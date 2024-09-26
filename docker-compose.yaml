@@ -3,23 +3,25 @@ include:
 
 
   - ./supabase/docker/docker-compose.yml
-  - ./frontend/docker-compose.yaml
 services:
-  # database:
-  #   build:
-  #     context: ./database/
-  #   env_file:
-  #     ./database/.env
-  #   ports:
-  #     - "3036:3036"
-  #   volumes:
-  #     - MQP:/data/database
-  # mb-db:
-  #   extends:
-  #     file: ./mb-docker/docker-compose.yml
-  #     service: db
-  #   ports:
-  #     - "5432:5432"
+  frontend:
+    build:
+      context: ./frontend/
+      target: dev
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/static:/app/static
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/svelte.config.js:/app/svelte.config.js
+      - ./frontend/.env.local:/app/.env.local
+      - MQP:/data/frontend
+    ports:
+      - "5173:5173"
+      - "24678:24678"
+    networks:
+      - default
+  
   data-acquisition:
     build:
       context: ./data-acquisition/
