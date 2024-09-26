@@ -1,0 +1,6 @@
+.DS_Store
+.env
+.log
+env.sh
+env.ps1
+test.env

@@ -1,0 +1,89 @@
+include:
+  #- ./mb-docker/docker-compose.yml
+
+
+  - ./supabase-docker/docker/docker-compose.yml
+services:
+  frontend:
+    build:
+      context: ./frontend/
+      target: prod
+    volumes:
+      - MQP:/data/frontend
+    ports:
+      - "4200:4200"
+    networks:
+      - default
+  data-acquisition:
+    build:
+      context: ./data-acquisition/
+      target: prod
+    volumes:
+      - MQP:/data/data-acquisition
+    ports:
+      - "3001:3001"
+    networks:
+      - default
+    develop:
+      watch:
+        - action: sync
+          path: ./data-acquisition/
+          target: src/
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: .
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      analytics:
+        condition: service_healthy
+    # healthcheck:
+    #   test:
+    #     [
+    #       "CMD",
+    #       "node",
+    #       "-e",
+    #       "require('http').get('http://localhost:3000/api/profile', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+    #     ]
+    #   timeout: 5s
+    #   interval: 5s
+    #   retries: 3
+    # restart: on-failure
+    
+    
+
+
+
+    # expose:
+    #   - "4200"
+# networks:
+#   frontend:
+#     # Specify driver options
+#     driver: bridge
+#     driver_opts:
+#       com.docker.network.bridge.host_binding_ipv4: "127.0.0.1"
+#     networks:
+#       - frontnet
+#       - backnet
+# networks:
+#   backnet:
+#   frontnet:
+
+# networks:
+#   default:
+#     driver: bridge
+  # backend:
+  #   build:
+  #     context: ./backend/
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - MQP:/data/backend
+# networks:
+#   default:
+#     driver: bridge
+volumes:
+  MQP:

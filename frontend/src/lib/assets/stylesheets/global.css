@@ -1,0 +1,60 @@
+@font-face {
+    font-family: "Mattone";
+    src: url("../fonts/Mattone-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Archivo";
+    src: url("../fonts/Archivo-Regular.woff2") format("woff2");
+}
+
+/* basic elements */
+body {
+    background-color: var(--background);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Mattone";
+    color: var(--text);
+}
+
+p, div {
+    font-family: "Archivo";
+    color: var(--text);
+}
+
+a {
+    font-family: "Archivo";
+    color: var(--accent);
+}
+
+h1 {
+    font-size: 30px;
+}
+
+/* input elements */
+input[type="text"], input[type="password"] {
+    background-color: var(--background);
+    border: 2px solid var(--medium);
+    border-radius: 5px;
+    font-family: "Archivo", sans-serif;
+    font-size: 15px;
+    padding: 2px 5px;
+    color: var(--text);
+}
+
+input[type="submit"] {
+    height: 40px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    color: var(--background);
+    background-color: var(--accent);
+    font-family: "Mattone", sans-serif;
+    font-size: 15px;
+    padding: 0 20px;
+}
+
+::placeholder {
+    color: var(--medium);
+}

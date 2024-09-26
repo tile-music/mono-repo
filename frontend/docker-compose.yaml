@@ -1,0 +1,19 @@
+services:
+  frontend:
+    build:
+      target: dev
+    volumes:
+      - ./src:/app/src
+      - ./static:/app/static
+      - ./vite.config.ts:/app/vite.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./svelte.config.js:/app/svelte.config.js
+      - ./.env.local:/app/.env.local
+      - MQP:/data/frontend
+    ports:
+      - "5173:5173"
+      - "24678:24678"
+    networks:
+      - default
+volumes:
+  MQP:

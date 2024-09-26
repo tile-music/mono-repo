@@ -1,0 +1,3 @@
+[submodule "supabase"]
+	path = supabase
+	url = git@github.com:Music-Visualization-MQP/supabase.git

@@ -1,0 +1,24 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "typescript",
+			"tsconfig": "new-login-experiment/tsconfig.json",
+			"option": "watch",
+			"problemMatcher": [
+				"$tsc-watch"
+			],
+			"group": "build",
+			"label": "tsc: watch - new-login-experiment/tsconfig.json"
+		},
+		{
+			"type": "typescript",
+			"tsconfig": "new-login-experiment/tsconfig.json",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build",
+			"label": "tsc: build - new-login-experiment/tsconfig.json"
+		}
+	]
+}
