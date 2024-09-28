@@ -73,7 +73,7 @@ const authGuard: Handle = async ({ event, resolve }) => {
     for (const route of protectedRoutes) {
       if (event.url.pathname.startsWith(route)) prot = true;
     }
-    if (prot = true) redirect(303, '/login');
+    if (prot === true) redirect(303, '/login');
   }
 
   if (event.locals.session && (event.url.pathname === '/login' || event.url.pathname === '/register')) {
