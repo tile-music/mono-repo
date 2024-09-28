@@ -3,11 +3,12 @@ import type { Actions } from './$types'
 
 export const load: PageServerLoad = async ({locals: { supabase, session } }) => {
     if (session !== null) {
-        const { data: user } = await supabase
+        const { data: user, error } = await supabase
         .from('profiles')
         .select(`updated_at, username, full_name, website, avatar_url`)
         .eq('id', session.user.id)
         .single()
+        if (error) console.error(error)
         return { user: user ?? null }; 
     } else {
         throw Error("User does not have session.") 
@@ -30,9 +31,7 @@ export const actions: Actions = {
             }
       
             const { error } = await supabase.from('profiles').upsert(update)
-            if (error) {
-                console.error(error)
-            }
+            if (error) console.error(error)
         } else {
             throw Error("User does not have session.") 
         }
