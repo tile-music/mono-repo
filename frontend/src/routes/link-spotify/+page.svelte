@@ -3,32 +3,6 @@
     import spotify_logo from '$lib/assets/images/spotify_logo.png'
 
     import { goto } from '$app/navigation';
-    import type { PageData } from './$types';
-    export let data: PageData;
-    $: ({ supabase, session } = data);
-
-    async function link_spotify() {
-        if (session == null) {
-            console.error("User does not have session.");
-            goto("/login");
-            return;
-        }
-
-        const headers = {
-            headers: {
-                Authorization: `Bearer ${session.access_token}`
-            }
-        }
-        const { data, error } = await supabase.functions.invoke("spotify-login", headers)
-
-        if (error) {
-            // TODO: tell the user that the link failed and to try again
-            throw Error(error)
-        }
-
-        console.log(data)
-        window.location.href = data
-    }
 </script>
 
 <div class="content">
@@ -37,7 +11,7 @@
     </div>
     <div class="middle">
         <h1>one last thing...</h1>
-        <button class="link_spotify" on:click={link_spotify}>log in with Spotify<img class="spotify_logo" src={spotify_logo} alt="The Spotify logo."></button>
+        <button class="link_spotify" on:click={() => {goto('/link-spotify?link=true')}}>log in with Spotify<img class="spotify_logo" src={spotify_logo} alt="The Spotify logo."></button>
         <div>
             <a href="/">cancel & delete account</a>
         </div>
