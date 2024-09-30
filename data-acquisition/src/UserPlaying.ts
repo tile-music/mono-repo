@@ -106,7 +106,7 @@ export class MockUserPlaying extends UserPlaying {
         track.popularity
 
       );
-      this.played.push();
+      this.played.push(playedTrackInfo);
     }
     for (let track of this.played) {
       this.dbEntries.p_track_info.push(track.createDbEntryObject());
@@ -118,6 +118,7 @@ export class MockUserPlaying extends UserPlaying {
   public async init(): Promise<void> {
     this.inited = true;
     console.log("Mock init");
+    console.log
   }
   public async fire(): Promise<void> {
     console.log("Mock fire");
@@ -148,6 +149,8 @@ export class MockUserPlaying extends UserPlaying {
         console.log(trackData, trackError);
       }
       if (!albumData) {
+        console.log("reached album");
+        console.log(entry);
         const { data: albumDataRet, error: albumErrorRet } = await this.supabase
           .from("albums")
           .select("*")
@@ -162,8 +165,8 @@ export class MockUserPlaying extends UserPlaying {
         albumError = albumErrorRet;
         console.log(albumData, albumError);
       }
-
       if (trackData && albumData) {
+        console.log("reached track albums");
         const { data: trackAlbumData, error: trackAlbumError } =
           await this.supabase.from("track_albums").insert({
             track_id: trackData[0].track_id,
@@ -175,12 +178,11 @@ export class MockUserPlaying extends UserPlaying {
             user_id: this.userId,
             track_id: trackData[0].track_id,
             listened_at: entry.timestamp,
-            popularity: entry.p_popularity,
+            popularity: entry.track_album.popularity,
             isrc: entry.track.isrc,
           });
       } else throw new Error("No data returned from insert");
+      i+=1;
     }
-
-    /* this.supabase.rpc("bulk_add_played_tracks", this.dbEntries); */
   }
 }
