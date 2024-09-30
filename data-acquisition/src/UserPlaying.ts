@@ -15,11 +15,7 @@ export abstract class UserPlaying {
   postgres!: any;
   played: PlayedTrack[] = [];
   dbEntries: any = { p_track_info: [], p_user_id: "", p_environment: "" };
-  constructor(
-    supabase: SupabaseClient,
-    userId: string,
-    context: any
-  ) {
+  constructor(supabase: SupabaseClient, userId: string, context: any) {
     this.supabase = supabase;
     this.userId = userId;
     this.context = context;
@@ -34,99 +30,12 @@ export abstract class UserPlaying {
   public async fire(): Promise<void> {
     throw new Error("Method not implemented.");
   }
-}
-
-export class SpotifyUserPlaying extends UserPlaying {
-  client!: Client;
-  player!: Player;
-  items!: any[];
-  constructor(
-    supabase: SupabaseClient,
-    userId: any,
-    context: any
-  ) {
-    super(supabase, userId, context);
-  }
-  public async init(): Promise<void> {
-    console.log(this.context)
-    this.client = await Client.create({
-      refreshToken: true,
-      token: {
-        clientID: process.env.SP_CID as string,
-        clientSecret: process.env.SP_SECRET as string,
-        refreshToken: this.context.refresh_token,
-      },
-      onRefresh: () => {
-        console.log(`Token has been refreshed. New token: ${this.client.token}!`);
-      },
-    });
-    this.player = new Player(this.client);
-  }
-  public async fire(): Promise<void> {
-    await this.player.getRecentlyPlayed({limit: 50}).then((data) => {  });
-
-  }
-}
-
-export class MockUserPlaying extends UserPlaying {
-  mockData: any;
-  constructor(
-    supabase: SupabaseClient,
-    userId: any,
-    context: any
-  ) {
-    super(supabase, userId, context);
-    this.mockData = context;
-  }
-  protected async makeDBEntries(): Promise<void> {
-    for (let track of this.mockData) {
-      const album = new AlbumInfo(
-        track.albumInfo.albumName,
-        "Album",
-        track.albumInfo.albumArtists,
-        track.albumInfo.albumImage,
-        new Date(track.albumInfo.albumReleaseDate),
-        1,
-        ["Test Genre"],
-        "Test UPC",
-        "",
-        "",
-        100
-      );
-      const trackInfo = new TrackInfo(
-        track.trackName,
-        track.trackArtists,
-        track.isrc,
-        track.durationMs
-      );
-      const playedTrackInfo = new PlayedTrack(
-        track.timestamp,
-        trackInfo,
-        album,
-        track.popularity
-
-      );
-      this.played.push(playedTrackInfo);
-    }
-    for (let track of this.played) {
-      this.dbEntries.p_track_info.push(track.createDbEntryObject());
-    }
-    this.dbEntries.p_user_id = this.userId;
-    this.dbEntries.p_environment = "test";
-  }
-
-  public async init(): Promise<void> {
-    this.inited = true;
-    console.log("Mock init");
-    console.log
-  }
-  public async fire(): Promise<void> {
-    console.log("Mock fire");
+  public async putInDB(): Promise<void> {
     await this.makeDBEntries();
     console.log(this.dbEntries);
     let i = 1;
     for (let entry of this.dbEntries.p_track_info) {
-      console.log("count!!!:",i);
+      console.log("count!!!:", i);
       let { data: trackData, error: trackError } = await this.supabase
         .from("tracks")
         .insert(entry.track)
@@ -158,7 +67,7 @@ export class MockUserPlaying extends UserPlaying {
           .eq("album_type", entry.track_album.album_type)
           .eq("release_date", entry.track_album.release_date)
           //.eq("num_tracks", entry.track_album.num_tracks as BigInteger) // Filter by release_date
-          .eq("upc", entry.track_album.upc) 
+          .eq("upc", entry.track_album.upc)
           .eq("ean", entry.track_album.ean);
         //.eq("(album).album_isrc", entry.track_album.album.album_isrc)
         albumData = albumDataRet;
@@ -182,7 +91,121 @@ export class MockUserPlaying extends UserPlaying {
             isrc: entry.track.isrc,
           });
       } else throw new Error("No data returned from insert");
-      i+=1;
+      i += 1;
     }
+  }
+}
+
+export class SpotifyUserPlaying extends UserPlaying {
+  client!: Client;
+  player!: Player;
+  items!: any[];
+  constructor(supabase: SupabaseClient, userId: any, context: any) {
+    super(supabase, userId, context);
+  }
+  public async init(): Promise<void> {
+    console.log(this.context);
+    this.client = await Client.create({
+      refreshToken: true,
+      token: {
+        clientID: process.env.SP_CID as string,
+        clientSecret: process.env.SP_SECRET as string,
+        refreshToken: this.context.refresh_token,
+      },
+      onRefresh: () => {
+        console.log(
+          `Token has been refreshed. New token: ${this.client.token}!`
+        );
+      },
+    });
+    this.player = new Player(this.client);
+  }
+  protected async makeDBEntries(): Promise<void> {
+    this.items.forEach((item) => {
+      const album = new AlbumInfo(
+        item.track.album.name,
+        item.track.album.album_type,
+        item.track.album.artists,
+        item.track.album.images[0].url,
+        new Date(item.track.album.release_date),
+        item.track.album.total_tracks,
+        item.track.album.genres,
+        item.track.album.upc,
+        item.track.album.ean,
+        "USRC17607830",
+        item.track.album.popularity,
+      );
+      const trackInfo = new TrackInfo(
+        item.track.name,
+        item.track.artists,
+        item.track.external_ids.isrc,
+        item.track.duration_ms
+      );
+      const playedTrackInfo = new PlayedTrack(
+        new Date(item.played_at),
+        trackInfo,
+        album,
+        item.track.popularity
+      );
+      this.played.push(playedTrackInfo);
+    })
+
+  }
+  public async fire(): Promise<void> {
+    this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
+    await this.putInDB();
+
+  }
+}
+
+export class MockUserPlaying extends UserPlaying {
+  mockData: any;
+  constructor(supabase: SupabaseClient, userId: any, context: any) {
+    super(supabase, userId, context);
+    this.mockData = context;
+  }
+  protected async makeDBEntries(): Promise<void> {
+    for (let track of this.mockData) {
+      const album = new AlbumInfo(
+        track.albumInfo.albumName,
+        "Album",
+        track.albumInfo.albumArtists,
+        track.albumInfo.albumImage,
+        new Date(track.albumInfo.albumReleaseDate),
+        1,
+        ["Test Genre"],
+        "Test UPC",
+        "",
+        "",
+        100
+      );
+      const trackInfo = new TrackInfo(
+        track.trackName,
+        track.trackArtists,
+        track.isrc,
+        track.durationMs
+      );
+      const playedTrackInfo = new PlayedTrack(
+        track.timestamp,
+        trackInfo,
+        album,
+        track.popularity
+      );
+      this.played.push(playedTrackInfo);
+    }
+    for (let track of this.played) {
+      this.dbEntries.p_track_info.push(track.createDbEntryObject());
+    }
+    this.dbEntries.p_user_id = this.userId;
+    this.dbEntries.p_environment = "test";
+  }
+
+  public async init(): Promise<void> {
+    this.inited = true;
+    console.log("Mock init");
+    console.log;
+  }
+  public async fire(): Promise<void> {
+    await this.putInDB();
   }
 }
