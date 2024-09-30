@@ -1,0 +1,130 @@
+import { SupabaseClient } from "@supabase/supabase-js";
+import { SpotifyUserPlaying, MockUserPlaying } from "../src/UserPlaying";
+
+import dotenv from "dotenv";
+dotenv.config();
+
+describe("UserPlaying Tests", () => {
+  let supabase: SupabaseClient;
+  describe("UserPlaying Tests", () => {
+    let supabase: any;
+    let postgres: any;
+    let userId: string;
+    let context: any;
+    let email: string = "test@test.com"
+    let password: string = "password"
+    const testData1 = [
+      {
+        trackName: "Test Track",
+        trackArtists: ["Test Artist"],
+        albumInfo: {
+          albumName: "Test Album",
+          albumArtists: ["Test Album Artist"],
+          albumImage: "Test Image",
+          albumReleaseDate: new Date(2021, 1, 1),
+        },
+        image: "Test Image",
+        isrc: "USRC17607830",
+        durationMs: 1000,
+        progressMs: 500,
+        popularity: 100,
+        timestamp: new Date(125666778),
+      },
+      {
+        trackName: "Test Track 2",
+        trackArtists: ["Test Artist 2"],
+        albumInfo: {
+          albumName: "Test Album 2",
+          albumArtists: ["Test Album Artist 2"],
+          albumImage: "Test Image 2",
+          albumReleaseDate: new Date(2021, 1, 1),
+        },
+        image: "Test Image 2",
+        isrc: "USRC17607839",
+        durationMs: 2000,
+        progressMs: 1000,
+        popularity: 95,
+        timestamp: new Date(13888088),
+      },
+    ];
+
+    beforeAll(async () => {
+      supabase = new SupabaseClient(
+        process.env.SB_URL as string,
+        process.env.ANON as string,
+        { db: { schema: 'test' } });
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: "test1@example.com",
+        password: "password",
+      });
+      if (error) throw error;
+      userId = data.user?.id || "test-user-id";
+      context = { refresh_token: "test-refresh-token" };
+    });
+    afterAll(async () => {
+      const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+      supabase = new SupabaseClient(
+        process.env.SB_URL as string,
+        process.env.SERVICE as string
+      );
+      const {data, error} = await supabase.auth.admin.deleteUser(userId);
+      if (error) throw error;
+      //await supabase.rpc("clear_test_tables");
+    });
+
+    /* test("postgres connection" , async () => {
+      await expect(postgres.query("SELECT * from test.tracks")).resolves.not.toThrow();
+    }); */
+
+    // test("SpotifyUserPlaying init method", async () => {
+    //   const spotifyUserPlaying = new SpotifyUserPlaying(
+    //     supabase,
+    //     userId,
+    //     context
+    //   );
+    //   await expect(spotifyUserPlaying.init()).resolves.not.toThrow();
+    // });
+
+    test("MockUserPlaying init method", async () => {
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
+      await expect(mockUserPlaying.init())
+        .resolves.not.toThrow()
+    });
+
+    test("MockUserPlaying fire method", async () => {
+      
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
+      await mockUserPlaying.init();
+      await expect(mockUserPlaying.fire()).resolves.not.toThrow().then(() =>
+        supabase
+          .from("played_tracks")
+          .select()
+          .eq("user_id", userId)
+          .then(({ data, error }: { data: any; error: any }) =>{
+            console.log(data)
+            expect(data).toHaveLength(2);
+          }
+          ));;
+    });
+
+    test("SpotifyUserPlaying fire method", async () => {
+      const spotifyUserPlaying = new SpotifyUserPlaying(
+        supabase,
+        userId,
+        context
+      );
+      await spotifyUserPlaying.init();
+      await expect(spotifyUserPlaying.fire()).resolves.not.toThrow();
+      
+    });
+
+    test("MockUserPlaying data integrity", async () => {
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
+      await mockUserPlaying.init();
+      //await mockUserPlaying.fire();
+      expect(mockUserPlaying.mockData).toHaveLength(2);
+      expect(mockUserPlaying.mockData[0].trackName).toBe("Test Track");
+    });
+  });
+});
