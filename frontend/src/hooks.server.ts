@@ -1,13 +1,12 @@
-import { createServerClient } from '@supabase/ssr'
-import { type Handle, redirect } from '@sveltejs/kit'
-import { sequence } from '@sveltejs/kit/hooks'
+import { createServerClient } from '@supabase/ssr';
+import { type Handle, redirect } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
 
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 
 const supabase: Handle = async ({ event, resolve }) => {
   /**
    * Creates a Supabase client specific to this server request.
-   *
    * The Supabase client gets the Auth token from the request cookies.
    */
   event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
@@ -20,11 +19,11 @@ const supabase: Handle = async ({ event, resolve }) => {
        */
       setAll: (cookiesToSet) => {
         cookiesToSet.forEach(({ name, value, options }) => {
-          event.cookies.set(name, value, { ...options, path: '/' })
-        })
+          event.cookies.set(name, value, { ...options, path: '/' });
+        });
       },
-    },
-  })
+    }
+  });
 
   /**
    * Unlike `supabase.auth.getSession()`, which returns the session _without_
@@ -34,21 +33,21 @@ const supabase: Handle = async ({ event, resolve }) => {
   event.locals.safeGetSession = async () => {
     const {
       data: { session },
-    } = await event.locals.supabase.auth.getSession()
+    } = await event.locals.supabase.auth.getSession();
     if (!session) {
-      return { session: null, user: null }
+      return { session: null, user: null };
     }
 
     const {
       data: { user },
       error,
-    } = await event.locals.supabase.auth.getUser()
+    } = await event.locals.supabase.auth.getUser();
     if (error) {
       // JWT validation has failed
-      return { session: null, user: null }
+      return { session: null, user: null };
     }
 
-    return { session, user }
+    return { session, user };
   }
 
   return resolve(event, {
@@ -57,29 +56,31 @@ const supabase: Handle = async ({ event, resolve }) => {
        * Supabase libraries use the `content-range` and `x-supabase-api-version`
        * headers, so we need to tell SvelteKit to pass it through.
        */
-      return name === 'content-range' || name === 'x-supabase-api-version'
+      return name === 'content-range' || name === 'x-supabase-api-version';
     },
-  })
+  });
 }
 
 const authGuard: Handle = async ({ event, resolve }) => {
-  const { session, user } = await event.locals.safeGetSession()
-  event.locals.session = session
-  event.locals.user = user
+  const { session, user } = await event.locals.safeGetSession();
+  event.locals.session = session;
+  event.locals.user = user;
 
-  // there is a better way to do this i swear
-  if (!event.locals.session &&
-    (event.url.pathname.startsWith('/display')
-    || event.url.pathname.startsWith('/listening')
-    || event.url.pathname.startsWith('/profile'))) {
-    redirect(303, '/login')
+  // make sure users can't access protected routes
+  if (!event.locals.session) {
+    const protectedRoutes = ['/display', '/listening', '/profile', '/link-spotify' ];
+    let prot = false;
+    for (const route of protectedRoutes) {
+      if (event.url.pathname.startsWith(route)) prot = true;
+    }
+    if (prot === true) redirect(303, '/login');
   }
 
   if (event.locals.session && (event.url.pathname === '/login' || event.url.pathname === '/register')) {
-    redirect(303, '/profile')
+    redirect(303, '/profile');
   }
 
-  return resolve(event)
+  return resolve(event);
 }
 
 const originalConsoleWarn = console.warn;
@@ -101,4 +102,4 @@ console.warn = function (...args) {
   }
 };
 
-export const handle: Handle = sequence(supabase, authGuard)
+export const handle: Handle = sequence(supabase, authGuard);

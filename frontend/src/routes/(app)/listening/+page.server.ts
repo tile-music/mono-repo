@@ -14,22 +14,26 @@ export const load: PageServerLoad = async ({locals: { supabase, session } }) => 
         }
 
         const song_data: any[] = JSON.parse(data)
-        const songs: {
+        let songs: {
             album_art_path: string
             title: string
             artists: string[]
             album: string
-        }[] = []
+        }[] | null = []
 
-        for (const song of song_data) {
-            songs.push({
-                album_art_path: song.track_album.image,
-                title: song.track_name,
-                artists: song.track_artists,
-                album: song.track_album.album_name
-            })
+        if (song_data) {
+            for (const song of song_data) {
+                songs.push({
+                    album_art_path: song.track_album.image,
+                    title: song.track_name,
+                    artists: song.track_artists,
+                    album: song.track_album.album_name
+                })
+            }
+        } else {
+            songs = null;
         }
-        return { songs: songs ?? null }
+        return { songs }
     } else {
         throw Error("User does not have session.") 
     }

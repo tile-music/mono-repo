@@ -6,9 +6,13 @@
 
 <h1>Listening Data</h1>
 <div class="songs">
-    {#each data.songs as song}
-        <Song {song} />
-    {/each}
+    {#if data.songs != null}
+        {#each data.songs as song}
+            <Song {song} />
+        {/each}
+    {:else}
+        <p>No listening data yet!</p>
+    {/if}
 </div>
 
 <style>
