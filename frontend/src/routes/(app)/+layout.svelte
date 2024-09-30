@@ -1,14 +1,7 @@
 <script>
     import { redirect } from '@sveltejs/kit';
 
-    export let data;
-    $: ({ supabase } = data);
-
     $: logout = async () => {
-		// const { error } = await supabase.auth.signOut();
-		// if (error) {
-		// 	console.error(error);
-		// }
         console.log(redirect(302, "/login"));
 	};
 </script>
