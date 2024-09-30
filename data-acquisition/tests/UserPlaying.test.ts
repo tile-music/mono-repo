@@ -10,7 +10,7 @@ describe("UserPlaying Tests", () => {
     let supabase: any;
     let postgres: any;
     let userId: string;
-    let context: any;
+    let context: any = {refresh_token: process.env.SP_REFRESH};
     let email: string = "test@test.com"
     let password: string = "password"
     const testData1 = [
@@ -60,7 +60,7 @@ describe("UserPlaying Tests", () => {
       });
       if (error) throw error;
       userId = data.user?.id || "test-user-id";
-      context = { refresh_token: "test-refresh-token" };
+
     });
     afterAll(async () => {
       const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -107,7 +107,14 @@ describe("UserPlaying Tests", () => {
           }
           ));;
     });
-
+    test("MockUserPlaying data integrity", async () => {
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
+      await mockUserPlaying.init();
+      //await mockUserPlaying.fire();
+      expect(mockUserPlaying.mockData).toHaveLength(2);
+      expect(mockUserPlaying.mockData[0].trackName).toBe("Test Track");
+    });
+    
     test("SpotifyUserPlaying fire method", async () => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
         supabase,
@@ -119,12 +126,5 @@ describe("UserPlaying Tests", () => {
       
     });
 
-    test("MockUserPlaying data integrity", async () => {
-      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
-      await mockUserPlaying.init();
-      //await mockUserPlaying.fire();
-      expect(mockUserPlaying.mockData).toHaveLength(2);
-      expect(mockUserPlaying.mockData[0].trackName).toBe("Test Track");
-    });
   });
 });

@@ -1,8 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { connect } from "ts-postgres";
+
 import { TrackInfo } from "./TrackInfo";
 import { UUID } from "crypto";
-import { Album, Client, User } from "spotify-api.js";
+import { Album, Client, Player, User } from "spotify-api.js";
 import { AlbumInfo } from "./AlbumInfo";
 import { error, time, timeStamp } from "console";
 import { PlayedTrack } from "./PlayedTrack";
@@ -37,6 +37,9 @@ export abstract class UserPlaying {
 }
 
 export class SpotifyUserPlaying extends UserPlaying {
+  client!: Client;
+  player!: Player;
+  items!: any[];
   constructor(
     supabase: SupabaseClient,
     userId: any,
@@ -45,19 +48,24 @@ export class SpotifyUserPlaying extends UserPlaying {
     super(supabase, userId, context);
   }
   public async init(): Promise<void> {
-    const client = await Client.create({
+    console.log(this.context)
+    this.client = await Client.create({
       refreshToken: true,
       token: {
         clientID: process.env.SP_CID as string,
         clientSecret: process.env.SP_SECRET as string,
         refreshToken: this.context.refresh_token,
       },
-      onRefresh() {
-        console.log(`Token has been refreshed. New token: ${client.token}!`);
+      onRefresh: () => {
+        console.log(`Token has been refreshed. New token: ${this.client.token}!`);
       },
     });
+    this.player = new Player(this.client);
   }
-  public async fire(): Promise<void> {}
+  public async fire(): Promise<void> {
+    await this.player.getRecentlyPlayed({limit: 50}).then((data) => {  });
+
+  }
 }
 
 export class MockUserPlaying extends UserPlaying {
@@ -94,9 +102,11 @@ export class MockUserPlaying extends UserPlaying {
       const playedTrackInfo = new PlayedTrack(
         track.timestamp,
         trackInfo,
-        album
+        album,
+        track.popularity
+
       );
-      this.played.push(playedTrackInfo);
+      this.played.push();
     }
     for (let track of this.played) {
       this.dbEntries.p_track_info.push(track.createDbEntryObject());
@@ -138,8 +148,6 @@ export class MockUserPlaying extends UserPlaying {
         console.log(trackData, trackError);
       }
       if (!albumData) {
-        console.log("reached album");
-        console.log(entry);
         const { data: albumDataRet, error: albumErrorRet } = await this.supabase
           .from("albums")
           .select("*")
@@ -156,7 +164,6 @@ export class MockUserPlaying extends UserPlaying {
       }
 
       if (trackData && albumData) {
-        console.log("reached track albums");
         const { data: trackAlbumData, error: trackAlbumError } =
           await this.supabase.from("track_albums").insert({
             track_id: trackData[0].track_id,
@@ -168,11 +175,10 @@ export class MockUserPlaying extends UserPlaying {
             user_id: this.userId,
             track_id: trackData[0].track_id,
             listened_at: entry.timestamp,
-            popularity: entry.track_album.popularity,
+            popularity: entry.p_popularity,
             isrc: entry.track.isrc,
           });
       } else throw new Error("No data returned from insert");
-      i+=1;
     }
 
     /* this.supabase.rpc("bulk_add_played_tracks", this.dbEntries); */
