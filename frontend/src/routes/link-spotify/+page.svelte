@@ -1,8 +1,6 @@
 <script lang="ts">
     import sample_collage from '$lib/assets/images/sample_collage.png'
-    import spotify_logo from '$lib/assets/images/spotify_logo.png'
-
-    import { goto } from '$app/navigation';
+    import Button from './spotify.svelte'
 </script>
 
 <div class="content">
@@ -11,7 +9,7 @@
     </div>
     <div class="middle">
         <h1>one last thing...</h1>
-        <button class="link_spotify" on:click={() => {goto('/link-spotify?link=true')}}>log in with Spotify<img class="spotify_logo" src={spotify_logo} alt="The Spotify logo."></button>
+        <Button></Button>
         <div>
             <a href="/">cancel & delete account</a>
         </div>
@@ -55,17 +53,6 @@
         gap: 10px;
     }
 
-    .link_spotify {
-        border: none;
-        cursor: pointer;
-        color: var(--background);
-        font-family: "Mattone", sans-serif;
-        font-size: 15px;
-        height: 50px;
-        width: 300px;
-        border-radius: 10px;
-        background-color: #1DB954; /* spotify green */
-    }
 
     .right {
         width: 30%;
@@ -80,15 +67,5 @@
         opacity: 0.5;
     }
 
-    .spotify_logo {
-        width: 30px;
-        height: 30px;
-    }
-
-    button {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-    }
+    
 </style>

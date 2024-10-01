@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { PageData } from './$types';
     export let data: PageData;
+    import Button from '../../link-spotify/spotify.svelte';
     $: ({ user } = data);
 </script>
 
@@ -11,6 +12,7 @@
     <input type="text" name="avatar_url" id="avatar_url" placeholder="avatar url" value={user?.avatar_url}>
     <input type="submit" value="edit profile">
 </form>
+<Button></Button>
 
 <style>
     form {

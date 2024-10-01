@@ -10,6 +10,8 @@ export const load: PageServerLoad = async ({locals: { supabase, session }, url})
                     Authorization: `Bearer ${session.access_token}`
                 }
             }
+            const { data: checkSpotify, error: checkSpotifyError } = await supabase.functions.invoke("check-spotify", headers)
+            console.log("check-spotify", checkSpotify, checkSpotifyError)
             const { data, error } = await supabase.functions.invoke("spotify-login", headers)
     
             if (error) {
