@@ -52,7 +52,6 @@ export class AlbumInfo {
       genre: this.genre,
       upc: this.upc,
       ean: this.ean,
-      album_isrc: this.albumIsrc,
       popularity: this.popularity,
       image: this.image,
     };

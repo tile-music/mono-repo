@@ -122,13 +122,14 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
   protected async makeDBEntries(): Promise<void> {
     this.items.forEach((item) => {
+      console.log(item)
       const album = new AlbumInfo(
         item.track.album.name,
         item.track.album.album_type,
         item.track.album.artists,
         item.track.album.images[0].url,
-        new Date(item.track.album.release_date),
-        item.track.album.total_tracks,
+        new Date(item.track.album.releaseDate),
+        item.track.album.totalTracks as number,
         item.track.album.genres,
         item.track.album.upc,
         item.track.album.ean,
@@ -138,17 +139,20 @@ export class SpotifyUserPlaying extends UserPlaying {
       const trackInfo = new TrackInfo(
         item.track.name,
         item.track.artists,
-        item.track.external_ids.isrc,
+        item.track.externalID.isrc,
         item.track.duration_ms
       );
       const playedTrackInfo = new PlayedTrack(
-        new Date(item.played_at),
+        new Date(item.playedAt),
         trackInfo,
         album,
         item.track.popularity
       );
       this.played.push(playedTrackInfo);
     })
+    this.played.forEach((track) => this.dbEntries.p_track_info.push(track.createDbEntryObject()));
+    this.dbEntries.p_user_id = this.userId;
+    this.dbEntries.p_environment = "test";
 
   }
   public async fire(): Promise<void> {
