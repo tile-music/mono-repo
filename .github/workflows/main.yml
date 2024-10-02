@@ -1,0 +1,48 @@
+# Initial file copied from https://stackoverflow.com/a/64373702
+# NOTE: Apparently GH provides its own runners? That's kinda cool!
+name: Test
+on:
+  pull_request:
+    branches:
+    - main
+  push:
+    branches:
+    - main
+    # We can add more branches/regexes here if we want our dev branches to have constant testing too
+
+jobs:
+  test:
+    name: Run development tests
+    runs-on: ubuntu-latest
+    # runs-on: windows-latest
+    env:
+      COMPOSE_FILE: docker-compose.yml
+      # DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      # DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+
+    steps:
+    - name: Hello!
+      run: echo "Hello, this line is just here to test that actions works as expected, I guess"
+      
+    - name: Checkout code
+      uses: actions/checkout@v4 # This is very cool we do not need to manually checkout
+
+    # - name: Login to DockerHub
+    #   run: docker login -u $DOCKER_USER -p $DOCKER_PASS
+
+    # - name: Run Docker
+    #   run: docker run
+
+    - name: Build docker images
+      # working-directory: ./mono-repo
+              # ls -R
+      run: |
+        docker compose build
+
+    - name: Run tests
+      run: |
+        npm run test
+        echo "other test commands go here"
+
+    - name: Celebrate
+      run: echo "Hurray! Nothing broke before this! At least I hope..."
