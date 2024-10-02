@@ -64,9 +64,9 @@ export abstract class UserPlaying {
           .from("albums")
           .select("*")
           .eq("album_name", entry.track_album.album_name) // Filter by album_name
-          .eq("album_type", entry.track_album.album_type)
-          .eq("release_date", entry.track_album.release_date)
-          //.eq("num_tracks", entry.track_album.num_tracks as BigInteger) // Filter by release_date
+          //.eq("album_type", entry.track_album.album_type)
+          //.eq("release_date", entry.track_album.release_date)
+          .eq("num_tracks", entry.track_album.num_tracks) // Filter by release_date
           .eq("upc", entry.track_album.upc)
           .eq("ean", entry.track_album.ean);
         //.eq("(album).album_isrc", entry.track_album.album.album_isrc)
@@ -126,7 +126,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       const album = new AlbumInfo(
         item.track.album.name,
         item.track.album.album_type,
-        item.track.album.artists,
+        item.track.album.artists.map((artist: any) => artist.name),
         item.track.album.images[0].url,
         new Date(item.track.album.releaseDate),
         item.track.album.totalTracks as number,
@@ -138,7 +138,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       );
       const trackInfo = new TrackInfo(
         item.track.name,
-        item.track.artists,
+        item.track.artists.map((artist: any) => artist.name),
         item.track.externalID.isrc,
         item.track.duration_ms
       );
@@ -153,6 +153,7 @@ export class SpotifyUserPlaying extends UserPlaying {
     this.played.forEach((track) => this.dbEntries.p_track_info.push(track.createDbEntryObject()));
     this.dbEntries.p_user_id = this.userId;
     this.dbEntries.p_environment = "test";
+
 
   }
   public async fire(): Promise<void> {
@@ -200,6 +201,7 @@ export class MockUserPlaying extends UserPlaying {
     for (let track of this.played) {
       this.dbEntries.p_track_info.push(track.createDbEntryObject());
     }
+
     this.dbEntries.p_user_id = this.userId;
     this.dbEntries.p_environment = "test";
   }

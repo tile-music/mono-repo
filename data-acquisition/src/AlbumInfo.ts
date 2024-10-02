@@ -48,6 +48,7 @@ export class AlbumInfo {
       album_name: this.albumName,
       album_type: this.albumType,
       release_date: this.releaseDate.toISOString(),
+      num_tracks: this.numTracks,
       artists: this.artists,
       genre: this.genre,
       upc: this.upc,
