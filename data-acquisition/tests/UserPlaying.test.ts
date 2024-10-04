@@ -47,6 +47,22 @@ describe("UserPlaying Tests", () => {
         timestamp: new Date(13888088),
       },
     ];
+    const testData2 = Array.from({ length: 50 }, (_, i) => ({
+      trackName: `Test Track ${i % 10}`,
+      trackArtists: [`Test Artist ${i % 5}`],
+      albumInfo: {
+        albumName: `Test Album ${i % 7}`,
+        albumArtists: [`Test Album Artist ${i % 3}`],
+        albumImage: `Test Image ${i % 4}`,
+        albumReleaseDate: new Date(2021, 1, 1),
+      },
+      image: `Test Image ${i % 4}`,
+      isrc: `USRC176078${30 + i}`,
+      durationMs: 1000 + i * 100,
+      progressMs: 500 + i * 50,
+      popularity: 100 - (i % 10),
+      timestamp: new Date(125666778 + i * 1000),
+    }));
 
     beforeAll(async () => {
       supabase = new SupabaseClient(
@@ -104,6 +120,27 @@ describe("UserPlaying Tests", () => {
           .then(({ data, error }: { data: any; error: any }) =>{
             console.log(data)
             expect(data).toHaveLength(2);
+          }
+          ));;
+    });
+    test("MockUserPlaying init method using test data 2", async () => {
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
+      await expect(mockUserPlaying.init())
+        .resolves.not.toThrow()
+    });
+
+    test("MockUserPlaying fire method using test data 2", async () => {
+      
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
+      await mockUserPlaying.init();
+      await expect(mockUserPlaying.fire()).resolves.not.toThrow().then(() =>
+        supabase
+          .from("played_tracks")
+          .select()
+          .eq("user_id", userId)
+          .then(({ data, error }: { data: any; error: any }) =>{
+            console.log(data)
+            ;
           }
           ));;
     });

@@ -6,7 +6,9 @@ import { Album, Client, Player, User } from "spotify-api.js";
 import { AlbumInfo } from "./AlbumInfo";
 import { error, time, timeStamp } from "console";
 import { PlayedTrack } from "./PlayedTrack";
-
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 export abstract class UserPlaying {
   userId!: string;
   supabase!: SupabaseClient;
@@ -48,6 +50,7 @@ export abstract class UserPlaying {
       if (albumError && albumError?.code !== "23505") throw albumError;
       console.log(albumData, trackData, albumError, trackError);
       if (!trackData) {
+
         console.log("reached track");
         const { data: trackDataRet, error: trackErrorRet } = await this.supabase
           .from("tracks")
@@ -60,6 +63,7 @@ export abstract class UserPlaying {
       if (!albumData) {
         console.log("reached album");
         console.log(entry);
+        
         const { data: albumDataRet, error: albumErrorRet } = await this.supabase
           .from("albums")
           .select("*")
@@ -67,14 +71,13 @@ export abstract class UserPlaying {
           //.eq("album_type", entry.track_album.album_type)
           //.eq("release_date", entry.track_album.release_date)
           .eq("num_tracks", entry.track_album.num_tracks) // Filter by release_date
-          .eq("upc", entry.track_album.upc)
-          .eq("ean", entry.track_album.ean);
+          
         //.eq("(album).album_isrc", entry.track_album.album.album_isrc)
         albumData = albumDataRet;
         albumError = albumErrorRet;
         console.log(albumData, albumError);
       }
-      if (trackData && albumData) {
+      if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
         console.log("reached track albums");
         const { data: trackAlbumData, error: trackAlbumError } =
           await this.supabase.from("track_albums").insert({
@@ -90,7 +93,10 @@ export abstract class UserPlaying {
             popularity: entry.track_album.popularity,
             isrc: entry.track.isrc,
           });
-      } else throw new Error("No data returned from insert");
+      } else {
+        console.error("No data returned from insert or albumData is undefined or empty");
+        throw new Error("No data returned from insert or albumData is undefined or empty");
+      }
       i += 1;
     }
   }
@@ -121,7 +127,7 @@ export class SpotifyUserPlaying extends UserPlaying {
     this.player = new Player(this.client);
   }
   protected async makeDBEntries(): Promise<void> {
-    this.items.forEach((item) => {
+    for(const item of this.items) {
       console.log(item)
       const album = new AlbumInfo(
         item.track.album.name,
@@ -140,7 +146,7 @@ export class SpotifyUserPlaying extends UserPlaying {
         item.track.name,
         item.track.artists.map((artist: any) => artist.name),
         item.track.externalID.isrc,
-        item.track.duration_ms
+        item.track.duration
       );
       const playedTrackInfo = new PlayedTrack(
         new Date(item.playedAt),
@@ -149,15 +155,17 @@ export class SpotifyUserPlaying extends UserPlaying {
         item.track.popularity
       );
       this.played.push(playedTrackInfo);
-    })
-    this.played.forEach((track) => this.dbEntries.p_track_info.push(track.createDbEntryObject()));
+    }
+    for (const track of this.played) {
+      await this.dbEntries.p_track_info.push(track.createDbEntryObject());
+    }
     this.dbEntries.p_user_id = this.userId;
     this.dbEntries.p_environment = "test";
 
 
   }
   public async fire(): Promise<void> {
-    this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
+    this.items = ( await this.player.getRecentlyPlayed({ limit: 50 })).items;
     await this.putInDB();
 
   }
@@ -199,7 +207,7 @@ export class MockUserPlaying extends UserPlaying {
       this.played.push(playedTrackInfo);
     }
     for (let track of this.played) {
-      this.dbEntries.p_track_info.push(track.createDbEntryObject());
+      await this.dbEntries.p_track_info.push(track.createDbEntryObject());
     }
 
     this.dbEntries.p_user_id = this.userId;
