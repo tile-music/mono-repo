@@ -1,6 +1,6 @@
 <script lang="ts">
     import sample_collage from '$lib/assets/images/sample_collage.png'
-    import Button from './spotify.svelte'
+    import LinkSpotify from './spotify.svelte'
 </script>
 
 <div class="content">
@@ -9,7 +9,7 @@
     </div>
     <div class="middle">
         <h1>one last thing...</h1>
-        <Button></Button>
+        <LinkSpotify></LinkSpotify>
         <div>
             <a href="/">cancel & delete account</a>
         </div>

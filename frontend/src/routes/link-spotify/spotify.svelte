@@ -6,9 +6,8 @@
 
 <button
   class="link_spotify"
-  on:load={() => {
-    goto("/check-spotify?link=true");
-  }}
+  name="LinkSpotify"
+  
   on:click={() => {
     goto("/link-spotify?link=true");
   }}

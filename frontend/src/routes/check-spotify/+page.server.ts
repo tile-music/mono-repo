@@ -10,18 +10,17 @@ export const load: PageServerLoad = async ({locals: { supabase, session }, url})
                     Authorization: `Bearer ${session.access_token}`
                 }
             }
-            const { data: spotifyCheckData, error: spotifyCheckError } = await supabase.functions.invoke("check-spotify", headers)
-            console.log(spotifyCheckData, spotifyCheckError)
-            const { data, error } = await supabase.functions.invoke("spotify-login", headers)
-    
-            if (error) {
-                
+
+            //const { data, error } = await supabase.functions.invoke("check-spotify", headers)
+            //console.log("check-spotify", data, error)
+            /* if (error) {
                 // TODO: tell the user that the link failed and to try again
+                // Question: how the fuck do we do that?
                 throw Error(error)
             }
     
             console.log(data)
-            redirect(302, data)
+            redirect(302, data) */
         }
     } else {
         throw Error("User does not have session.") 
