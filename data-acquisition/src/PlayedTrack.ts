@@ -16,8 +16,8 @@ export class PlayedTrack {
 
   public createDbEntryObject() {
     return {
-      p_popularity: this.popularity,
-      p_listened_at: this.playedAt.toISOString(),
+      popularity: this.popularity,
+      listened_at: this.playedAt.toISOString(),
       track: this.trackInfo.createDbEntryObject(),
       track_album: this.albumInfo.createDbEntryObject(),
     };

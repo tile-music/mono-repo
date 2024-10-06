@@ -21,7 +21,10 @@ services:
       - "24678:24678"
     networks:
       - default
-  
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
   data-acquisition:
     build:
       context: ./data-acquisition/
@@ -46,6 +49,8 @@ services:
         condition: service_healthy
       analytics:
         condition: service_healthy
+      redis:
+        condition: service_started
     # healthcheck:
     #   test:
     #     [

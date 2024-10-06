@@ -13,7 +13,6 @@ describe('AlbumInfo class', () => {
       "123456789012",
       "1234567890123",
       "US1234567890",
-      50
     );
 
     expect(albumInfo['albumName']).toBe("Lenny Skinny");
@@ -26,7 +25,6 @@ describe('AlbumInfo class', () => {
     expect(albumInfo['upc']).toBe("123456789012");
     expect(albumInfo['ean']).toBe("1234567890123");
     expect(albumInfo['albumIsrc']).toBe("US1234567890");
-    expect(albumInfo['popularity']).toBe(50);
   });
 
   test('createDbEntryObject should return correct object', () => {
@@ -40,8 +38,7 @@ describe('AlbumInfo class', () => {
       ["Rock"],
       "123456789012",
       "1234567890123",
-      "US1234567890",
-      50
+      "US1234567890"
     );
 
     const dbEntry = albumInfo.createDbEntryObject();
@@ -54,7 +51,6 @@ describe('AlbumInfo class', () => {
       genre: ["Rock"],
       upc: "123456789012",
       ean: "1234567890123",
-      popularity: 50,
       image: "placeholder"
     });
   });

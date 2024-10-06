@@ -8,7 +8,6 @@ export class AlbumInfo {
   private upc: string;
   private ean: string;
   private albumIsrc: string;
-  private popularity: number;
   private image: string;
 
   constructor(
@@ -22,7 +21,6 @@ export class AlbumInfo {
     upc: string,
     ean: string,
     albumIsrc: string,
-    popularity: number
   ) {
     this.albumName = albumName;
     this.albumType = albumType;
@@ -34,7 +32,7 @@ export class AlbumInfo {
     this.upc = upc;
     this.ean = ean;
     this.albumIsrc = albumIsrc;
-    this.popularity = popularity;
+
 
     console.log(this);
   }
@@ -53,7 +51,6 @@ export class AlbumInfo {
       genre: this.genre,
       upc: this.upc,
       ean: this.ean,
-      popularity: this.popularity,
       image: this.image,
     };
   }

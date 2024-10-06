@@ -11,13 +11,13 @@ function wait(ms: number): Promise<void> {
 }
 export abstract class UserPlaying {
   userId!: string;
-  supabase!: SupabaseClient;
+  supabase!: SupabaseClient<any,"test"|"prod",any>;
   context!: any;
   inited!: boolean;
   postgres!: any;
   played: PlayedTrack[] = [];
   dbEntries: any = { p_track_info: [], p_user_id: "", p_environment: "" };
-  constructor(supabase: SupabaseClient, userId: string, context: any) {
+  constructor(supabase: SupabaseClient<any,"test"|"prod",any>, userId: string, context: any) {
     this.supabase = supabase;
     this.userId = userId;
     this.context = context;
@@ -90,7 +90,7 @@ export abstract class UserPlaying {
             user_id: this.userId,
             track_id: trackData[0].track_id,
             listened_at: entry.timestamp,
-            popularity: entry.track_album.popularity,
+            popularity: entry.popularity,
             isrc: entry.track.isrc,
           });
       } else {
@@ -106,7 +106,7 @@ export class SpotifyUserPlaying extends UserPlaying {
   client!: Client;
   player!: Player;
   items!: any[];
-  constructor(supabase: SupabaseClient, userId: any, context: any) {
+  constructor(supabase: SupabaseClient<any,"test"|"prod",any>, userId: any, context: any) {
     super(supabase, userId, context);
   }
   public async init(): Promise<void> {
@@ -140,7 +140,6 @@ export class SpotifyUserPlaying extends UserPlaying {
         item.track.album.upc,
         item.track.album.ean,
         "USRC17607830",
-        item.track.album.popularity,
       );
       const trackInfo = new TrackInfo(
         item.track.name,
@@ -173,7 +172,7 @@ export class SpotifyUserPlaying extends UserPlaying {
 
 export class MockUserPlaying extends UserPlaying {
   mockData: any;
-  constructor(supabase: SupabaseClient, userId: any, context: any) {
+  constructor(supabase: SupabaseClient<any,"test"|"prod",any>, userId: any, context: any) {
     super(supabase, userId, context);
     this.mockData = context;
   }
@@ -189,9 +188,8 @@ export class MockUserPlaying extends UserPlaying {
         ["Test Genre"],
         "Test UPC",
         "",
-        "",
-        100
-      );
+        "" 
+     );
       const trackInfo = new TrackInfo(
         track.trackName,
         track.trackArtists,
