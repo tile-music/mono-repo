@@ -1,10 +1,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import { TrackInfo } from "./TrackInfo";
-import { UUID } from "crypto";
+
 import { Album, Client, Player, User } from "spotify-api.js";
 import { AlbumInfo } from "./AlbumInfo";
-import { error, time, timeStamp } from "console";
+
 import { PlayedTrack } from "./PlayedTrack";
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -34,10 +34,9 @@ export abstract class UserPlaying {
   }
   public async putInDB(): Promise<void> {
     await this.makeDBEntries();
-    console.log(this.dbEntries);
+    //console.log(this.dbEntries);
     let i = 1;
     for (let entry of this.dbEntries.p_track_info) {
-      console.log("count!!!:", i);
       let { data: trackData, error: trackError } = await this.supabase
         .from("tracks")
         .insert(entry.track)
@@ -48,21 +47,21 @@ export abstract class UserPlaying {
         .insert(entry.track_album)
         .select("*");
       if (albumError && albumError?.code !== "23505") throw albumError;
-      console.log(albumData, trackData, albumError, trackError);
+      //console.log(albumData, trackData, albumError, trackError);
       if (!trackData) {
 
-        console.log("reached track");
+        //console.log("reached track");
         const { data: trackDataRet, error: trackErrorRet } = await this.supabase
           .from("tracks")
           .select("*")
           .eq("isrc", entry.track.isrc);
         trackData = trackDataRet;
         trackError = trackErrorRet;
-        console.log(trackData, trackError);
+        //console.log(trackData, trackError);
       }
       if (!albumData) {
-        console.log("reached album");
-        console.log(entry);
+        //console.log("reached album");
+        //console.log(entry);
         
         const { data: albumDataRet, error: albumErrorRet } = await this.supabase
           .from("albums")
@@ -75,10 +74,10 @@ export abstract class UserPlaying {
         //.eq("(album).album_isrc", entry.track_album.album.album_isrc)
         albumData = albumDataRet;
         albumError = albumErrorRet;
-        console.log(albumData, albumError);
+        //console.log(albumData, albumError);
       }
       if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
-        console.log("reached track albums");
+        //console.log("reached track albums");
         const { data: trackAlbumData, error: trackAlbumError } =
           await this.supabase.from("track_albums").insert({
             track_id: trackData[0].track_id,
@@ -89,12 +88,12 @@ export abstract class UserPlaying {
           .insert({
             user_id: this.userId,
             track_id: trackData[0].track_id,
-            listened_at: entry.timestamp,
+            listened_at: entry.listened_at,
             popularity: entry.popularity,
             isrc: entry.track.isrc,
           });
       } else {
-        console.error("No data returned from insert or albumData is undefined or empty");
+        //console.error("No data returned from insert or albumData is undefined or empty");
         throw new Error("No data returned from insert or albumData is undefined or empty");
       }
       i += 1;
@@ -110,7 +109,7 @@ export class SpotifyUserPlaying extends UserPlaying {
     super(supabase, userId, context);
   }
   public async init(): Promise<void> {
-    console.log(this.context);
+    //console.log(this.context);
     this.client = await Client.create({
       refreshToken: true,
       token: {
@@ -128,7 +127,7 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
   protected async makeDBEntries(): Promise<void> {
     for(const item of this.items) {
-      console.log(item)
+      //console.log(item)
       const album = new AlbumInfo(
         item.track.album.name,
         item.track.album.album_type,

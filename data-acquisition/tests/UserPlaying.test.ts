@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { SpotifyUserPlaying, MockUserPlaying } from "../src/UserPlaying";
+import { SpotifyUserPlaying, MockUserPlaying } from "../src/music/UserPlaying";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -10,9 +10,9 @@ describe("UserPlaying Tests", () => {
     let supabase: any;
     let postgres: any;
     let userId: string;
-    let context: any = {refresh_token: process.env.SP_REFRESH};
-    let email: string = "test@test.com"
-    let password: string = "password"
+    let context: any = { refresh_token: process.env.SP_REFRESH };
+    let email: string = "test@test.com";
+    let password: string = "password";
     const testData1 = [
       {
         trackName: "Test Track",
@@ -68,15 +68,15 @@ describe("UserPlaying Tests", () => {
       supabase = new SupabaseClient(
         process.env.SB_URL as string,
         process.env.ANON as string,
-        { db: { schema: 'test' } });
-      
+        { db: { schema: "test" } }
+      );
+
       const { data, error } = await supabase.auth.signUp({
         email: "test1@example.com",
         password: "password",
       });
       if (error) throw error;
       userId = data.user?.id || "test-user-id";
-
     });
     afterAll(async () => {
       const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -84,7 +84,7 @@ describe("UserPlaying Tests", () => {
         process.env.SB_URL as string,
         process.env.SERVICE as string
       );
-      const {data, error} = await supabase.auth.admin.deleteUser(userId);
+      const { data, error } = await supabase.auth.admin.deleteUser(userId);
       if (error) throw error;
       //await supabase.rpc("clear_test_tables");
     });
@@ -104,45 +104,44 @@ describe("UserPlaying Tests", () => {
 
     test("MockUserPlaying init method", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
-      await expect(mockUserPlaying.init())
-        .resolves.not.toThrow()
+      await expect(mockUserPlaying.init()).resolves.not.toThrow();
     });
 
     test("MockUserPlaying fire method", async () => {
-      
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
       await mockUserPlaying.init();
-      await expect(mockUserPlaying.fire()).resolves.not.toThrow().then(() =>
-        supabase
-          .from("played_tracks")
-          .select()
-          .eq("user_id", userId)
-          .then(({ data, error }: { data: any; error: any }) =>{
-            console.log(data)
-            expect(data).toHaveLength(2);
-          }
-          ));;
+      await expect(mockUserPlaying.fire())
+        .resolves.not.toThrow()
+        .then(() =>
+          supabase
+            .from("played_tracks")
+            .select()
+            .eq("user_id", userId)
+            .then(({ data, error }: { data: any; error: any }) => {
+              console.log(data);
+              expect(data).toHaveLength(2);
+            })
+        );
     });
     test("MockUserPlaying init method using test data 2", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
-      await expect(mockUserPlaying.init())
-        .resolves.not.toThrow()
+      await expect(mockUserPlaying.init()).resolves.not.toThrow();
     });
 
     test("MockUserPlaying fire method using test data 2", async () => {
-      
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
       await mockUserPlaying.init();
-      await expect(mockUserPlaying.fire()).resolves.not.toThrow().then(() =>
-        supabase
-          .from("played_tracks")
-          .select()
-          .eq("user_id", userId)
-          .then(({ data, error }: { data: any; error: any }) =>{
-            console.log(data)
-            ;
-          }
-          ));;
+      await expect(mockUserPlaying.fire())
+        .resolves.not.toThrow()
+        .then(() =>
+          supabase
+            .from("played_tracks")
+            .select()
+            .eq("user_id", userId)
+            .then(({ data, error }: { data: any; error: any }) => {
+              console.log(data);
+            })
+        );
     });
     test("MockUserPlaying data integrity", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
@@ -151,7 +150,7 @@ describe("UserPlaying Tests", () => {
       expect(mockUserPlaying.mockData).toHaveLength(2);
       expect(mockUserPlaying.mockData[0].trackName).toBe("Test Track");
     });
-    
+
     test("SpotifyUserPlaying fire method", async () => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
         supabase,
@@ -160,8 +159,33 @@ describe("UserPlaying Tests", () => {
       );
       await spotifyUserPlaying.init();
       await expect(spotifyUserPlaying.fire()).resolves.not.toThrow();
-      
     });
+    test("SpotifyUserPlaying fire method does not create duplicates", async () => {
+      const spotifyUserPlaying = new SpotifyUserPlaying(
+      supabase,
+      userId,
+      context
+      );
+      await spotifyUserPlaying.init();
+      await expect(spotifyUserPlaying.fire())
+      .resolves.not.toThrow()
+      .then(async () => {
+        const { data, error } = await supabase
+        .from("played_tracks")
+        .select()
+        .eq("user_id", userId);
+        if (error) throw error;
 
+        await spotifyUserPlaying.fire();
+        const { data: newData, error: newError } = await supabase
+        .from("played_tracks")
+        .select()
+        .eq("user_id", userId);
+        if (newError) throw newError;
+
+        expect(newData.length).toBeGreaterThanOrEqual(data.length - 2);
+        expect(newData.length).toBeLessThanOrEqual(data.length + 2);
+      });
+    });
   });
 });

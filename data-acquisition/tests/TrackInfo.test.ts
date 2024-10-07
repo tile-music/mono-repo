@@ -1,5 +1,5 @@
 
-import { TrackInfo } from '../src/TrackInfo';
+import { TrackInfo } from '../src/music/TrackInfo';
 
 describe('TrackInfo', () => {
   it('should create an instance of TrackInfo with correct properties', () => {
