@@ -38,6 +38,10 @@ const worker = new Worker(
   { connection }
 );
 
+process.on('unhandledRejection', (err) => {
+  console.error(err);
+})
+
 // Graceful shutdown handling
 process.on('SIGINT', async () => {
   await worker.close();

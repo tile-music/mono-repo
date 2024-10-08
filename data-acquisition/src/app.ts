@@ -1,4 +1,4 @@
-import { Queue, Worker } from 'bullmq';
+import { Queue, Worker, QueueEvents } from 'bullmq';
 import {makeJobs} from './worker/service-adapter';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SpotifyUserPlaying } from './music/UserPlaying';
@@ -7,24 +7,29 @@ import os from 'os';
 import { connection } from './worker/redis';
 
 // Create a Queue instance
-const myQueue = new Queue('my-cron-jobs', { connection });
+const queue = new Queue('my-cron-jobs', { connection });
 async function reset() {
-  await myQueue.obliterate({ force: true });
+  await queue.obliterate({ force: true });
 }
 reset();
 // Create a QueueScheduler to manage job scheduling
-makeJobs(myQueue);
+makeJobs();
 
 
-// Worker to process the job
+const queueEvents = new QueueEvents('my-cron-jobs', { connection });
 
+queueEvents.on('failed', ({ jobId, failedReason }) => {
+  console.error(`Job ${jobId} failed with error ${failedReason}`);
+});
 // Graceful shutdown handling
 process.on('SIGINT', async () => {
-  await myQueue.close();
+  await queue.close();
   console.log('Worker and queue closed');
   process.exit(0);
 });
 
-for (let i = 0; i < os.cpus().length; i++ ){
-  fork(__dirname + "/worker.ts");
+fork(__dirname + "/worker/webserver.ts");
+
+for (let i = 3; i < os.cpus().length; i++ ){
+  fork(__dirname + "/worker/worker.ts");
 }

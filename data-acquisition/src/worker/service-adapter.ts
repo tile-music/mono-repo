@@ -1,9 +1,14 @@
 import { SpotifyUserPlaying, UserPlaying } from "../music/UserPlaying";
 import { SupabaseClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
-import { spotifyFire } from "./worker";
+import { Queue } from "bullmq";
+import { connection } from "./redis";
 dotenv.config();
-export async function makeJobs(queue: any) {
+/**
+ * @todo: add a perameter instead of creating a new queue
+ */
+export async function makeJobs() {
+  const queue = new Queue('my-cron-jobs', { connection });
   console.log("makeJobs");
   const supabase = new SupabaseClient(
     process.env.SB_URL as string,
@@ -16,7 +21,6 @@ export async function makeJobs(queue: any) {
     .then((items) => {
       console.log(items);
       items.data?.forEach(async (element) => {
-        await spotifyFire(element.id, element.refresh_token);
         await queue.add(
           "spotify" + element,
           {
@@ -26,7 +30,19 @@ export async function makeJobs(queue: any) {
             },
           },
           {
-            repeat: { cron: "0,30 * * * *" },
+            jobId: "spotify" + element.id,
+          }
+        );
+        await queue.add(
+          "spotify" + element,
+          {
+            data: {
+              userId: element.id,
+              refreshToken: element.refresh_token,
+            },
+          },
+          {
+            repeat: { pattern: "0/30 * * * *" },
             jobId: "spotify" + element.id,
           }
         );
