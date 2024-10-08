@@ -64,7 +64,7 @@ type FormValidation = {
     failures: Failures
 }
 
-type Failures = {
+export type Failures = {
     missingEmail: boolean
     missingPassword: boolean
     passwordMismatch: boolean
