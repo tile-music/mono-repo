@@ -5,8 +5,8 @@ export function validateAccountForm(type: "login" | "register", formData: FormDa
         passwordMismatch: false,
         invalidEmail: false,
         invalidPassword: {
-            tooLong: false,
             tooShort: false,
+            tooLong: false,
             noNumbers: false
         }
     }
