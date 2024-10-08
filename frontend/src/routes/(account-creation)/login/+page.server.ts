@@ -13,8 +13,7 @@ export const actions: Actions = {
 
     const { error } = await supabase.auth.signInWithPassword(form.data);
     if (error) {
-      console.error(error);
-      redirect(303, '/login');
+      return fail(422, { invalidCredentials: true });
     } else {
       redirect(303, '/profile');
     }
