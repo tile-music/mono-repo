@@ -4,34 +4,56 @@
     import type { Failures } from './validateAccountForm';
     export let type: "login" | "register";
 
-    $: buttonText = status.submitting === true ? "working..." : (type === "login" ? "log in" : "get started");
-
-    let failures: Failures = {
-        missingEmail: false,
-        missingPassword: false,
-        passwordMismatch: false,
-        invalidEmail: false,
-        invalidPassword: {
-            tooLong: false,
-            tooShort: false,
-            noNumbers: false
+    let status: {
+        submitting: boolean,
+        invalidCredentials: boolean,
+        failures: Failures
+    } = {
+        submitting: false,
+        invalidCredentials: false,
+        failures: {
+            missingEmail: false,
+            missingPassword: false,
+            passwordMismatch: false,
+            invalidEmail: false,
+            invalidPassword: {
+                tooShort: false,
+                tooLong: false,
+                noNumbers: false
+            }
         }
     }
 
-    let status = {
-        submitting: false,
-        invalidCredentials: false,
-        failures
-    }
+    $: buttonText = status.submitting === true ? "working..." : (type === "login" ? "log in" : "get started");
+    let invalidPasswordText = determineInvalidPasswordText();
+    let invalidEmailText = determineInvalidEmailText();
 
     const submit: SubmitFunction = () => {
         status.submitting = false;
         return async ({ result, update }) => {
             // if login was unsuccessful, change the status to reflect what went wrong
-            if (result.type === "failure") Object.assign(status, result.data);
+            if (result.type === "failure") {
+                Object.assign(status, result.data);
+                invalidPasswordText = determineInvalidPasswordText();
+                invalidEmailText = determineInvalidEmailText();
+            }
             await update();
             status.submitting = false;
         }; 
+    }
+
+    function determineInvalidPasswordText(): string {
+        if (status.failures.missingPassword) return "please enter a password"
+        if (status.failures.invalidPassword.tooShort) return "password must be at least 8 characters"
+        if (status.failures.invalidPassword.tooLong) return "password must be 64 characters or less"
+        if (status.failures.invalidPassword.noNumbers) return "password must contain a number"
+        return ""
+    }
+
+    function determineInvalidEmailText(): string {
+        if (status.failures.missingEmail) return "please enter an email"
+        if (status.failures.invalidEmail) return "please enter a valid email"
+        return ""
     }
 </script>
 
@@ -40,11 +62,11 @@
     <form method="POST" action={"?/" + type} use:enhance={submit}>
         <fieldset>
             <div>
-                <p>{status.failures.missingEmail ? "please enter an email" : ""}</p>
+                <p>{invalidEmailText}</p>
                 <input type="text" name="email" id="email" placeholder="email" disabled={status.submitting}>
             </div>
             <div>
-                <p>{status.failures.missingPassword ? "please enter a password" : ""}</p>
+                <p>{invalidPasswordText}</p>
                 <input type="password" name="password" id="password" placeholder="password" disabled={status.submitting}>
             </div>
             {#if type === "register"}
