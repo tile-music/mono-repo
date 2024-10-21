@@ -2,42 +2,55 @@ include:
   #- ./mb-docker/docker-compose.yml
 
 
-  - ./supabase-docker/docker/docker-compose.yml
+  - ./supabase/docker/docker-compose.yml
 services:
   frontend:
     build:
       context: ./frontend/
       target: prod
     volumes:
+      - /app/node_modules
+      - ./frontend/src:/app/src
+      - ./frontend/static:/app/static
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/svelte.config.js:/app/svelte.config.js
+      - ./frontend/.env.local:/app/.env.local
       - MQP:/data/frontend
     ports:
-      - "4200:4200"
+      - "5173:4173"
     networks:
       - default
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
   data-acquisition:
     build:
       context: ./data-acquisition/
-      target: prod
+      target: dev
     volumes:
       - MQP:/data/data-acquisition
     ports:
       - "3001:3001"
     networks:
       - default
-    develop:
-      watch:
-        - action: sync
-          path: ./data-acquisition/
-          target: src/
-          ignore:
-            - node_modules/
-        - action: rebuild
-          path: .
+    # develop:
+    #   watch:
+    #     - action: sync
+    #       path: ./data-acquisition/
+    #       target: src/
+    #       ignore:
+    #         - node_modules/
+    #     - action: rebuild
+    #       path: .
     depends_on:
       supabase-db:
         condition: service_healthy
       analytics:
         condition: service_healthy
+      redis:
+        condition: service_started
     # healthcheck:
     #   test:
     #     [
