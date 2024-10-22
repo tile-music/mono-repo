@@ -3,7 +3,7 @@ FROM node:18.18.0-alpine AS build
 WORKDIR /app
 
 COPY package*.json .
-COPY pnpm-lock.yaml .
+#COPY pnpm-lock.yaml .
 
 RUN npm i -g pnpm
 RUN pnpm install
@@ -33,15 +33,12 @@ ENV NODE_ENV=development
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 
-FROM node:18.8.0-alpine AS run
+FROM build AS prod
 
 WORKDIR /app
 
-COPY --from=build /app/build build/
-COPY --from=build /app/package.json .
+EXPOSE 4173
 
-EXPOSE 5173
+ENV NODE_ENV=development
 
-ENV NODE_ENV=production
-
-CMD [ "node", "build" ]
+CMD [ "npm", "run", "preview", "--", "--host", "0.0.0.0" ]

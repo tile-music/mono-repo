@@ -21,7 +21,10 @@ services:
       - "24678:24678"
     networks:
       - default
-  
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
   data-acquisition:
     build:
       context: ./data-acquisition/
@@ -32,20 +35,22 @@ services:
       - "3001:3001"
     networks:
       - default
-    develop:
-      watch:
-        - action: sync
-          path: ./data-acquisition/
-          target: src/
-          ignore:
-            - node_modules/
-        - action: rebuild
-          path: .
+    # develop:
+    #   watch:
+    #     - action: sync
+    #       path: ./data-acquisition/
+    #       target: src/
+    #       ignore:
+    #         - node_modules/
+    #     - action: rebuild
+    #       path: .
     depends_on:
       supabase-db:
         condition: service_healthy
       analytics:
         condition: service_healthy
+      redis:
+        condition: service_started
     # healthcheck:
     #   test:
     #     [
