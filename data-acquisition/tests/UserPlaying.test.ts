@@ -66,7 +66,7 @@ describe("UserPlaying Tests", () => {
 
     beforeAll(async () => {
       supabase = new SupabaseClient(
-        process.env.SB_URL as string,
+        process.env.SB_URL_TEST as string,
         process.env.ANON as string,
         { db: { schema: "test" } }
       );
@@ -81,7 +81,7 @@ describe("UserPlaying Tests", () => {
     afterAll(async () => {
       const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
       supabase = new SupabaseClient(
-        process.env.SB_URL as string,
+        process.env.SB_URL_TEST as string,
         process.env.SERVICE as string
       );
       const { data, error } = await supabase.auth.admin.deleteUser(userId);

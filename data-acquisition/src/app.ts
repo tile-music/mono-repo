@@ -7,7 +7,16 @@ import os from 'os';
 import { connection } from './worker/redis';
 
 // Create a Queue instance
-const queue = new Queue('my-cron-jobs', { connection });
+const queue = new Queue('my-cron-jobs', {
+  connection,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 1000,
+    },
+  },
+});
 async function reset() {
   await queue.obliterate({ force: true });
 }
