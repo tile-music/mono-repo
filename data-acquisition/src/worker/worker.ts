@@ -5,6 +5,19 @@ import { SpotifyUserPlaying } from '../music/UserPlaying';
 import { fork } from 'node:child_process';
 import os from 'node:os';
 import { connection } from './redis';
+/**
+ * Fetches and processes the currently playing track for a Spotify user.
+ *
+ * This function initializes a Supabase client and a SpotifyUserPlaying instance
+ * with the provided user ID and refresh token. It then fetches the currently
+ * playing track for the user and processes it.
+ *
+ * @param userId - The ID of the Spotify user.
+ * @param refreshToken - The refresh token for the Spotify user.
+ * @returns A promise that resolves when the operation is complete.
+ */
+
+
 export async function spotifyFire(userId: string, refreshToken: string) {
   const supabaseInd = new SupabaseClient(
     process.env.SB_URL as string,

@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { SpotifyUserPlaying, MockUserPlaying } from "../src/music/UserPlaying";
+import { SpotifyUserPlaying, MockUserPlaying } from "../../src/music/UserPlaying";
 
 import dotenv from "dotenv";
 dotenv.config();
