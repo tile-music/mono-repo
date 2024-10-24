@@ -8,8 +8,7 @@ COPY . .
 COPY .env .
 
 COPY package*.json .
-RUN npm i --save-dev @types/node
-RUN npm i --save-dev @types/jest
+
 RUN npm i -g typescript
 
 RUN npm install
