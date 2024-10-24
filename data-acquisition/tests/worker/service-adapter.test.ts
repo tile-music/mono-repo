@@ -102,7 +102,7 @@ describe("makeJobs", () => {
     await makeJobs();
 
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("spotify_credentials");
-    expect(mockSupabaseClient.select).toHaveBeenCalledWith("*");
+    expect(mockSupabaseClient.from()).toHaveBeenCalledWith("*");
 
     expect(mockQueue.add).not.toHaveBeenCalled();
   });
