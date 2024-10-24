@@ -5,18 +5,10 @@ import { SpotifyUserPlaying } from './music/UserPlaying';
 import { fork } from 'node:child_process';
 import os from 'os';
 import { connection } from './worker/redis';
+import { makeQueue } from './worker/makeQueue';
 
 // Create a Queue instance
-const queue = new Queue('my-cron-jobs', {
-  connection,
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 1000,
-    },
-  },
-});
+const queue = makeQueue();
 async function reset() {
   await queue.obliterate({ force: true });
 }

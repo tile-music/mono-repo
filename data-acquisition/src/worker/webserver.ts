@@ -2,13 +2,14 @@ import express from 'express';
 import { Queue } from 'bullmq';
 import { connection } from './redis';  // Assuming you already have the Redis connection
 import { spotifyFire } from './worker';       // Import the spotifyFire function
+import { makeQueue } from './makeQueue';
 
 // Create an instance of Express
 const app = express();
 app.use(express.json());
 
 // Create a Queue instance
-const queue = new Queue('my-cron-jobs', { connection });
+const queue = makeQueue();
 
 // Route to add a new job to the queue
 app.post('/add-job', async (req, res) => {
