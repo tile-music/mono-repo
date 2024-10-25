@@ -8,31 +8,9 @@ export const load: PageServerLoad = async ({locals: { supabase, session } }) => 
             }
         }
         const { data, error } = await supabase.functions.invoke("get-user-data", headers)
+        if (error) console.log(error)
 
-        if (error) {
-            console.log(error)
-        }
-
-        const song_data: any[] = JSON.parse(data)
-        let songs: {
-            album_art_path: string
-            title: string
-            artists: string[]
-            album: string
-        }[] | null = []
-
-        if (song_data) {
-            for (const song of song_data) {
-                songs.push({
-                    album_art_path: song.track_album.image,
-                    title: song.track_name,
-                    artists: song.track_artists,
-                    album: song.track_album.album_name
-                })
-            }
-        } else {
-            songs = null;
-        }
+        const songs = JSON.parse(data)
         return { songs }
     } else {
         throw Error("User does not have session.") 
