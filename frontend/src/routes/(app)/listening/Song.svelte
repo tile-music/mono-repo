@@ -1,17 +1,14 @@
 <script lang="ts">
-    export let song: {
-        album_art_path: string
-        title: string
-        artists: string[]
-        album: string
-    };
+    import type { SongInfo } from '../song';
+    export let song: SongInfo;
+    let album = song.albums[0];
 </script>
 
 <div class="song">
-    <img src={song.album_art_path} alt={`The album art for ${song.album}.`}>
+    <img src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
     <p class="title">{song.title}</p>
     <p class="artist">{song.artists.join(', ')}</p>
-    <p class="album">{song.album}</p>
+    <p class="album">{album.title}</p>
 </div>
 
 <style>
