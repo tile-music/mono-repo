@@ -9,7 +9,7 @@ export async function spotifyFire(userId: string, refreshToken: string) {
   const supabaseInd = new SupabaseClient(
     process.env.SB_URL as string,
     process.env.SERVICE as string,
-    { db: { schema: "test" } }
+    { db: { schema: "prod" } }
   );
 
   const spotifyUserPlaying = new SpotifyUserPlaying(
