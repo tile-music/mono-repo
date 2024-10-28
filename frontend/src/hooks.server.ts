@@ -9,6 +9,7 @@ const supabase: Handle = async ({ event, resolve }) => {
    * Creates a Supabase client specific to this server request.
    * The Supabase client gets the Auth token from the request cookies.
    */
+  
   event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
     cookies: {
       getAll: () => event.cookies.getAll(),
@@ -65,6 +66,16 @@ const authGuard: Handle = async ({ event, resolve }) => {
   const { session, user } = await event.locals.safeGetSession();
   event.locals.session = session;
   event.locals.user = user;
+  if (event.request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*', // Replace '*' with specific origin in production
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  }
 
   // make sure users can't access protected routes
   if (!event.locals.session) {
@@ -79,8 +90,13 @@ const authGuard: Handle = async ({ event, resolve }) => {
   if (event.locals.session && (event.url.pathname === '/login' || event.url.pathname === '/register')) {
     redirect(303, '/profile');
   }
+  const response = await resolve(event)
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
 
-  return resolve(event);
+  return response;
 }
 
 const originalConsoleWarn = console.warn;

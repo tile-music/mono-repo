@@ -1,12 +1,10 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import mkcert from 'vite-plugin-mkcert'
 
 export default defineConfig({
 	server: {
-		https: {
-			key: 'cert/ca-key.pem',
-			cert: 'cert/ca-cert.pem'
+		proxy: {
+			'/location': 'https://mdv-test-h0019375.cs.wpi.edu/' 
 		},
 		watch: {
 		  usePolling: true

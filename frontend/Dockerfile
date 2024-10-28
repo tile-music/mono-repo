@@ -1,4 +1,4 @@
-FROM node:18.18.0-alpine AS build
+FROM node:current-alpine3.20 AS build
 
 WORKDIR /app
 
@@ -11,18 +11,12 @@ RUN pnpm install
 COPY . .
 
 RUN pnpm run build
-RUN pnpm prune --prod
+RUN pnpm prune
 
 
 # https://jenyus.web.app/blog/2021-05-30-setting-up-a-development-environment-for-sveltekit-with-docker-and-compose
-FROM node:18.18.0-alpine AS dev
+FROM base AS dev
 
-WORKDIR /app
-
-COPY package*.json .
-
-RUN npm i -g pnpm
-RUN pnpm install
 
 # Expose port 5173 for the SvelteKit app and 24678 for Vite's HMR
 EXPOSE 5173
@@ -35,7 +29,6 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 FROM build AS prod
 
-WORKDIR /app
 
 EXPOSE 4173
 
