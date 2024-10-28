@@ -6,7 +6,7 @@
 	};
 </script>
 
-<div>
+<div id="container">
     <nav>
         <ul>
             <li><a href="/display">art display</a></li>
@@ -21,6 +21,12 @@
 </div>
 
 <style>
+    #container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
     nav {
         margin: 20px;
     }
@@ -37,5 +43,7 @@
 
     .content {
         margin: 20px;
+        flex-grow: 1;
+        min-height: 0;
     }
 </style>
