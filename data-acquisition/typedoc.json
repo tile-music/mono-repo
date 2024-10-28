@@ -1,3 +1,3 @@
 {
-    "entryPoints": ["src/app.ts"]
+    "entryPoints": ["src/app.ts", "src/worker/worker.ts"]
 }
