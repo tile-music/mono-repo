@@ -3,6 +3,7 @@ export type SongInfo = {
     title: string
     artists: string[]
     duration: number
+    listened_at: number
     albums: AlbumInfo[]
 }
 
