@@ -5,6 +5,11 @@ type RankOutput = {
     plays: number
 }[];
 
+/**
+ * aggregates a list of songs based on their isrc and sorts them based on the number of listens
+ * @param songs the list of songs listened to by the user
+ * @returns a sorted list of objects containing the song and its number of listens
+ */
 export function rankSongs(songs: SongInfo[]): RankOutput {
     // tabulate number of listens based on song isrc
     const ranks: { [x: string]: number } = {};
@@ -24,7 +29,7 @@ export function rankSongs(songs: SongInfo[]): RankOutput {
         output.push({ song: isrcToSong[isrc], plays: ranks[isrc] });
     }
 
-    // sort by number of plays, descending
+    // sort by number of plays in descending order
     output.sort((a, b) => { return a.plays - b.plays; });
     return output;
 }
