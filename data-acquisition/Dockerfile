@@ -1,12 +1,15 @@
 #Build stage
 FROM node:alpine3.20 AS base
 
+RUN rm -rf /app
 WORKDIR /app
 
 COPY . .
 COPY .env .
 
 COPY package*.json .
+
+RUN npm i -g typescript
 
 RUN npm install
 

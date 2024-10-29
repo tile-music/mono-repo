@@ -1,44 +1,36 @@
-import { SupabaseClient, createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
-import {Client, Player} from "spotify-api.js"
-import {gatherAndMapUsers, buildUserMap,  updateUsersPlayback, Playing,PlayingSpotify, delay} from "./handle-users";
-import { TimeData } from "./TimeData";
-dotenv.config();
+import { Queue, Worker, QueueEvents } from 'bullmq';
+import {makeJobs} from './worker/service-adapter';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { SpotifyUserPlaying } from './music/UserPlaying';
+import { fork } from 'node:child_process';
+import os from 'os';
+import { connection } from './worker/redis';
+import { makeQueue } from './worker/makeQueue';
 
-
-
-console.log(process.env.ANON);
-
-
-/**
- * This function runs the entire program by gathering the users and their refresh tokens...
- * then updating the users and their playback information continuously for all users
- * if there are any new users, they are added to the map of users at a given time interval
- * 
- * TODO: Cleanup the code and add more comments
- */
-async function run() {
-  let timeToAcquire : TimeData = new TimeData();
-  timeToAcquire.alterDelay(30000)
-  let obj : Map<string, PlayingSpotify> | undefined
-  let users = await gatherAndMapUsers([])
-  let newUsers;
-  if (users){
-    obj = await buildUserMap(users)
-  }
-  while (true){
-    if(timeToAcquire.isTimeToUpdate()) {
-      const userIds = Array.from(obj!.keys())
-      newUsers = await gatherAndMapUsers(userIds)
-      if((newUsers).size > 0){
-        let newObj = await buildUserMap(newUsers as Map<string, { refresh_token: string; }>)
-        obj =  new Map([...obj!, ...newObj!])
-      }
-      timeToAcquire.reset()
-    }
-    if(obj) await updateUsersPlayback(obj)
-    await delay(3000)
-  }
+// Create a Queue instance
+const queue = makeQueue();
+async function reset() {
+  await queue.obliterate({ force: true });
 }
+reset();
+// Create a QueueScheduler to manage job scheduling
+makeJobs();
 
-run()
+
+const queueEvents = new QueueEvents('my-cron-jobs', { connection });
+
+queueEvents.on('failed', ({ jobId, failedReason }) => {
+  console.error(`Job ${jobId} failed with error ${failedReason}`);
+});
+// Graceful shutdown handling
+process.on('SIGINT', async () => {
+  await queue.close();
+  console.log('Worker and queue closed');
+  process.exit(0);
+});
+
+fork(__dirname + "/worker/webserver.ts");
+
+for (let i = 3; i < os.cpus().length; i++ ){
+  fork(__dirname + "/worker/worker.ts");
+}

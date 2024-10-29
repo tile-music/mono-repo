@@ -23,9 +23,13 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.43.4",
+    "@supabase/supabase-js": "^2.45.4",
+    "bullmq": "^5.16.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "spotify-api.js": "^9.2.5"
+    "ioredis": "^5.4.1",
+    "spotify-api.js": "^9.2.5",
+    "supabase": "^1.203.0",
+    "wakaq": "^2.2.1"
   }
 }
