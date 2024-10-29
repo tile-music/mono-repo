@@ -2,8 +2,8 @@
   import spotify_logo from "$lib/assets/images/spotify_logo.png";
   import {onMount} from "svelte"
   import { goto } from "$app/navigation";
-  let enabled : boolean|null 
-  onMount(() => {
+  let enabled = false;
+ onMount(() => {
     fetch("/check-spotify", {
       method: "POST",
       headers: {
@@ -24,7 +24,7 @@
   });
 </script>
 
-{#if enabled === true}
+{#if enabled}
 <button
   class="link_spotify"
   name="LinkSpotify"
