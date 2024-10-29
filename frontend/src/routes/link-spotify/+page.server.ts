@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types'
 
+
 export const load: PageServerLoad = async ({locals: { supabase, session }, url}) => {
     if (session !== null) {
         // determine if users have clicked the 'log in with spotify' button or are just trying to load the page
@@ -10,8 +11,6 @@ export const load: PageServerLoad = async ({locals: { supabase, session }, url})
                     Authorization: `Bearer ${session.access_token}`
                 }
             }
-            const { data: spotifyCheckData, error: spotifyCheckError } = await supabase.functions.invoke("check-spotify", headers)
-            console.log(spotifyCheckData, spotifyCheckError)
             const { data, error } = await supabase.functions.invoke("spotify-login", headers)
     
             if (error) {
