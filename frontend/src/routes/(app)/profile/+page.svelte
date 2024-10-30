@@ -2,6 +2,7 @@
     import type { PageData } from './$types';
     export let data: PageData;
     import LinkSpotify from '../../link-spotify/spotify.svelte';
+    import DeleteUser from '../delete-account/delete.svelte'
     $: ({ user } = data);
     let showSettings = true;
 </script>
@@ -25,6 +26,7 @@
     {#if showSettings}
         <div class="settings-menu">
             <LinkSpotify></LinkSpotify>
+            <DeleteUser>   </DeleteUser>
         </div>
     {/if}
 </div>
