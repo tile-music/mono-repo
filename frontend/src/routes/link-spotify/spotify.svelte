@@ -1,42 +1,69 @@
 <script lang="ts">
   import spotify_logo from "$lib/assets/images/spotify_logo.png";
-  import {onMount} from "svelte"
+  import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  let enabled = false;
- onMount(() => {
+  import { writable } from "svelte/store";
+
+  let enabled = writable(false);
+  let checkSpotify = async () => 
     fetch("/check-spotify", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(" ") // Adjust data as needed
+      body: JSON.stringify(" "),
     })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) =>{ 
-        if(data.spotify === true) {
-          enabled = false
-        } else {
-          enabled = true
-        }
-        console.log("data", data)})
+    .then((response) => {
+      console.log("Response status:", response.status); // Log status
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Parsed data:", data);
+      let typedData : boolean = data
+      console.log(typedData)
+      if (data === "spotify logged in") {
+        console.log("should be disabled")
+        enabled.set(false);
+      } else {
+        console.log("not true")
+        enabled.set(true);
+      }
+    })
+    .catch((error) => console.error("Fetch error:", error));
+  
+  onMount(() => {
+    checkSpotify()
+     
   });
+
+  $: console.log("enabled", $enabled);
 </script>
 
-{#if enabled}
-<button
-  class="link_spotify"
-  name="LinkSpotify"
-    on:click={() =>  goto("/link-spotify?link=true")  }
-  >log in with Spotify<img
-  class="spotify_logo"
-  src={spotify_logo}
-  alt="The Spotify logo."
-/></button>
+{#if $enabled}
+  <button
+    class="link_spotify"
+    name="LinkSpotify"
+    on:click={() => goto("/link-spotify?link=true").then(async ()=> await checkSpotify())}
+  >
+    log in with Spotify
+    <img class="spotify_logo" src={spotify_logo} alt="The Spotify logo." />
+  </button>
+{:else}
+  <button 
+    class="link_spotify"
+    name="UnlinkSpotify"
+    on:click={()=> fetch("/unlink-spotify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(" "),
+    })}
+    >Unlink Spotify Account</button>
 {/if}
-
-
 <style>
   .link_spotify {
     border: none;
@@ -60,5 +87,4 @@
     align-items: center;
     gap: 10px;
   }
-
 </style>

@@ -11,24 +11,14 @@ export const POST: RequestHandler = async ({locals: { supabase, session }, reque
                 Authorization: `Bearer ${session.access_token}`
             }
         }
-        const { data, error } = await supabase.functions.invoke("check-spotify", headers)
+        const { data, error } = await supabase.auth.getUser();
         console.log("data", data)
-
-
-        if (error) {    
-            // TODO: tell the user that the link failed and to try again
-            throw Error(error)
-        }
-        switch (data) {
-            case "spotify logged in":
-                body = "spotify logged in";
-                break;
-            default:
-                body = "spotify login not found";
-                break;
-        }
-        console.log(body);
-        console.log(request)
+        const userId = data.user?.id;
+        console.log("userId", userId);
+        const { data: dbData, error: error2 } = await supabase
+            .from("spotify_credentials")
+            .delete()
+            .eq("id", userId);
 
 
         return new Response(JSON.stringify(body), {
