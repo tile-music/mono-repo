@@ -30,6 +30,6 @@ export function rankSongs(songs: SongInfo[]): RankOutput {
     }
 
     // sort by number of plays in descending order
-    output.sort((a, b) => { return a.plays - b.plays; });
+    output.sort((a, b) => { return b.plays - a.plays; });
     return output;
 }
