@@ -1,8 +1,9 @@
 <script lang="ts">
     import type { PageData } from './$types';
     export let data: PageData;
-    import Button from '../../link-spotify/spotify.svelte';
+    import LinkSpotify from '../../link-spotify/spotify.svelte';
     $: ({ user } = data);
+    let showSettings = true;
 </script>
 
 <form method="POST" action="?/update_profile">
@@ -16,9 +17,27 @@
     <input type="text" name="avatar_url" id="avatar_url" placeholder="avatar url" value={user?.avatar_url}>
     <input type="submit" value="edit profile">
 </form>
-<Button></Button>
+
+<div>
+    <button id=settings-button on:click={() => showSettings = !showSettings}>
+        {showSettings ? 'Hide Settings' : 'Show Settings'}
+    </button>
+    {#if showSettings}
+        <div class="settings-menu">
+            <LinkSpotify></LinkSpotify>
+        </div>
+    {/if}
+</div>
+
 
 <style>
+    #settings-button{
+        margin-top:10px ;
+    }
+    .settings-menu {
+
+        margin-top: 10px;
+    }
     form {
         display: flex;
         flex-direction: column;
