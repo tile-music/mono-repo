@@ -71,6 +71,7 @@
 <!-- this could be deduplicated, im just not totally sure how right now -->
   <button
     class="link_spotify"
+    id="unlink_spotify"
     name="UnlinkSpotify"
     on:click={async () => {
       await fetch("/unlink-spotify", {
@@ -96,6 +97,9 @@
     width: 300px;
     border-radius: 10px;
     background-color: #1db954; /* spotify green*/
+  }
+  #unlink_spotify{
+    background-color: #FF4B4B;
   }
   .spotify_logo {
     width: 30px;

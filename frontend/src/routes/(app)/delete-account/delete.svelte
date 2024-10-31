@@ -43,5 +43,18 @@
   </button>
 
 <style>
+  .delete-account{
+    margin-top: 10px;
+    border: none;
+    cursor: pointer;
+    color: var(--background);
+    font-family: "Mattone", sans-serif;
+    font-size: 15px;
+    height: 50px;
+    width: 300px;
+    border-radius: 10px;
+    background-color: #FF4B4B;
+
+  }
   
 </style>
