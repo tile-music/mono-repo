@@ -30,10 +30,6 @@
       .catch((error) => console.error("Fetch error:", error));
 
 </script>
-
-  
-
-
   <button
     class="delete-account"
     name="DeleteAccount"
