@@ -5,7 +5,7 @@ import pkg from "@supabase/supabase-js"
 
 const {SupabaseClient} = pkg;
 
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_SERVICE_KEY } from '$env/static/public';
 
 /**
  * Handles the POST request to unlink Spotify credentials for the authenticated user.
@@ -36,7 +36,7 @@ export const POST: RequestHandler = async ({locals: { supabase, session }, reque
         }
         const supabaseProd  = new SupabaseClient(
             PUBLIC_SUPABASE_URL as string,
-            PUBLIC_SUPABASE_ANON_KEY as string,
+            PUBLIC_SUPABASE_SERVICE_KEY as string,
             { db: { schema: "prod" } }
           );
         
@@ -46,7 +46,8 @@ export const POST: RequestHandler = async ({locals: { supabase, session }, reque
         console.log("userId", userId);
         if(userId){
             await supabaseProd.from("played_tracks").delete().eq("user_id", userId);
-            await supabaseProd.auth.admin.deleteUser(userId);
+            const {error} = await supabaseProd.auth.admin.deleteUser(userId);
+            console.log(error)
         } else{
             throw Error("User not found.")
         }

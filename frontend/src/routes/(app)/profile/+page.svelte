@@ -4,7 +4,7 @@
   import LinkSpotify from "../../link-spotify/spotify.svelte";
   import DeleteUser from "../delete-account/delete.svelte";
   $: ({ user } = data);
-  let showSettings = true;
+  let showSettings = false;
 </script>
 
 <form method="POST" action="?/update_profile">
