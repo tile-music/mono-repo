@@ -31,12 +31,18 @@
 
 </script>
 
+  
+
 
   <button
     class="delete-account"
     name="DeleteAccount"
     on:click={async () => {
+      if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+        return;
+      }
       await deleteAccount()
+
       await goto("/logout")
     }}
   > Delete Account
