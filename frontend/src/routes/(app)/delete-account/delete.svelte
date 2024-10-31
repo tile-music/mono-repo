@@ -3,6 +3,15 @@
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
 
+  /**
+   * Asynchronous function to delete an account.
+   * 
+   * This function sends a POST request to the "/delete-account" endpoint with an empty JSON body.
+   * It logs the response status and throws an error if the response is not OK.
+   * 
+   * @returns {Promise<Object>} The JSON response from the server if the request is successful.
+   * @throws {Error} If the response status is not OK.
+   */
   let deleteAccount = async () =>
     fetch("/delete-account", {
       method: "POST",
