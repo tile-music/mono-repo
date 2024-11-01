@@ -6,6 +6,18 @@ describe('Test login form functionality', async () => {
         render(AccountForm, { type: "login"});
     });
 
+    test('Email field should be present', async () => {
+        const emailInput = screen.getByPlaceholderText("email");
+        expect(emailInput).toBeInTheDocument();
+        expect(emailInput).toBeEnabled();
+    });
+
+    test('Password field should be present', async () => {
+        const passwordInput = screen.getByPlaceholderText("password");
+        expect(passwordInput).toBeInTheDocument();
+        expect(passwordInput).toBeEnabled();
+    });
+
     test('Login button should be present', async () => {
         expect(screen.getByDisplayValue('log in')).toBeInTheDocument();
     });
@@ -23,6 +35,24 @@ describe('Test login form functionality', async () => {
 describe('Test register form functionality', async () => {
     beforeEach(() => {
         render(AccountForm, { type: "register"});
+    });
+
+    test('Email field should be present', async () => {
+        const emailInput = screen.getByPlaceholderText("email");
+        expect(emailInput).toBeInTheDocument();
+        expect(emailInput).toBeEnabled();
+    });
+
+    test('Password field should be present', async () => {
+        const passwordInput = screen.getByPlaceholderText("password");
+        expect(passwordInput).toBeInTheDocument();
+        expect(passwordInput).toBeEnabled();
+    });
+
+    test('Confirm password field should be present', async () => {
+        const confirmPasswordInput = screen.getByPlaceholderText("confirm password");
+        expect(confirmPasswordInput).toBeInTheDocument();
+        expect(confirmPasswordInput).toBeEnabled();
     });
 
     test('Register button should be present', async () => {
