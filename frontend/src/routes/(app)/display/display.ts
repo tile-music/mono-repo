@@ -15,11 +15,11 @@ export function rankSongs(songs: SongInfo[]): RankOutput {
     const ranks: { [x: string]: number } = {};
     const isrcToSong: { [x: string]: SongInfo } = {}
     for (const song of songs) {
-        if (!ranks[song.isrc]) {
-            ranks[song.isrc] = 1;
-            isrcToSong[song.isrc] = song;
+        if (!ranks[song.albums[0].image]) {
+            ranks[song.albums[0].image] = 1;
+            isrcToSong[song.albums[0].image] = song;
         } else {
-            ranks[song.isrc]++;
+            ranks[song.albums[0].image]++;
         }
     }
     
