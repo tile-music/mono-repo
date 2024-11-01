@@ -21,7 +21,9 @@
 </div>
 
 <style>
+
     nav {
+        z-index: 9999;
         margin: 20px;
     }
 

@@ -2,9 +2,9 @@
     import type { PageData } from './$types';
     export let data: PageData;
     import Song from './Song.svelte';
-    
+    import Loading from '$lib/assets/components/Loading.svelte';
 </script>
-
+<Loading></Loading>
 <h1>Listening Data</h1>
 <div class="songs">
     {#if data.songs != null}
