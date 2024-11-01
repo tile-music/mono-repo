@@ -5,7 +5,25 @@
   import { generateFullArrangement } from "./pack";
 
   import type { PageData } from "./$types";
+  import {toPng} from 'html-to-image'
   export let data: PageData;
+
+  let artDisplayRef;
+
+  async function captureDiv() {
+        try {
+            // Capture the div as an image
+            const dataUrl = await toPng(artDisplayRef);
+            
+            // Create a link and trigger download
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = 'my-div-image.png';
+            link.click();
+        } catch (error) {
+            console.error('Failed to capture div as image:', error);
+        }
+      }
 
   const makeSquares = (): { x: number; y: number; size: number }[] => {
     const arrangement = generateFullArrangement(1, 14, 18, 0.1, 0.2);
@@ -29,22 +47,23 @@
 </script>
 
 <div id="container">
-  <div id="display">
+  <div id="display" bind:this={artDisplayRef} class="capture-area">
     {#each squares as square, i}
-      <Square {square} song={result[i].song} />
+    <Square {square} song={result[i].song} />
     {/each}
   </div>
 </div>
 <footer>
-
-    <button on:click={() => (squares = makeSquares())} id="regenerate"
-      >Regenerate</button
-    >
+  <div style="display: flex; gap: 20px; position: relative;">
+    <button on:click={() => (squares = makeSquares())} id="regenerate">Regenerate</button>
+    <button on:click={captureDiv}>Save Art Collage</button>
+  </div>
+  
 </footer>
 
 <style>
 button {
-    position: absolute;
+
     bottom: 20px;
     left: 20px;
     height: 40px;

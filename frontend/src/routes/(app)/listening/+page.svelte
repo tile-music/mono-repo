@@ -2,6 +2,7 @@
     import type { PageData } from './$types';
     export let data: PageData;
     import Song from './Song.svelte';
+    
 </script>
 
 <h1>Listening Data</h1>
