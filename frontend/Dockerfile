@@ -15,7 +15,7 @@ RUN pnpm prune
 
 
 # https://jenyus.web.app/blog/2021-05-30-setting-up-a-development-environment-for-sveltekit-with-docker-and-compose
-FROM base AS dev
+FROM build AS dev
 
 
 # Expose port 5173 for the SvelteKit app and 24678 for Vite's HMR
