@@ -24,13 +24,13 @@ export function processSongs(songs: SongInfo[]): ProcessOutput[] {
     }
 
     // sort songs by time listened
-    const sorted = songs.toSorted((a, b) => { return b.listened_at - a.listened_at});
+    songs.sort((a, b) => { return b.listened_at - a.listened_at});
 
     // if user played the same song multiple times in a row,
     // collapse into one entry and record repetitions
     const output: ProcessOutput[] = []
     let prev_isrc = "";
-    for (const song of sorted) {
+    for (const song of songs) {
         if (song.isrc !== prev_isrc) {
             output.push({
                 ...song,
