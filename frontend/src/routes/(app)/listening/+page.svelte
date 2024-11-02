@@ -9,32 +9,41 @@
 
 <div id="container">
     <h1>Listening Data</h1>
-    <div id="headers">
-        <h2 id="art">art</h2>
-        <h2 id="title">title</h2>
-        <h2 id="artist">artist</h2>
-        <h2 id="album">album</h2>
-        <h2 id="duration">duration</h2>
-        <h2 id="plays">plays</h2>
-    </div>
-    <div id="songs">
-        {#if data.songs != null}
-            {#each processedSongs as song}
-                <Song {song} />
-            {/each}
-        {:else}
-            <p>No listening data yet!</p>
-        {/if}
+    <div id="scroll-container">
+        <div id="headers">
+            <h2 id="art">art</h2>
+            <h2 id="title">title</h2>
+            <h2 id="artist">artist</h2>
+            <h2 id="album">album</h2>
+            <h2 id="duration">duration</h2>
+            <h2 id="plays">plays</h2>
+        </div>
+        <div id="songs">
+            {#if data.songs != null}
+                {#each processedSongs as song}
+                    <Song {song} />
+                {/each}
+            {:else}
+                <p>No listening data yet!</p>
+            {/if}
+        </div>
     </div>
 </div>
 
 <style>
     #container {
-        width: 100%;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    #scroll-container {
+        overflow-x: scroll;
+        height: 100%;
         display: flex;
         flex-direction: column;
     }
-
+    
     h1 {
         margin-bottom: 1em;
     }
@@ -42,10 +51,8 @@
     #headers {
         display: flex;
         padding: 1em 0 1em 40px;
+        width: fit-content;
         gap: 10px;
-        position: sticky;
-        top: 0;
-        background-color: var(--background);
     }
 
     /* these values are manually synced with the Song component */
@@ -70,6 +77,8 @@
         flex-direction: column;
         gap: 20px;
         align-items: flex-start;
-        min-height: 0;
+        margin-bottom: 20px;
+        overflow-y: scroll;
+        width: fit-content;
     }
 </style>
