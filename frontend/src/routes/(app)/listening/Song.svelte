@@ -1,4 +1,5 @@
 <script lang="ts">
+    import refresh from '$lib/assets/icons/refresh.svg';
     import type { ProcessOutput } from './processSongs';
     export let song: ProcessOutput;
     $: album = song.albums[0];
@@ -12,7 +13,11 @@
 </script>
 
 <div class="song">
-    <p class="repetitions">{(song.repetitions > 1) ? "x" + song.repetitions : ""}</p>
+    {#if song.repetitions > 1}
+        <p class="repetitions"><img src={refresh} alt="A replay icon">{song.repetitions}</p>
+    {:else}
+        <p class="repetitions"></p>
+    {/if}
     <img class="art" src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
     <p class="title">{song.title}</p>
     <p class="artist">{song.artists.join(', ')}</p>
@@ -26,6 +31,8 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        height: 50px;
+        flex-shrink: 0;
     }
 
     .repetitions {
@@ -35,8 +42,8 @@
     }
 
     .art {
-        width: 50px;
-        height: 50px;
+        height: 100%;
+        aspect-ratio: 1 / 1;
     }
 
     .title, .album {
@@ -49,5 +56,18 @@
 
     .duration, .plays {
         width: 100px;
+    }
+
+    .repetitions {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .repetitions img {
+        width: 12px;
+        height: 12px;
+        transform: rotate(130deg);
+        z-index: -1 /* ????? */
     }
 </style>
