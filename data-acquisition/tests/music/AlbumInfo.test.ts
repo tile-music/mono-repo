@@ -1,4 +1,4 @@
-import { AlbumInfo } from '../src/music/AlbumInfo';
+import { AlbumInfo } from '../../src/music/AlbumInfo';
 
 describe('AlbumInfo class', () => {
   test('constructor should initialize properties correctly', () => {

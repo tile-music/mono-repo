@@ -2,15 +2,25 @@ import express from 'express';
 import { Queue } from 'bullmq';
 import { connection } from './redis';  // Assuming you already have the Redis connection
 import { spotifyFire } from './worker';       // Import the spotifyFire function
+import { makeQueue } from './makeQueue';
 
 // Create an instance of Express
 const app = express();
 app.use(express.json());
 
 // Create a Queue instance
-const queue = new Queue('my-cron-jobs', { connection });
+const queue = makeQueue();
 
 // Route to add a new job to the queue
+/**
+ * Extracts the `userId`, `refreshToken`, and `type` properties from the request body.
+ *
+ * @param req - The HTTP request object containing the body with user details.
+ * @param req.body - The body of the request containing user information.
+ * @param req.body.userId - The unique identifier for the user.
+ * @param req.body.refreshToken - The refresh token for the user session.
+ * @param req.body.type - The type of request or user action.
+ */
 app.post('/add-job', async (req, res) => {
   const { userId, refreshToken, type } = req.body;
   console.log(req.body)

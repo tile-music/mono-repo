@@ -186,7 +186,7 @@ function genSquares(min_size, max_size, n_squares, scale) {
 function genPositions(max_offset, min_offset) {
     var axis = Math.round(Math.random());
     var offset_direction = Math.random() < 0.5 ? -1 : 1;
-    var offset = Math.round(Math.random() * max_offset + min_offset) * offset_direction;
+    var offset = (Math.random() * max_offset + min_offset) * offset_direction;
     return [axis, offset];
 }
 
@@ -388,7 +388,7 @@ export function generateFullArrangement(scale, min_squares, max_squares, offset_
     }
 
     // Generate offset
-    var pos = genPositions(offset_max, offset_min);
+    var pos = genPositions(arr_A.longestEdge.length * offset_max, arr_A.longestEdge.length * offset_min);
     var axis = pos[0];
     var offset = pos[1];
     
@@ -401,8 +401,8 @@ export function generateFullArrangement(scale, min_squares, max_squares, offset_
         arr_B.squares = rotate(arr_B.squares);
     }
 
-    var new_x = axis == 0 ? offset / scale : 0;
-    var new_y = axis == 1 ? offset / scale : 0;
+    var new_x = axis == 0 ? offset : 0;
+    var new_y = axis == 1 ? offset : 0;
     // Shift arrangement B to be flush with arrangement A
     var trans_squares = shiftOrigin(arr_B.squares, new_x, new_y);
     var full_arr = arr_A.squares.concat(trans_squares); // The full arrangement
