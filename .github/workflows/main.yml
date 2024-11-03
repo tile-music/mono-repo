@@ -13,10 +13,10 @@ on:
 jobs:
   test:
     name: Run development tests
+    # runs-on: [self-hosted, linux]
     runs-on: ubuntu-latest
-    # runs-on: windows-latest
-    env:
-      COMPOSE_FILE: docker-compose.yml
+    # env:
+      # COMPOSE_FILE: docker-compose.yml
       # DOCKER_USER: ${{ secrets.DOCKER_USER }}
       # DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
 
@@ -32,6 +32,15 @@ jobs:
 
     # - name: Run Docker
     #   run: docker run
+
+    - name: Setup env
+      env: 
+        ENV_SH_CONTENT: ${{ secrets.ENV_SH }}
+      run: |
+        echo "$ENV_SH_CONTENT" > env.sh
+        chmod +x env.sh
+        ./env.sh
+      shell: bash
 
     - name: Build docker images
       # working-directory: ./mono-repo
