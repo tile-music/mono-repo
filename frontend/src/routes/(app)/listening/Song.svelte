@@ -8,8 +8,7 @@
     <img src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
     <p class="title">{song.title}</p>
     <p class="artist">{song.artists.join(', ')}</p>
-    <p class="album">{album.title}</p>
-
+    <p class="album">{song.album}</p>
 </div>
 
 <style>

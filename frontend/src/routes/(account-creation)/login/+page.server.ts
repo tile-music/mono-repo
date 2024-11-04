@@ -8,13 +8,12 @@ export const actions: Actions = {
     const formData = await request.formData();
     const form = validateAccountForm("login", formData)
     if (!form.valid) {
-      return fail(422, form.failures);
+      return fail(422, { failures: form.failures });
     }
 
     const { error } = await supabase.auth.signInWithPassword(form.data);
     if (error) {
-      console.error(error);
-      redirect(303, '/login');
+      return fail(422, { invalidCredentials: true });
     } else {
       redirect(303, '/profile');
     }
