@@ -38,10 +38,13 @@ jobs:
     - name: Setup env
       env: 
         ENV_SH_CONTENT: ${{ secrets.ENV_SH }}
+        FRONTEND_SUPABASE: ${{ secrets.FRONTEND_SERVICE_KEY }}
       run: |
         echo "$ENV_SH_CONTENT" > env.sh
         chmod +x env.sh
         ./env.sh
+        echo "$FRONTEND_SUPABASE" >> frontend/.env.local
+
       shell: bash
 
     - name: Build docker images
