@@ -54,20 +54,19 @@ jobs:
         docker compose build
         docker compose up -d
 
-    - name: Download other stuff
-      run: |
-        npm i
-        npm i -g vitest
-
     - name: Run frontend tests
       working-directory: frontend/
       run: |
+        npm i
+        npm i -g vitest
         npm run test
         echo "other test commands go here"
 
     - name: Run dataaq tests
       working-directory: data-acquisition/
       run: |
+        npm i
+        npm i -g vitest
         npm run test
         echo "other test commands go here"
 
