@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types'
 import type { Actions } from './$types'
+import { fail } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({locals: { supabase, session } }) => {
     if (session !== null) {
@@ -48,15 +49,38 @@ export const actions: Actions = {
             throw Error("User does not have session.") 
         }
     },
+
     reset_profile: async ({ request, locals: { supabase, session } }) => {
-        if (session !== null) {
-            const blankProfile = assembleBlankProfile(session.user.id, session.user.email);
-            const { error } = await supabase.from('profiles').upsert(blankProfile);
-            if (error) console.error(error);
-        } else {
-            throw Error("User does not have session.") 
+        if (session == null) return fail(401, { not_authenticated: true});
+
+        const blankProfile = assembleBlankProfile(session.user.id, session.user.email);
+        const { error } = await supabase.from('profiles').upsert(blankProfile);
+        if (error) {
+            console.error(error); // log unexpected error
+            return fail(500, { server_error: true });
         }
-    }
+
+        return { success: true };
+    },
+
+    reset_listening_data: async ({ request, locals: { supabase, session } }) => {
+        console.log(request);
+        if (session == null) return fail(401, { not_authenticated: true});
+
+        // attempt to reset listening data
+        const headers = {
+            headers: {
+                Authorization: `Bearer ${session.access_token}`
+            }
+        };
+        const { data } = await supabase.functions.invoke("reset-listening-data", headers);
+
+        // handle errors
+        const response = JSON.parse(data);
+        console.log(response);
+
+        return { success: true };
+    },
 }
 
 // TODO: TEST THISSSSS

@@ -7,7 +7,52 @@
 
   export let data: PageData;
   $: ({ user, email } = data);
-  let showSettings = false;
+
+  let resetProfileStatus = "";
+  async function resetProfileInformation() {
+    // confirm with user
+    if (!confirm("Are you sure you want to reset your profile information? " +
+      "This action cannot be undone.")) return;
+
+    const res = await fetch('?/reset_profile', {
+      method: 'POST',
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+
+    // parse response
+    const response = await res.json();
+    const data = JSON.parse(response.data)[0]; // returns an array, for some reason
+
+    // set status message
+    if (data.success) resetProfileStatus = "reset successfully";
+    else if (data.not_authenticated) resetProfileStatus = "failed: not authenticated";
+    else if (data.server_error) resetProfileStatus = "failed: server error";
+    else resetProfileStatus = "failed: unknown error";
+  }
+
+  // very similar to the function above, but i'm keeping it separate
+  // to allow for more robust error handling in the future
+  let resetListeningStatus = "";
+  async function resetListeningHistory() {
+    // confirm with user
+    if (!confirm("Are you sure you want to reset your listening history? " +
+      "This action cannot be undone.")) return;
+
+    const res = await fetch('?/reset_listening_data', {
+      method: 'POST',
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+
+    // parse response
+    const response = await res.json();
+    const data = JSON.parse(response.data)[0]; // returns an array, for some reason
+
+    // set status message
+    if (data.success) resetListeningStatus = "reset successfully";
+    else if (data.not_authenticated) resetListeningStatus = "failed: not authenticated";
+    else if (data.server_error) resetListeningStatus = "failed: server error";
+    else resetListeningStatus = "failed: unknown error";
+  }
 </script>
 
 <div id="container">
@@ -58,12 +103,16 @@
       <h2>linked services</h2>
       <LinkSpotify></LinkSpotify>
     </div>
-    <div>
+    <div id="account-actions">
       <h2>account actions</h2>
-      <button class="link-button">reset listening history</button>
-      <form method="POST" action="?/reset_profile" id="reset-info-form">
-        <input type="submit" class="link-button" value="reset profile information" />
-      </form>
+      <div class="button-status-group">
+        <button class="link-button" on:click={resetListeningHistory}>reset listening history</button>
+        <p>{resetListeningStatus}</p>
+      </div>
+      <div class="button-status-group">
+        <button class="link-button" on:click={resetProfileInformation}>reset profile information</button>
+        <p>{resetProfileStatus}</p>
+      </div>
       <DeleteUser><div id="delete">delete account</div></DeleteUser>
     </div>
   </div>
@@ -163,5 +212,15 @@
     justify-content: center;
     align-items: center;
     margin-left: -5px;
+  }
+
+  .button-status-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+  }
+
+  .button-status-group p {
+    margin-bottom: 3px; /* align status message with button */
   }
 </style>
