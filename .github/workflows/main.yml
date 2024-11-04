@@ -54,6 +54,11 @@ jobs:
         docker compose build
         docker compose up -d
 
+    - name: Download other stuff
+      run: |
+        npm i
+        npm i -g vitest
+
     - name: Run frontend tests
       working-directory: frontend/
       run: |
@@ -68,3 +73,6 @@ jobs:
 
     - name: Celebrate
       run: echo "Hurray! Nothing broke before this! At least I hope..."
+
+    - name: down
+      run: docker compose down 
