@@ -3,51 +3,55 @@ import type { Actions } from './$types'
 import { fail } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({locals: { supabase, session } }) => {
-    if (session !== null) {
-        // fetch profile data
-        let { data: user, error } = await supabase
-        .from('profiles')
-        .select(`updated_at, username, full_name, website, avatar_url`)
-        .eq('id', session.user.id)
-        .single()
+    if (session == null) throw Error("User does not have session.");
 
-        if (error && error.code == "PGRST116") {
-            // insert new user profile
-            const blankProfile = assembleBlankProfile(session.user.id, session.user.email)
-            const { error: insertError } = await supabase.from('profiles').insert(blankProfile);
-            if (insertError) console.error(insertError)
-            else user = blankProfile
-        } else if (error) {
-            console.error(error);
-        }
+    // fetch profile data
+    let { data: user, error } = await supabase
+    .from('profiles')
+    .select(`updated_at, username, full_name, website, avatar_url`)
+    .eq('id', session.user.id)
+    .single()
 
-        // return the retrieved user, or the blank user if no profile was found
-        return { user: user ?? null, email: session.user.email ?? null }; 
-    } else {
-        throw Error("User does not have session.") 
+    // check if user profile does not exist
+    if (error && error.code == "PGRST116") {
+        // insert new user profile
+        const blankProfile = assembleBlankProfile(session.user.id, session.user.email)
+        const { error: insertError } = await supabase.from('profiles').insert(blankProfile);
+        if (insertError) console.error(insertError)
+        else user = blankProfile
+    } else if (error) {
+        console.error(error);
     }
+
+    // return the retrieved user, or the blank user if no profile was found
+    return { user: user ?? null, email: session.user.email ?? null }; 
 
 };
 
 export const actions: Actions = {
     update_profile: async ({ request, locals: { supabase, session } }) => {
-        if (session !== null) {
-            const formData = await request.formData()
+        if (session == null) return fail(401, { not_authenticated: true});
 
-            const update = {
-                id: session?.user.id,
-                updated_at: new Date(),
-                username: formData.get('username') as string,
-                full_name: formData.get('full_name') as string,
-                website: formData.get('website') as string,
-                avatar_url: null,
-            }
-      
-            const { error } = await supabase.from('profiles').upsert(update)
-            if (error) console.error(error)
-        } else {
-            throw Error("User does not have session.") 
+        // assemble update object
+        const formData = await request.formData()
+        const update = {
+            id: session?.user.id,
+            updated_at: new Date(),
+            username: formData.get('username') as string,
+            full_name: formData.get('full_name') as string,
+            website: formData.get('website') as string,
+            avatar_url: null,
         }
+  
+        // attempt to perform update
+        const { error } = await supabase.from('profiles').upsert(update)
+        if (error) {
+            console.log(error);
+            if (error.code === '23514') return fail(400, { username_too_short: true });
+            else return fail(500, { server_error: true });
+        }
+
+        return { success: true }
     },
 
     reset_profile: async ({ request, locals: { supabase, session } }) => {

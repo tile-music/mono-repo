@@ -4,6 +4,8 @@
   import LinkSpotify from "../../link-spotify/spotify.svelte";
   import DeleteUser from "../delete-account/delete.svelte";
   import Avatar from './avatar.svelte';
+  import { enhance } from "$app/forms";
+  import type { SubmitFunction } from "@sveltejs/kit";
 
   export let data: PageData;
   $: ({ user, email } = data);
@@ -54,13 +56,29 @@
     else if (data.server_error) resetListeningStatus = "failed: server error";
     else resetListeningStatus = "failed: unknown error";
   }
+
+  let updateProfileStatus = "";
+  const handleUpdateProfile: SubmitFunction = () => {
+    return async ({ result }) => {
+      if (result.type === "success") updateProfileStatus = "updated successfully";
+      else if (result.type === "failure") {
+        if (!result.data || result.data.server_error)
+          updateProfileStatus = "failed to update profile: server error";
+        else if (result.data.not_authenticated)
+          updateProfileStatus = "failed to update profile: not authenticated";
+        else if (result.data.username_too_short)
+          updateProfileStatus = "failed to update profile: username must be at least 3 characters";
+        else updateProfileStatus = "failed to update profile: unknown error";
+      } else updateProfileStatus = "failed to update profile: unknown error"; // just in case
+    };
+  }
 </script>
 
 <div id="container">
   <div id="profile">
     <h1>profile</h1>
     <Avatar url={sampleAvatar} size={150} />
-    <form method="POST" action="?/update_profile">
+    <form method="POST" action="?/update_profile" use:enhance={handleUpdateProfile}>
       <div>
         <label for="username">username</label>
         <input
@@ -91,6 +109,7 @@
           value={user?.website}
         />
       </div>
+      <p>{updateProfileStatus}</p>
       <input type="submit" value="edit profile" />
     </form>
   </div>
@@ -142,6 +161,7 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    margin-top: 20px;
   }
 
   #profile form div {
@@ -159,16 +179,17 @@
     width: 150px;
     flex-grow: 1;
   }
+
+  #profile form p {
+    min-height: 40px;
+    text-align: center;
+  }
   
   #profile input[type="text"] {
     border: none;
     border-bottom: 2px solid var(--medium);
     border-radius: 0;
     background-color: transparent;
-  }
-
-  #profile input[type="submit"] {
-    margin-top: 20px;
   }
 
   #settings {
