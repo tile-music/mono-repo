@@ -47,13 +47,21 @@ jobs:
 
       shell: bash
 
-    - name: Build docker images
+    - name: Build, run docker images
       # working-directory: ./mono-repo
               # ls -R
       run: |
         docker compose build
+        docker compose up -d
 
-    - name: Run tests
+    - name: Run frontend tests
+      working-directory: frontend/
+      run: |
+        npm run test
+        echo "other test commands go here"
+
+    - name: Run dataaq tests
+      working-directory: data-acquisition/
       run: |
         npm run test
         echo "other test commands go here"
