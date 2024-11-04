@@ -1,6 +1,4 @@
 <script lang="ts">
-  import spotify_logo from "$lib/assets/images/spotify_logo.png";
-  import { onMount } from "svelte";
   import { goto } from "$app/navigation";
 
   /**
@@ -30,33 +28,24 @@
       .catch((error) => console.error("Fetch error:", error));
 
 </script>
-  <button
-    class="delete-account"
-    name="DeleteAccount"
-    on:click={async () => {
-      if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-        return;
-      }
-      await deleteAccount()
 
-      await goto("/logout")
-    }}
-  > Delete Account
-  </button>
+<button
+  class="delete-account"
+  name="DeleteAccount"
+  on:click={async () => {
+    if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      return;
+    }
+    await deleteAccount()
+
+    await goto("/logout")
+  }}
+><slot /></button>
 
 <style>
-  .delete-account{
-    margin-top: 10px;
-    border: none;
-    cursor: pointer;
-    color: var(--background);
-    font-family: "Mattone", sans-serif;
-    font-size: 15px;
-    height: 50px;
-    width: 300px;
-    border-radius: 10px;
-    background-color: #FF4B4B;
-
+  button {
+    border: 0;
+    padding: 0;
+    background-color: transparent;
   }
-  
 </style>
