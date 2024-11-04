@@ -12,6 +12,8 @@
         const seconds = ((ms % 60000) / 1000);
         return minutes + ":" + (seconds < 10 ? '0' : '') + seconds.toFixed(0);
     }
+
+
 </script>
 
 <div class="song">
@@ -23,7 +25,7 @@
     <img class="art" src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
     <p class="title">{song.title}</p>
     <p class="artist">{song.artists.join(', ')}</p>
-    <p class="album">{album.title}</p>
+    <p class="album">{song.album}</p>
 </div>
 
 <style>
