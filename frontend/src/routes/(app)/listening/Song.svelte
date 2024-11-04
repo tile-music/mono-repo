@@ -1,14 +1,14 @@
 <script lang="ts">
-    import type { SongInfo } from '../song';
+    import type { SongInfo, AlbumInfo } from '../../../../../lib/Song';
     export let song: SongInfo;
-    let album = song.albums[0];
+    let album : AlbumInfo = song.albums[0];
 </script>
 
 <div class="song">
     <img src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
     <p class="title">{song.title}</p>
     <p class="artist">{song.artists.join(', ')}</p>
-    <p class="album">{album.title}</p>
+    <p class="album">{song.album}</p>
 </div>
 
 <style>
