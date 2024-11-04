@@ -49,6 +49,7 @@
 
     // set status message
     if (data.success) resetListeningStatus = "reset successfully";
+    else if (data.no_action) resetListeningStatus = "no listening data found";
     else if (data.not_authenticated) resetListeningStatus = "failed: not authenticated";
     else if (data.server_error) resetListeningStatus = "failed: server error";
     else resetListeningStatus = "failed: unknown error";

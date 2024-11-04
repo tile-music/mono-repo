@@ -77,9 +77,7 @@ export const actions: Actions = {
 
         // handle errors
         const response = JSON.parse(data);
-        console.log(response);
-
-        return { success: true };
+        return response;
     },
 }
 
