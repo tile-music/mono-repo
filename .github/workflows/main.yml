@@ -26,6 +26,8 @@ jobs:
       
     - name: Checkout code
       uses: actions/checkout@v4 # This is very cool we do not need to manually checkout
+      with:
+        submodules: recursive
 
     # - name: Login to DockerHub
     #   run: docker login -u $DOCKER_USER -p $DOCKER_PASS
