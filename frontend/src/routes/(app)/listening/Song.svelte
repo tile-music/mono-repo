@@ -1,7 +1,9 @@
 <script lang="ts">
-    import refresh from '$lib/assets/icons/refresh.svg';
     import type { ProcessOutput } from './processSongs';
+    import type { SongInfo, AlbumInfo } from '../../../../../lib/Song';
     export let song: ProcessOutput;
+    let album : AlbumInfo = song.albums[0];
+    import refresh from '$lib/assets/icons/refresh.svg';
     $: album = song.albums[0];
     $: duration = calculateDuration(song.duration);
 
@@ -22,8 +24,6 @@
     <p class="title">{song.title}</p>
     <p class="artist">{song.artists.join(', ')}</p>
     <p class="album">{album.title}</p>
-    <p class="duration">{duration}</p>
-    <p class="plays">{song.plays}</p>
 </div>
 
 <style>

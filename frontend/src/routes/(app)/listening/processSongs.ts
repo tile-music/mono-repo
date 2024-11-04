@@ -1,4 +1,4 @@
-import type { SongInfo } from '../song';
+import type { SongInfo } from '../../../../../lib/Song';
 
 export type ProcessOutput = SongInfo & {
     repetitions: number,
