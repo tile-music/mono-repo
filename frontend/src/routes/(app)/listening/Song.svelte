@@ -25,7 +25,9 @@
     <img class="art" src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
     <p class="title">{song.title}</p>
     <p class="artist">{song.artists.join(', ')}</p>
-    <p class="album">{song.album}</p>
+    <p class="album">{album.title}</p>
+    <p class="duration">{duration}</p>
+    <p class="plays">{song.plays}</p>
 </div>
 
 <style>
