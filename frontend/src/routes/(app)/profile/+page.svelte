@@ -23,12 +23,18 @@
 
     // parse response
     const response = await res.json();
-    const data = JSON.parse(response.data)[0]; // returns an array, for some reason
+    const info = JSON.parse(response.data)[0]; // returns an array, for some reason
 
     // set status message
-    if (data.success) resetProfileStatus = "reset successfully";
-    else if (data.not_authenticated) resetProfileStatus = "failed: not authenticated";
-    else if (data.server_error) resetProfileStatus = "failed: server error";
+    if (info.success) {
+      resetProfileStatus = "reset successfully";
+
+      // reset profile information
+      const userString = JSON.parse(response.data)[2];
+      user = JSON.parse(userString);
+    }
+    else if (info.not_authenticated) resetProfileStatus = "failed: not authenticated";
+    else if (info.server_error) resetProfileStatus = "failed: server error";
     else resetProfileStatus = "failed: unknown error";
   }
 
@@ -86,7 +92,7 @@
           name="username"
           id="username"
           placeholder="username"
-          value={user?.username}
+          bind:value={user.username}
         />
       </div>
       <div>
@@ -96,7 +102,7 @@
           name="full_name"
           id="full_name"
           placeholder="full name"
-          value={user?.full_name}
+          bind:value={user.full_name}
         />
       </div>
       <div>
@@ -106,7 +112,7 @@
           name="website"
           id="website"
           placeholder="website"
-          value={user?.website}
+          bind:value={user.website}
         />
       </div>
       <p>{updateProfileStatus}</p>

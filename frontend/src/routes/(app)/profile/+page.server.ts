@@ -18,13 +18,13 @@ export const load: PageServerLoad = async ({locals: { supabase, session } }) => 
         const blankProfile = assembleBlankProfile(session.user.id, session.user.email)
         const { error: insertError } = await supabase.from('profiles').insert(blankProfile);
         if (insertError) console.error(insertError)
-        else user = blankProfile
+        else user = blankProfile;
     } else if (error) {
         console.error(error);
     }
 
     // return the retrieved user, or the blank user if no profile was found
-    return { user: user ?? null, email: session.user.email ?? null }; 
+    return { user: user!, email: session.user.email! }; 
 
 };
 
@@ -64,7 +64,7 @@ export const actions: Actions = {
             return fail(500, { server_error: true });
         }
 
-        return { success: true };
+        return { success: true, user: JSON.stringify(blankProfile) };
     },
 
     reset_listening_data: async ({ request, locals: { supabase, session } }) => {
