@@ -1,6 +1,7 @@
 <script lang="ts">
     import sample_collage from '$lib/assets/images/sample_collage.png'
     import LinkSpotify from './spotify.svelte'
+    import DeleteUser from '../(app)/delete-account/delete.svelte';
 </script>
 
 <div class="content">
@@ -10,9 +11,7 @@
     <div class="middle">
         <h1>one last thing...</h1>
         <LinkSpotify></LinkSpotify>
-        <div>
-            <a href="/">cancel & delete account</a>
-        </div>
+        <DeleteUser><a href="/">cancel & delete account</a></DeleteUser>
     </div>
     <div class="right">
         <img src={sample_collage} alt="A second sample album art collage.">
@@ -47,12 +46,9 @@
         font-size: 30px;
     }
 
-    .middle div {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
+    a {
+        font-size: 16px;
     }
-
 
     .right {
         width: 30%;
