@@ -8,7 +8,7 @@
   import {toPng} from 'html-to-image'
   export let data: PageData;
 
-  let artDisplayRef;
+  let artDisplayRef:any;
 
   async function captureDiv() {
         try {

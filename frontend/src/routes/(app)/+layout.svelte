@@ -23,21 +23,26 @@
 <style>
 
     nav {
-        z-index: 9999;
+        top:0;
+        position:sticky;
+        z-index: 2;
         margin: 20px;
     }
 
     ul {
+
         display: flex;
         gap: 20px;
     }
 
     a {
+
         text-decoration: none;
         font-family: "Mattone", sans-serif;
     }
 
     .content {
+
         margin: 20px;
     }
 </style>

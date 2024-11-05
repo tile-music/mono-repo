@@ -2,14 +2,15 @@
     import type { PageData } from './$types';
     export let data: PageData;
     import Song from './Song.svelte';
-    import Loading from '$lib/assets/components/Loading.svelte';
 </script>
 
+
+
 <h1>Listening Data</h1>
-<div class="songs">
+<div  class="songs">
     {#if data.songs != null}
         {#each data.songs as song}
-            <Song {song} />
+            <Song {song}></Song>
         {/each}
     {:else}
         <p>No listening data yet!</p>

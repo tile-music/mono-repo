@@ -1,9 +1,10 @@
 <script>
   export let loading = true;
+
 </script>
 
 <style>
-  @import '../stylesheets/global.css';
+
   .loading-overlay {
     position: fixed;
     top: 0;
@@ -14,7 +15,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999; /* Ensure the loading overlay is above other content but below the navbar */
+    z-index: 1; /* Ensure the loading overlay is above other content but below the navbar */
   }
 
   .spinner {
