@@ -39,6 +39,10 @@ export const POST: RequestHandler = async ({locals: { supabase, session }, reque
             PUBLIC_SUPABASE_SERVICE_KEY as string,
             { db: { schema: "prod" } }
           );
+          const supabasePublic  = new SupabaseClient(
+            PUBLIC_SUPABASE_URL as string,
+            PUBLIC_SUPABASE_SERVICE_KEY as string
+          );
         
         const { data, error } = await supabase.auth.getUser();
         console.log("data", data)
@@ -46,8 +50,9 @@ export const POST: RequestHandler = async ({locals: { supabase, session }, reque
         console.log("userId", userId);
         if(userId){
             await supabaseProd.from("played_tracks").delete().eq("user_id", userId);
-            const {error} = await supabaseProd.auth.admin.deleteUser(userId);
-            console.log(error)
+            const {error:prodError} = await supabaseProd.auth.admin.deleteUser(userId);
+            const {error:publicError} = await supabasePublic.auth.admin.deleteUser(userId);
+            throw prodError || publicError;
         } else{
             throw Error("User not found.")
         }
