@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types'
 import type { Actions } from './$types'
 import { fail } from '@sveltejs/kit';
+import { assembleBlankProfile } from './profile';
 
 export const load: PageServerLoad = async ({locals: { supabase, session } }) => {
     if (session == null) throw Error("User does not have session.");
@@ -11,21 +12,10 @@ export const load: PageServerLoad = async ({locals: { supabase, session } }) => 
     .select(`updated_at, username, full_name, website, avatar_url`)
     .eq('id', session.user.id)
     .single()
-
-    // check if user profile does not exist
-    if (error && error.code == "PGRST116") {
-        // insert new user profile
-        const blankProfile = assembleBlankProfile(session.user.id, session.user.email)
-        const { error: insertError } = await supabase.from('profiles').insert(blankProfile);
-        if (insertError) console.error(insertError)
-        else user = blankProfile;
-    } else if (error) {
-        console.error(error);
-    }
+    if (error) throw error;
 
     // return the retrieved user, or the blank user if no profile was found
     return { user: user!, email: session.user.email! }; 
-
 };
 
 export const actions: Actions = {
@@ -83,23 +73,4 @@ export const actions: Actions = {
         const response = JSON.parse(data);
         return response;
     },
-}
-
-// TODO: TEST THISSSSS
-function assembleBlankProfile(id: string, email?: string) {
-    let username = null;
-    if (email) {
-        const domain = email.split('@')[0];
-        if (domain.length >= 3) username = domain;
-    }
-
-    // insert blank profile
-    return {
-        id: id,
-        updated_at: new Date(),
-        username,
-        full_name: null,
-        website: null,
-        avatar_url: null
-    }
 }
