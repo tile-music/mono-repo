@@ -14,8 +14,20 @@ export const load: PageServerLoad = async ({locals: { supabase, session } }) => 
     .single()
     if (error) throw error;
 
+    if (!user) {
+        user = {
+            updated_at: null,
+            username: null,
+            full_name: null,
+            website: null,
+            avatar_url: null
+        }
+    }
+
+    const email = session.user.email ?? null;
+
     // return the retrieved user, or the blank user if no profile was found
-    return { user: user!, email: session.user.email! }; 
+    return { user, email }; 
 };
 
 export const actions: Actions = {
@@ -28,7 +40,7 @@ export const actions: Actions = {
             id: session?.user.id,
             updated_at: new Date(),
             username: formData.get('username') as string,
-            full_name: formData.get('full_name') as string,
+            full_name: formData.get('full name') as string,
             website: formData.get('website') as string,
             avatar_url: null,
         }
