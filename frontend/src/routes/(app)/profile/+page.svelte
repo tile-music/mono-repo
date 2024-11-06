@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from "./$types";
-  import sampleAvatar from '$lib/assets/images/sample_avatar.jpeg'
+  import sampleAvatar from '$lib/assets/images/sample_avatar.jpg'
   import LinkSpotify from "../../link-spotify/spotify.svelte";
   import DeleteUser from "../delete-account/delete.svelte";
   import Avatar from './avatar.svelte';
