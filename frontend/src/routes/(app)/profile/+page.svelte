@@ -133,11 +133,11 @@
       <h2>account actions</h2>
       <div class="button-status-group">
         <button class="link-button" on:click={resetListeningHistory}>reset listening history</button>
-        <p>{resetListeningStatus}</p>
+        <p role="status">{resetListeningStatus}</p>
       </div>
       <div class="button-status-group">
         <button class="link-button" on:click={resetProfileInformation}>reset profile information</button>
-        <p>{resetProfileStatus}</p>
+        <p role="status">{resetProfileStatus}</p>
       </div>
       <DeleteUser><div id="delete">delete account</div></DeleteUser>
     </div>
