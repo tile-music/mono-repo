@@ -96,11 +96,11 @@
         />
       </div>
       <div>
-        <label for="full_name">full name</label>
+        <label for="full name">full name</label>
         <input
           type="text"
-          name="full_name"
-          id="full_name"
+          name="full name"
+          id="full name"
           placeholder="full name"
           bind:value={user.full_name}
         />
@@ -123,7 +123,7 @@
     <h1>account settings</h1>
     <div>
       <h2>email</h2>
-      <p>your email is <em>{email}</em>.</p>
+      <p>your email is <em>{email ?? "[no email found]"}</em>.</p>
     </div>
     <div>
       <h2>linked services</h2>
