@@ -1,29 +1,30 @@
 <script lang="ts">
   import Square from "./Square.svelte";
-  import { rankSongs } from "./display";
-
+  import { rankSongs, RankSelection } from "./display";
+  
   import { generateFullArrangement } from "./pack";
-
+  
   import type { PageData } from "./$types";
-  import {toPng} from 'html-to-image'
+  import { toPng } from "html-to-image";
   export let data: PageData;
-
-  let artDisplayRef:any;
+  
+  let artDisplayRef: any;
+  let selection = RankSelection.ALBUM;
 
   async function captureDiv() {
-        try {
-            // Capture the div as an image
-            const dataUrl = await toPng(artDisplayRef);
-            
-            // Create a link and trigger download
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = 'my-div-image.png';
-            link.click();
-        } catch (error) {
-            console.error('Failed to capture div as image:', error);
-        }
-      }
+    try {
+      // Capture the div as an image
+      const dataUrl = await toPng(artDisplayRef);
+
+      // Create a link and trigger download
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = "art-display.png";
+      link.click();
+    } catch (error) {
+      console.error("Failed to capture div as image:", error);
+    }
+  }
 
   const makeSquares = (): { x: number; y: number; size: number }[] => {
     const arrangement = generateFullArrangement(1, 14, 18, 0.1, 0.2);
@@ -39,44 +40,42 @@
     return squares;
   };
 
-  let squares = makeSquares();
+
   $: squares = makeSquares();
 
-  const result = rankSongs(data.songs);
+  let result = rankSongs(data.songs,selection);
   // generate 14-18 squares with a small range of offsets
 </script>
+
+<select bind:value={selection} on:change={() => {
+    console.log("changed")
+    result = rankSongs(data.songs, RankSelection[selection]);
+
+  }}  class="art-display-button">
+  
+  {#each Object.values(RankSelection).filter((value) => typeof value === "string") as value}
+    <option {value } selected={0}> {value.charAt(0) + value.slice(1).toLowerCase()}</option>
+  {/each}
+</select>
 
 <div id="container">
   <div id="display" bind:this={artDisplayRef} class="capture-area">
     {#each squares as square, i}
-    <Square {square} song={result[i].song} />
+      <Square {square} song={result[i].song} />
     {/each}
   </div>
 </div>
 <footer>
   <div style="display: flex; gap: 20px; position: relative;">
-    <button on:click={() => (squares = makeSquares())} id="regenerate">Regenerate</button>
-    <button on:click={captureDiv}>Save Art Collage</button>
+    <button on:click={() => (squares = makeSquares())} id="regenerate"
+      class="art-display-button">Regenerate</button
+    >
+    <button on:click={captureDiv} class="art-display-button">Save Art Collage</button>
   </div>
-  
 </footer>
 
 <style>
-button {
-
-    bottom: 20px;
-    left: 20px;
-    height: 40px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    color: var(--background);
-    background-color: var(--accent);
-    font-family: "Mattone", sans-serif;
-    font-size: 15px;
-    padding: 0 20px;
-}
-
+  
   #container {
     width: 100%;
     height: 100%;
