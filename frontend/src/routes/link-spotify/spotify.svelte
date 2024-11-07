@@ -48,8 +48,9 @@
       })
       .catch((error) => console.error("Fetch error:", error));
 
-  onMount(() => {
-    checkSpotify();
+  onMount(async () => {
+    await checkSpotify();
+
   });
 
   $: console.log("enabled", $enabled);
@@ -61,6 +62,7 @@
     name="LinkSpotify"
     on:click={async () => {
       await goto("/link-spotify?link=true");
+       window.location.reload();
       await checkSpotify();
     }}
   >
