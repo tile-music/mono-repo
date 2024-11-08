@@ -1,6 +1,7 @@
 <script lang="ts">
   import Square from "./Square.svelte";
-  import { rankSongs, RankSelection } from "./display";
+  import { rankSongs } from "./display";
+  import type { RankSelection } from "./display";
   
   import { generateFullArrangement } from "./pack";
   
@@ -9,7 +10,7 @@
   export let data: PageData;
   
   let artDisplayRef: any;
-  let selection = RankSelection.ALBUM;
+  let selection: RankSelection = "song";
 
   async function captureDiv() {
     try {
@@ -41,21 +42,15 @@
   };
 
 
-  $: squares = makeSquares();
+  let squares = makeSquares();
 
-  let result = rankSongs(data.songs,selection);
+  $: result = rankSongs(data.songs, selection);
   // generate 14-18 squares with a small range of offsets
 </script>
 
-<select bind:value={selection} on:change={() => {
-    console.log("changed")
-    result = rankSongs(data.songs, RankSelection[selection]);
-
-  }}  class="art-display-button">
-  
-  {#each Object.values(RankSelection).filter((value) => typeof value === "string") as value}
-    <option {value } selected={0}> {value.charAt(0) + value.slice(1).toLowerCase()}</option>
-  {/each}
+<select bind:value={selection} class="art-display-button">
+  <option value="song">Song</option>
+  <option value="album">Album</option>
 </select>
 
 <div id="container">

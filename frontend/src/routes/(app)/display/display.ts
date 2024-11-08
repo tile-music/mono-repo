@@ -5,10 +5,7 @@ type RankOutput = {
     plays: number
 }[];
 
-export enum RankSelection {
-    SONG,
-    ALBUM,
-}
+export type RankSelection = "song" | "album";
 
 /**
  * aggregates a list of songs based on their isrc and sorts them based on the number of listens
@@ -22,13 +19,14 @@ export function rankSongs(songs: SongInfo[], rankSelection: RankSelection): Rank
     for (const song of songs) {
         let rank: string;
         switch(rankSelection){
-            case RankSelection.SONG:
+            case "song":
                 rank = song.isrc
                 break;
-            case RankSelection.ALBUM:
+            case "album":
                 rank = song.albums[0].image
                 break
             default:
+                console.log(rankSelection);
                 throw new Error("Invalid RankSelection")
 
         }
