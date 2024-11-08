@@ -62,7 +62,6 @@
     name="LinkSpotify"
     on:click={async () => {
       await goto("/link-spotify?link=true");
-       window.location.reload();
       await checkSpotify();
     }}
   >
