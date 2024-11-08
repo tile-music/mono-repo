@@ -31,7 +31,7 @@
     const arrangement = generateFullArrangement(1, 14, 18, 0.1, 0.2);
 
     // translate the output of arrangement into a form usable by the Square component
-    const squares: { x: number; y: number; size: number }[] = [];
+    const squares: { x: number, y: number, size: number }[] = [];
     for (const square of arrangement) {
       squares.push({ x: square.x, y: square.y, size: square.width });
     }
