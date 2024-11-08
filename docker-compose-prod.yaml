@@ -28,12 +28,6 @@ services:
       - "443:443"
     depends_on:
       - frontend
-    volumes:
-      - ./nginx/certbot/www:/var/www/certbot/:ro
-  certbot:
-    image: certbot/certbot:latest
-    volumes:
-      - ./nginx/certbot/www/:/var/www/certbot/:rw
   redis:
     image: "redis:alpine"
     ports:
