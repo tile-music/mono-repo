@@ -28,7 +28,7 @@
   }
 
   const makeSquares = (): { x: number; y: number; size: number }[] => {
-    const arrangement = generateFullArrangement(1, 14, 18, 0.1, 0.2);
+    const arrangement = generateFullArrangement(1, 14, 18, 0.0, 0.1);
 
     // translate the output of arrangement into a form usable by the Square component
     const squares: { x: number, y: number, size: number }[] = [];
@@ -36,16 +36,13 @@
       squares.push({ x: square.x, y: square.y, size: square.width });
     }
 
-    // sort listened songs by times listened
-
     return squares;
   };
 
 
+  // generate initial square arrangement and song ranking
   let squares = makeSquares();
-
   $: result = rankSongs(data.songs, selection);
-  // generate 14-18 squares with a small range of offsets
 </script>
 
 <select bind:value={selection} class="art-display-button">
@@ -63,8 +60,7 @@
 <footer>
   <div style="display: flex; gap: 20px; position: relative;">
     <button on:click={() => (squares = makeSquares())} id="regenerate"
-      class="art-display-button">Regenerate</button
-    >
+      class="art-display-button">Regenerate</button>
     <button on:click={captureDiv} class="art-display-button">Save Art Collage</button>
   </div>
 </footer>

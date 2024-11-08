@@ -20,15 +20,13 @@ export function rankSongs(songs: SongInfo[], rankSelection: RankSelection): Rank
         let rank: string;
         switch(rankSelection){
             case "song":
-                rank = song.isrc
+                rank = song.isrc;
                 break;
             case "album":
-                rank = song.albums[0].image
+                rank = song.albums[0].image;
                 break
             default:
-                console.log(rankSelection);
-                throw new Error("Invalid RankSelection")
-
+                throw new Error("Invalid RankSelection");
         }
         if (!ranks[rank]) {
             ranks[rank] = 1;
