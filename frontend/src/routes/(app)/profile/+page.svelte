@@ -31,7 +31,7 @@
 
       // reset profile information
       const userString = JSON.parse(response.data)[2];
-      user = JSON.parse(userString);
+      data.user = JSON.parse(userString);
     }
     else if (info.not_authenticated) resetProfileStatus = "failed: not authenticated";
     else if (info.server_error) resetProfileStatus = "failed: server error";
