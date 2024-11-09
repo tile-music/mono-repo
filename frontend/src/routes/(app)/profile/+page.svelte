@@ -148,6 +148,7 @@
   #container {
     display: flex;
     height: 100%;
+    gap: 20px;
   }
 
   #profile {
