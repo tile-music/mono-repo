@@ -32,6 +32,7 @@
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
     "@sveltejs/adapter-node": "^5.2.8",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "selenium-webdriver": "^4.26.0"
   }
 }
