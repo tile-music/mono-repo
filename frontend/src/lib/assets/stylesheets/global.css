@@ -47,7 +47,7 @@ input[type="text"], input[type="password"] {
     color: var(--text);
 }
 
-input[type="submit"] {
+input[type="submit"], .art-display-button {
     height: 40px;
     border-radius: 20px;
     border: none;

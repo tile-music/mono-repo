@@ -1,32 +1,45 @@
-import type { SongInfo } from "../song";
+import type { AlbumInfo, SongInfo } from "../song";
 
 type RankOutput = {
     song: SongInfo,
     plays: number
 }[];
 
+export type RankSelection = "song" | "album";
+
 /**
  * aggregates a list of songs based on their isrc and sorts them based on the number of listens
  * @param songs the list of songs listened to by the user
  * @returns a sorted list of objects containing the song and its number of listens
  */
-export function rankSongs(songs: SongInfo[]): RankOutput {
+export function rankSongs(songs: SongInfo[], rankSelection: RankSelection): RankOutput {
     // tabulate number of listens based on song isrc
     const ranks: { [x: string]: number } = {};
-    const isrcToSong: { [x: string]: SongInfo } = {}
+    const songRanking: { [x: string]: SongInfo } = {}
     for (const song of songs) {
-        if (!ranks[song.isrc]) {
-            ranks[song.isrc] = 1;
-            isrcToSong[song.isrc] = song;
+        let rank: string;
+        switch(rankSelection){
+            case "song":
+                rank = song.isrc;
+                break;
+            case "album":
+                rank = song.albums[0].image;
+                break
+            default:
+                throw new Error("Invalid RankSelection");
+        }
+        if (!ranks[rank]) {
+            ranks[rank] = 1;
+            songRanking[rank] = song;
         } else {
-            ranks[song.isrc]++;
+            ranks[rank]++;
         }
     }
     
     // translate isrc back into song
     const output: RankOutput = [];
-    for (const isrc in ranks) {
-        output.push({ song: isrcToSong[isrc], plays: ranks[isrc] });
+    for (const rankMetric in ranks) {
+        output.push({ song: songRanking[rankMetric], plays: ranks[rankMetric] });
     }
 
     // sort by number of plays in descending order

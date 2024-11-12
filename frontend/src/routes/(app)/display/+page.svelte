@@ -1,46 +1,82 @@
 <script lang="ts">
-    import Square from './Square.svelte';
-    import { rankSongs } from './display';
+  import Square from "./Square.svelte";
+  import { rankSongs } from "./display";
+  import type { RankSelection } from "./display";
+  
+  import { generateFullArrangement } from "./pack";
+  
+  import type { PageData } from "./$types";
+  import { toPng } from "html-to-image";
+  export let data: PageData;
+  
+  let artDisplayRef: any;
+  let selection: RankSelection = "song";
 
-    import { generateFullArrangement } from './pack';
+  async function captureDiv() {
+    try {
+      // Capture the div as an image
+      const dataUrl = await toPng(artDisplayRef);
 
-    import type { PageData } from './$types';
-    export let data: PageData;
+      // Create a link and trigger download
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = "art-display.png";
+      link.click();
+    } catch (error) {
+      console.error("Failed to capture div as image:", error);
+    }
+  }
 
-    // generate 14-18 squares with a small range of offsets
-    const arrangement = generateFullArrangement(1, 14, 18, 0.1, 0.2);
+  const makeSquares = (): { x: number; y: number; size: number }[] => {
+    const arrangement = generateFullArrangement(1, 14, 18, 0.0, 0.1);
 
     // translate the output of arrangement into a form usable by the Square component
-    const squares: { x: number, y: number, size: number}[] = [];
+    const squares: { x: number, y: number, size: number }[] = [];
     for (const square of arrangement) {
-        squares.push({ x: square.x, y: square.y, size: square.width })
+      squares.push({ x: square.x, y: square.y, size: square.width });
     }
 
-    // sort listened songs by times listened
-    const result = rankSongs(data.songs);
+    return squares;
+  };
+
+
+  // generate initial square arrangement and song ranking
+  let squares = makeSquares();
+  $: result = rankSongs(data.songs, selection);
 </script>
 
-<h1>Art Display</h1>
+<select bind:value={selection} class="art-display-button">
+  <option value="song">Song</option>
+  <option value="album">Album</option>
+</select>
+
 <div id="container">
-    <div id="display">
-        {#each squares as square, i}
-            <Square square={square} song={result[i].song}/>
-        {/each}
-    </div>
+  <div id="display" bind:this={artDisplayRef} class="capture-area">
+    {#each squares as square, i}
+      <Square {square} song={result[i].song} />
+    {/each}
+  </div>
 </div>
+<footer>
+  <div style="display: flex; gap: 20px; position: relative;">
+    <button on:click={() => (squares = makeSquares())} id="regenerate"
+      class="art-display-button">Regenerate</button>
+    <button on:click={captureDiv} class="art-display-button">Save Art Collage</button>
+  </div>
+</footer>
 
 <style>
-    #container {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #display {
-        height: calc(100vh - 150px);
-        aspect-ratio: 1 / 1;
-        position: relative;
-    }
+  
+  #container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #display {
+    height: calc(100vh - 150px);
+    aspect-ratio: 1 / 1;
+    position: relative;
+  }
 </style>
