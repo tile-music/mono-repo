@@ -297,20 +297,33 @@ function overlap(s1, s2) {
     var bot_right = {x:int(s1.x + s1.width), y:int(s1.y + s1.height)};
     var sqr = {left: top_left, right: bot_right};
 
-    // Get all 4 points of second square
+    // Get all 4 verticies of second square
     var p1 = {x:int(s2.x), y:int(s2.y)};
     var p2 = {x:int(s2.x + s2.width), y:int(s2.y)};
     var p3 = {x:int(s2.x + s2.width), y:int(s2.y + s2.height)};  
     var p4 = {x:int(s2.x), y:int(s2.y + s2.height)};  
+    
+    // Get 4 midpoints of second square
+    // Yes this is not efficent but it's the only way to solve an edge case
+    var mp1 = {x:int(s2.x + (s2.width / 2)), y:int(s2.y)};
+    var mp2 = {x:int(s2.x + s2.width), y:int(s2.y + (s2.height / 2))};
+    var mp3 = {x:int(s2.x + (s2.width / 2)), y:int(s2.y + s2.height)};  
+    var mp4 = {x:int(s2.x), y:int(s2.y + (s2.height / 2))};  
 
     // Check if all points in square 2 are within square 1
     var p1_overlap = pointIn(sqr, p1);
     var p2_overlap = pointIn(sqr, p2);
     var p3_overlap = pointIn(sqr, p3);
     var p4_overlap = pointIn(sqr, p4);
+    var mp1_overlap = pointIn(sqr, mp1);
+    var mp2_overlap = pointIn(sqr, mp2);
+    var mp3_overlap = pointIn(sqr, mp3);
+    var mp4_overlap = pointIn(sqr, mp4);
+
+    var all_overlap = p1_overlap || p2_overlap || p3_overlap || p4_overlap || mp1_overlap || mp2_overlap || mp3_overlap || mp4_overlap;
 
     // If any point has overlap, return true
-    return p1_overlap || p2_overlap || p3_overlap || p4_overlap; 
+    return all_overlap; 
 }
 
 // Check overlap of all squares in an array
