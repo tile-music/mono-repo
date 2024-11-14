@@ -27,8 +27,9 @@
     }
   }
 
-  const makeSquares = (): { x: number; y: number; size: number }[] => {
-    const arrangement = generateFullArrangement(1, 14, 18, 0.0, 0.1);
+  const makeSquares = (maxSquares: number): { x: number; y: number; size: number }[] => {
+    const max = Math.min(maxSquares, 15);
+    const arrangement = generateFullArrangement(1, Math.max(max, 0), max, 0.0, 0.1);
 
     // translate the output of arrangement into a form usable by the Square component
     const squares: { x: number, y: number, size: number }[] = [];
@@ -40,9 +41,10 @@
   };
 
 
-  // generate initial square arrangement and song ranking
-  let squares = makeSquares();
-  $: result = rankSongs(data.songs, selection);
+  // generate initial square arrangement and song ranking;
+  // make them reactive to changes in ranking method
+  $: ranking = rankSongs(data.songs, selection);
+  $: squares = makeSquares(ranking.length);
 </script>
 
 <select bind:value={selection} class="art-display-button">
@@ -53,20 +55,19 @@
 <div id="container">
   <div id="display" bind:this={artDisplayRef} class="capture-area">
     {#each squares as square, i}
-      <Square {square} song={result[i].song} />
+      <Square {square} song={ranking[i].song} />
     {/each}
   </div>
 </div>
 <footer>
   <div style="display: flex; gap: 20px; position: relative;">
-    <button on:click={() => (squares = makeSquares())} id="regenerate"
+    <button on:click={() => (squares = makeSquares(ranking.length))} id="regenerate"
       class="art-display-button">Regenerate</button>
     <button on:click={captureDiv} class="art-display-button">Save Art Collage</button>
   </div>
 </footer>
 
 <style>
-  
   #container {
     width: 100%;
     height: 100%;
