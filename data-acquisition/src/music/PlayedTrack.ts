@@ -26,13 +26,14 @@ import { TrackInfo } from "./TrackInfo";
  * @returns {Object} An object representing the database entry for the played track.
  */
 export class PlayedTrack {
-  private playedAt: Date;
+
+  private listenedAt: number;
   private trackInfo: TrackInfo;
   private albumInfo: AlbumInfo;
   private popularity: number
 
-  constructor(playedAt: Date, trackInfo: TrackInfo, albumInfo: AlbumInfo, popularity: number) {
-    this.playedAt = playedAt;
+  constructor(listenedAt: Date, trackInfo: TrackInfo, albumInfo: AlbumInfo, popularity: number) {
+    this.listenedAt = listenedAt.valueOf();
     this.trackInfo = trackInfo;
     this.albumInfo = albumInfo;
     this.popularity = popularity;
@@ -41,7 +42,7 @@ export class PlayedTrack {
   public createDbEntryObject() {
     return {
       popularity: this.popularity,
-      listened_at: this.playedAt.valueOf(),
+      listened_at: this.listenedAt,
       track: this.trackInfo.createDbEntryObject(),
       track_album: this.albumInfo.createDbEntryObject(),
     };

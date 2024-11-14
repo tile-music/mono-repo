@@ -21,14 +21,16 @@ describe("UserPlaying Tests", () => {
           albumName: "Test Album",
           albumArtists: ["Test Album Artist"],
           albumImage: "Test Image",
-          albumReleaseDate: new Date(2021, 1, 1),
+          albumReleaseDay: 1,
+          albumReleaseMonth: 2,
+          albumReleaseYear: 2021,
         },
         image: "Test Image",
         isrc: "USRC17607830",
         durationMs: 1000,
         progressMs: 500,
         popularity: 100,
-        timestamp: new Date(125666778),
+        timestamp: 1256667799,
       },
       {
         trackName: "Test Track 2",
@@ -37,14 +39,16 @@ describe("UserPlaying Tests", () => {
           albumName: "Test Album 2",
           albumArtists: ["Test Album Artist 2"],
           albumImage: "Test Image 2",
-          albumReleaseDate: new Date(2021, 1, 1),
+          albumReleaseDay: 1,
+          albumReleaseMonth: 2,
+          albumReleaseYear: 2023,
         },
         image: "Test Image 2",
         isrc: "USRC17607839",
         durationMs: 2000,
         progressMs: 1000,
         popularity: 95,
-        timestamp: new Date(13888088),
+        timestamp: 13888088,
       },
     ];
     const testData2 = Array.from({ length: 50 }, (_, i) => ({
@@ -54,14 +58,16 @@ describe("UserPlaying Tests", () => {
         albumName: `Test Album ${i % 7}`,
         albumArtists: [`Test Album Artist ${i % 3}`],
         albumImage: `Test Image ${i % 4}`,
-        albumReleaseDate: new Date(2021, 1, 1),
+        albumReleaseDay: 1,
+        albumReleaseMonth: 2,
+        albumReleaseYear: 2024,
       },
       image: `Test Image ${i % 4}`,
       isrc: `USRC176078${30 + i}`,
       durationMs: 1000 + i * 100,
       progressMs: 500 + i * 50,
       popularity: 100 - (i % 10),
-      timestamp: new Date(125666778 + i * 1000),
+      timestamp: 125666778 + i * 1000,
     }));
 
     beforeAll(async () => {
@@ -151,6 +157,13 @@ describe("UserPlaying Tests", () => {
       expect(mockUserPlaying.mockData[0].trackName).toBe("Test Track");
     });
 
+    test("SpotifyUserPlaying Parse Spotify Date Function", async () => {
+      expect(SpotifyUserPlaying.parseSpotifyDate("1999-12-22","day")).toStrictEqual({year: 1999, month: 12, day: 22});
+      expect(SpotifyUserPlaying.parseSpotifyDate("1999-12","month")).toStrictEqual({year: 1999, month: 12});
+      expect(SpotifyUserPlaying.parseSpotifyDate("1999","year")).toStrictEqual({year: 1999});
+    })
+
+
     test("SpotifyUserPlaying fire method", async () => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
         supabase,
@@ -183,8 +196,8 @@ describe("UserPlaying Tests", () => {
         .eq("user_id", userId);
         if (newError) throw newError;
 
-        expect(newData.length).toBeGreaterThanOrEqual(data.length - 2);
-        expect(newData.length).toBeLessThanOrEqual(data.length + 2);
+        expect(newData.length).toBeGreaterThanOrEqual(data.length);
+        expect(newData.length).toBeLessThanOrEqual(data.length);
       });
     });
   });

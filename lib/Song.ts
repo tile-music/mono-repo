@@ -10,7 +10,9 @@ export type SongInfo = {
 export type AlbumInfo = {
   title: string
   tracks: number
-  release_date: Date
+  release_day: number,
+  release_month: number,
+  release_year: number,
   artists: string[]
   image: string
 }

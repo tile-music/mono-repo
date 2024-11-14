@@ -40,7 +40,7 @@ const worker = new Worker(
   async (job: any) => {
     const { userId, refreshToken } = job.data.data;
     
-    spotifyFire(userId, refreshToken);
+    await spotifyFire(userId, refreshToken);
 
     console.log(
       `Processing job ${job.id} at ${new Date()} for user ${userId}`
