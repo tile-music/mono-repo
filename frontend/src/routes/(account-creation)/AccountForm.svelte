@@ -20,7 +20,8 @@
                 tooShort: false,
                 tooLong: false,
                 noNumbers: false
-            }
+            },
+            alreadyTaken: false
         }
     }
 
@@ -79,6 +80,7 @@
             {/if}
         </fieldset>
         <fieldset>
+            <p>{status.failures.alreadyTaken ? "this email is already taken" : ""}</p>
             <input type="submit" value={buttonText}>
             {#if type === "login"}
                 <a href="register">don't have an account?</a>
@@ -107,7 +109,7 @@
     }
 
     fieldset {
-        gap: 20px;
+        gap: 10px;
     }
 
     p {
