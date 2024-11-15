@@ -48,8 +48,9 @@
       })
       .catch((error) => console.error("Fetch error:", error));
 
-  onMount(() => {
-    checkSpotify();
+  onMount(async () => {
+    await checkSpotify();
+
   });
 
   $: console.log("enabled", $enabled);

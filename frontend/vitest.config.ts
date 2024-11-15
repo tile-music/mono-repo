@@ -13,6 +13,8 @@ export default defineConfig({
     setupFiles: ["./setupTests.js"],
     alias: {
       "$app/forms": resolve('./__mocks__/$app.forms.ts'),
+      "$app/navigation": resolve('./__mocks__/$app.navigation.ts'),
+      "$lib": resolve('./src/lib')
     }
   }
 })

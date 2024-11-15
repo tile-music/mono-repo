@@ -2,6 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { validateAccountForm } from '../validateAccountForm';
+import { assembleBlankProfile } from '../../(app)/profile/profile';
 
 export const actions: Actions = {
   register: async ({ request, locals: { supabase } }) => {
@@ -17,11 +18,16 @@ export const actions: Actions = {
       redirect(303, '/register');
     }
     
-    const { error: login_error } = await supabase.auth.signInWithPassword(form.data);
+    const { data, error: login_error } = await supabase.auth.signInWithPassword(form.data);
     if (login_error) {
       console.error(login_error);
       redirect(303, '/login');
     }
+
+    // insert new user profile
+    const blankProfile = assembleBlankProfile(data.session.user.id, data.session.user.email)
+    const { error: insertError } = await supabase.from('profiles').insert(blankProfile);
+    if (insertError) console.error(insertError)
 
     redirect(303, '/link-spotify');
   }
