@@ -74,6 +74,8 @@
           updateProfileStatus = "failed to update profile: not authenticated";
         else if (result.data.username_too_short)
           updateProfileStatus = "failed to update profile: username must be at least 3 characters";
+        else if (result.data.update_unnecessary)
+          updateProfileStatus = "change fields to update profile"
         else updateProfileStatus = "failed to update profile: unknown error";
       } else updateProfileStatus = "failed to update profile: unknown error"; // just in case
     };
