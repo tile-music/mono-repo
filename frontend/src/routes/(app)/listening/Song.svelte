@@ -40,7 +40,7 @@
     }
 
     .repetitions {
-        width: 30px;
+        width: 50px;
         display: flex;
         justify-content: center;
     }

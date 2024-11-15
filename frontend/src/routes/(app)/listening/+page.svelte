@@ -49,7 +49,7 @@
 
     #headers {
         display: flex;
-        padding: 1em 0 1em 40px;
+        padding: 1em 0 1em 60px;
         width: fit-content;
         gap: 10px;
     }
