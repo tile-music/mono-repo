@@ -1,4 +1,4 @@
-import type { AlbumInfo, SongInfo } from "../song";
+import type { SongInfo } from "../../../../../lib/Song";
 
 type RankOutput = {
     song: SongInfo,
@@ -13,6 +13,9 @@ export type RankSelection = "song" | "album";
  * @returns a sorted list of objects containing the song and its number of listens
  */
 export function rankSongs(songs: SongInfo[], rankSelection: RankSelection): RankOutput {
+    // return empty array if listening data is empty
+    if (!songs || !songs.length) return [];
+
     // tabulate number of listens based on song isrc
     const ranks: { [x: string]: number } = {};
     const songRanking: { [x: string]: SongInfo } = {}

@@ -28,6 +28,9 @@
   }
 
   const makeSquares = (maxSquares: number): { x: number; y: number; size: number }[] => {
+    // skip computation if no squares are being generated
+    if (maxSquares == 0) return [];
+
     const max = Math.min(maxSquares, 15);
     const arrangement = generateFullArrangement(1, Math.max(max, 0), max, 0.0, 0.1);
 
@@ -53,11 +56,18 @@
 </select>
 
 <div id="container">
-  <div id="display" bind:this={artDisplayRef} class="capture-area">
-    {#each squares as square, i}
-      <Square {square} song={ranking[i].song} />
-    {/each}
-  </div>
+  {#if squares.length > 0 }
+    <div id="display" bind:this={artDisplayRef} class="capture-area">
+      {#each squares as square, i}
+        <Square {square} song={ranking[i].song} />
+      {/each}
+    </div>
+  {:else}
+    <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
+      <h1>No listening data!</h1>
+      <p>To generate a display, <a href="/link-spotify">link your Spotify account</a> and listen to some music!</p>
+    </div>
+  {/if}
 </div>
 <footer>
   <div style="display: flex; gap: 20px; position: relative;">
@@ -79,5 +89,17 @@
     height: calc(100vh - 150px);
     aspect-ratio: 1 / 1;
     position: relative;
+  }
+
+  #placeholder-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  #placeholder-display p {
+    width: 20em;
+    text-align: center;
   }
 </style>
