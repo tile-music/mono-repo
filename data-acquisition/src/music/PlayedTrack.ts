@@ -32,8 +32,8 @@ export class PlayedTrack {
   private albumInfo: AlbumInfo;
   private popularity: number
 
-  constructor(listenedAt: Date, trackInfo: TrackInfo, albumInfo: AlbumInfo, popularity: number) {
-    this.listenedAt = listenedAt.valueOf();
+  constructor(listenedAt: number, trackInfo: TrackInfo, albumInfo: AlbumInfo, popularity: number) {
+    this.listenedAt = listenedAt;
     this.trackInfo = trackInfo;
     this.albumInfo = albumInfo;
     this.popularity = popularity;

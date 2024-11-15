@@ -1,16 +1,156 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { SpotifyUserPlaying, MockUserPlaying } from "../../src/music/UserPlaying";
+import { Client, Player } from "spotify-api.js";
 
 import dotenv from "dotenv";
+import { parse } from "path";
+import { time } from "console";
+
 dotenv.config();
 
+let context: any = { refresh_token: process.env.SP_REFRESH };
+
+
+
+
+describe("spotify Listening timestamp sanity check", ()=>{
+  const testData = ["2024-11-15T14:27:57.952Z",
+                    "2024-11-15T14:24:25.620Z",
+                    "2024-11-15T14:22:30.406Z",
+                    "2024-11-15T14:17:43.461Z",
+                    "2024-11-15T14:13:43.754Z",
+                    "2024-11-15T14:09:47.990Z",
+                    "2024-11-15T14:06:07.862Z",
+                    "2024-11-15T13:59:51.570Z",
+                    "2024-11-15T13:56:10.273Z"]
+  test("SpotifyUserPlaying parseSpotifyListeningTimestamp", () => {
+    for (const timestamp of testData) { // Use for...of to iterate over values
+      const date = SpotifyUserPlaying.parseISOToDate(timestamp);
+      // Check if the parsed date matches the original timestamp
+      expect(date.toISOString()).toStrictEqual(timestamp);
+    }
+
+})
+})
+describe("Spotify UserPlaying Integration", () => {
+  let supabase: SupabaseClient<any, "test", any>;
+  let userId: string;
+  let spotifyClient : Client;
+  let player : Player;
+  let spotifyData: any;
+
+  beforeAll(async () => {
+    supabase = new SupabaseClient(
+      process.env.SB_URL_TEST as string,
+      process.env.ANON as string,
+      { db: { schema: "test" } }
+    );
+
+    const { data, error } = await supabase.auth.signUp({
+      email: "test2@example.com",
+      password: "password",
+    });
+    spotifyClient = await Client.create({
+      refreshToken: true,
+      token: {
+        clientID: process.env.SP_CID as string,
+        clientSecret: process.env.SP_SECRET as string,
+        refreshToken: process.env.SP_REFRESH as string,
+      },
+      onRefresh: () => {
+        console.log("token refreshed");
+      },
+    });
+    player = new Player(spotifyClient);
+
+    if (error) throw error;
+    userId = data.user?.id || "test-user-id";
+  });
+  beforeEach(async () => {
+    spotifyData = (await player.getRecentlyPlayed({ limit: 50 })).items;
+  });
+  afterAll(async () => {
+    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+    supabase = new SupabaseClient(
+      process.env.SB_URL_TEST as string,
+      process.env.SERVICE as string
+    );
+    const { data, error } = await supabase.auth.admin.deleteUser(userId);
+    if (error) throw error;
+    //await supabase.rpc("clear_test_tables");
+  });
+  test("SpotifyUserPlaying fire method data integrity", async () => {
+    const spotifyUserPlaying = new SpotifyUserPlaying(
+      supabase,
+      userId,
+      context
+      );
+    await spotifyUserPlaying.init();
+    await expect(spotifyUserPlaying.fire()).resolves.not.toThrow().then(async() =>{
+      let { data, error } = await supabase
+        .from("played_tracks")
+        .select()
+        .eq("user_id", userId);
+      console.log(spotifyData)
+      if(data){
+        data = data?.sort((a, b) => b.listened_at - a.listened_at);
+      }
+
+      expect(data).toHaveLength(spotifyData.length);
+      expect(data).toBeDefined()
+      if(data){
+        for(let i = 0; i < data.length; i++){
+          console.log( spotifyData[i].playedAt);
+          //console.log(SpotifyUserPlaying.parseISOToDate(spotifyData.items[i].playedAt), data[i].listened_at);
+          const spotifyTimeStamp : Date = SpotifyUserPlaying.parseISOToDate(spotifyData[i].playedAt)
+          expect(data[i].isrc).toStrictEqual(spotifyData[i].track.externalID.isrc);
+          expect(data[i].listened_at).toStrictEqual(spotifyTimeStamp.valueOf());
+          
+          
+
+          
+        }
+      }
+
+    })
+
+
+
+  });
+
+})
+
 describe("UserPlaying Tests", () => {
-  let supabase: SupabaseClient;
+
   describe("UserPlaying Tests", () => {
+    beforeAll(async () => {
+      supabase = new SupabaseClient(
+        process.env.SB_URL_TEST as string,
+        process.env.ANON as string,
+        { db: { schema: "test" } }
+      );
+
+      const { data, error } = await supabase.auth.signUp({
+        email: "test1@example.com",
+        password: "password",
+      });
+      if (error) throw error;
+      userId = data.user?.id || "test-user-id";
+    });
+    afterAll(async () => {
+
+      supabase = new SupabaseClient(
+        process.env.SB_URL_TEST as string,
+        process.env.SERVICE as string
+      );
+      const { data, error } = await supabase.auth.admin.deleteUser(userId);
+      if (error) throw error;
+      //await supabase.rpc("clear_test_tables");
+    });
     let supabase: any;
     let postgres: any;
     let userId: string;
-    let context: any = { refresh_token: process.env.SP_REFRESH };
+    
     let email: string = "test@test.com";
     let password: string = "password";
     const testData1 = [
@@ -70,30 +210,7 @@ describe("UserPlaying Tests", () => {
       timestamp: 125666778 + i * 1000,
     }));
 
-    beforeAll(async () => {
-      supabase = new SupabaseClient(
-        process.env.SB_URL_TEST as string,
-        process.env.ANON as string,
-        { db: { schema: "test" } }
-      );
-
-      const { data, error } = await supabase.auth.signUp({
-        email: "test1@example.com",
-        password: "password",
-      });
-      if (error) throw error;
-      userId = data.user?.id || "test-user-id";
-    });
-    afterAll(async () => {
-      const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-      supabase = new SupabaseClient(
-        process.env.SB_URL_TEST as string,
-        process.env.SERVICE as string
-      );
-      const { data, error } = await supabase.auth.admin.deleteUser(userId);
-      if (error) throw error;
-      //await supabase.rpc("clear_test_tables");
-    });
+    
 
     /* test("postgres connection" , async () => {
       await expect(postgres.query("SELECT * from test.tracks")).resolves.not.toThrow();

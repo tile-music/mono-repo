@@ -9,9 +9,7 @@ import { PlayedTrack } from "./PlayedTrack";
 import { release } from "os";
 
 export type ReleaseDate = {year: number, month?: number, day?: number} 
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+
 export abstract class UserPlaying {
   userId!: string;
   supabase!: SupabaseClient<any,"test"|"prod",any>;
@@ -161,13 +159,13 @@ export class SpotifyUserPlaying extends UserPlaying {
         item.track.duration
       );
       const playedTrackInfo = new PlayedTrack(
-        new Date(item.playedAt),
+        SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
         trackInfo,
         album,
         item.track.popularity
       );
       this.played.push(playedTrackInfo);
-      console.log(playedTrackInfo);
+      //console.log(playedTrackInfo);
     }
     for (const track of this.played) {
       await this.dbEntries.p_track_info.push(track.createDbEntryObject());
@@ -194,6 +192,40 @@ export class SpotifyUserPlaying extends UserPlaying {
       case "day":
         return { year: parseInt(year), month: parseInt(month), day: parseInt(day) };
     }
+  }
+  public static parseISOToDate(isoString: string): Date {
+    //console.log(isoString);
+    const match = isoString.match(
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?Z$/
+    );
+  
+    if (!match) {
+      throw new Error("Invalid ISO 8601 format");
+    }
+  
+    const [, year, month, day, hours, minutes, seconds, milliseconds] = match;
+  
+    // Parse components into numbers
+    const parsedYear = Number(year);
+    const parsedMonth = Number(month) - 1; // Months are 0-indexed
+    const parsedDay = Number(day);
+    const parsedHours = Number(hours);
+    const parsedMinutes = Number(minutes);
+    const parsedSeconds = Number(seconds);
+    const parsedMilliseconds = milliseconds ? Number(milliseconds) * 1000 : 0;
+  
+    // Construct a Date object in UTC
+    return new Date(
+      Date.UTC(
+        parsedYear,
+        parsedMonth,
+        parsedDay,
+        parsedHours,
+        parsedMinutes,
+        parsedSeconds,
+        parsedMilliseconds
+      )
+    );
   }
 }
 
