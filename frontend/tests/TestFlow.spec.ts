@@ -81,9 +81,10 @@ test.describe("Test homepage elements", async () => {
     const registerPasswordConfirm = await page.$("#confirm_password");
     await registerPasswordConfirm?.fill(password);
     const registerButton = await page.$(
-      "body > div > div.content.s-gO4E-FEgf6uX > div.right.s-gO4E-FEgf6uX > div > form > fieldset:nth-child(2) > input"
+      "#content > form > fieldset:nth-child(2) > input"
     );
     await registerButton?.click();
+    await page.waitForTimeout(5000);
     await injectSpotifyCreds(getEmail(browserName));
     await page.waitForURL("**/link-spotify");
 
@@ -91,10 +92,9 @@ test.describe("Test homepage elements", async () => {
     await expect(oneLastThing).toBeVisible();
     
     await page.reload();
-    await page.waitForTimeout(50000);
     const spotifyButton =  page.getByText("Unlink Spotify Account");
     await expect(spotifyButton).toBeVisible();
-    console.log("Spotify button", spotifyButton);
+    console.log("Spotify button", spotifyButton)
     /* await page.waitForTimeout(500);
     await page.waitForURL("https://accounts.spotify.com/**");
     const spotifyEmail = await page.$("#login-username");
@@ -112,7 +112,7 @@ test.describe("Test homepage elements", async () => {
 });
 
 test.beforeAll(async () => {
-
+  console.log(process.env.EXTERNAL_SUPABASE_URL);
   supabase = createClient(
     process.env.EXTERNAL_SUPABASE_URL as string,
     process.env.PUBLIC_SUPABASE_SERVICE_KEY as string,

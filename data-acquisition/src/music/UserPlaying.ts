@@ -96,9 +96,10 @@ export abstract class UserPlaying {
             isrc: entry.track.isrc,
           });
         //console.log(playedData, playedError);
-        if(playedError){
+        /* if(playedError){
           console.log("Duplicate entry")
-        }
+        } */
+       // improve error handling
       } else {
         //console.error("No data returned from insert or albumData is undefined or empty");
         throw new Error("No data returned from insert or albumData is undefined or empty");
@@ -276,7 +277,6 @@ export class MockUserPlaying extends UserPlaying {
   public async init(): Promise<void> {
     this.inited = true;
     console.log("Mock init");
-    console.log;
   }
   public async fire(): Promise<void> {
     await this.putInDB();
