@@ -5,6 +5,9 @@ import { SpotifyUserPlaying } from '../music/UserPlaying';
 import { fork } from 'node:child_process';
 import os from 'node:os';
 import { connection } from './redis';
+import dotenv from 'dotenv';
+
+dotenv.config();
 /**
  * Fetches and processes the currently playing track for a Spotify user.
  *
@@ -17,12 +20,13 @@ import { connection } from './redis';
  * @returns A promise that resolves when the operation is complete.
  */
 
+type SupabaseSchema = "test" | "prod";
 
-export async function spotifyFire(userId: string, refreshToken: string) {
+export async function spotifyFire(userId: string, refreshToken: string, supabaseSchema: SupabaseSchema) {
   const supabaseInd = new SupabaseClient(
     process.env.SB_URL as string,
     process.env.SERVICE as string,
-    { db: { schema: "prod" } }
+    { db: { schema: supabaseSchema} }
   );
 
   const spotifyUserPlaying = new SpotifyUserPlaying(
@@ -40,7 +44,7 @@ const worker = new Worker(
   async (job: any) => {
     const { userId, refreshToken } = job.data.data;
     
-    await spotifyFire(userId, refreshToken);
+    await spotifyFire(userId, refreshToken, process.env.SB_SCHEMA as SupabaseSchema); 
 
     console.log(
       `Processing job ${job.id} at ${new Date()} for user ${userId}`

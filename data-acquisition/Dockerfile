@@ -19,6 +19,7 @@ FROM base AS dev
 #RUN npm intall -g @angular/cli
 CMD ["npm", "run", "dev"]
 
+EXPOSE 3001
 
 #test stage
 FROM base AS test

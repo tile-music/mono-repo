@@ -57,7 +57,8 @@ app.post('/add-job', async (req, res) => {
           jobId: "spotify" + userId,
         }
       );
-      console.log("added job")
+      console.log("added job");
+      res.status(200).json({ message: 'Job added successfully' });
     }else{
       return res.status(400).json({ error: 'Invalid type' });
     }

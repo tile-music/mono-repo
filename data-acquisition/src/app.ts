@@ -31,6 +31,6 @@ process.on('SIGINT', async () => {
 
 fork(__dirname + "/worker/webserver.ts");
 
-for (let i = 3; i < os.cpus().length; i++ ){
-  fork(__dirname + "/worker/worker.ts");
+for (let i = 0; i < Math.floor(os.cpus().length/2) ; i++ ){
+  fork(__dirname + "/worker/worker.ts" );
 }
