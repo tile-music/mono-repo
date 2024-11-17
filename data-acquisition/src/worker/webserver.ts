@@ -9,10 +9,6 @@ const queue = makeQueue();
 const app = express();
 app.use(express.json());
 
-app.get('/test', (req, res) => {
-  res.json({ message: 'Test route working!' });
-});
-// Route to add a new job to the queue
 /**
  * Extracts the `userId`, `refreshToken`, and `type` properties from the request body.
  *
