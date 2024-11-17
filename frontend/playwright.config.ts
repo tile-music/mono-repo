@@ -24,8 +24,14 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
 
-  /* Configure projects for major browsers */
-  projects: [
+  /* Configure projects for major browsers, 
+   * only running Chrome when testing locally. */
+  projects: (process.env.LOCAL == '1') ? [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    }
+  ] : [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
