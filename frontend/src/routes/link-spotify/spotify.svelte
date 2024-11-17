@@ -30,19 +30,19 @@
       body: JSON.stringify(" "),
     })
       .then((response) => {
-        console.log("Response status:", response.status); // Log status
+        //console.log("Response status:", response.status); // Log status
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.json();
       })
       .then((data) => {
-        console.log("Parsed data:", data);
+        //console.log("Parsed data:", data);
         if (data === "spotify logged in") {
-          console.log("should be disabled");
+          //console.log("should be disabled");
           enabled.set({status: "true"});
         } else {
-          console.log("not true");
+          //console.log("not true");
           enabled.set({status: "false"});
         }
       })
@@ -55,7 +55,7 @@
     }
   });
 
-  $: console.log("enabled", $enabled);
+  //$: console.log("enabled", $enabled);
 </script>
 
 {#if $enabled.status === "false"}
