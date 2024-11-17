@@ -18,7 +18,6 @@ makeJobs();
 
 
 const queueEvents = new QueueEvents('my-cron-jobs', { connection });
-
 queueEvents.on('failed', ({ jobId, failedReason }) => {
   console.error(`Job ${jobId} failed with error ${failedReason}`);
 });

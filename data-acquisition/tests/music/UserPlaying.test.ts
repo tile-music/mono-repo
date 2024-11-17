@@ -26,8 +26,9 @@ describe("spotify Listening timestamp sanity check", ()=>{
   test("SpotifyUserPlaying parseSpotifyListeningTimestamp", () => {
     for (const timestamp of testData) { // Use for...of to iterate over values
       const date = SpotifyUserPlaying.parseISOToDate(timestamp);
+      const dateTs= new Date(timestamp)
       // Check if the parsed date matches the original timestamp
-      expect(date.toISOString()).toStrictEqual(timestamp);
+      expect(dateTs.toISOString()).toStrictEqual(timestamp);
     }
 
 })
@@ -103,6 +104,7 @@ describe("Spotify UserPlaying Integration", () => {
           console.log( spotifyData[i].playedAt);
           //console.log(SpotifyUserPlaying.parseISOToDate(spotifyData.items[i].playedAt), data[i].listened_at);
           const spotifyTimeStamp : Date = SpotifyUserPlaying.parseISOToDate(spotifyData[i].playedAt)
+          const tsDateObjectSpTimestamp : Date = new Date(spotifyData[i].playedAt)
           expect(data[i].isrc).toStrictEqual(spotifyData[i].track.externalID.isrc);
           expect(data[i].listened_at).toStrictEqual(spotifyTimeStamp.valueOf());
           

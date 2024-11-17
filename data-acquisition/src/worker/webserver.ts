@@ -4,13 +4,14 @@ import { connection } from './redis';  // Assuming you already have the Redis co
 import { spotifyFire } from './worker';       // Import the spotifyFire function
 import { makeQueue } from './makeQueue';
 
+const queue = makeQueue();
 // Create an instance of Express
 const app = express();
 app.use(express.json());
 
-// Create a Queue instance
-const queue = makeQueue();
-
+app.get('/test', (req, res) => {
+  res.json({ message: 'Test route working!' });
+});
 // Route to add a new job to the queue
 /**
  * Extracts the `userId`, `refreshToken`, and `type` properties from the request body.
@@ -25,15 +26,16 @@ app.post('/add-job', async (req, res) => {
   const { userId, refreshToken, type } = req.body;
   console.log(req.body)
   console.log("userId", userId)
-  if (!userId || !refreshToken) {
+  if (!userId || !refreshToken || !type) {
     return res.status(400).json({ error: 'Missing userId, refreshToken, or cronExpression' });
   }
 
   try {
 
     if(type === "spotify"){
+      //while (!(await queue.remove("single-shot" + userId)))
       await queue.add(
-        'spotify' + userId,
+          userId,
         {
           data: {
             userId,
@@ -41,11 +43,12 @@ app.post('/add-job', async (req, res) => {
           },
         },
         {
-          jobId: "spotify" + userId,
+          jobId:  "single-shot" + userId,
         }
       );
+      //while(!(await queue.remove(userId)))
       await queue.add(
-        'spotify' + userId,
+         userId,
         {
           data: {
             userId,
@@ -54,7 +57,8 @@ app.post('/add-job', async (req, res) => {
         },
         {
           repeat: { pattern: "0/30 * * * *" },
-          jobId: "spotify" + userId,
+          jobId: userId,
+          
         }
       );
       console.log("added job");
@@ -64,6 +68,30 @@ app.post('/add-job', async (req, res) => {
     }
     // Add job to queue with specified cron expression
     
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add job' });
+  }
+});
+
+app.post('/remove-job', async (req, res) => {
+  console.log("remove job")
+  const { userId, type } = req.body;
+  console.log(req.body)
+  console.log("userId", userId)
+  if (!userId || !type) {
+    return res.status(400).json({ error: 'Missing userId, refreshToken, or cronExpression' });
+  }
+
+  try {
+
+    if(type === "spotify"){
+      while (!(await queue.remove(userId))) console.log("removing job");
+      while (!(await queue.remove("single-shot" + userId))) console.log("removing job ss");
+      console.log("removed job");
+      res.status(200).json({ message: 'Job removed successfully' });
+    }else{
+      return res.status(400).json({ error: 'Invalid type' });
+    }
   } catch (err) {
     res.status(500).json({ error: 'Failed to add job' });
   }
