@@ -8,6 +8,13 @@ const queue = makeQueue();
 // Create an instance of Express
 const app = express();
 app.use(express.json());
+async function removeJob(jobId: string) {
+  let failCount = 0;
+  while (failCount < 8 && !(await queue.remove(jobId))){
+    if(failCount === 6) throw new Error("Failed to remove job from queue something is blocking it or one of its dependencies");
+  }
+}
+
 
 /**
  * Extracts the `userId`, `refreshToken`, and `type` properties from the request body.
@@ -81,14 +88,21 @@ app.post('/remove-job', async (req, res) => {
   try {
 
     if(type === "spotify"){
-      while (!(await queue.remove(userId))) console.log("removing job");
-      while (!(await queue.remove("single-shot" + userId))) console.log("removing job single shot");
+      await removeJob(userId);
+      await removeJob("single-shot"+userId);
+      
       console.log("removed job");
       res.status(200).json({ message: 'Job removed successfully' });
     }else{
       return res.status(400).json({ error: 'Invalid type' });
     }
-  } catch (err) {
+  } catch (err : any) {
+    if(err instanceof Error){
+      switch(err.message){
+        case "Failed to remove job from queue something is blocking it or one of its dependencies":
+          return res.status(500).json({ error: "you may be hitting the button too many times in a row, chill out then try agian" });
+      }
+    }
     res.status(500).json({ error: 'Failed to add job' });
   }
 });
