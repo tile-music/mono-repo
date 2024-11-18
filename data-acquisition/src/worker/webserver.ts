@@ -82,7 +82,7 @@ app.post('/remove-job', async (req, res) => {
 
     if(type === "spotify"){
       while (!(await queue.remove(userId))) console.log("removing job");
-      while (!(await queue.remove("single-shot" + userId))) console.log("removing job ss");
+      while (!(await queue.remove("single-shot" + userId))) console.log("removing job single shot");
       console.log("removed job");
       res.status(200).json({ message: 'Job removed successfully' });
     }else{
