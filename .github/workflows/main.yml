@@ -15,25 +15,12 @@ jobs:
     name: Run development tests
     # runs-on: [self-hosted, linux]
     runs-on: ubuntu-latest
-    # env:
-      # COMPOSE_FILE: docker-compose.yml
-      # DOCKER_USER: ${{ secrets.DOCKER_USER }}
-      # DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
 
     steps:
-    - name: Hello!
-      run: echo "Hello, this line is just here to test that actions works as expected, I guess"
-      
     - name: Checkout code
       uses: actions/checkout@v4 # This is very cool we do not need to manually checkout
       with:
         submodules: recursive
-
-    # - name: Login to DockerHub
-    #   run: docker login -u $DOCKER_USER -p $DOCKER_PASS
-
-    # - name: Run Docker
-    #   run: docker run
 
     - name: Setup env
       env: 
@@ -47,8 +34,6 @@ jobs:
       shell: bash
 
     - name: Build, run docker images
-      # working-directory: ./mono-repo
-              # ls -R
       run: |
         docker compose build
         docker compose up -d
@@ -65,7 +50,6 @@ jobs:
         npm i
         npm i -g vitest
         npm run test
-        echo "other test commands go here"
 
     - name: Run dataaq tests
       working-directory: data-acquisition/
@@ -73,7 +57,6 @@ jobs:
         npm i
         npm i -g vitest
         npm run test
-        echo "other test commands go here"
 
     - name: Celebrate
       run: echo "Hurray! Nothing broke before this! At least I hope..."
