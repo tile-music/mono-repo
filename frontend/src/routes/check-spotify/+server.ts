@@ -25,7 +25,6 @@ export const POST: RequestHandler = async ({locals: { supabase, session }, reque
             }
         }
         const { data, error } = await supabase.functions.invoke("check-spotify", headers)
-        console.log("data", data)
 
 
         if (error) {    
@@ -40,9 +39,6 @@ export const POST: RequestHandler = async ({locals: { supabase, session }, reque
                 body = "spotify login not found";
                 break;
         }
-        console.log(body);
-        console.log(request)
-
 
         return new Response(JSON.stringify(body), {
             status: 200,

@@ -8,7 +8,8 @@ export function validateAccountForm(type: "login" | "register", formData: FormDa
             tooShort: false,
             tooLong: false,
             noNumbers: false
-        }
+        },
+        alreadyTaken: false
     }
 
     const email = formData.get("email")?.toString();
@@ -29,7 +30,7 @@ export function validateAccountForm(type: "login" | "register", formData: FormDa
     const malformedCredentials = failures.passwordMismatch || failures.invalidEmail || invalidPassword
     if (missingAttribute || type === "register" && malformedCredentials) return { valid: false, failures};
 
-    return { valid: true, data: { email: email!, password: password! }}
+    return { valid: true, failures: failures, data: { email: email!, password: password! }}
 }
 
 function validateWellFormedEmail(email: string) {
@@ -55,6 +56,7 @@ function validateWellFormedPassword(password: string): InvalidPassword {
 
 type FormValidation = {
     valid: true,
+    failures: Failures,
     data: {
         email: string,
         password: string
@@ -70,6 +72,7 @@ export type Failures = {
     passwordMismatch: boolean
     invalidEmail: boolean
     invalidPassword: InvalidPassword
+    alreadyTaken: boolean
 }
 
 type InvalidPassword = {

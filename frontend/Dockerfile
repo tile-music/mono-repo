@@ -3,20 +3,17 @@ FROM node:current-alpine3.20 AS build
 WORKDIR /app
 
 COPY package*.json .
-#COPY pnpm-lock.yaml .
 
-RUN npm i -g pnpm
-RUN pnpm install
+RUN npm ci
 
 COPY . .
 
-RUN pnpm run build
-RUN pnpm prune
+RUN npm run build
+RUN npm prune --production
 
 
 # https://jenyus.web.app/blog/2021-05-30-setting-up-a-development-environment-for-sveltekit-with-docker-and-compose
 FROM build AS dev
-
 
 # Expose port 5173 for the SvelteKit app and 24678 for Vite's HMR
 EXPOSE 5173

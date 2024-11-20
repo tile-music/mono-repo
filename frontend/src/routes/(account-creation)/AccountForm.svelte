@@ -20,7 +20,8 @@
                 tooShort: false,
                 tooLong: false,
                 noNumbers: false
-            }
+            },
+            alreadyTaken: false
         }
     }
 
@@ -107,7 +108,7 @@
     }
 
     fieldset {
-        gap: 20px;
+        gap: 10px;
     }
 
     p {

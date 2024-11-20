@@ -14,6 +14,13 @@ export const actions: Actions = {
 
     const { error: register_error } = await supabase.auth.signUp(form.data);
     if (register_error) {
+      // check if user already exists
+      if (register_error.code == "user_already_exists") {
+        form.failures.alreadyTaken = true;
+        return fail(422, { failures: form.failures });
+      }
+
+      // encountered some other registration error
       console.error(register_error);
       redirect(303, '/register');
     }
