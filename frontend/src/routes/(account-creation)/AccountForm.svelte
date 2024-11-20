@@ -80,8 +80,7 @@
             {/if}
         </fieldset>
         <fieldset>
-            <p>{status.failures.alreadyTaken ? "this email is already taken" : ""}</p>
-            <input type="submit" value={buttonText}>
+            <input type="submit" id="submit" value={buttonText}>
             {#if type === "login"}
                 <a href="register">don't have an account?</a>
             {:else}

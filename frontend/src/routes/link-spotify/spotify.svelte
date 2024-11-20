@@ -3,8 +3,8 @@
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { writable } from "svelte/store";
-
-  let enabled = writable(false);
+  type SpotifyStatus = {status: "true"| "false" | "loading"};
+  let enabled = writable<SpotifyStatus>({status: "loading"});
   /**
    * Asynchronously checks the Spotify login status by sending a POST request to the "/check-spotify" endpoint.
    * 
@@ -19,8 +19,10 @@
    *    - Otherwise, logs a different message and sets the `enabled` store to `true`.
    * 7. Catches and logs any errors that occur during the fetch operation.
    */
-  let checkSpotify = async () =>
-    fetch("/check-spotify", {
+  let checkSpotify = async () =>{
+
+    enabled.set({status: "loading"})
+    await fetch("/check-spotify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -28,40 +30,50 @@
       body: JSON.stringify(" "),
     })
       .then((response) => {
+        //console.log("Response status:", response.status); // Log status
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.json();
       })
       .then((data) => {
-        let typedData: boolean = data;
+        //console.log("Parsed data:", data);
         if (data === "spotify logged in") {
-          enabled.set(false);
+          //console.log("should be disabled");
+          enabled.set({status: "true"});
         } else {
-          enabled.set(true);
+          //console.log("not true");
+          enabled.set({status: "false"});
         }
       })
       .catch((error) => console.error("Fetch error:", error));
+  }
 
   onMount(async () => {
-    await checkSpotify();
-
+    if($enabled.status === "loading"){
+      await checkSpotify(); 
+    }
   });
+
+  //$: console.log("enabled", $enabled);
 </script>
 
-{#if $enabled}
+{#if $enabled.status === "false"}
   <button
     class="link_spotify"
     name="LinkSpotify"
     on:click={async () => {
       await goto("/link-spotify?link=true");
-      await checkSpotify();
+      setTimeout(async () => {
+        await checkSpotify();
+      }, 1000);
     }}
+
   >
     log in with Spotify
     <img class="spotify_logo" src={spotify_logo} alt="The Spotify logo." />
   </button>
-{:else}
+{:else if $enabled.status === "true"}
 <!-- this could be deduplicated, im just not totally sure how right now -->
   <button
     class="link_spotify"
@@ -74,10 +86,12 @@
           "Content-Type": "application/json",
         },
         body: JSON.stringify(" "),
-      });
+      })  
       await checkSpotify();
     }}>Unlink Spotify Account</button
   >
+{:else}
+  <button  class="link_spotify" disabled>loading...</button>
 {/if}
 
 <style>
