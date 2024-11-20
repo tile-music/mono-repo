@@ -109,13 +109,13 @@ test.describe("Test homepage elements", async () => {
     const register = await page.$("#content > ul > li:nth-child(3) > a");
     await register?.click();
     await page.waitForURL("**/register");
-    const registerEmail = await page.$("#email");
+    const registerEmail = await page.getByPlaceholder("email");
     await registerEmail?.fill(getEmail(browserName));
-    const registerPassword = await page.$("#password");
+    const registerPassword = await page.getByPlaceholder("password", {exact: true});
     await registerPassword?.fill(password);
-    const registerPasswordConfirm = await page.$("#confirm_password");
+    const registerPasswordConfirm = await page.getByPlaceholder("confirm password");
     await registerPasswordConfirm?.fill(password);
-    const registerButton = await page.$("#submit");
+    const registerButton = await page.getByText("get started");
     await registerButton?.click();
     /* await injectSpotifyCreds(getEmail(browserName));
     await page.waitForTimeout(5000); */
@@ -134,17 +134,17 @@ test.describe("Test homepage elements", async () => {
     fireSpotifyJob(await getUserId(getEmail(browserName)));
     await page.waitForTimeout(2000);
     console.log("fired job");
-    const artDisplay = await page.$("#display");
+    const artDisplay = await page.getByText("art display");
     await artDisplay?.click();
     
-    const listeningData = await page.$("#listening");
+    const listeningData = await page.getByText("listening data");
     await listeningData?.click();
     await page.waitForURL("**/listening");
   
-    const listeningDataContainer = page.$("#scroll-container")
+    const listeningDataContainer = page.getByText("plays")
     expect(listeningDataContainer).toBeDefined();
 
-    const profile = await page.$("#profile");
+    const profile = await page.getByText("profile");
     await profile?.click();
     await page.waitForURL("**/profile");
 
