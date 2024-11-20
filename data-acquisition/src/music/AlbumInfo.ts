@@ -35,7 +35,9 @@ export class AlbumInfo {
   private albumName: string;
   private albumType: string;
   private numTracks: number;
-  private releaseDate: Date;
+  private releaseDay: number | null;
+  private releaseMonth: number| null;
+  private releaseYear: number;
   private artists: string[];
   private genre: string[];
   private upc: string;
@@ -48,7 +50,9 @@ export class AlbumInfo {
     albumType: string,
     artists: string[],
     image: string,
-    releaseDate: Date,
+    releaseDay: number | undefined,
+    releaseMonth: number | undefined,
+    releaseYear: number, 
     numTracks: number,
     genre: string[],
     upc: string,
@@ -58,7 +62,9 @@ export class AlbumInfo {
     this.albumName = albumName;
     this.albumType = albumType;
     this.artists = artists;
-    this.releaseDate = releaseDate;
+    this.releaseDay = releaseDay ? releaseDay : null;
+    this.releaseMonth = releaseMonth ? releaseMonth : null;
+    this.releaseYear = releaseYear;
     this.numTracks = numTracks;
     this.image = image;
     this.genre = genre;
@@ -78,7 +84,9 @@ export class AlbumInfo {
     return {
       album_name: this.albumName,
       album_type: this.albumType,
-      release_date: this.releaseDate.toISOString(),
+      release_day: this.releaseDay,
+      release_month: this.releaseMonth,
+      release_year: this.releaseYear,
       num_tracks: this.numTracks,
       artists: this.artists,
       genre: this.genre,
