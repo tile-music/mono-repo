@@ -4,29 +4,28 @@
     import Song from './Song.svelte';
 
     import { processSongs } from './processSongs';
-    const processedSongs = processSongs(data.songs);
 </script>
 
 <div id="container">
     <h1>Listening Data</h1>
     <div id="scroll-container">
-        <div id="headers">
-            <h2 id="art">art</h2>
-            <h2 id="title">title</h2>
-            <h2 id="artist">artist</h2>
-            <h2 id="album">album</h2>
-            <h2 id="duration">duration</h2>
-            <h2 id="plays">plays</h2>
-        </div>
-        <div id="songs">
-            {#if data.songs != null}
-                {#each processedSongs as song}
-                    <Song {song} />
-                {/each}
-            {:else}
-                <p>No listening data yet!</p>
-            {/if}
-        </div>
+        {#if data.songs != null}
+            <div id="headers">
+                <h2 id="art">art</h2>
+                <h2 id="title">title</h2>
+                <h2 id="artist">artist</h2>
+                <h2 id="album">album</h2>
+                <h2 id="duration">duration</h2>
+                <h2 id="plays">plays</h2>
+            </div>
+            <div id="songs">
+                    {#each processSongs(data.songs) as song}
+                        <Song {song} />
+                    {/each}
+            </div>
+        {:else}
+            <p>No listening data yet!</p>
+        {/if}
     </div>
 </div>
 

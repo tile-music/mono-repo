@@ -7,6 +7,8 @@ const {SupabaseClient} = pkg;
 
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_SERVICE_KEY } from '$env/static/public';
 
+const headers = { 'Content-Type': 'application/json' }
+
 /**
  * Handles the POST request to unlink Spotify credentials for the authenticated user.
  * 
@@ -27,51 +29,36 @@ import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_SERVICE_KEY } from '$env/static/pu
  * 6. If the session is null, returns a 400 response with an error message.
  */
 export const POST: RequestHandler = async ({locals: { supabase, session }, request}) => {
-    let body = await request.json();
-    if(session !== null) {
-        const headers = {
-            headers: {
-                Authorization: `Bearer ${session.access_token}`
-            }
-        }
+    if (session !== null) {
+        // create a supabase client
         const supabaseProd  = new SupabaseClient(
             PUBLIC_SUPABASE_URL as string,
             PUBLIC_SUPABASE_SERVICE_KEY as string,
             { db: { schema: "prod" } }
-          );
-          const supabasePublic  = new SupabaseClient(
-            PUBLIC_SUPABASE_URL as string,
-            PUBLIC_SUPABASE_SERVICE_KEY as string
-          );
+        );
         
-        const { data, error } = await supabase.auth.getUser();
-        console.log("data", data)
-        const userId = data.user?.id;
-        console.log("userId", userId);
-        if(userId){
-            await supabaseProd.from("played_tracks").delete().eq("user_id", userId);
-            const {error:prodError} = await supabaseProd.auth.admin.deleteUser(userId);
-            const {error:publicError} = await supabasePublic.auth.admin.deleteUser(userId);
-            throw prodError || publicError;
-        } else{
-            throw Error("User not found.")
+        try {
+            // attempt to clear user's played tracks and delete their account
+            const { data, error: authError } = await supabase.auth.getUser();
+            if (authError) throw authError;
+            const userId = data.user?.id;
+            if (userId) {
+                const { error: clearError } = await supabaseProd.from("played_tracks").delete().eq("user_id", userId);
+                if (clearError) throw clearError;
+                const { error: deleteError } = await supabaseProd.auth.admin.deleteUser(userId);
+                if (deleteError) throw deleteError;
+            } else throw "User not found.";
+        } catch(error) {
+            // if any errors occur, respond with internal server error
+            console.error(error);
+            const body = JSON.stringify({ error: "Internal server error." })
+            return new Response(body, { status: 500, headers })
         }
 
-
-        return new Response(JSON.stringify(body), {
-            status: 200,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-    }else{
-        body = JSON.stringify({error: "User does not have session."})
-        return new Response( body, {
-            status: 400,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
+        return new Response("", { status: 200, headers });
+    } else {
+        const body = JSON.stringify({ error: "User does not have session." })
+        return new Response(body, { status: 400, headers })
     }
 
 };

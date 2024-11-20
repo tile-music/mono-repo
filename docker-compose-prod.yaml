@@ -8,13 +8,6 @@ services:
       context: ./frontend/
       target: prod
     volumes:
-      - /app/node_modules
-      - ./frontend/src:/app/src
-      - ./frontend/static:/app/static
-      - ./frontend/vite.config.ts:/app/vite.config.ts
-      - ./frontend/tsconfig.json:/app/tsconfig.json
-      - ./frontend/svelte.config.js:/app/svelte.config.js
-      - ./frontend/.env.local:/app/.env.local
       - MQP:/data/frontend
     ports:
       - "4173:4173"
@@ -28,12 +21,6 @@ services:
       - "443:443"
     depends_on:
       - frontend
-    volumes:
-      - ./nginx/certbot/www:/var/www/certbot/:ro
-  certbot:
-    image: certbot/certbot:latest
-    volumes:
-      - ./nginx/certbot/www/:/var/www/certbot/:rw
   redis:
     image: "redis:alpine"
     ports:
