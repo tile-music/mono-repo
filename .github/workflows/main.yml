@@ -1,0 +1,65 @@
+# Initial file copied from https://stackoverflow.com/a/64373702
+# NOTE: Apparently GH provides its own runners? That's kinda cool!
+name: Test
+on:
+  pull_request:
+    branches:
+    - main
+  push:
+    branches:
+    - main
+    # We can add more branches/regexes here if we want our dev branches to have constant testing too
+
+jobs:
+  test:
+    name: Run development tests
+    # runs-on: [self-hosted, linux]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # This is very cool we do not need to manually checkout
+      with:
+        submodules: recursive
+
+    - name: Setup env
+      env: 
+        ENV_SH_CONTENT: ${{ secrets.ENV_SH }}
+        FRONTEND_SUPABASE: ${{ secrets.FRONTEND_SERVICE_KEY }}
+      run: |
+        echo "$ENV_SH_CONTENT" > env.sh
+        chmod +x env.sh
+        ./env.sh
+        echo "$FRONTEND_SUPABASE" >> frontend/.env.local
+      shell: bash
+
+    - name: Build, run docker images
+      run: |
+        docker compose build
+        docker compose up -d
+
+    - name: Apply schema
+      env:
+        CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
+      run: 
+        psql "$CONNECTION_STRING" -f supabase/docker/volumes/db/init/data.sql
+
+    - name: Run frontend tests
+      working-directory: frontend/
+      run: |
+        npm i
+        npm i -g vitest
+        npm run test
+
+    - name: Run dataaq tests
+      working-directory: data-acquisition/
+      run: |
+        npm i
+        npm i -g vitest
+        npm run test
+
+    - name: Celebrate
+      run: echo "Hurray! Nothing broke before this! At least I hope..."
+
+    - name: down
+      run: docker compose down 
