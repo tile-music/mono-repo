@@ -30,12 +30,10 @@ export const load: PageServerLoad = async ({locals: { supabase, session }, url})
             const { data, error } = await supabase.functions.invoke("spotify-login", headers)
     
             if (error) {
-                
                 // TODO: tell the user that the link failed and to try again
                 throw Error(error)
             }
     
-            console.log(data)
             redirect(302, data)
         }
     } else {

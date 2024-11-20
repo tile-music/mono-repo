@@ -31,9 +31,7 @@ export const POST: RequestHandler = async ({locals: { supabase, session }, reque
             }
         }
         const { data, error } = await supabase.auth.getUser();
-        console.log("data", data)
         const userId = data.user?.id;
-        console.log("userId", userId);
         const { data: dbData, error: error2 } = await supabase
             .from("spotify_credentials")
             .delete()

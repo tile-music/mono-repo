@@ -28,21 +28,16 @@
       body: JSON.stringify(" "),
     })
       .then((response) => {
-        console.log("Response status:", response.status); // Log status
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.json();
       })
       .then((data) => {
-        console.log("Parsed data:", data);
         let typedData: boolean = data;
-        console.log(typedData);
         if (data === "spotify logged in") {
-          console.log("should be disabled");
           enabled.set(false);
         } else {
-          console.log("not true");
           enabled.set(true);
         }
       })
@@ -52,8 +47,6 @@
     await checkSpotify();
 
   });
-
-  $: console.log("enabled", $enabled);
 </script>
 
 {#if $enabled}
