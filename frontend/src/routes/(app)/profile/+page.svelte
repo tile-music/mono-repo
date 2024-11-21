@@ -6,6 +6,7 @@
   import Avatar from './avatar.svelte';
   import { enhance } from "$app/forms";
   import type { SubmitFunction } from "@sveltejs/kit";
+  import ITunes from "../upload-itunes-xml/ITunes.svelte";
 
   export let data: PageData;
   $: ({ user, email } = data);
@@ -130,6 +131,7 @@
     <div>
       <h2>linked services</h2>
       <LinkSpotify></LinkSpotify>
+      <ITunes></ITunes>
     </div>
     <div id="account-actions">
       <h2>account actions</h2>
