@@ -99,7 +99,7 @@ const authGuard: Handle = async ({ event, resolve }) => {
   return response;
 }
 
-const originalConsoleWarn = console.warn;
+const originalConsoleWarn = console.debug
 
 console.warn = function (...args) {
   const shouldLog = args.every((arg) => {
