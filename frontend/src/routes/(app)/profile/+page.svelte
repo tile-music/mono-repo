@@ -206,7 +206,7 @@
     display: flex;
     flex-direction: column;
     gap: 40px;
-    margin-top: 7%;
+    margin: auto;
   }
 
   #settings>div {
