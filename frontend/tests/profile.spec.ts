@@ -55,7 +55,7 @@ test.describe.serial("Test profile editing", async () => {
         await page.getByLabel("username").fill(newUsername);
         await page.getByLabel("full name").fill(newName);
         await page.getByLabel("website").fill(newWebsite);
-        await page.getByText("edit profile").click();
+        await page.getByText("save profile").click();
 
         // await expect(page.getByText("updated successfully")).toBeVisible();
         await page.reload();

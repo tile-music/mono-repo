@@ -88,8 +88,8 @@ const userAgentStrings = [
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
 ];
 
-test.describe("Test homepage elements", async () => {
-  test("Contains header text", async ({ page, browserName}) => {
+test.describe("FullFlow Test ", async () => {
+  test("Monolithic Full Flow Test", async ({ page, browserName}) => {
     await page.goto("/");
     registerUser(browserName, testName, page, password);
     // Expect a title "to contain" a substring
@@ -112,8 +112,8 @@ test.describe("Test homepage elements", async () => {
     await expect(spotifyButton).toBeVisible();
     await page.goto("/profile");
     /**for some reason this blocks for like ever... */
-    fireSpotifyJob(await getUserId(getEmail(browserName, testName)));
-    await page.waitForTimeout(2000);
+    await fireSpotifyJob(await getUserId(getEmail(browserName, testName)));
+    
     console.log("fired job");
     const artDisplay = await page.getByText("art display");
     await artDisplay?.click();
