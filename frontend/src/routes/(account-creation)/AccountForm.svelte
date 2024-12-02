@@ -54,6 +54,7 @@
     function determineInvalidEmailText(): string {
         if (status.failures.missingEmail) return "please enter an email"
         if (status.failures.invalidEmail) return "please enter a valid email"
+        if (status.failures.alreadyTaken) return "this email is already taken"
         return ""
     }
 </script>
