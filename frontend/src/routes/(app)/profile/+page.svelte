@@ -118,7 +118,7 @@
         />
       </div>
       <p>{updateProfileStatus}</p>
-      <input type="submit" value="edit profile" />
+      <input type="submit" value="save profile" />
     </form>
   </div>
   <div id="settings">
@@ -206,6 +206,7 @@
     display: flex;
     flex-direction: column;
     gap: 40px;
+    margin: auto;
   }
 
   #settings>div {

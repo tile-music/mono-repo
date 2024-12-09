@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-
+import { getEmail, registerUser } from "./utils";
 
 import exp from "constants";
 import env from "dotenv";
@@ -17,19 +17,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const getEmail = (browserName: string) => {
-  switch (browserName) {
-    case "chromium":
-      return "test1@test.com";
-    case "firefox":
-      return "test2@test.com";
-    case "webkit":
-      return "test3@test.com";
-    default:
-      throw Error("unexpected browser name");
-      break;
-  }
-};
+const testName = "Flow";
+
 
 const fireSpotifyJob = async (userId: string | undefined) => {
   if (!userId) {
@@ -99,24 +88,16 @@ const userAgentStrings = [
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
 ];
 
-test.describe("Test homepage elements", async () => {
-  test("Contains header text", async ({ page, browserName, browser }) => {
+test.describe("FullFlow Test ", async () => {
+  test("Monolithic Full Flow Test", async ({ page, browserName}) => {
     await page.goto("/");
-
+    registerUser(browserName, testName, page, password);
     // Expect a title "to contain" a substring
     const login = await page.getByText("music viz mqp!");
     await expect(login).toBeVisible();
-    const register = await page.$("#content > ul > li:nth-child(3) > a");
+    const register = await page.getByText("register");
     await register?.click();
     await page.waitForURL("**/register");
-    const registerEmail = await page.getByPlaceholder("email");
-    await registerEmail?.fill(getEmail(browserName));
-    const registerPassword = await page.getByPlaceholder("password", {exact: true});
-    await registerPassword?.fill(password);
-    const registerPasswordConfirm = await page.getByPlaceholder("confirm password");
-    await registerPasswordConfirm?.fill(password);
-    const registerButton = await page.getByText("get started");
-    await registerButton?.click();
     /* await injectSpotifyCreds(getEmail(browserName));
     await page.waitForTimeout(5000); */
 
@@ -124,15 +105,15 @@ test.describe("Test homepage elements", async () => {
 
     const oneLastThing = await page.getByText("one last thing...");
     await expect(oneLastThing).toBeVisible();
-    await injectSpotifyCreds(getEmail(browserName));
+    await injectSpotifyCreds(getEmail(browserName, testName));
     
     await page.reload();
     const spotifyButton = page.getByText("Unlink Spotify Account");
     await expect(spotifyButton).toBeVisible();
     await page.goto("/profile");
     /**for some reason this blocks for like ever... */
-    fireSpotifyJob(await getUserId(getEmail(browserName)));
-    await page.waitForTimeout(2000);
+    await fireSpotifyJob(await getUserId(getEmail(browserName, testName)));
+    
     console.log("fired job");
     const artDisplay = await page.getByText("art display");
     await artDisplay?.click();
@@ -176,7 +157,7 @@ test.beforeAll(async () => {
 test.afterEach(async ({ browserName }) => {
   if (supabase) {
     let { data, error } = await supabase.auth.signInWithPassword({
-      email: getEmail(browserName),
+      email: getEmail(browserName,testName),
       password,
     });
 

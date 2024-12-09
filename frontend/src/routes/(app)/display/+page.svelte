@@ -69,18 +69,23 @@
     </div>
   {/if}
 </div>
-<footer>
-  <div style="display: flex; gap: 20px; position: relative;">
-    <button on:click={() => (squares = makeSquares(ranking.length))} id="regenerate"
-      class="art-display-button">Regenerate</button>
-    <button on:click={captureDiv} class="art-display-button">Save Art Collage</button>
-  </div>
-</footer>
+<div id="lower-btns" style="">
+  <button on:click={() => (squares = makeSquares(ranking.length))} id="regenerate"
+    class="art-display-button">Regenerate</button>
+  <button on:click={captureDiv} class="art-display-button">Save Art Collage</button>
+</div>
 
 <style>
+  #lower-btns {
+    display: flex; 
+    gap: 20px;
+    position: absolute;
+    bottom: 10px;
+
+  }
   #container {
     width: 100%;
-    height: 100%;
+    height: max-content;
     display: flex;
     justify-content: center;
     align-items: center;
