@@ -28,9 +28,11 @@
     <p class="album">{album.title}</p>
     <p class="duration">{duration}</p>
     <p class="plays">{song.plays}</p>
+    <p class="listened_at">{new Date(song.listened_at).toLocaleString()}</p>
 </div>
 
 <style>
+
     .song {
         display: flex;
         gap: 10px;
@@ -66,6 +68,9 @@
         display: flex;
         gap: 5px;
         align-items: center;
+    }   
+    .listened_at{
+        width: 300px;
     }
 
     .repetitions img {

@@ -1,6 +1,7 @@
 import type { SongInfo } from '../../../../../lib/Song';
 
 export type ProcessOutput = SongInfo & {
+    album_title: string,
     repetitions: number,
     plays: number
 };
@@ -24,7 +25,7 @@ export function processSongs(songs: SongInfo[]): ProcessOutput[] {
     }
 
     // sort songs by time listened
-    songs.sort((a, b) => { return b.listened_at - a.listened_at});
+    /* songs.sort((a, b) => { return b.listened_at - a.listened_at}); */
 
     // if user played the same song multiple times in a row,
     // collapse into one entry and record repetitions
@@ -35,7 +36,8 @@ export function processSongs(songs: SongInfo[]): ProcessOutput[] {
             output.push({
                 ...song,
                 repetitions: 1,
-                plays: ranks[song.isrc]
+                plays: ranks[song.isrc],
+                album_title: song.albums[0].title /** this might bite us later but it will work 4 now */
             });
             prev_isrc = song.isrc;
         } else {
