@@ -1,6 +1,6 @@
 <script>
     import { redirect } from '@sveltejs/kit';
-    import Logout from './logout/Logout.svelte';
+
 
     $: logout = async () => {
         console.log(redirect(302, "/login"));
@@ -13,7 +13,7 @@
             <li id="display"><a href="/display">art display</a></li>
             <li id="listening"><a href="/listening">listening data</a></li>
             <li id="profile"><a href="/profile">profile</a></li>
-            <li id="logout"><Logout></Logout></li>
+            <li id="logout"><a href="/logout" data-sveltekit-preload-data="off">logout</a></li>
         </ul>
     </nav>
     <div class="content">
