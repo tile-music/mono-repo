@@ -1,7 +1,6 @@
 <script>
     import { redirect } from '@sveltejs/kit';
 
-
     $: logout = async () => {
         console.log(redirect(302, "/login"));
 	};

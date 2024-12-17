@@ -60,7 +60,10 @@
         width: 200px;
     }
 
-    .duration, .plays {
+    .duration{
+        width: 110px;
+    } 
+    .plays {
         width: 100px;
     }
 

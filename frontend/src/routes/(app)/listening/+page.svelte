@@ -1,10 +1,12 @@
 <script lang="ts">
-import type { PageData } from "./$types";
-import Song from "./Song.svelte";
-import { processSongs } from "./processSongs";
-export let data: PageData;
-
+    import type { PageData } from "./$types";
+    import Song from "./Song.svelte";
+    import { processSongs } from "./processSongs";
+    export let data: PageData;
     let sortBy = { col: "listened_at", asc: false };
+    $: sortByHelper = (colName: string) =>
+        colName === sortBy.col ? (sortBy.asc ? "▲" : "▼") : "";
+
     $: songs = processSongs(data.songs);
     $: sort = (column: string) => {
         if (sortBy.col == column) {
@@ -34,16 +36,46 @@ export let data: PageData;
         {#if songs != null}
             <div id="headers">
                 <h2 id="art">art</h2>
-                <button id="title" on:click={() => sort("title")} aria-label="Sort by title"><h2>title</h2></button>
-                <button id="artist" on:click={() => sort("artists")} aria-label="Sort by artist"><h2>artist</h2></button>
-                <button id="album" on:click={() => sort("album_title")} aria-label="Sort by album"><h2>album</h2></button>
-                <button id="duration" on:click={() => sort("duration")} aria-label="Sort by duration"><h2>duration</h2></button>
-                <button id="plays" on:click={() => sort("plays")} aria-label="Sort by plays"><h2>plays</h2></button>
-                <button id="listened_at" on:click={() => sort("listened_at")} aria-label="Sort by played at"><h2>played at</h2></button>
-                </div>
+                <button
+                    id="title"
+                    on:click={() => sort("title")}
+                    aria-label="Sort by title"
+                    ><h2>title {sortByHelper("title")}</h2></button
+                >
+                <button
+                    id="artist"
+                    on:click={() => sort("artists")}
+                    aria-label="Sort by artist"
+                    ><h2>artist {sortByHelper("artists")}</h2></button
+                >
+                <button
+                    id="album"
+                    on:click={() => sort("album_title")}
+                    aria-label="Sort by album"
+                    ><h2>album {sortByHelper("album_title")}</h2></button
+                >
+                <button
+                    id="duration"
+                    on:click={() => sort("duration")}
+                    aria-label="Sort by duration"
+                    ><h2>duration {sortByHelper("duration")}</h2></button
+                >
+                <button
+                    id="plays"
+                    on:click={() => sort("plays")}
+                    aria-label="Sort by plays"
+                    ><h2>plays {sortByHelper("plays")}</h2></button
+                >
+                <button
+                    id="listened_at"
+                    on:click={() => sort("listened_at")}
+                    aria-label="Sort by played at"
+                    ><h2>played at {sortByHelper("listened_at")}</h2></button
+                >
+            </div>
             <div id="songs">
                 {#each songs as song}
-                    <Song {song}/>
+                    <Song {song} />
                 {/each}
             </div>
         {:else}
@@ -53,7 +85,6 @@ export let data: PageData;
 </div>
 
 <style>
-    
     /* a{
         text-align: left;
     } */
@@ -70,14 +101,13 @@ export let data: PageData;
         flex-direction: column;
     }
     /* this is temporary  */
-    
 
     h1 {
         margin-bottom: 1em;
     }
 
-    button{
-        all:unset;
+    button {
+        all: unset;
     }
 
     #headers {
@@ -105,7 +135,9 @@ export let data: PageData;
         width: 200px;
     }
 
-    #duration,
+    #duration {
+        width: 110px;
+    }
     #plays {
         width: 100px;
     }
