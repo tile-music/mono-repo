@@ -1,7 +1,7 @@
 <script lang="ts">
   import Square from "./Square.svelte";
-  import { rankSongs } from "./display";
-  import type { RankSelection } from "./display";
+  import type { DisplayDataRequest } from '../../../../../lib/Request';
+  import { deserialize } from '$app/forms';
   
   import { generateFullArrangement } from "./pack";
   
@@ -10,7 +10,21 @@
   export let data: PageData;
   
   let artDisplayRef: any;
-  let selection: RankSelection = "song";
+
+  let displayContainerSize = {width: 0, height: 0};
+  $: displaySize = Math.min(displayContainerSize.width, displayContainerSize.height);
+
+  const filters: DisplayDataRequest = {
+    aggregate: "album",
+    num_cells: null,
+    date: {start: null, end: null},
+    rank_determinant: "listens"
+  };
+
+  let prevFilters: DisplayDataRequest = {...filters};
+  prevFilters.date = {...filters.date};
+
+  let timeFrame: "this-week" | "this-month" | "year-to-date" | "this-year" | "all-time" = "all-time";
 
   async function captureDiv() {
     try {
@@ -27,7 +41,7 @@
     }
   }
 
-  const makeSquares = (maxSquares: number): { x: number; y: number; size: number }[] => {
+  function makeSquares(maxSquares: number): { x: number; y: number; size: number }[] {
     // skip computation if no squares are being generated
     if (maxSquares == 0) return [];
 
@@ -43,55 +57,169 @@
     return squares;
   };
 
+  let refreshStatus = "";
+  async function refresh() {
+    // set date range
+    const startDate = new Date();
 
-  // generate initial square arrangement and song ranking;
-  // make them reactive to changes in ranking method
-  $: ranking = rankSongs(data.songs, selection);
-  $: squares = makeSquares(ranking.length);
+    switch (timeFrame) {
+      case "this-week":
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case "this-month":
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case "year-to-date":
+        startDate.setFullYear(startDate.getFullYear(), 0, 1);
+        break;
+      case "this-year":
+        startDate.setMonth(startDate.getMonth() - 12);
+        break;
+    }
+
+    if (timeFrame != "all-time")
+      filters.date.start = startDate.toISOString().substring(0, 10);
+
+    // send new data request only if filters have changed
+    if (JSON.stringify(filters) !== JSON.stringify(prevFilters)) {
+      // send request
+      refreshStatus = "Refreshing...";
+      const res = await fetch('?/refresh', {
+        method: 'POST', body: JSON.stringify(filters)
+      });
+
+      // parse response
+      const response = deserialize(await res.text());
+      console.log(response);
+      if (response.type === "success") {
+        refreshStatus = "";
+        data.songs = response.data!.songs;
+        prevFilters = {...filters};
+        prevFilters.date = {...filters.date};
+      } else if (response.type === "error") {
+        refreshStatus = "Error: " + response.error.message;
+      }
+    }
+
+    // generate new square arrangement
+    squares = makeSquares(data.songs.length);
+  }
+
+  // generate initial square arrangement
+  $: squares = makeSquares(data.songs.length);
 </script>
 
-<select bind:value={selection} class="art-display-button">
-  <option value="song">Song</option>
-  <option value="album">Album</option>
-</select>
-
 <div id="container">
-  {#if squares.length > 0 }
-    <div id="display" bind:this={artDisplayRef} class="capture-area">
+  <div id="filters">
+    <h1>art display</h1>
+    <div class="input-section">
+      <h2>basic information</h2>
+      <div class="labeled-input">
+        <label for="music-type">music type</label>
+        <select id="music-type" bind:value={filters.aggregate}>
+          <option value="song">song</option>
+          <option value="album">album</option>
+        </select>
+      </div>
+      <div class="labeled-input">
+        <label for="time-frame">time frame</label>
+        <select id="time-frame" bind:value={timeFrame}>
+          <option value="this-week">this week</option>
+          <option value="this-month">this month</option>
+          <option value="year-to-date">year to date</option>
+          <option value="this-year">this year</option>
+          <option value="all-time">all time</option>
+        </select>
+      </div>
+    </div>
+    <div class="input-section">
+      <h2>display size</h2>
+      <div class="labeled-input">
+        <label for="num-cells">number of cells</label>
+        <input id="num-cells" type="number" name="num-cells" bind:value={filters.num_cells} placeholder="max">
+      </div>
+      <div class="labeled-input">
+        <label for="rank-determinant">rank determinant</label>
+        <select id="rank-determinant" bind:value={filters.rank_determinant}>
+          <option value="listens">listens</option>
+          <option value="time">time</option>
+        </select>
+      </div>
+    </div>
+    <p id="refresh-status">{refreshStatus}</p>
+    <div id="lower-btns" style="">
+      <button on:click={refresh} id="regenerate"
+        class="art-display-button">Regenerate</button>
+      <button on:click={captureDiv} class="art-display-button">Export</button>
+    </div>
+  </div>
+  <div id="display-container"
+    bind:clientWidth={displayContainerSize.width}
+    bind:clientHeight={displayContainerSize.height}
+  >
+    {#if squares.length > 0 }
+    <div id="display" bind:this={artDisplayRef} class="capture-area"
+      style={`width: ${displaySize}px; height: ${displaySize}px`}}>
       {#each squares as square, i}
-        <Square {square} song={ranking[i].song} />
+        <Square {square} song={data.songs[i].song} />
       {/each}
     </div>
-  {:else}
-    <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
-      <h1>No listening data!</h1>
-      <p>To generate a display, <a href="/link-spotify">link your Spotify account</a> and listen to some music!</p>
-    </div>
-  {/if}
-</div>
-<div id="lower-btns" style="">
-  <button on:click={() => (squares = makeSquares(ranking.length))} id="regenerate"
-    class="art-display-button">Regenerate</button>
-  <button on:click={captureDiv} class="art-display-button">Save Art Collage</button>
+    {:else}
+      <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
+        <h1>No listening data!</h1>
+        <p>To generate a display, <a href="/link-spotify">link your Spotify account</a> and listen to some music!</p>
+      </div>
+    {/if}
+  </div>
 </div>
 
 <style>
+  #refresh-status {
+    margin-top: auto;
+  }
   #lower-btns {
     display: flex; 
     gap: 20px;
-    position: absolute;
-    bottom: 10px;
-
   }
+  
   #container {
     width: 100%;
-    height: 90%;
+    height: 100%;
+    display: flex;
+  }
+
+  #filters {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .labeled-input {
+    display: flex;
+    align-items: center;
+  }
+
+  .labeled-input label {
+    width: 150px;
+  }
+
+  #display-container {
+    width: calc(100% - 300px);
+    height: 100%;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
   }
+
   #display {
-    height: calc(100vh - 150px);
     aspect-ratio: 1 / 1;
     position: relative;
   }
@@ -106,5 +234,28 @@
   #placeholder-display p {
     width: 20em;
     text-align: center;
+  }
+
+  select, input[type="number"] {
+    background-color: var(--background);
+    border: 0;
+    border-bottom: 2px solid var(--medium);
+    font-family: "Archivo", sans-serif;
+    font-size: 15px;
+    padding: 0 2px; /* compensate for border */
+    color: var(--text);
+  }
+
+  select {
+    width: 100px;
+  }
+
+  input[type="number"] {
+    width: 60px;
+  }
+
+  select:hover, select:focus, input:hover, input:focus {
+    outline: none;
+    background-color: var(--midground);
   }
 </style>
