@@ -21,10 +21,15 @@
     rank_determinant: "listens"
   };
 
+  let timeFrame: "this-week" | "this-month" | "year-to-date" | "this-year" | "all-time" = "all-time";
+
+  // let dateStrings: {
+  //   start: string | null,
+  //   end: string | null
+  // } = { start: null, end: null };
+
   let prevFilters: DisplayDataRequest = {...filters};
   prevFilters.date = {...filters.date};
-
-  let timeFrame: "this-week" | "this-month" | "year-to-date" | "this-year" | "all-time" = "all-time";
 
   async function captureDiv() {
     try {
@@ -62,23 +67,26 @@
     // set date range
     const startDate = new Date();
 
-    switch (timeFrame) {
-      case "this-week":
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case "this-month":
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
-      case "year-to-date":
-        startDate.setFullYear(startDate.getFullYear(), 0, 1);
-        break;
-      case "this-year":
-        startDate.setMonth(startDate.getMonth() - 12);
-        break;
-    }
+    if (timeFrame != "all-time") {
+      switch (timeFrame) {
+        case "this-week":
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case "this-month":
+          startDate.setMonth(startDate.getMonth() - 1);
+          break;
+        case "year-to-date":
+          startDate.setFullYear(startDate.getFullYear(), 0, 1);
+          break;
+        case "this-year":
+          startDate.setMonth(startDate.getMonth() - 12);
+          break;
+      }
 
-    if (timeFrame != "all-time")
-      filters.date.start = startDate.toISOString().substring(0, 10);
+      filters.date.start = startDate.getTime();
+    } else {
+      filters.date.start = null;
+    }
 
     // send new data request only if filters have changed
     if (JSON.stringify(filters) !== JSON.stringify(prevFilters)) {
@@ -90,7 +98,6 @@
 
       // parse response
       const response = deserialize(await res.text());
-      console.log(response);
       if (response.type === "success") {
         refreshStatus = "";
         data.songs = response.data!.songs;
