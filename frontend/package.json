@@ -34,6 +34,7 @@
     "@sveltejs/adapter-node": "^5.2.8",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
     "dotenv": "^16.4.5",
+    "flowbite-svelte": "^0.47.4",
     "html-to-image": "^1.11.11",
     "import": "^0.0.6"
   }

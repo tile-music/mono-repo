@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { writable } from "svelte/store";
-  type SpotifyStatus = {status: "true"| "false" | "loading"};
+  type SpotifyStatus = {status: "true" | "false" | "loading"};
   let enabled = writable<SpotifyStatus>({status: "loading"});
   /**
    * Asynchronously checks the Spotify login status by sending a POST request to the "/check-spotify" endpoint.

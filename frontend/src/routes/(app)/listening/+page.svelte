@@ -1,13 +1,36 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
+
     import Song from "./Song.svelte";
     import { processSongs } from "./processSongs";
-    export let data: PageData;
+    import type {ListeningDataReqPerams} from "../../../../../lib/ListeningDataReqPerams";
+    import DatePickers from "../../date-picker/DatePickers.svelte";
+    import  dateRangeObj  from "../../date-picker/DatePickers.svelte";
+    import { onMount } from "svelte";
+
+    let listeningData: any = null;
+    onMount(async () => await getData(dateRangeObj));
+    const getData = async (listeningDataReqPerams:any): Promise<any> => {
+        console.log("listeningDataReqPerams", listeningDataReqPerams);
+        const response = await fetch("/get-listening", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(listeningDataReqPerams),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        listeningData = await response.json();
+        
+    }
+
     let sortBy = { col: "listened_at", asc: false };
     $: sortByHelper = (colName: string) =>
         colName === sortBy.col ? (sortBy.asc ? "▲" : "▼") : "";
-
-    $: songs = processSongs(data.songs);
+    $: songs = processSongs(listeningData.songs);
     $: sort = (column: string) => {
         if (sortBy.col == column) {
             sortBy.asc = !sortBy.asc;
@@ -31,7 +54,12 @@
 </script>
 
 <div id="container">
-    <h1>Listening Data</h1>
+    <div id="listening-data-menu">
+        <h1>Listening Data</h1>
+        <DatePickers></DatePickers>
+
+    </div>
+
     <div id="scroll-container">
         {#if songs != null}
             <div id="headers">
