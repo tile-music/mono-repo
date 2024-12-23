@@ -50,7 +50,7 @@
     // skip computation if no squares are being generated
     if (maxSquares == 0) return [];
 
-    const max = Math.min(maxSquares, 15);
+    const max = Math.min(maxSquares, 14);
     const arrangement = generateFullArrangement(1, Math.max(max, 0), max, 0.0, 0.1);
 
     // translate the output of arrangement into a form usable by the Square component
