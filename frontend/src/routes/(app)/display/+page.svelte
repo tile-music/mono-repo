@@ -62,7 +62,8 @@
     return squares;
   };
 
-  let refreshStatus = "";
+  let refreshStatus: {status: "refreshing"} |
+    { status: "idle" } | { status: "error", error: string } = { status: "idle"};
   async function refresh() {
     // set date range
     const startDate = new Date();
@@ -89,23 +90,23 @@
     }
 
     // send new data request only if filters have changed
-    if (JSON.stringify(filters) !== JSON.stringify(prevFilters)) {
-      // send request
-      refreshStatus = "Refreshing...";
-      const res = await fetch('?/refresh', {
-        method: 'POST', body: JSON.stringify(filters)
-      });
+    if (JSON.stringify(filters) == JSON.stringify(prevFilters)) return;
 
-      // parse response
-      const response = deserialize(await res.text());
-      if (response.type === "success") {
-        refreshStatus = "";
-        data.songs = response.data!.songs;
-        prevFilters = {...filters};
-        prevFilters.date = {...filters.date};
-      } else if (response.type === "error") {
-        refreshStatus = "Error: " + response.error.message;
-      }
+    // send request
+    refreshStatus = { status: "refreshing" };
+    const res = await fetch('?/refresh', {
+      method: 'POST', body: JSON.stringify(filters)
+    });
+
+    // parse response
+    const response = deserialize(await res.text());
+    if (response.type === "success") {
+      refreshStatus = { status: "idle" };
+      data.songs = response.data!.songs;
+      prevFilters = {...filters};
+      prevFilters.date = {...filters.date};
+    } else if (response.type === "error") {
+      refreshStatus = { status: "error", error: response.error.message};
     }
 
     // generate new square arrangement
@@ -123,14 +124,14 @@
       <h2>basic information</h2>
       <div class="labeled-input">
         <label for="music-type">music type</label>
-        <select id="music-type" bind:value={filters.aggregate}>
+        <select id="music-type" bind:value={filters.aggregate}  on:change={refresh}>
           <option value="song">song</option>
           <option value="album">album</option>
         </select>
       </div>
       <div class="labeled-input">
         <label for="time-frame">time frame</label>
-        <select id="time-frame" bind:value={timeFrame}>
+        <select id="time-frame" bind:value={timeFrame} on:change={refresh}>
           <option value="this-week">this week</option>
           <option value="this-month">this month</option>
           <option value="year-to-date">year to date</option>
@@ -143,20 +144,20 @@
       <h2>display size</h2>
       <div class="labeled-input">
         <label for="num-cells">number of cells</label>
-        <input id="num-cells" type="number" name="num-cells" bind:value={filters.num_cells} placeholder="max">
+        <input id="num-cells" type="number" name="num-cells"
+          bind:value={filters.num_cells} on:blur={refresh} placeholder="max">
       </div>
       <div class="labeled-input">
         <label for="rank-determinant">rank determinant</label>
-        <select id="rank-determinant" bind:value={filters.rank_determinant}>
+        <select id="rank-determinant" bind:value={filters.rank_determinant} on:change={refresh}>
           <option value="listens">listens</option>
           <option value="time">time</option>
         </select>
       </div>
     </div>
-    <p id="refresh-status">{refreshStatus}</p>
     <div id="lower-btns" style="">
-      <button on:click={refresh} id="regenerate"
-        class="art-display-button">Regenerate</button>
+      <button on:click={() => squares = makeSquares(data.songs.length)} id="regenerate"
+        class="art-display-button" >Regenerate</button>
       <button on:click={captureDiv} class="art-display-button">Export</button>
     </div>
   </div>
@@ -164,13 +165,24 @@
     bind:clientWidth={displayContainerSize.width}
     bind:clientHeight={displayContainerSize.height}
   >
-    {#if squares.length > 0 }
-    <div id="display" bind:this={artDisplayRef} class="capture-area"
-      style={`width: ${displaySize}px; height: ${displaySize}px`}}>
-      {#each squares as square, i}
-        <Square {square} song={data.songs[i].song} />
-      {/each}
-    </div>
+    {#if squares.length > 0}
+      {#if refreshStatus.status == "idle"}
+        <div id="display" bind:this={artDisplayRef} class="capture-area"
+          style={`width: ${displaySize}px; height: ${displaySize}px`}}>
+          {#each squares as square, i}
+            <Square {square} song={data.songs[i].song} />
+          {/each}
+        </div>
+      {:else if refreshStatus.status == "refreshing"}
+        <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
+          <h1>Regenerating...</h1>
+        </div>
+      {:else}
+        <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
+          <h1>Error!</h1>
+          <p>{refreshStatus.error}</p>
+        </div>
+      {/if}
     {:else}
       <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
         <h1>No listening data!</h1>
@@ -181,12 +193,10 @@
 </div>
 
 <style>
-  #refresh-status {
-    margin-top: auto;
-  }
   #lower-btns {
     display: flex; 
     gap: 20px;
+    margin-top: auto;
   }
   
   #container {
