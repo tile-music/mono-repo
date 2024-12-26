@@ -50,6 +50,9 @@
     // skip computation if no squares are being generated
     if (maxSquares == 0) return [];
 
+    // 1 square requires no computation
+    if (maxSquares == 1) return [{ x: 0, y: 0, size: 1 }];
+
     const max = Math.min(maxSquares, 14);
     const arrangement = generateFullArrangement(1, Math.max(max, 0), max, 0.0, 0.1);
 
