@@ -2,12 +2,13 @@
   import Square from "./Square.svelte";
   import type { DisplayDataRequest } from '../../../../../lib/Request';
   import { deserialize } from '$app/forms';
+  import type { SongInfo } from '../../../../../lib/Song';
+  import { onMount } from 'svelte';
   
   import { generateFullArrangement } from "./pack";
-  
-  import type { PageData } from "./$types";
+
   import { toPng } from "html-to-image";
-  export let data: PageData;
+  let songs: { song: SongInfo, quantity: number }[] = [];
   
   let artDisplayRef: any;
 
@@ -28,8 +29,7 @@
   //   end: string | null
   // } = { start: null, end: null };
 
-  let prevFilters: DisplayDataRequest = {...filters};
-  prevFilters.date = {...filters.date};
+  let prevFilters: DisplayDataRequest;
 
   async function captureDiv() {
     try {
@@ -66,8 +66,9 @@
   };
 
   let refreshStatus: {status: "refreshing"} |
-    { status: "idle" } | { status: "error", error: string } = { status: "idle"};
+    { status: "idle" } | { status: "error", error: string } = { status: "refreshing"};
   async function refresh() {
+    console.log("refreshing");
     // set date range
     const startDate = new Date();
 
@@ -105,19 +106,22 @@
     const response = deserialize(await res.text());
     if (response.type === "success") {
       refreshStatus = { status: "idle" };
-      data.songs = response.data!.songs;
+      songs = response.data!.songs as typeof songs;
       prevFilters = {...filters};
       prevFilters.date = {...filters.date};
+
+      // generate new square arrangement
+      squares = makeSquares(songs.length);
     } else if (response.type === "error") {
       refreshStatus = { status: "error", error: response.error.message};
+      songs = [];
     }
-
-    // generate new square arrangement
-    squares = makeSquares(data.songs.length);
   }
 
   // generate initial square arrangement
-  $: squares = makeSquares(data.songs.length);
+  $: squares = makeSquares(songs.length);
+
+  onMount(refresh);
 </script>
 
 <div id="container">
@@ -159,7 +163,7 @@
       </div>
     </div>
     <div id="lower-btns" style="">
-      <button on:click={() => squares = makeSquares(data.songs.length)} id="regenerate"
+      <button on:click={() => squares = makeSquares(songs.length)} id="regenerate"
         class="art-display-button" >Regenerate</button>
       <button on:click={captureDiv} class="art-display-button">Export</button>
     </div>
@@ -168,17 +172,22 @@
     bind:clientWidth={displayContainerSize.width}
     bind:clientHeight={displayContainerSize.height}
   >
-    {#if squares.length > 0}
+    {#if squares.length == 0 && refreshStatus.status == "idle"}
+      <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
+        <h1>No listening data!</h1>
+        <p>To generate a display, <a href="/link-spotify">link your Spotify account</a> and listen to some music!</p>
+      </div>
+    {:else}
       {#if refreshStatus.status == "idle"}
         <div id="display" bind:this={artDisplayRef} class="capture-area"
           style={`width: ${displaySize}px; height: ${displaySize}px`}}>
           {#each squares as square, i}
-            <Square {square} song={data.songs[i].song} />
+            <Square {square} song={songs[i].song} />
           {/each}
         </div>
       {:else if refreshStatus.status == "refreshing"}
         <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
-          <h1>Regenerating...</h1>
+          <h1>Loading...</h1>
         </div>
       {:else}
         <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
@@ -186,11 +195,6 @@
           <p>{refreshStatus.error}</p>
         </div>
       {/if}
-    {:else}
-      <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
-        <h1>No listening data!</h1>
-        <p>To generate a display, <a href="/link-spotify">link your Spotify account</a> and listen to some music!</p>
-      </div>
     {/if}
   </div>
 </div>
