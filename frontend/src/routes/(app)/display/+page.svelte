@@ -122,12 +122,45 @@
   $: squares = makeSquares(songs.length);
 
   onMount(refresh);
+
+  const toggleMenu = () => {
+    console.log("clicked")
+    const filters = document.getElementById("filters");
+    const display = document.getElementById("display-container");
+    const openMenu = document.getElementById("open-menu-header");
+    console.log(`${filters}, ${JSON.stringify(filters?.style)}`);
+    if(filters && display && openMenu) {
+      if(filters.style.display == "flex" || filters.style.display == "") {
+        filters.style.display = "none"
+        display.style.width = "100%";
+        openMenu.style.display = "inline";  
+      } else {
+        filters.style.display = "flex";
+        display.style.width = "calc(100% - 300px)";
+        openMenu.style.display = "none";
+      } 
+    } else if (!filters){
+      throw Error("filters not found");
+    } else if (!display){
+      throw Error("display not found");
+    } else if(!openMenu){
+      throw Error("openMenu not found");
+    }
+
+  }
 </script>
 
 <div id="container">
+  <div id="open-menu-header" >
+    <button on:click={toggleMenu} id="open-menu" class="art-display-menu-button">menu</button>
+  </div>
   <div id="filters">
-    <h1>art display</h1>
     <div class="input-section">
+      <div id="close-menu-header">
+        <h1>Filters</h1>
+        <button on:click={toggleMenu} id="close-menu" class="art-display-menu-button">close</button>
+      </div>
+
       <h2>basic information</h2>
       <div class="labeled-input">
         <label for="music-type">music type</label>
@@ -144,6 +177,7 @@
           <option value="year-to-date">year to date</option>
           <option value="this-year">this year</option>
           <option value="all-time">all time</option>
+          <option value="custom">custom</option>
         </select>
       </div>
     </div>
@@ -200,6 +234,19 @@
 </div>
 
 <style>
+  #close-menu-header {
+    max-width: 300px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #open-menu-header {
+    display: none;
+    position: absolute;
+    top: .8;
+    left: .5;
+    z-index: 1;
+  }
   #lower-btns {
     display: flex; 
     gap: 20px;
@@ -213,8 +260,9 @@
   }
 
   #filters {
-    width: 300px;
     display: flex;
+    width: 30%;
+    min-width: 300px;
     flex-direction: column;
     gap: 30px;
   }
@@ -231,7 +279,7 @@
   }
 
   .labeled-input label {
-    width: 150px;
+      width: 150px;
   }
 
   #display-container {
