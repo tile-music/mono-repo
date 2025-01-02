@@ -18,6 +18,19 @@
     displayContainerSize.width,
     displayContainerSize.height,
   );
+  type FilterMenu = {
+    filterRef: HTMLDivElement | null;
+    artDisplayRef: HTMLDivElement | null;
+    menuButtonRef: HTMLDivElement | null;
+    customDateRef: HTMLDivElement | null;
+  }
+  
+  let filterMenu : FilterMenu = {
+    filterRef: null,
+    artDisplayRef: null,
+    menuButtonRef: null,
+    customDateRef: null
+  }
 
   const filters: DisplayDataRequest = {
     aggregate: "album",
@@ -95,15 +108,14 @@
     // set date range
     const startDate = new Date();
     const endDate = new Date();
-    const customDate = document.getElementById("custome-date");
-    if (customDate) {
-      if (timeFrame == "custom") {
-        customDate.style.display = "inline";
-      } else {
-        customDate.style.display = "none";
-        dateStrings.start = null;
-        dateStrings.end = null;
-      }
+
+
+    if (timeFrame == "custom") {
+      filterMenu.customDateRef!.style.display = "inline";
+    } else {
+      filterMenu.customDateRef!.style.display = "none";
+      dateStrings.start = null;
+      dateStrings.end = null;
     }
     if (timeFrame != "all-time") {
       switch (timeFrame) {
@@ -177,45 +189,44 @@
   onMount(refresh);
 
   const toggleMenu = () => {
-    //console.log("clicked");
-    const filters = document.getElementById("filters");
-    const display = document.getElementById("display-container");
-    const openMenu = document.getElementById("open-menu-header");
-    //console.log(`${filters}, ${JSON.stringify(filters?.style)}`);
-    if (filters && display && openMenu) {
-      if (filters.style.display == "flex" || filters.style.display == "") {
-        filters.style.display = "none";
-        display.style.width = "100%";
-        openMenu.style.display = "inline";
+    if (filterMenu.filterRef && filterMenu.artDisplayRef && filterMenu.menuButtonRef) {
+      console.log(filterMenu.filterRef.style.display);
+      console.log(filterMenu.artDisplayRef.style.width);
+      if (filterMenu.filterRef.style.display == "flex" || filterMenu.filterRef.style.display == "") {
+        filterMenu.filterRef.style.display = "none";
+        filterMenu.artDisplayRef.style.width = "100%";
+        filterMenu.menuButtonRef.style.display = "block";
       } else {
-        filters.style.display = "flex";
-        display.style.width = "calc(100% -300px)";
-        openMenu.style.display = "none";
+        filterMenu.filterRef.style.display = "flex";
+        filterMenu.artDisplayRef.style.setProperty("width", "70%");
+        console.log(filterMenu.artDisplayRef.style.width);
+        filterMenu.menuButtonRef.style.display = "none";
       } 
-    } else if (!filters) {
+    } else if (!filterMenu.menuButtonRef) {
       throw Error("filters not found");
-    } else if (!display) {
+    } else if (!filterMenu.artDisplayRef) {
       throw Error("display not found");
-    } else if (!openMenu) {
+    } else if (!filterMenu.menuButtonRef) {
       throw Error("openMenu not found");
     }
   };
 </script>
 
 <div id="container">
-  <div id="open-menu-header">
-    <button on:click={toggleMenu} id="open-menu" class="art-display-menu-button"
+  <div id="open-menu-header" bind:this={filterMenu.menuButtonRef}>
+    <button on:click={toggleMenu}  id="open-menu" class="art-display-menu-button"
       >menu</button
     >
   </div>
-  <div id="filters">
+  <div id="filters" bind:this={filterMenu.filterRef}>
     <div class="input-section">
       <div id="close-menu-header">
         <h1>Filters</h1>
         <button
           on:click={toggleMenu}
           id="close-menu"
-          class="art-display-menu-button">close</button
+          class="art-display-menu-button"
+          >close</button
         >
       </div>
 
@@ -242,7 +253,7 @@
           <option value="custom">custom</option>
         </select>
       </div>
-      <div id="custome-date">
+      <div id="custome-date" style="gap: 15px;" bind:this={filterMenu.customDateRef}>
         <div class="labeled-input" aria-label="custom-date">
           <label for="start-date">start date</label>
           <input
@@ -303,6 +314,7 @@
     id="display-container"
     bind:clientWidth={displayContainerSize.width}
     bind:clientHeight={displayContainerSize.height}
+    bind:this={filterMenu.artDisplayRef}
   >
     {#if squares.length == 0 && refreshStatus.status == "idle"}
       <div
