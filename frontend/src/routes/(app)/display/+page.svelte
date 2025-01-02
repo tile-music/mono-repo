@@ -1,34 +1,47 @@
 <script lang="ts">
   import Square from "./Square.svelte";
-  import type { DisplayDataRequest } from '../../../../../lib/Request';
-  import { deserialize } from '$app/forms';
-  import type { SongInfo } from '../../../../../lib/Song';
-  import { onMount } from 'svelte';
-  
+  import type { DisplayDataRequest } from "../../../../../lib/Request";
+  import { deserialize } from "$app/forms";
+  import type { SongInfo } from "../../../../../lib/Song";
+  import { onMount } from "svelte";
+
   import { generateFullArrangement } from "./pack";
 
   import { toPng } from "html-to-image";
-  let songs: { song: SongInfo, quantity: number }[] = [];
-  
+
+  let songs: { song: SongInfo; quantity: number }[] = [];
+
   let artDisplayRef: any;
 
-  let displayContainerSize = {width: 0, height: 0};
-  $: displaySize = Math.min(displayContainerSize.width, displayContainerSize.height);
+  let displayContainerSize = { width: 0, height: 0 };
+  $: displaySize = Math.min(
+    displayContainerSize.width,
+    displayContainerSize.height,
+  );
 
   const filters: DisplayDataRequest = {
     aggregate: "album",
     num_cells: null,
-    date: {start: null, end: null},
-    rank_determinant: "listens"
+    date: { start: null, end: null },
+    rank_determinant: "listens",
   };
 
-  let timeFrame: "this-week" | "this-month" | "year-to-date" | "this-year" | "all-time" = "all-time";
+  
 
-  // let dateStrings: {
-  //   start: string | null,
-  //   end: string | null
-  // } = { start: null, end: null };
+  let timeFrame:
+    | "this-week"
+    | "this-month"
+    | "year-to-date"
+    | "this-year"
+    | "all-time"
+    | "custom" = "all-time";
 
+  let dateStrings: {
+    start: string | null;
+    end: string | null;
+  } = { start: null, end: null };
+
+  //what is this for?
   let prevFilters: DisplayDataRequest;
 
   async function captureDiv() {
@@ -46,7 +59,9 @@
     }
   }
 
-  function makeSquares(maxSquares: number): { x: number; y: number; size: number }[] {
+  function makeSquares(
+    maxSquares: number,
+  ): { x: number; y: number; size: number }[] {
     // skip computation if no squares are being generated
     if (maxSquares == 0) return [];
 
@@ -54,24 +69,42 @@
     if (maxSquares == 1) return [{ x: 0, y: 0, size: 1 }];
 
     const max = Math.min(maxSquares, 14);
-    const arrangement = generateFullArrangement(1, Math.max(max, 0), max, 0.0, 0.1);
+    const arrangement = generateFullArrangement(
+      1,
+      Math.max(max, 0),
+      max,
+      0.0,
+      0.1,
+    );
 
     // translate the output of arrangement into a form usable by the Square component
-    const squares: { x: number, y: number, size: number }[] = [];
+    const squares: { x: number; y: number; size: number }[] = [];
     for (const square of arrangement) {
       squares.push({ x: square.x, y: square.y, size: square.width });
     }
 
     return squares;
-  };
+  }
 
-  let refreshStatus: {status: "refreshing"} |
-    { status: "idle" } | { status: "error", error: string } = { status: "refreshing"};
+  let refreshStatus:
+    | { status: "refreshing" }
+    | { status: "idle" }
+    | { status: "error"; error: string } = { status: "refreshing" };
   async function refresh() {
-    console.log("refreshing");
+    //console.log("refreshing");
     // set date range
     const startDate = new Date();
-
+    const endDate = new Date();
+    const customDate = document.getElementById("custome-date");
+    if (customDate) {
+      if (timeFrame == "custom") {
+        customDate.style.display = "inline";
+      } else {
+        customDate.style.display = "none";
+        dateStrings.start = null;
+        dateStrings.end = null;
+      }
+    }
     if (timeFrame != "all-time") {
       switch (timeFrame) {
         case "this-week":
@@ -86,34 +119,54 @@
         case "this-year":
           startDate.setMonth(startDate.getMonth() - 12);
           break;
+        case "custom":
+          if (!(dateStrings.start?.split("-").length == 3 ) && !(dateStrings.end?.split("-").length == 3 )) {
+            return;
+          } else {
+            //console.log(dateStrings);
+            dateStrings.start ? startDate.setTime(new Date(dateStrings.start).valueOf()) : null;
+            dateStrings.end ? endDate.setTime(new Date(dateStrings.end).valueOf()) : null;
+            break;  
+          }
+        default:
+          throw Error("invalid time frame selection");
       }
-
-      filters.date.start = startDate.getTime();
+      //console.log(`start: ${startDate.toISOString()} \n end: ${endDate.toISOString()} `);
+      filters.date.start = startDate.valueOf();
+      filters.date.end = endDate.valueOf();
     } else {
       filters.date.start = null;
+      filters.date.end = null;
+
     }
 
     // send new data request only if filters have changed
     if (JSON.stringify(filters) == JSON.stringify(prevFilters)) return;
 
     // send request
+
     refreshStatus = { status: "refreshing" };
-    const res = await fetch('?/refresh', {
-      method: 'POST', body: JSON.stringify(filters)
+    const res = await fetch("?/refresh", {
+      method: "POST",
+      body: JSON.stringify(filters),
     });
 
     // parse response
     const response = deserialize(await res.text());
+    //console.log(response);
     if (response.type === "success") {
       refreshStatus = { status: "idle" };
       songs = response.data!.songs as typeof songs;
-      prevFilters = {...filters};
-      prevFilters.date = {...filters.date};
-
+      prevFilters = { ...filters };
+      prevFilters.date = { ...filters.date };
       // generate new square arrangement
-      squares = makeSquares(songs.length);
+      if(songs) {squares = makeSquares(songs.length);}
+      else {
+        refreshStatus = { status: "error", error: "No songs found" };
+        songs = [];
+      }
     } else if (response.type === "error") {
-      refreshStatus = { status: "error", error: response.error.message};
+      refreshStatus = { status: "error", error: response.error.message };
       songs = [];
     }
   }
@@ -124,47 +177,56 @@
   onMount(refresh);
 
   const toggleMenu = () => {
-    console.log("clicked")
+    //console.log("clicked");
     const filters = document.getElementById("filters");
     const display = document.getElementById("display-container");
     const openMenu = document.getElementById("open-menu-header");
-    console.log(`${filters}, ${JSON.stringify(filters?.style)}`);
-    if(filters && display && openMenu) {
-      if(filters.style.display == "flex" || filters.style.display == "") {
-        filters.style.display = "none"
+    //console.log(`${filters}, ${JSON.stringify(filters?.style)}`);
+    if (filters && display && openMenu) {
+      if (filters.style.display == "flex" || filters.style.display == "") {
+        filters.style.display = "none";
         display.style.width = "100%";
-        openMenu.style.display = "inline";  
+        openMenu.style.display = "inline";
       } else {
         filters.style.display = "flex";
-        display.style.width = "calc(100% - 300px)";
+        display.style.width = "calc(100% -300px)";
         openMenu.style.display = "none";
       } 
-    } else if (!filters){
+    } else if (!filters) {
       throw Error("filters not found");
-    } else if (!display){
+    } else if (!display) {
       throw Error("display not found");
-    } else if(!openMenu){
+    } else if (!openMenu) {
       throw Error("openMenu not found");
     }
-
-  }
+  };
 </script>
 
 <div id="container">
-  <div id="open-menu-header" >
-    <button on:click={toggleMenu} id="open-menu" class="art-display-menu-button">menu</button>
+  <div id="open-menu-header">
+    <button on:click={toggleMenu} id="open-menu" class="art-display-menu-button"
+      >menu</button
+    >
   </div>
   <div id="filters">
     <div class="input-section">
       <div id="close-menu-header">
         <h1>Filters</h1>
-        <button on:click={toggleMenu} id="close-menu" class="art-display-menu-button">close</button>
+        <button
+          on:click={toggleMenu}
+          id="close-menu"
+          class="art-display-menu-button">close</button
+        >
       </div>
 
       <h2>basic information</h2>
       <div class="labeled-input">
         <label for="music-type">music type</label>
-        <select id="music-type" bind:value={filters.aggregate}  on:change={refresh}>
+        <select
+          id="music-type"
+          bind:value={filters.aggregate}
+          on:change={refresh}
+        >
           <option value="song">song</option>
           <option value="album">album</option>
         </select>
@@ -180,55 +242,109 @@
           <option value="custom">custom</option>
         </select>
       </div>
+      <div id="custome-date">
+        <div class="labeled-input" aria-label="custom-date">
+          <label for="start-date">start date</label>
+          <input
+            id="start-date"
+            type="date"
+            name="start-date"
+            bind:value={dateStrings.start}
+            on:blur={refresh}
+          />
+        </div>
+        <div class="labeled-input" aria-label="custom-date">
+          <label for="end-date">end date</label>
+          <input
+            id="end-date"
+            type="date"
+            name="end-date"
+            bind:value={dateStrings.end}
+            on:blur={refresh}
+          />
+        </div>
+      </div>
     </div>
     <div class="input-section">
       <h2>display size</h2>
       <div class="labeled-input">
         <label for="num-cells">number of cells</label>
-        <input id="num-cells" type="number" name="num-cells"
-          bind:value={filters.num_cells} on:blur={refresh} placeholder="max">
+        <input
+          id="num-cells"
+          type="number"
+          name="num-cells"
+          bind:value={filters.num_cells}
+          on:blur={refresh}
+          placeholder="max"
+        />
       </div>
       <div class="labeled-input">
         <label for="rank-determinant">rank determinant</label>
-        <select id="rank-determinant" bind:value={filters.rank_determinant} on:change={refresh}>
+        <select
+          id="rank-determinant"
+          bind:value={filters.rank_determinant}
+          on:change={refresh}
+        >
           <option value="listens">listens</option>
           <option value="time">time</option>
         </select>
       </div>
     </div>
     <div id="lower-btns" style="">
-      <button on:click={() => squares = makeSquares(songs.length)} id="regenerate"
-        class="art-display-button" >Regenerate</button>
+      <button
+        on:click={() => (squares = makeSquares(songs.length))}
+        id="regenerate"
+        class="art-display-button">Regenerate</button
+      >
       <button on:click={captureDiv} class="art-display-button">Export</button>
     </div>
   </div>
-  <div id="display-container"
+  <div
+    id="display-container"
     bind:clientWidth={displayContainerSize.width}
     bind:clientHeight={displayContainerSize.height}
   >
     {#if squares.length == 0 && refreshStatus.status == "idle"}
-      <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
+      <div
+        id="placeholder-display"
+        bind:this={artDisplayRef}
+        class="capture-area"
+      >
         <h1>No listening data!</h1>
-        <p>To generate a display, <a href="/link-spotify">link your Spotify account</a> and listen to some music!</p>
+        <p>
+          To generate a display, <a href="/link-spotify"
+            >link your Spotify account</a
+          > and listen to some music!
+        </p>
+      </div>
+    {:else if refreshStatus.status == "idle"}
+      <div
+        id="display"
+        bind:this={artDisplayRef}
+        class="capture-area"
+        style="{`width: ${displaySize}px; height: ${displaySize}px`}}"
+      >
+        {#each squares as square, i}
+          <Square {square} song={songs[i].song} />
+        {/each}
+      </div>
+    {:else if refreshStatus.status == "refreshing"}
+      <div
+        id="placeholder-display"
+        bind:this={artDisplayRef}
+        class="capture-area"
+      >
+        <h1>Loading...</h1>
       </div>
     {:else}
-      {#if refreshStatus.status == "idle"}
-        <div id="display" bind:this={artDisplayRef} class="capture-area"
-          style={`width: ${displaySize}px; height: ${displaySize}px`}}>
-          {#each squares as square, i}
-            <Square {square} song={songs[i].song} />
-          {/each}
-        </div>
-      {:else if refreshStatus.status == "refreshing"}
-        <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
-          <h1>Loading...</h1>
-        </div>
-      {:else}
-        <div id="placeholder-display" bind:this={artDisplayRef} class="capture-area">
-          <h1>Error!</h1>
-          <p>{refreshStatus.error}</p>
-        </div>
-      {/if}
+      <div
+        id="placeholder-display"
+        bind:this={artDisplayRef}
+        class="capture-area"
+      >
+        <h1>Error!</h1>
+        <p>{refreshStatus.error}</p>
+      </div>
     {/if}
   </div>
 </div>
@@ -243,16 +359,16 @@
   #open-menu-header {
     display: none;
     position: absolute;
-    top: .8;
-    left: .5;
+    top: 0.8;
+    left: 0.5;
     z-index: 1;
   }
   #lower-btns {
-    display: flex; 
+    display: flex;
     gap: 20px;
     margin-top: auto;
   }
-  
+
   #container {
     width: 100%;
     height: 100%;
@@ -279,7 +395,7 @@
   }
 
   .labeled-input label {
-      width: 150px;
+    width: 150px;
   }
 
   #display-container {
@@ -308,7 +424,9 @@
     text-align: center;
   }
 
-  select, input[type="number"] {
+  select,
+  input[type="number"],
+  input[type="date"] {
     background-color: var(--background);
     border: 0;
     border-bottom: 2px solid var(--medium);
@@ -316,6 +434,10 @@
     font-size: 15px;
     padding: 0 2px; /* compensate for border */
     color: var(--text);
+  }
+  /* make the colors the same!!*/
+  input[type="date"]::-webkit-calendar-picker-indicator{
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 24 24"><path fill="%23bbbbbb" d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>');
   }
 
   select {
@@ -326,7 +448,10 @@
     width: 60px;
   }
 
-  select:hover, select:focus, input:hover, input:focus {
+  select:hover,
+  select:focus,
+  input:hover,
+  input:focus {
     outline: none;
     background-color: var(--midground);
   }
