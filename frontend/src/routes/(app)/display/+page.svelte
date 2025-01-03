@@ -394,7 +394,7 @@
 
   #display {
     aspect-ratio: 1 / 1;
-    position: relative;
+    position: absolute;
   }
 
   #placeholder-display {
