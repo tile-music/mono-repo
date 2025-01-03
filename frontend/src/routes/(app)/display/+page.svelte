@@ -19,18 +19,19 @@
     displayContainerSize.height,
   );
   type FilterMenu = {
+    showfilter?: boolean;
     filterRef: HTMLDivElement | null;
-    artDisplayRef: HTMLDivElement | null;
+    artDisplayDivRef: HTMLDivElement | null;
     menuButtonRef: HTMLDivElement | null;
-    customDateRef: HTMLDivElement | null;
-  }
-  
-  let filterMenu : FilterMenu = {
+    customDateDivRef: HTMLDivElement | null;
+  };
+
+  let filterMenu: FilterMenu = {
     filterRef: null,
-    artDisplayRef: null,
+    artDisplayDivRef: null,
     menuButtonRef: null,
-    customDateRef: null
-  }
+    customDateDivRef: null,
+  };
 
   const filters: DisplayDataRequest = {
     aggregate: "album",
@@ -38,8 +39,6 @@
     date: { start: null, end: null },
     rank_determinant: "listens",
   };
-
-  
 
   let timeFrame:
     | "this-week"
@@ -109,11 +108,7 @@
     const startDate = new Date();
     const endDate = new Date();
 
-
-    if (timeFrame == "custom") {
-      filterMenu.customDateRef!.style.display = "inline";
-    } else {
-      filterMenu.customDateRef!.style.display = "none";
+    if (timeFrame != "custom") {
       dateStrings.start = null;
       dateStrings.end = null;
     }
@@ -132,13 +127,20 @@
           startDate.setMonth(startDate.getMonth() - 12);
           break;
         case "custom":
-          if (!(dateStrings.start?.split("-").length == 3 ) && !(dateStrings.end?.split("-").length == 3 )) {
+          if (
+            !(dateStrings.start?.split("-").length == 3) &&
+            !(dateStrings.end?.split("-").length == 3)
+          ) {
             return;
           } else {
             //console.log(dateStrings);
-            dateStrings.start ? startDate.setTime(new Date(dateStrings.start).valueOf()) : null;
-            dateStrings.end ? endDate.setTime(new Date(dateStrings.end).valueOf()) : null;
-            break;  
+            dateStrings.start
+              ? startDate.setTime(new Date(dateStrings.start).valueOf())
+              : null;
+            dateStrings.end
+              ? endDate.setTime(new Date(dateStrings.end).valueOf())
+              : null;
+            break;
           }
         default:
           throw Error("invalid time frame selection");
@@ -149,7 +151,6 @@
     } else {
       filters.date.start = null;
       filters.date.end = null;
-
     }
 
     // send new data request only if filters have changed
@@ -172,8 +173,9 @@
       prevFilters = { ...filters };
       prevFilters.date = { ...filters.date };
       // generate new square arrangement
-      if(songs) {squares = makeSquares(songs.length);}
-      else {
+      if (songs) {
+        squares = makeSquares(songs.length);
+      } else {
         refreshStatus = { status: "error", error: "No songs found" };
         songs = [];
       }
@@ -189,22 +191,29 @@
   onMount(refresh);
 
   const toggleMenu = () => {
-    if (filterMenu.filterRef && filterMenu.artDisplayRef && filterMenu.menuButtonRef) {
+    if (
+      filterMenu.filterRef &&
+      filterMenu.artDisplayDivRef &&
+      filterMenu.menuButtonRef
+    ) {
       console.log(filterMenu.filterRef.style.display);
-      console.log(filterMenu.artDisplayRef.style.width);
-      if (filterMenu.filterRef.style.display == "flex" || filterMenu.filterRef.style.display == "") {
+      console.log(filterMenu.artDisplayDivRef.style.width);
+      if (
+        filterMenu.filterRef.style.display == "flex" ||
+        filterMenu.filterRef.style.display == ""
+      ) {
         filterMenu.filterRef.style.display = "none";
-        filterMenu.artDisplayRef.style.width = "100%";
+        filterMenu.artDisplayDivRef.style.width = "100%";
         filterMenu.menuButtonRef.style.display = "block";
       } else {
         filterMenu.filterRef.style.display = "flex";
-        filterMenu.artDisplayRef.style.setProperty("width", "70%");
-        console.log(filterMenu.artDisplayRef.style.width);
+        filterMenu.artDisplayDivRef.style.setProperty("width", "70%");
+        console.log(filterMenu.artDisplayDivRef.style.width);
         filterMenu.menuButtonRef.style.display = "none";
-      } 
+      }
     } else if (!filterMenu.menuButtonRef) {
       throw Error("filters not found");
-    } else if (!filterMenu.artDisplayRef) {
+    } else if (!filterMenu.artDisplayDivRef) {
       throw Error("display not found");
     } else if (!filterMenu.menuButtonRef) {
       throw Error("openMenu not found");
@@ -214,7 +223,7 @@
 
 <div id="container">
   <div id="open-menu-header" bind:this={filterMenu.menuButtonRef}>
-    <button on:click={toggleMenu}  id="open-menu" class="art-display-menu-button"
+    <button on:click={toggleMenu} id="open-menu" class="art-display-menu-button"
       >menu</button
     >
   </div>
@@ -225,8 +234,7 @@
         <button
           on:click={toggleMenu}
           id="close-menu"
-          class="art-display-menu-button"
-          >close</button
+          class="art-display-menu-button">close</button
         >
       </div>
 
@@ -253,28 +261,28 @@
           <option value="custom">custom</option>
         </select>
       </div>
-      <div id="custome-date" style="gap: 15px;" bind:this={filterMenu.customDateRef}>
-        <div class="labeled-input" aria-label="custom-date">
-          <label for="start-date">start date</label>
-          <input
-            id="start-date"
-            type="date"
-            name="start-date"
-            bind:value={dateStrings.start}
-            on:blur={refresh}
-          />
-        </div>
-        <div class="labeled-input" aria-label="custom-date">
-          <label for="end-date">end date</label>
-          <input
-            id="end-date"
-            type="date"
-            name="end-date"
-            bind:value={dateStrings.end}
-            on:blur={refresh}
-          />
-        </div>
-      </div>
+      {#if timeFrame == "custom"}
+          <div class="labeled-input" aria-label="custom-date">
+            <label for="start-date">start date</label>
+            <input
+              id="start-date"
+              type="date"
+              name="start-date"
+              bind:value={dateStrings.start}
+              on:blur={refresh}
+            />
+          </div>
+          <div class="labeled-input" aria-label="custom-date">
+            <label for="end-date">end date</label>
+            <input
+              id="end-date"
+              type="date"
+              name="end-date"
+              bind:value={dateStrings.end}
+              on:blur={refresh}
+            />
+          </div>
+      {/if}
     </div>
     <div class="input-section">
       <h2>display size</h2>
@@ -314,7 +322,7 @@
     id="display-container"
     bind:clientWidth={displayContainerSize.width}
     bind:clientHeight={displayContainerSize.height}
-    bind:this={filterMenu.artDisplayRef}
+    bind:this={filterMenu.artDisplayDivRef}
   >
     {#if squares.length == 0 && refreshStatus.status == "idle"}
       <div
@@ -448,7 +456,7 @@
     color: var(--text);
   }
   /* make the colors the same!!*/
-  input[type="date"]::-webkit-calendar-picker-indicator{
+  input[type="date"]::-webkit-calendar-picker-indicator {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 24 24"><path fill="%23bbbbbb" d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>');
   }
 
