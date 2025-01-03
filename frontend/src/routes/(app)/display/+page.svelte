@@ -53,9 +53,6 @@
     end: string | null;
   } = { start: null, end: null };
 
-  //what is this for?
-  let prevFilters: DisplayDataRequest;
-
   async function captureDiv() {
     try {
       // Capture the div as an image
@@ -97,6 +94,10 @@
 
     return squares;
   }
+
+  // stores the filters used for the previous server request.
+  // used to make sure changes were made before sending subsequent reqiests.
+  let prevFilters: DisplayDataRequest;
 
   let refreshStatus:
     | { status: "refreshing" }
@@ -166,7 +167,6 @@
 
     // parse response
     const response = deserialize(await res.text());
-    //console.log(response);
     if (response.type === "success") {
       refreshStatus = { status: "idle" };
       songs = response.data!.songs as typeof songs;
