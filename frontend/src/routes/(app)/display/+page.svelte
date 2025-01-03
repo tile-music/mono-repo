@@ -18,20 +18,6 @@
     displayContainerSize.width,
     displayContainerSize.height,
   );
-  type FilterMenu = {
-    showfilter?: boolean;
-    filterRef: HTMLDivElement | null;
-    artDisplayDivRef: HTMLDivElement | null;
-    menuButtonRef: HTMLDivElement | null;
-    customDateDivRef: HTMLDivElement | null;
-  };
-
-  let filterMenu: FilterMenu = {
-    filterRef: null,
-    artDisplayDivRef: null,
-    menuButtonRef: null,
-    customDateDivRef: null,
-  };
 
   const filters: DisplayDataRequest = {
     aggregate: "album",
@@ -52,6 +38,8 @@
     start: string | null;
     end: string | null;
   } = { start: null, end: null };
+
+  let filterVisibility = true;
 
   async function captureDiv() {
     try {
@@ -189,50 +177,22 @@
   $: squares = makeSquares(songs.length);
 
   onMount(refresh);
-
-  const toggleMenu = () => {
-    if (
-      filterMenu.filterRef &&
-      filterMenu.artDisplayDivRef &&
-      filterMenu.menuButtonRef
-    ) {
-      console.log(filterMenu.filterRef.style.display);
-      console.log(filterMenu.artDisplayDivRef.style.width);
-      if (
-        filterMenu.filterRef.style.display == "flex" ||
-        filterMenu.filterRef.style.display == ""
-      ) {
-        filterMenu.filterRef.style.display = "none";
-        filterMenu.artDisplayDivRef.style.width = "100%";
-        filterMenu.menuButtonRef.style.display = "block";
-      } else {
-        filterMenu.filterRef.style.display = "flex";
-        filterMenu.artDisplayDivRef.style.setProperty("width", "70%");
-        console.log(filterMenu.artDisplayDivRef.style.width);
-        filterMenu.menuButtonRef.style.display = "none";
-      }
-    } else if (!filterMenu.menuButtonRef) {
-      throw Error("filters not found");
-    } else if (!filterMenu.artDisplayDivRef) {
-      throw Error("display not found");
-    } else if (!filterMenu.menuButtonRef) {
-      throw Error("openMenu not found");
-    }
-  };
 </script>
 
 <div id="container">
-  <div id="open-menu-header" bind:this={filterMenu.menuButtonRef}>
-    <button on:click={toggleMenu} id="open-menu" class="art-display-menu-button"
+  <div id="open-menu-header" class={filterVisibility ? "hidden" : ""}>
+    <button on:click={() => {filterVisibility = true}}
+      disabled={filterVisibility}
+      id="open-menu" class="art-display-menu-button"
       >menu</button
     >
   </div>
-  <div id="filters" bind:this={filterMenu.filterRef}>
+  <div id="filters" class={!filterVisibility ? "hidden" : ""}>
     <div class="input-section">
       <div id="close-menu-header">
         <h1>Filters</h1>
         <button
-          on:click={toggleMenu}
+          on:click={() => {filterVisibility = false;}}
           id="close-menu"
           class="art-display-menu-button">close</button
         >
@@ -309,7 +269,7 @@
         </select>
       </div>
     </div>
-    <div id="lower-btns" style="">
+    <div id="lower-btns">
       <button
         on:click={() => (squares = makeSquares(songs.length))}
         id="regenerate"
@@ -322,7 +282,6 @@
     id="display-container"
     bind:clientWidth={displayContainerSize.width}
     bind:clientHeight={displayContainerSize.height}
-    bind:this={filterMenu.artDisplayDivRef}
   >
     {#if squares.length == 0 && refreshStatus.status == "idle"}
       <div
@@ -342,7 +301,7 @@
         id="display"
         bind:this={artDisplayRef}
         class="capture-area"
-        style="{`width: ${displaySize}px; height: ${displaySize}px`}}"
+        style="{`width: ${displaySize}px; height: ${displaySize}px`}"
       >
         {#each squares as square, i}
           <Square {square} song={songs[i].song} />
@@ -370,19 +329,24 @@
 </div>
 
 <style>
+  .hidden {
+    display: none !important;
+  }
+
   #close-menu-header {
     max-width: 300px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
+
   #open-menu-header {
-    display: none;
     position: absolute;
-    top: 0.8;
-    left: 0.5;
+    top: 0;
+    left: 0;
     z-index: 1;
   }
+
   #lower-btns {
     display: flex;
     gap: 20px;
@@ -393,6 +357,7 @@
     width: 100%;
     height: 100%;
     display: flex;
+    position: relative;
   }
 
   #filters {
@@ -419,7 +384,7 @@
   }
 
   #display-container {
-    width: calc(100% - 300px);
+    width: 100%;
     height: 100%;
     position: relative;
     display: flex;
