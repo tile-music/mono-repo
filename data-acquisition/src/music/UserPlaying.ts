@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 import { TrackInfo } from "./TrackInfo";
 
-import { Album, Client, Player, User } from "spotify-api.js";
+import { Album, Client, Player, Track, User } from "spotify-api.js";
 import { AlbumInfo } from "./AlbumInfo";
 
 import { PlayedTrack } from "./PlayedTrack";
@@ -91,8 +91,10 @@ export abstract class UserPlaying {
           .insert({
             user_id: this.userId,
             track_id: trackData[0].track_id,
+            album_id: albumData[0].album_id,
             listened_at: entry.listened_at,
-            popularity: entry.popularity,
+            track_popularity: entry.track_popularity,
+            album_popularity: entry.album_popularity,
             isrc: entry.track.isrc,
           });
         //console.log(playedData, playedError);
@@ -113,6 +115,8 @@ export class SpotifyUserPlaying extends UserPlaying {
   client!: Client;
   player!: Player;
   items!: any[];
+  albums: any[] = [];
+
   constructor(supabase: SupabaseClient<any,"test"|"prod",any>, userId: any, context: any) {
     super(supabase, userId, context);
   }
@@ -133,8 +137,36 @@ export class SpotifyUserPlaying extends UserPlaying {
     });
     this.player = new Player(this.client);
   }
+  protected async getAlbumPopularity(): Promise<void> {
+    const albumLimit = 20;
+    let remaining = this.items.length;
+    let albumSpotifyIdList: string[] = [];
+
+
+    let beginIdx : number = 0;
+    let endIdx : number = albumLimit > remaining ? remaining : albumLimit;
+    
+    if(!this.items || this.items.length == 0) return
+
+    for (const item of this.items) {
+      albumSpotifyIdList.push(item.track.album.id);
+    }
+
+    while(remaining){
+      let tmpAlbums : any[] = await SpotifyUserPlaying.getSpotifyAlbumData(albumSpotifyIdList.slice(beginIdx, endIdx), this.client.token);
+      //let tmpAlbums : any[] = await this.client.albums.getMultiple(albumSpotifyIdList.slice(beginIdx, endIdx));
+      this.albums.push(...tmpAlbums);
+      remaining -= tmpAlbums.length;
+      beginIdx = this.albums.length;
+      endIdx = remaining > albumLimit ? beginIdx + albumLimit : remaining + beginIdx; 
+    }
+    if(this.albums.length !== this.items.length) throw Error("spotify album list length mismatch")
+  }
+
+
   protected async makeDBEntries(): Promise<void> {
-    for(const item of this.items) {
+    await this.getAlbumPopularity();
+    for(const [i, item] of this.items.entries()) {
       const releaseDateRaw : any = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
       const releaseDatePrecisionRaw : any = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
       
@@ -163,12 +195,13 @@ export class SpotifyUserPlaying extends UserPlaying {
         SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
         trackInfo,
         album,
-        item.track.popularity
+        item.track.popularity,
+        this.albums[i].popularity ? this.albums[i].popularity : null
       );
       this.played.push(playedTrackInfo);
       //console.log(playedTrackInfo);
     }
-    for (const track of this.played) {
+    for (const [i, track] of this.played.entries()) {
       await this.dbEntries.p_track_info.push(track.createDbEntryObject());
     }
     this.dbEntries.p_user_id = this.userId;
@@ -192,6 +225,7 @@ export class SpotifyUserPlaying extends UserPlaying {
         return { year: parseInt(year), month: parseInt(month) };
       case "day":
         return { year: parseInt(year), month: parseInt(month), day: parseInt(day) };
+        
     }
   }
   public static parseISOToDate(isoString: string): Date {
@@ -228,6 +262,34 @@ export class SpotifyUserPlaying extends UserPlaying {
       )
     );
   }
+  public static async getSpotifyAlbumData(ids: string[], token: string) : Promise<any> {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      throw new Error('IDs must be a non-empty array of strings.');
+    }
+  
+    const url = `https://api.spotify.com/v1/albums?ids=${encodeURIComponent(ids.join(','))}`;
+  
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${String(token)}`,
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      return data.albums ? data.albums : []; // Return the data for further use
+    } catch (error) {
+      console.error('Error fetching albums:', error);
+      throw error; // Re-throw the error for external handling
+    }
+  };
+  
 }
 
 export class MockUserPlaying extends UserPlaying {
@@ -262,7 +324,8 @@ export class MockUserPlaying extends UserPlaying {
         track.timestamp,
         trackInfo,
         album,
-        track.popularity
+        track.popularity,
+        1
       );
       this.played.push(playedTrackInfo);
     }

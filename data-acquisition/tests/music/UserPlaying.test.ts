@@ -13,31 +13,31 @@ let context: any = { refresh_token: process.env.SP_REFRESH };
 
 
 
-describe("spotify Listening timestamp sanity check", ()=>{
+describe("spotify Listening timestamp sanity check", () => {
   const testData = ["2024-11-15T14:27:57.952Z",
-                    "2024-11-15T14:24:25.620Z",
-                    "2024-11-15T14:22:30.406Z",
-                    "2024-11-15T14:17:43.461Z",
-                    "2024-11-15T14:13:43.754Z",
-                    "2024-11-15T14:09:47.990Z",
-                    "2024-11-15T14:06:07.862Z",
-                    "2024-11-15T13:59:51.570Z",
-                    "2024-11-15T13:56:10.273Z"]
+    "2024-11-15T14:24:25.620Z",
+    "2024-11-15T14:22:30.406Z",
+    "2024-11-15T14:17:43.461Z",
+    "2024-11-15T14:13:43.754Z",
+    "2024-11-15T14:09:47.990Z",
+    "2024-11-15T14:06:07.862Z",
+    "2024-11-15T13:59:51.570Z",
+    "2024-11-15T13:56:10.273Z"]
   test("SpotifyUserPlaying parseSpotifyListeningTimestamp", () => {
     for (const timestamp of testData) { // Use for...of to iterate over values
       const date = SpotifyUserPlaying.parseISOToDate(timestamp);
-      const dateTs= new Date(timestamp)
+      const dateTs = new Date(timestamp)
       // Check if the parsed date matches the original timestamp
       expect(dateTs.toISOString()).toStrictEqual(timestamp);
     }
 
-})
+  })
 })
 describe("Spotify UserPlaying Integration", () => {
   let supabase: SupabaseClient<any, "test", any>;
   let userId: string;
-  let spotifyClient : Client;
-  let player : Player;
+  let spotifyClient: Client;
+  let player: Player;
   let spotifyData: any;
 
   beforeAll(async () => {
@@ -85,32 +85,32 @@ describe("Spotify UserPlaying Integration", () => {
       supabase,
       userId,
       context
-      );
+    );
     await spotifyUserPlaying.init();
-    await expect(spotifyUserPlaying.fire()).resolves.not.toThrow().then(async() =>{
+    await expect(spotifyUserPlaying.fire()).resolves.not.toThrow().then(async () => {
       let { data, error } = await supabase
         .from("played_tracks")
         .select()
         .eq("user_id", userId);
       console.log(spotifyData)
-      if(data){
+      if (data) {
         data = data?.sort((a, b) => b.listened_at - a.listened_at);
       }
 
       expect(data).toHaveLength(spotifyData.length);
       expect(data).toBeDefined()
-      if(data){
-        for(let i = 0; i < data.length; i++){
-          console.log( spotifyData[i].playedAt);
+      if (data) {
+        for (let i = 0; i < data.length; i++) {
+          console.log(spotifyData[i].playedAt);
           //console.log(SpotifyUserPlaying.parseISOToDate(spotifyData.items[i].playedAt), data[i].listened_at);
-          const spotifyTimeStamp : Date = SpotifyUserPlaying.parseISOToDate(spotifyData[i].playedAt)
-          const tsDateObjectSpTimestamp : Date = new Date(spotifyData[i].playedAt)
+          const spotifyTimeStamp: Date = SpotifyUserPlaying.parseISOToDate(spotifyData[i].playedAt)
+          const tsDateObjectSpTimestamp: Date = new Date(spotifyData[i].playedAt)
           expect(data[i].isrc).toStrictEqual(spotifyData[i].track.externalID.isrc);
           expect(data[i].listened_at).toStrictEqual(spotifyTimeStamp.valueOf());
-          
-          
 
-          
+
+
+
         }
       }
 
@@ -139,7 +139,7 @@ describe("UserPlaying Tests", () => {
       if (error) throw error;
       userId = data.user?.id || "test-user-id";
     });
-    afterAll(async () => {
+    /* afterAll(async () => {
 
       supabase = new SupabaseClient(
         process.env.SB_URL_TEST as string,
@@ -148,11 +148,11 @@ describe("UserPlaying Tests", () => {
       const { data, error } = await supabase.auth.admin.deleteUser(userId);
       if (error) throw error;
       //await supabase.rpc("clear_test_tables");
-    });
+    }); */
     let supabase: any;
     let postgres: any;
     let userId: string;
-    
+
     let email: string = "test@test.com";
     let password: string = "password";
     const testData1 = [
@@ -212,7 +212,7 @@ describe("UserPlaying Tests", () => {
       timestamp: 125666778 + i * 1000,
     }));
 
-    
+
 
     /* test("postgres connection" , async () => {
       await expect(postgres.query("SELECT * from test.tracks")).resolves.not.toThrow();
@@ -277,9 +277,9 @@ describe("UserPlaying Tests", () => {
     });
 
     test("SpotifyUserPlaying Parse Spotify Date Function", async () => {
-      expect(SpotifyUserPlaying.parseSpotifyDate("1999-12-22","day")).toStrictEqual({year: 1999, month: 12, day: 22});
-      expect(SpotifyUserPlaying.parseSpotifyDate("1999-12","month")).toStrictEqual({year: 1999, month: 12});
-      expect(SpotifyUserPlaying.parseSpotifyDate("1999","year")).toStrictEqual({year: 1999});
+      expect(SpotifyUserPlaying.parseSpotifyDate("1999-12-22", "day")).toStrictEqual({ year: 1999, month: 12, day: 22 });
+      expect(SpotifyUserPlaying.parseSpotifyDate("1999-12", "month")).toStrictEqual({ year: 1999, month: 12 });
+      expect(SpotifyUserPlaying.parseSpotifyDate("1999", "year")).toStrictEqual({ year: 1999 });
     })
 
 
@@ -294,30 +294,30 @@ describe("UserPlaying Tests", () => {
     });
     test("SpotifyUserPlaying fire method does not create duplicates", async () => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
-      supabase,
-      userId,
-      context
+        supabase,
+        userId,
+        context
       );
       await spotifyUserPlaying.init();
       await expect(spotifyUserPlaying.fire())
-      .resolves.not.toThrow()
-      .then(async () => {
-        const { data, error } = await supabase
-        .from("played_tracks")
-        .select()
-        .eq("user_id", userId);
-        if (error) throw error;
+        .resolves.not.toThrow()
+        .then(async () => {
+          const { data, error } = await supabase
+            .from("played_tracks")
+            .select()
+            .eq("user_id", userId);
+          if (error) throw error;
 
-        await spotifyUserPlaying.fire();
-        const { data: newData, error: newError } = await supabase
-        .from("played_tracks")
-        .select()
-        .eq("user_id", userId);
-        if (newError) throw newError;
+          await spotifyUserPlaying.fire();
+          const { data: newData, error: newError } = await supabase
+            .from("played_tracks")
+            .select()
+            .eq("user_id", userId);
+          if (newError) throw newError;
 
-        expect(newData.length).toBeGreaterThanOrEqual(data.length);
-        expect(newData.length).toBeLessThanOrEqual(data.length);
-      });
-    });
+          expect(newData.length).toBeGreaterThanOrEqual(data.length);
+          expect(newData.length).toBeLessThanOrEqual(data.length);
+        });
+    }, 10000);
   });
 });
