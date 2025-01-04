@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { SongInfo } from "../song";
+    import type { SongInfo } from "../../../../../lib/Song";
     type squareInfo = {
         x: number
         y: number
