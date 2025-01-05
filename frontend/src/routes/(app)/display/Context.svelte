@@ -19,7 +19,7 @@
 
     $: altText = `Album art for ${album.title} by ${artistsText}`;
 
-    $: rankText = `#${rank} most ${filters.rank_determinant == "time" ? "listened to" : "played"} ` +
+    $: rankText = `#${rank} most ${filters.rank_determinant == "time" ? "listened" : "played"} ` +
                   timeFrameToText(timeFrame, dateStrings);
     $: quantityText = filters.rank_determinant == "time" ?
                       toHoursAndMinutes(quantity) + " listened" :
@@ -38,8 +38,8 @@
 
     function customTimeFrameText(ds: DateStrings) {
         if (ds.start == null && ds.end == null) return "of all time";
-        else if (ds.start == null) return "before " + ds.end;
-        else if (ds.end == null) return "after " + ds.start;
+        else if (ds.start == null || ds.start == "") return "before " + ds.end;
+        else if (ds.end == null || ds.end == "") return "after " + ds.start;
         else return `between ${ds.start} and ${ds.end}`;
     }
 

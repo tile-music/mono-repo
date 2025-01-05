@@ -88,15 +88,20 @@
     | { status: "idle" }
     | { status: "error"; error: string } = { status: "refreshing" };
   async function refresh() {
-    //console.log("refreshing");
     // set date range
     const startDate = new Date();
     const endDate = new Date();
 
+    // wipe dateStrings if needed
     if (timeFrame != "custom") {
       dateStrings.start = null;
       dateStrings.end = null;
     }
+
+    // make sure dateStrings sare null if no date is entered
+    if (dateStrings.start == "") dateStrings.start = null;
+    if (dateStrings.end == "") dateStrings.end = null;
+
     if (timeFrame != "all-time") {
       switch (timeFrame) {
         case "this-week":
@@ -118,7 +123,6 @@
           ) {
             return;
           } else {
-            //console.log(dateStrings);
             dateStrings.start
               ? startDate.setTime(new Date(dateStrings.start).valueOf())
               : null;
