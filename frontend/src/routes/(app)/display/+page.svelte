@@ -39,6 +39,8 @@
     end: string | null;
   } = { start: null, end: null };
 
+  let showCellInfo: "never" | "on-hover" | "always" = "on-hover";
+
   let filterVisibility = true;
 
   async function captureDiv() {
@@ -269,6 +271,17 @@
         </select>
       </div>
     </div>
+    <div class="input-section">
+      <h2>display style</h2>
+      <div class="labeled-input">
+        <label for="num-cells">include cell info</label>
+        <select id="show-cell-info" bind:value={showCellInfo}>
+          <option value="always">always</option>
+          <option value="on-hover">on hover</option>
+          <option value="never">never</option>
+        </select>
+      </div>
+    </div>
     <div id="lower-btns">
       <button
         on:click={() => (squares = makeSquares(songs.length))}
@@ -304,7 +317,12 @@
         style="{`width: ${displaySize}px; height: ${displaySize}px`}"
       >
         {#each squares as square, i}
-          <Square {square} song={songs[i].song} />
+          <Square {square} song={songs[i].song}
+           aggregate={filters.aggregate}
+           rank_determinant={filters.rank_determinant}
+           quantity={songs[i].quantity}
+           rank={i+1}
+           {showCellInfo}/>
         {/each}
       </div>
     {:else if refreshStatus.status == "refreshing"}
