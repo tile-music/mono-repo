@@ -1,9 +1,12 @@
 <script lang="ts">
   import Square from "./Square.svelte";
+  import Context from "./Context.svelte";
   import type { DisplayDataRequest } from "../../../../../lib/Request";
   import { deserialize } from "$app/forms";
   import type { SongInfo } from "../../../../../lib/Song";
   import { onMount } from "svelte";
+
+  import type { TimeFrame, DateStrings, ShowCellInfo } from "./filters";
 
   import { generateFullArrangement } from "./pack";
 
@@ -26,20 +29,11 @@
     rank_determinant: "listens",
   };
 
-  let timeFrame:
-    | "this-week"
-    | "this-month"
-    | "year-to-date"
-    | "this-year"
-    | "all-time"
-    | "custom" = "all-time";
+  let timeFrame: TimeFrame = "all-time";
 
-  let dateStrings: {
-    start: string | null;
-    end: string | null;
-  } = { start: null, end: null };
+  let dateStrings: DateStrings = { start: null, end: null };
 
-  let showCellInfo: "never" | "on-hover" | "always" = "on-hover";
+  let showCellInfo: ShowCellInfo = "on-hover";
 
   let filterVisibility = true;
 
@@ -325,6 +319,9 @@
            {showCellInfo}/>
         {/each}
       </div>
+      <Context album={songs[0].song.albums[0]}
+        quantity={songs[0].quantity} rank={1}
+        {dateStrings} {filters} {timeFrame}/>
     {:else if refreshStatus.status == "refreshing"}
       <div
         id="placeholder-display"

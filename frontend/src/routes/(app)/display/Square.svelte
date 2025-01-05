@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { SongInfo } from "../../../../../lib/Song";
     import type { DisplayDataRequest } from "../../../../../lib/Request";
+    import type { ShowCellInfo } from "./filters";
     type squareInfo = {
         x: number
         y: number
@@ -13,7 +14,7 @@
     export let rank_determinant: DisplayDataRequest["rank_determinant"];
     export let quantity: number;
     export let rank: number;
-    export let showCellInfo: "never" | "on-hover" | "always";
+    export let showCellInfo: ShowCellInfo
 
     $: cellInfoClass = showCellInfo == "on-hover" ? "show-on-hover" : "";
 
