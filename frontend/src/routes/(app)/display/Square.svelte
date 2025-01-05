@@ -15,11 +15,9 @@
     export let rank: number;
     export let showCellInfo: "never" | "on-hover" | "always";
 
-    let cellInfoClass: string;
     $: cellInfoClass = showCellInfo == "on-hover" ? "show-on-hover" : "";
 
     let squareWidth: number = 0;
-    let fontSize;
     $: fontSize = (0.08 * squareWidth) + "px";
 
     function toHoursAndMinutes(ms: number) {
