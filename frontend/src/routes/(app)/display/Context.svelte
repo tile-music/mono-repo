@@ -67,8 +67,8 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 500px;
-        height: 600px;
+        width: min(500px, 100%);
+        height: min(600px, 100%);
         padding: 10px;
         background-color: var(--midground);
     }
