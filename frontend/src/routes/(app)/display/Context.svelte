@@ -11,7 +11,6 @@
     export let dateStrings: DateStrings;
     export let filters: DisplayDataRequest;
     export let timeFrame: TimeFrame;
-    export let closeMenu: () => void;
 
     // computed state for metadata text
     $: artistsText = album.artists.length == 1 ? album.artists[0]
@@ -74,6 +73,8 @@
 
     // form request logic
     async function fetchContextMenuData(upc: string): Promise<ContextDataResponse> {
+        hidden = false;
+        
         const request: ContextDataRequest = {
             upc,
             date: filters.date,
@@ -97,11 +98,10 @@
     }
 
     // close logic
+    let hidden = false;
     function clickOutside(node: HTMLElement) {
         const handleClick = (event: MouseEvent) => {
-            if (!node.contains(event.target as Node)) {
-                closeMenu();
-            }
+            if (!node.contains(event.target as Node)) hidden = true;
         };
 
         document.addEventListener("click", handleClick, true);
@@ -114,7 +114,8 @@
     $: contextDataResponse = fetchContextMenuData(album.image);
 </script>
 
-<div id="context-menu" style={`top:${position.top}px; left:${position.left}px`}
+<div id="context-menu" style={`top:${position.top}px; left:${position.left}px;`}
+    class={hidden ? "hidden" : ""}
     use:clickOutside>
     <div id="dragTarget" bind:this={dragTarget} on:mousedown={onMouseDown}
         role="button" tabindex={-1}>
@@ -176,6 +177,10 @@
         flex-direction: column;
         overflow: scroll;
         z-index: 10;
+    }
+
+    #context-menu.hidden {
+        display: none;
     }
 
     #dragTarget {

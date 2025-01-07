@@ -173,7 +173,6 @@
   }
 
   // context menu display logic
-  let showContextMenu = false;
   let focusedAlbumInfo: {
     albumInfo: AlbumInfo,
     quantity: number,
@@ -181,7 +180,6 @@
   };
 
   function selectAlbum(albumInfo: AlbumInfo, quantity: number, rank: number) {
-    showContextMenu = true;
     focusedAlbumInfo = { albumInfo, quantity, rank }
   }
 
@@ -337,12 +335,11 @@
            {selectAlbum}/>
         {/each}
       </div>
-      {#if showContextMenu}
+      {#if focusedAlbumInfo}
         <Context album={focusedAlbumInfo.albumInfo}
         quantity={focusedAlbumInfo.quantity}
         rank={focusedAlbumInfo.rank}
-        {dateStrings} {filters} {timeFrame}
-        closeMenu={() => showContextMenu = false }/>
+        {dateStrings} {filters} {timeFrame}/>
       {/if}
     {:else if refreshStatus.status == "refreshing"}
       <div
