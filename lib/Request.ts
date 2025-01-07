@@ -20,4 +20,4 @@ export type ContextDataRequest = {
 
 export type ContextDataResponse = {
     songs: RankOutput
-} | null;
+}
