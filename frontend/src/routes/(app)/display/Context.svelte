@@ -11,6 +11,9 @@
     export let dateStrings: DateStrings;
     export let filters: DisplayDataRequest;
     export let timeFrame: TimeFrame;
+    export let displayContainerSize: {width: number, height: number};
+
+    const CLOSE_BUFFER_MS = 100;
 
     // computed state for metadata text
     $: artistsText = album.artists.length == 1 ? album.artists[0]
@@ -55,25 +58,35 @@
 
     // drag logic
     let position = {top: 0, left: 10};
+    let size = { width: 0, height: 0};
     let moving = false;
     let dragTarget: HTMLElement;
 
     function onMouseDown(e: MouseEvent) {
-        if (e.target as HTMLElement == dragTarget) moving = true;
+        if (e.target as HTMLElement == dragTarget) {
+            moving = true;
+            canClose = false;
+        }
     }
 
-    function onMouseUp() { moving = false; }
+    function onMouseUp() {
+        moving = false;
+        setTimeout(() => canClose = true, CLOSE_BUFFER_MS);
+    }
 
     function onMouseMove(e: MouseEvent) {
         if (moving) {
-            position.top += e.movementY;
-            position.left += e.movementX;
+            const maxTop = displayContainerSize.height - size.height;
+            const maxLeft = displayContainerSize.width - size.width;
+            position.top = Math.max(Math.min(position.top + e.movementY, maxTop), 0);
+            position.left = Math.max(Math.min(position.left + e.movementX, maxLeft), 0);
         }
     }
 
     // form request logic
     async function fetchContextMenuData(upc: string): Promise<ContextDataResponse> {
         hidden = false;
+        setTimeout(() => canClose = true, CLOSE_BUFFER_MS);
         
         const request: ContextDataRequest = {
             upc,
@@ -99,9 +112,13 @@
 
     // close logic
     let hidden = false;
+    let canClose = true;
     function clickOutside(node: HTMLElement) {
         const handleClick = (event: MouseEvent) => {
-            if (!node.contains(event.target as Node)) hidden = true;
+            if (!node.contains(event.target as Node) && canClose) {
+                hidden = true;
+                canClose = false;
+            }
         };
 
         document.addEventListener("click", handleClick, true);
@@ -115,7 +132,7 @@
 </script>
 
 <div id="context-menu" style={`top:${position.top}px; left:${position.left}px;`}
-    class={hidden ? "hidden" : ""}
+    class={hidden ? "hidden" : ""} bind:clientWidth={size.width} bind:clientHeight={size.height}
     use:clickOutside>
     <div id="dragTarget" bind:this={dragTarget} on:mousedown={onMouseDown}
         role="button" tabindex={-1}>
