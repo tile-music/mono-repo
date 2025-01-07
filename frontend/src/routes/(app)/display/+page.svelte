@@ -341,7 +341,8 @@
         <Context album={focusedAlbumInfo.albumInfo}
         quantity={focusedAlbumInfo.quantity}
         rank={focusedAlbumInfo.rank}
-        {dateStrings} {filters} {timeFrame} />
+        {dateStrings} {filters} {timeFrame}
+        closeMenu={() => showContextMenu = false }/>
       {/if}
     {:else if refreshStatus.status == "refreshing"}
       <div
