@@ -94,7 +94,6 @@ export abstract class UserPlaying {
             album_id: albumData[0].album_id,
             listened_at: entry.listened_at,
             track_popularity: entry.track_popularity,
-            album_popularity: entry.album_popularity,
             isrc: entry.track.isrc,
           });
         //console.log(playedData, playedError);
@@ -122,22 +121,10 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
   public async init(): Promise<void> {
     //console.log(this.context);
-    this.client = await Client.create({
-      refreshToken: true,
-      token: {
-        clientID: process.env.SP_CID as string,
-        clientSecret: process.env.SP_SECRET as string,
-        refreshToken: this.context.refresh_token,
-      },
-      onRefresh: () => {
-        console.log(
-          `Token has been refreshed. New token: ${this.client.token}!`
-        );
-      },
-    });
+    
     this.player = new Player(this.client);
   }
-  protected async getAlbumPopularity(): Promise<void> {
+  /* protected async getAlbumPopularity(): Promise<void> {
     const albumLimit = 20;
     let remaining = this.items.length;
     let albumSpotifyIdList: string[] = [];
@@ -162,10 +149,10 @@ export class SpotifyUserPlaying extends UserPlaying {
     }
     if(this.albums.length !== this.items.length) throw Error("spotify album list length mismatch")
   }
-
+ */
 
   protected async makeDBEntries(): Promise<void> {
-    await this.getAlbumPopularity();
+    //await this.getAlbumPopularity();
     for(const [i, item] of this.items.entries()) {
       const releaseDateRaw : any = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
       const releaseDatePrecisionRaw : any = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
@@ -195,8 +182,7 @@ export class SpotifyUserPlaying extends UserPlaying {
         SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
         trackInfo,
         album,
-        item.track.popularity,
-        this.albums[i].popularity ? this.albums[i].popularity : null
+        item.track.popularity
       );
       this.played.push(playedTrackInfo);
       //console.log(playedTrackInfo);
@@ -262,7 +248,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       )
     );
   }
-  public static async getSpotifyAlbumData(ids: string[], token: string) : Promise<any> {
+  /* public static async getSpotifyAlbumData(ids: string[], token: string) : Promise<any> {
     if (!Array.isArray(ids) || ids.length === 0) {
       throw new Error('IDs must be a non-empty array of strings.');
     }
@@ -288,7 +274,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       console.error('Error fetching albums:', error);
       throw error; // Re-throw the error for external handling
     }
-  };
+  }; */
   
 }
 
@@ -324,8 +310,7 @@ export class MockUserPlaying extends UserPlaying {
         track.timestamp,
         trackInfo,
         album,
-        track.popularity,
-        1
+        track.popularity
       );
       this.played.push(playedTrackInfo);
     }

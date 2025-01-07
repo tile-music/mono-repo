@@ -31,14 +31,12 @@ export class PlayedTrack {
   private trackInfo: TrackInfo;
   private albumInfo: AlbumInfo;
   private trackPopularity: number;
-  private albumPopularity: number;
 
-  constructor(listenedAt: number, trackInfo: TrackInfo, albumInfo: AlbumInfo, trackPopularity: number, albumPopularity: number) {
+  constructor(listenedAt: number, trackInfo: TrackInfo, albumInfo: AlbumInfo, trackPopularity: number) {
     this.listenedAt = listenedAt;
     this.trackInfo = trackInfo;
     this.albumInfo = albumInfo;
     this.trackPopularity = trackPopularity;
-    this.albumPopularity = albumPopularity;
   }
 
   public createDbEntryObject() {
@@ -47,7 +45,6 @@ export class PlayedTrack {
       track_popularity: this.trackPopularity,
       track: this.trackInfo.createDbEntryObject(),
       track_album: this.albumInfo.createDbEntryObject(),
-      album_popularity: this.albumPopularity,
     };
   }
 }
