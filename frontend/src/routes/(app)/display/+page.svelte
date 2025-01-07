@@ -145,6 +145,9 @@
     // send new data request only if filters have changed
     if (JSON.stringify(filters) == JSON.stringify(prevFilters)) return;
 
+    // close popup
+    focusedAlbumInfo = null;
+
     // send request
     refreshStatus = { status: "refreshing" };
     const res = await fetch("?/refresh", {
@@ -177,7 +180,7 @@
     albumInfo: AlbumInfo,
     quantity: number,
     rank: number
-  };
+  } | null;
 
   function selectAlbum(albumInfo: AlbumInfo, quantity: number, rank: number) {
     focusedAlbumInfo = { albumInfo, quantity, rank }
