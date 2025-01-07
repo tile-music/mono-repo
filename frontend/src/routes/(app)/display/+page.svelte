@@ -3,7 +3,7 @@
   import Context from "./Context.svelte";
   import type { DisplayDataRequest } from "../../../../../lib/Request";
   import { deserialize } from "$app/forms";
-  import type { SongInfo } from "../../../../../lib/Song";
+  import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
   import { onMount } from "svelte";
 
   import type { TimeFrame, DateStrings, ShowCellInfo } from "./filters";
@@ -146,7 +146,6 @@
     if (JSON.stringify(filters) == JSON.stringify(prevFilters)) return;
 
     // send request
-
     refreshStatus = { status: "refreshing" };
     const res = await fetch("?/refresh", {
       method: "POST",
@@ -173,9 +172,23 @@
     }
   }
 
+  // context menu display logic
+  let showContextMenu = false;
+  let focusedAlbumInfo: {
+    albumInfo: AlbumInfo,
+    quantity: number,
+    rank: number
+  };
+
+  function selectAlbum(albumInfo: AlbumInfo, quantity: number, rank: number) {
+    showContextMenu = true;
+    focusedAlbumInfo = { albumInfo, quantity, rank }
+  }
+
   // generate initial square arrangement
   $: squares = makeSquares(songs.length);
 
+  // make initial data request upon load
   onMount(refresh);
 </script>
 
@@ -320,12 +333,16 @@
            rank_determinant={filters.rank_determinant}
            quantity={songs[i].quantity}
            rank={i+1}
-           {showCellInfo}/>
+           {showCellInfo}
+           {selectAlbum}/>
         {/each}
       </div>
-      <Context album={songs[0].song.albums[0]}
-        quantity={songs[0].quantity} rank={1}
-        {dateStrings} {filters} {timeFrame}/>
+      {#if showContextMenu}
+        <Context album={focusedAlbumInfo.albumInfo}
+        quantity={focusedAlbumInfo.quantity}
+        rank={focusedAlbumInfo.rank}
+        {dateStrings} {filters} {timeFrame} />
+      {/if}
     {:else if refreshStatus.status == "refreshing"}
       <div
         id="placeholder-display"

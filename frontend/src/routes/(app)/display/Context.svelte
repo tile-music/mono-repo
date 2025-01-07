@@ -54,7 +54,7 @@
     }
 
     // drag logic
-    let position = {top: 0, left: 0};
+    let position = {top: 0, left: 10};
     let moving = false;
     let dragTarget: HTMLElement;
 
@@ -133,7 +133,7 @@
                 </tr>
             {/each}
             {#if album.tracks !== response.songs.length}
-                <p><em>{album.tracks - response.songs.length} have not been listened to yet.</em></p>
+                <p><em>+ {album.tracks - response.songs.length} unplayed songs</em></p>
             {/if}
         {:catch error}
             <p>Error: {error.toString()}</p>
@@ -141,15 +141,19 @@
     </table>
 </div>
 
-<svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove} />
+<svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove}/>
 
 <style>
+    img {
+        object-fit: cover;
+    }
+    
     #context-menu {
         position: absolute;
         width: min(400px, 100%);
-        height: min(800px, 100%);
+        height: min(600px, 100%);
         max-height: fit-content;
-        padding: 5px 10px 10px 10px;
+        padding: 7px 15px 15px 15px;
         background-color: var(--midground);
         display: flex;
         flex-direction: column;
@@ -162,9 +166,9 @@
 
     #handle {
         width: 100px;
-        height: 5px;
+        height: 6px;
         background-color: var(--medium);
-        margin: 0 auto 5px auto;
+        margin: 0 auto 7px auto;
         border-radius: 5px;
         pointer-events: none;
     }

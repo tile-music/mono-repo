@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { SongInfo } from "../../../../../lib/Song";
+    import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
     import type { DisplayDataRequest } from "../../../../../lib/Request";
     import type { ShowCellInfo } from "./filters";
     type squareInfo = {
@@ -14,7 +14,8 @@
     export let rank_determinant: DisplayDataRequest["rank_determinant"];
     export let quantity: number;
     export let rank: number;
-    export let showCellInfo: ShowCellInfo
+    export let showCellInfo: ShowCellInfo;
+    export let selectAlbum: (a: AlbumInfo, q: number, r: number) => void;
 
     $: cellInfoClass = showCellInfo == "on-hover" ? "show-on-hover" : "";
 
@@ -39,8 +40,9 @@
     `
 </script>
 
-<div id="square" style={style}
- bind:clientWidth={squareWidth}>
+<button id="square" style={style}
+ bind:clientWidth={squareWidth}
+ on:click={() => selectAlbum(song.albums[0], quantity, rank)} tabindex={rank}>
     <img src={song.albums[0].image} alt="">
     {#if showCellInfo != "never"}
         <div id="cell-info" class={cellInfoClass} style={`font-size: ${fontSize}`}>
@@ -53,7 +55,7 @@
             {/if}
         </div>
     {/if}
-</div>
+</button>
 
 <style>
     #square {
@@ -61,6 +63,10 @@
         position: absolute;
         box-sizing: border-box;
         transition: transform ease-in 0.2s, z-index linear 0.2s;
+        border: none;
+        margin: 0;
+        padding: 0;
+        text-align: start;
     }
 
     #square:hover {
@@ -80,7 +86,10 @@
         background: rgb(0,0,0);
         background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.7) 100%);
         padding: 5%;
-        gap: 1%;
+    }
+
+    #cell-info>* {
+        line-height: 1.15;
     }
 
     #rank {
