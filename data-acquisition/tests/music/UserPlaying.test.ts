@@ -139,7 +139,7 @@ describe("UserPlaying Tests", () => {
       if (error) throw error;
       userId = data.user?.id || "test-user-id";
     });
-    /* afterAll(async () => {
+    afterAll(async () => {
 
       supabase = new SupabaseClient(
         process.env.SB_URL_TEST as string,
@@ -148,7 +148,7 @@ describe("UserPlaying Tests", () => {
       const { data, error } = await supabase.auth.admin.deleteUser(userId);
       if (error) throw error;
       //await supabase.rpc("clear_test_tables");
-    }); */
+    });
     let supabase: any;
     let postgres: any;
     let userId: string;
@@ -314,7 +314,7 @@ describe("UserPlaying Tests", () => {
             .select()
             .eq("user_id", userId);
           if (newError) throw newError;
-
+          expect(data.length).toBeGreaterThan(0)
           expect(newData.length).toBeGreaterThanOrEqual(data.length);
           expect(newData.length).toBeLessThanOrEqual(data.length);
         });

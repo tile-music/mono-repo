@@ -4,5 +4,8 @@
         "isrc",
         "musicbrainz"
     ],
-    "markdown.expand-tabs.tabWidth": 4
+    "markdown.expand-tabs.tabWidth": 4,
+    "jest.runMode": {
+        "type": "on-demand"
+    }
 }

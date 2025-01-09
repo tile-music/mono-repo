@@ -1,5 +1,5 @@
-import { AlbumInfo } from "./AlbumInfo";
-import { TrackInfo } from "./TrackInfo";
+import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo";
+import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo";
 
 /**
  * @file PlayedTrack.ts
@@ -28,8 +28,8 @@ import { TrackInfo } from "./TrackInfo";
 export class PlayedTrack {
 
   private listenedAt: number;
-  private trackInfo: TrackInfo;
-  private albumInfo: AlbumInfo;
+  private trackInfo: TrackInfo | SpotifyTrackInfo;
+  private albumInfo: AlbumInfo | SpotifyAlbumInfo;
   private trackPopularity: number;
 
   constructor(listenedAt: number, trackInfo: TrackInfo, albumInfo: AlbumInfo, trackPopularity: number) {

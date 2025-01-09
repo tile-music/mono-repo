@@ -96,3 +96,34 @@ export class AlbumInfo {
     };
   }
 }
+
+export class SpotifyAlbumInfo extends AlbumInfo {
+
+  private spotifyId: string;
+  constructor(
+    albumName: string,
+    albumType: string,
+    artists: string[],
+    image: string,
+    releaseDay: number | undefined,
+    releaseMonth: number | undefined,
+    releaseYear: number,
+    numTracks: number,
+    genre: string[],
+    upc: string,
+    ean: string,
+    albumIsrc: string,
+    spotifyId: string,
+  ) {
+    super(albumName, albumType, artists, image, releaseDay, releaseMonth, releaseYear, numTracks, genre, upc, ean, albumIsrc);
+    this.spotifyId = spotifyId;
+  }
+
+  public createDbEntryObject() {
+    return {
+      ...super.createDbEntryObject(),
+      spotify_id: this.spotifyId
+    };
+  }
+
+}

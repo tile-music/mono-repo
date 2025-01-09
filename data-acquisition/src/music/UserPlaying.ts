@@ -1,12 +1,11 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import { TrackInfo } from "./TrackInfo";
-
 import { Album, Client, Player, Track, User } from "spotify-api.js";
-import { AlbumInfo } from "./AlbumInfo";
 
+import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo";
+import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo";
 import { PlayedTrack } from "./PlayedTrack";
-import { release } from "os";
+
 
 export type ReleaseDate = {year: number, month?: number, day?: number} 
 
@@ -121,7 +120,19 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
   public async init(): Promise<void> {
     //console.log(this.context);
-    
+    this.client = await Client.create({
+      refreshToken: true,
+      token: {
+        clientID: process.env.SP_CID as string,
+        clientSecret: process.env.SP_SECRET as string,
+        refreshToken: this.context.refresh_token,
+      },
+      onRefresh: () => {
+        console.log(
+          `Token has been refreshed. New token: ${this.client.token}!`
+        );
+      },
+    });
     this.player = new Player(this.client);
   }
   /* protected async getAlbumPopularity(): Promise<void> {
@@ -158,7 +169,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       const releaseDatePrecisionRaw : any = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
       
       const releaseDateParsed : ReleaseDate = SpotifyUserPlaying.parseSpotifyDate(releaseDateRaw, releaseDatePrecisionRaw);
-      const album = new AlbumInfo(
+      const album = new SpotifyAlbumInfo(
         item.track.album.name,
         item.track.album.albumType,
         item.track.album.artists.map((artist: any) => artist.name),
@@ -171,12 +182,14 @@ export class SpotifyUserPlaying extends UserPlaying {
         item.track.album.upc,
         item.track.album.ean,
         "USRC17607830",
+        item.track.album.id
       );
-      const trackInfo = new TrackInfo(
+      const trackInfo = new SpotifyTrackInfo(
         item.track.name,
         item.track.artists.map((artist: any) => artist.name),
         item.track.externalID.isrc,
-        item.track.duration
+        item.track.duration,
+        item.track.id
       );
       const playedTrackInfo = new PlayedTrack(
         SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
@@ -196,6 +209,7 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
   public async fire(): Promise<void> {
     this.items = ( await this.player.getRecentlyPlayed({ limit: 50 })).items;
+    //console.log(this.items)
     await this.putInDB();
 
   }
