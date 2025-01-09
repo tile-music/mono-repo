@@ -135,3 +135,5 @@ dist
 supabase/*
 
 .vscode/
+
+tests/util/test-data.json

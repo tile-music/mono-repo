@@ -43,7 +43,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
   describe("fetch testdata from db", () => {
     test("get data ", async () => {
       const userPlayedData = await supabase.schema("prod").from("played_tracks").select(`
-        listened_at, track_id, album_id,
+        listened_at, track_id, album_id, track_popularity, album_popularity,
         albums (spotify_id) 
         )
       `).limit(50);
@@ -60,7 +60,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
       }
       spotifyData = JSON.parse(data);
     });
-    updateSpotifyAlbumPopularityHelper(spotifyClient.token, "test", )
+    updateSpotifyAlbumPopularityHelper(spotifyClient.token, "test", false, undefined, spotifyData)
 
   });
 });
