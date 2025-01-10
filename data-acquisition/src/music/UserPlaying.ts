@@ -135,32 +135,7 @@ export class SpotifyUserPlaying extends UserPlaying {
     });
     this.player = new Player(this.client);
   }
-  /* protected async getAlbumPopularity(): Promise<void> {
-    const albumLimit = 20;
-    let remaining = this.items.length;
-    let albumSpotifyIdList: string[] = [];
-
-
-    let beginIdx : number = 0;
-    let endIdx : number = albumLimit > remaining ? remaining : albumLimit;
-    
-    if(!this.items || this.items.length == 0) return
-
-    for (const item of this.items) {
-      albumSpotifyIdList.push(item.track.album.id);
-    }
-
-    while(remaining){
-      let tmpAlbums : any[] = await SpotifyUserPlaying.getSpotifyAlbumData(albumSpotifyIdList.slice(beginIdx, endIdx), this.client.token);
-      //let tmpAlbums : any[] = await this.client.albums.getMultiple(albumSpotifyIdList.slice(beginIdx, endIdx));
-      this.albums.push(...tmpAlbums);
-      remaining -= tmpAlbums.length;
-      beginIdx = this.albums.length;
-      endIdx = remaining > albumLimit ? beginIdx + albumLimit : remaining + beginIdx; 
-    }
-    if(this.albums.length !== this.items.length) throw Error("spotify album list length mismatch")
-  }
- */
+  
 
   protected async makeDBEntries(): Promise<void> {
     //await this.getAlbumPopularity();
@@ -262,33 +237,6 @@ export class SpotifyUserPlaying extends UserPlaying {
       )
     );
   }
-  /* public static async getSpotifyAlbumData(ids: string[], token: string) : Promise<any> {
-    if (!Array.isArray(ids) || ids.length === 0) {
-      throw new Error('IDs must be a non-empty array of strings.');
-    }
-  
-    const url = `https://api.spotify.com/v1/albums?ids=${encodeURIComponent(ids.join(','))}`;
-  
-    try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${String(token)}`,
-          'Content-Type': 'application/json'
-        }
-      });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      const data = await response.json();
-      return data.albums ? data.albums : []; // Return the data for further use
-    } catch (error) {
-      console.error('Error fetching albums:', error);
-      throw error; // Re-throw the error for external handling
-    }
-  }; */
   
 }
 

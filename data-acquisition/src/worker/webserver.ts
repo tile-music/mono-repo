@@ -1,7 +1,7 @@
 import express from 'express';
 import { Queue } from 'bullmq';
 import { connection } from './redis';  // Assuming you already have the Redis connection
-import { spotifyFire } from './spotifyWorker';       // Import the spotifyFire function
+import { spotifyFire } from './worker';       // Import the spotifyFire function
 import { makeDataAcqQueue } from './makeQueue';
 
 const queue = makeDataAcqQueue();

@@ -45,9 +45,11 @@ async function getSpotifyAlbumData(ids: string[], token: string): Promise<any> {
   if (!Array.isArray(ids) || ids.length === 0) {
     throw new Error('IDs must be a non-empty array of strings.');
   }
+  console.log("ids: ", ids);
+  ids = ids.filter((id) => typeof id === 'string' && id.length > 0);
 
   const url = `https://api.spotify.com/v1/albums?ids=${encodeURIComponent(ids.join(','))}`;
-
+  console.log("url: ", url);
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -116,7 +118,9 @@ async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): Promise<
 
 export async function updateSpotifyAlbumPopularity() {
   const spotifyClient: Client = await setupSpotifyClient();
-  updateSpotifyAlbumPopularityHelper(spotifyClient.token, "prod", false, new Date(Date.now() - (1000 * 60 * 60 * 24)));
+  const schema: "test" | "prod" = process.env.SB_SCHEMA === "test" ? "test" : "prod";
+  const internal: boolean = process.env.INTERNAL === "true";
+  await updateSpotifyAlbumPopularityHelper(spotifyClient.token, schema, internal, new Date(Date.now() - (1000 * 60 * 60 * 24)));
 
 }
 
@@ -125,7 +129,7 @@ export async function updateSpotifyAlbumPopularityHelper(token: string, schema: 
   const sbUrl = internal ? process.env.SB_URL : process.env.SB_URL_TEST;
   const serviceRoleKey = process.env.SERVICE;
   const map: Map<string, SpotifyUpdateData> = new Map();
-  let spotifyIDs: string[] = [];
+
   if (!sbUrl || !serviceRoleKey) {
     throw new Error("Missing Supabase URL or Service Role Key");
   }
@@ -135,7 +139,8 @@ export async function updateSpotifyAlbumPopularityHelper(token: string, schema: 
   let query = sbClient.schema(schema).from("played_tracks").select(selectString);
   if (beginAt) query = query.gte("listened_at", beginAt.valueOf());
 
-  const { data: dbData, error } = data ?  { data: data, error: null } : await query;
+  const { data: dbData, error } = data ? { data: data, error: null } : await query;
+  console.log(error)
 
   if (error) throw error;
   for (const entry of dbData) {

@@ -334,7 +334,6 @@ describe("UserPlaying Tests", () => {
           .eq("user_id", userId);
         if (error) throw error;
         expect(data).toBeDefined();
-        console.log(data)
         for (const entry of data) {
           expect(entry.albums.spotify_id).toBeDefined();
         }

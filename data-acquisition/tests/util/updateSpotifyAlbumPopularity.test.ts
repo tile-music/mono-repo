@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { SpotifyUpdateData, updateSpotifyAlbumPopularityHelper, selectString } from "../../src/util/updateSpotifyAlbumPopularity";
+import { SpotifyUpdateData, updateSpotifyAlbumPopularityHelper, selectString, updateSpotifyAlbumPopularity } from "../../src/util/updateSpotifyAlbumPopularity";
 import { Client, Player } from "spotify-api.js";
 import { SpotifyUserPlaying } from "../../src/music/UserPlaying";
 
@@ -12,6 +12,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
   let spotifyClient: Client;
   let spotifyData: SpotifyUpdateData[] = [];
   let userId: string;
+  
   beforeAll(async () => {
     supabase = new SupabaseClient(
       process.env.SB_URL_TEST as string,
@@ -65,7 +66,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
     ret.forEach((r) => {
       expect(r.album_popularity).toBeGreaterThanOrEqual(0);
     })
-  }, 50000);
+  }, 10000);
 
   test("use real data", async () => {
     const spotifyUserPlaying = new SpotifyUserPlaying(
@@ -73,19 +74,33 @@ describe("Test updateSpotifyAlbumPopularity", () => {
       userId,
       { refresh_token: process.env.SP_REFRESH }
     );
-    const { data, error } = await supabase.schema("prod").from("played_tracks").select()
     await spotifyUserPlaying.init();
     await expect(spotifyUserPlaying.fire()).resolves.not.toThrow();
 
     await updateSpotifyAlbumPopularityHelper(spotifyClient.token, "test", false);
 
     const { data: updatedData, error: updatedError } = (await supabase.schema("test").from("played_tracks").select(selectString).eq("user_id", userId));
+
+
     console.log(updatedData);
     const typedUpdatedData = updatedData as unknown as SpotifyUpdateData[];
     typedUpdatedData?.forEach((d) => {
       console.log(d)
       expect(d.album_popularity).toBeGreaterThanOrEqual(0);
     })
+  }, 10000)
+  test("test update using prod method", async () => {
+    const {data, error} = await supabase.schema("test").from("played_tracks").update({album_popularity: 0}).eq("user_id", userId).select("*");
+    if(error) throw error;
+    if(data.length === 0) throw new Error("No data found");
+    await updateSpotifyAlbumPopularity()
+    const {data: updatedData, error: updatedError} = await supabase.schema("test").from("played_tracks").select(selectString).eq("user_id", userId);
+    let typedUpdatedData = updatedData as unknown as SpotifyUpdateData[];
+    typedUpdatedData?.forEach((d) => {
+      expect(d.album_popularity).toBeGreaterThanOrEqual(0);
+    })
+    
   })
+  
 
 });

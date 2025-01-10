@@ -1,6 +1,8 @@
 
 import { TrackInfo, SpotifyTrackInfo } from '../../src/music/TrackInfo';
-
+/**
+ * sharted by chat
+ */
 describe('TrackInfo classes', () => {
   describe("base class", () => {
     test('should create an instance of TrackInfo with correct properties', () => {
