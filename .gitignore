@@ -7,6 +7,6 @@ test.env
 
 /scratch
 data-acquisition/tests/util/test-data.json
-data-acquisition/test-data.json
 data-acquisition/tests/util/test-data.copy.json
+data-acquisition/package-lock.json
 data-acquisition/package-lock.json

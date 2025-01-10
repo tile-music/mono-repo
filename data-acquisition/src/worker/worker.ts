@@ -63,3 +63,4 @@ process.on('SIGINT', async () => {
   console.log('Worker and queue closed');
   process.exit(0);
 });
+

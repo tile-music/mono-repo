@@ -68,14 +68,16 @@ export async function makeSpotifyAlbumPopularityJobs() {
   console.log("makeJobs for SpotifyAlbumPopularity");
   await queue.add(
     'spotifyAlbumPopularityCronJob',
-    {string: "update"},
+    { string: "update" },
     {
-      repeat: { pattern: "* * * * *" },
+      repeat: { pattern: "0 0 * * *" },
     }
   );
   console.log("added job for SpotifyAlbumPopularity update");
   await queue.add(
     'spotifyAlbumPopularitySingleShot',
-    { string:  "initialize" }
+    { string:  "initialize" },
+    { removeOnComplete: true, 
+      removeOnFail: true }
   );
 }

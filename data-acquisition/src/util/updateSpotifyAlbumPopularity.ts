@@ -45,11 +45,11 @@ async function getSpotifyAlbumData(ids: string[], token: string): Promise<any> {
   if (!Array.isArray(ids) || ids.length === 0) {
     throw new Error('IDs must be a non-empty array of strings.');
   }
-  console.log("ids: ", ids);
+  //console.log("ids: ", ids);
   ids = ids.filter((id) => typeof id === 'string' && id.length > 0);
 
   const url = `https://api.spotify.com/v1/albums?ids=${encodeURIComponent(ids.join(','))}`;
-  console.log("url: ", url);
+  //console.log("url: ", url);
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -90,7 +90,7 @@ async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): Promise<
     //let tmpAlbums : any[] = await this.client.albums.getMultiple(albumSpotifyIdList.slice(beginIdx, endIdx));
     for (const album of tmpAlbums) {
       try{
-      console.log("album: ", album.id);
+      //console.log("album: ", album.id);
       let data = ids.get(album.id)
       if (album.popularity !== undefined) {
         if (data) {

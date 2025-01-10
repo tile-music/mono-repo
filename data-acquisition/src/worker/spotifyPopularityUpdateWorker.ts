@@ -5,9 +5,8 @@ import { connection } from './redis';
 
 const worker = new Worker('spotifyAlbumPopularity', async () => {
   try {
-    console.log("attempting to update Spotify Album Popularity");
     await updateSpotifyAlbumPopularity();
-    console.log("Updated Spotify Album Popularity");
+    console.log(`Spotify Album Popularity updated at ${new Date()}`);
   } catch (error) {
     console.error("Error updating Spotify Album Popularity:", error);
   }
@@ -22,4 +21,3 @@ process.on('SIGINT', async () => {
   console.log('Worker and queue closed');
   process.exit(0);
 });
-console.log("Spotify Album Popularity Worker started");

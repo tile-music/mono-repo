@@ -45,6 +45,9 @@ console.log("Starting Spotify Worker");
 for (let i = 0; i < Math.floor(os.cpus().length/2) ; i++ ){
   fork(__dirname + "/worker/worker.ts" );
 }
+async function main(){
+  await makeDataAcqJobs();
+  await makeSpotifyAlbumPopularityJobs();
 
-makeDataAcqJobs();
-makeSpotifyAlbumPopularityJobs();
+}
+main();
