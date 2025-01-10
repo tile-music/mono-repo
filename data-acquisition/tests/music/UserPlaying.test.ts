@@ -218,14 +218,14 @@ describe("UserPlaying Tests", () => {
       await expect(postgres.query("SELECT * from test.tracks")).resolves.not.toThrow();
     }); */
 
-    // test("SpotifyUserPlaying init method", async () => {
-    //   const spotifyUserPlaying = new SpotifyUserPlaying(
-    //     supabase,
-    //     userId,
-    //     context
-    //   );
-    //   await expect(spotifyUserPlaying.init()).resolves.not.toThrow();
-    // });
+    test("SpotifyUserPlaying init method", async () => {
+      const spotifyUserPlaying = new SpotifyUserPlaying(
+        supabase,
+        userId,
+        context
+      );
+      await expect(spotifyUserPlaying.init()).resolves.not.toThrow();
+    });
 
     test("MockUserPlaying init method", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
@@ -319,7 +319,7 @@ describe("UserPlaying Tests", () => {
           expect(newData.length).toBeLessThanOrEqual(data.length);
         });
     }, 10000);
-    test("spotify id check", async() => {
+    test("test using real spotify data", async() => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
         supabase,
         userId,
@@ -337,7 +337,6 @@ describe("UserPlaying Tests", () => {
         console.log(data)
         for (const entry of data) {
           expect(entry.albums.spotify_id).toBeDefined();
-          expect(entry.tracks.spotify_id).toBeDefined();
         }
       });
     })

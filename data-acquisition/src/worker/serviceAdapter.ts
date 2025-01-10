@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import { Queue } from "bullmq";
 import { connection } from "./redis";
-import { makeQueue } from "./makeQueue";
+import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./makeQueue";
 dotenv.config();
 /**
  */
@@ -21,8 +21,8 @@ dotenv.config();
  * @todo: add a perameter instead of creating a new queue
  * @todo: deduplicate 
 */
-export async function makeJobs() {
-  const queue = makeQueue();
+export async function makeDataAcqJobs() {
+  const queue = makeDataAcqQueue();
   console.log("makeJobs");
   const supabase = new SupabaseClient(
     process.env.SB_URL as string,
@@ -62,4 +62,15 @@ export async function makeJobs() {
         );
       });
     });
+}
+export async function makeSpotifyAlbumPopularityJobs() {
+  const queue = makeSpotifyAlbumPopularityQueue();
+  await queue.add(
+    "spotifyAlbumPopularity",
+    {},
+    {
+      repeat: { pattern: "* * * * *" },
+      jobId: "spotifyAlbumPopularity",
+    }
+  );
 }

@@ -1,7 +1,8 @@
 import { Worker } from 'bullmq';
-import {makeJobs} from './service-adapter';
+import {makeDataAcqJobs} from './serviceAdapter';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SpotifyUserPlaying } from '../music/UserPlaying';
+import { updateSpotifyAlbumPopularity } from '../util/updateSpotifyAlbumPopularity';
 import { fork } from 'node:child_process';
 import os from 'node:os';
 import { connection } from './redis';
@@ -55,6 +56,13 @@ const worker = new Worker(
   { connection }
 );
 
+const worker2 = new Worker("spotifyAlbumPopularity", async (job: any) => {
+  await updateSpotifyAlbumPopularity();
+  console.log("Updated Spotify Album Popularity");
+}, { connection });
+
+console.log("Worker and queue started");
+
 process.on('unhandledRejection', (err) => {
   console.error(err);
 })
@@ -62,6 +70,7 @@ process.on('unhandledRejection', (err) => {
 // Graceful shutdown handling
 process.on('SIGINT', async () => {
   await worker.close();
+  await worker2.close();
   console.log('Worker and queue closed');
   process.exit(0);
 });
