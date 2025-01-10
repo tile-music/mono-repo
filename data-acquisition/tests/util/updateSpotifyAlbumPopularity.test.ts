@@ -52,15 +52,15 @@ describe("Test updateSpotifyAlbumPopularity", () => {
     });
 
   })
-  test("test update SpotifyAlbumPopularityHelper", () => {
-    fs.readFile('tests/util/test-data.json', 'utf8', (err, data) => {
-      if (err) {
-        console.error(err)
-        return
-      }
-      spotifyData = JSON.parse(data);
-    });
-    updateSpotifyAlbumPopularityHelper(spotifyClient.token, "test", false, undefined, spotifyData)
+  test("test update SpotifyAlbumPopularityHelper", async () => {
+    const data = fs.readFileSync('tests/util/test-data.json', 'utf8');
+    spotifyData = JSON.parse(data);
+    console.log("spotifyData: ", spotifyData);
+    const ret = await updateSpotifyAlbumPopularityHelper(spotifyClient.token, "test", false, undefined, spotifyData)
+    ret.forEach((r) => {
+      expect(r.album_popularity).toBeGreaterThanOrEqual(0);
+    })
 
-  });
+  }, 50000);
+  
 });

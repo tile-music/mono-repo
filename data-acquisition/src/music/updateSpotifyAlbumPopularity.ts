@@ -19,6 +19,7 @@ export type SpotifyUpdateData = {
 
 export async function setupSpotifyClient(): Promise<Client> {
   const token = process.env.SP_REFRESH;
+
   if (!token) throw new Error("Missing Spotify API token");
   const client = await Client.create({
     refreshToken: true,
@@ -64,12 +65,12 @@ async function getSpotifyAlbumData(ids: string[], token: string): Promise<any> {
   }
 };
 
-async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): Promise<Map<string, SpotifyUpdateData>> {
+async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): Promise<void> {
   const albumLimit = 20;
-  const token: string | undefined = process.env.SP_REFRESH;
-  let updated: number =0; 
-  let remaining = ids.size;
+  const token: string | undefined = await setupSpotifyClient().then(client => client.token);
+  let updated: number = 0;
   let albumSpotifyIdList: string[] = Array.from(ids.keys());
+  let remaining = albumSpotifyIdList.length;
   let beginIdx: number = 0;
   let endIdx: number = albumLimit > remaining ? remaining : albumLimit;
 
@@ -82,23 +83,25 @@ async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): Promise<
     let tmpAlbums: any[] = await getSpotifyAlbumData(albumSpotifyIdList.slice(beginIdx, endIdx), token);
     //let tmpAlbums : any[] = await this.client.albums.getMultiple(albumSpotifyIdList.slice(beginIdx, endIdx));
     for (const album of tmpAlbums) {
-      if (album.popularity) {
-        let data = ids.get(album.id)
+      console.log("album: ", album.id);
+      let data = ids.get(album.id)
+      if (album.popularity !== undefined) {
         if (data) {
           data.album_popularity = album.popularity;
           ids.set(album.id, data);
+        } else {
+          throw Error(`no album found with id: ${album.id}`);
         }
       } else {
-        throw Error("No popularity data found for album");
+        throw Error(`No popularity data found for album with id: ${album.id} popularity??? ${album.popularity}`);
       }
-      updated+=1;
-      
+      updated += 1;
+
     };
     remaining -= tmpAlbums.length;
     beginIdx = updated;
     endIdx = remaining > albumLimit ? beginIdx + albumLimit : remaining + beginIdx;
   }
-  return ids;
 }
 
 async function updateSpotifyAlbumPopularity() {
@@ -107,12 +110,12 @@ async function updateSpotifyAlbumPopularity() {
 
 }
 
-export async function updateSpotifyAlbumPopularityHelper(token: string, schema: string, internal: boolean, beginAt?: Date, data?: SpotifyUpdateData[]) : Map<string,SpotifyUpdateData> {
+export async function updateSpotifyAlbumPopularityHelper(token: string, schema: "test"|"prod", internal: boolean, beginAt?: Date, data?: SpotifyUpdateData[]): Promise<Map<string, SpotifyUpdateData>> {
   if (!(process.env.SB_URL || process.env.SB_URL_TEST) || !process.env.SERVICE) throw new Error("Missing Supabase URL or Service Role Key");
   if (data && data.length == 0 || data == undefined) throw Error("No items in the playlist");
   const sbUrl = internal ? process.env.SB_URL : process.env.SB_URL_TEST;
   const serviceRoleKey = process.env.SERVICE;
-  const map : Map<string,SpotifyUpdateData> = new Map(); 
+  const map: Map<string, SpotifyUpdateData> = new Map();
   let spotifyIDs: string[] = [];
   if (!sbUrl || !serviceRoleKey) {
     throw new Error("Missing Supabase URL or Service Role Key");
@@ -120,28 +123,33 @@ export async function updateSpotifyAlbumPopularityHelper(token: string, schema: 
 
   const sbClient = new SupabaseClient(sbUrl, serviceRoleKey, { db: { schema: schema } });
 
-  let query = sbClient.schema("prod").from("played_tracks").select(`
+  let query = sbClient.schema(schema).from("played_tracks").select(`
     listened_at, track_id, album_id, track_popularity, album_popularity,
     tracks ( spotify_id, track_name, track_artists, track_duration_ms),
     albums (spotify_id)
     )
   `)
   if (beginAt) query = query.gte("listened_at", beginAt.valueOf());
-  
-  const { data: dbData, error } = data ? await query : {data: data, error: null};
-  
+
+  const { data: dbData, error } = data ?  { data: data, error: null } : await query;
+
   if (error) throw error;
   for (const entry of dbData) {
-    try{
-
+    try {
       const typedEntry = entry as unknown as SpotifyUpdateData;
-      console.log(typedEntry)
       map.set(typedEntry.albums.spotify_id, typedEntry);
-      
     } catch (error) {
       console.error("Error updating Spotify album popularity:", error);
     }
-  }
+  } 
+  /** this might could be a reference so it might not actually matter 
+   * tldr: i was right and it is in-fact pbr baby
+  */
+  await getAlbumPopularity(map);
+
+  map.forEach(async (value, key) => {
+    const {error} = await sbClient.schema(schema).from("albums").update({album_popularity: value.album_popularity}).eq("album_id", value.album_id);
+  })
 
   return map;
 

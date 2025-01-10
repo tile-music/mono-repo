@@ -319,5 +319,27 @@ describe("UserPlaying Tests", () => {
           expect(newData.length).toBeLessThanOrEqual(data.length);
         });
     }, 10000);
+    test("spotify id check", async() => {
+      const spotifyUserPlaying = new SpotifyUserPlaying(
+        supabase,
+        userId,
+        context
+      );
+      await spotifyUserPlaying.init();
+      await expect(spotifyUserPlaying.fire()).resolves.not.toThrow().then(async () => {
+        const { data, error } = await supabase
+          .from("played_tracks")
+          .select(`listened_at, albums(spotify_id),
+                    tracks(spotify_id)`)
+          .eq("user_id", userId);
+        if (error) throw error;
+        expect(data).toBeDefined();
+        console.log(data)
+        for (const entry of data) {
+          expect(entry.albums.spotify_id).toBeDefined();
+          expect(entry.tracks.spotify_id).toBeDefined();
+        }
+      });
+    })
   });
 });
