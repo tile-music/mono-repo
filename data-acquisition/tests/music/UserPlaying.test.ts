@@ -92,7 +92,7 @@ describe("Spotify UserPlaying Integration", () => {
         .from("played_tracks")
         .select()
         .eq("user_id", userId);
-      console.log(spotifyData)
+      //console.log(spotifyData)
       if (data) {
         data = data?.sort((a, b) => b.listened_at - a.listened_at);
       }
@@ -101,7 +101,7 @@ describe("Spotify UserPlaying Integration", () => {
       expect(data).toBeDefined()
       if (data) {
         for (let i = 0; i < data.length; i++) {
-          console.log(spotifyData[i].playedAt);
+          //console.log(spotifyData[i].playedAt);
           //console.log(SpotifyUserPlaying.parseISOToDate(spotifyData.items[i].playedAt), data[i].listened_at);
           const spotifyTimeStamp: Date = SpotifyUserPlaying.parseISOToDate(spotifyData[i].playedAt)
           const tsDateObjectSpTimestamp: Date = new Date(spotifyData[i].playedAt)
@@ -243,7 +243,7 @@ describe("UserPlaying Tests", () => {
             .select()
             .eq("user_id", userId)
             .then(({ data, error }: { data: any; error: any }) => {
-              console.log(data);
+              //console.log(data);
               expect(data).toHaveLength(2);
             })
         );
@@ -263,9 +263,6 @@ describe("UserPlaying Tests", () => {
             .from("played_tracks")
             .select()
             .eq("user_id", userId)
-            .then(({ data, error }: { data: any; error: any }) => {
-              console.log(data);
-            })
         );
     });
     test("MockUserPlaying data integrity", async () => {
@@ -334,6 +331,7 @@ describe("UserPlaying Tests", () => {
           .eq("user_id", userId);
         if (error) throw error;
         expect(data).toBeDefined();
+        //console.log(data)
         for (const entry of data) {
           expect(entry.albums.spotify_id).toBeDefined();
         }

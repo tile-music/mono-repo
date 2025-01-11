@@ -53,7 +53,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
   describe("fetch testdata from db", () => {
     test("get data ", async () => {
       const userPlayedData = await supabase.schema("prod").from("played_tracks").select(selectString).limit(50);
-      console.log("data: ", userPlayedData);
+      //console.log("data: ", userPlayedData);
       fs.writeFileSync('tests/util/test-data.json', JSON.stringify(userPlayedData.data));
     });
   })
@@ -61,7 +61,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
   test("test update SpotifyAlbumPopularityHelper", async () => {
     const data = fs.readFileSync('tests/util/test-data.json', 'utf8');
     spotifyData = JSON.parse(data);
-    console.log("spotifyData: ", spotifyData);
+    //console.log("spotifyData: ", spotifyData);
     const ret = await updateSpotifyAlbumPopularityHelper(spotifyClient.token, "test", false, undefined, spotifyData)
     ret.forEach((r) => {
       expect(r.album_popularity).toBeGreaterThanOrEqual(0);
@@ -82,10 +82,10 @@ describe("Test updateSpotifyAlbumPopularity", () => {
     const { data: updatedData, error: updatedError } = (await supabase.schema("test").from("played_tracks").select(selectString).eq("user_id", userId));
 
 
-    console.log(updatedData);
+    //console.log(updatedData);
     const typedUpdatedData = updatedData as unknown as SpotifyUpdateData[];
     typedUpdatedData?.forEach((d) => {
-      console.log(d)
+      //console.log(d)
       expect(d.album_popularity).toBeGreaterThanOrEqual(0);
     })
   }, 10000)

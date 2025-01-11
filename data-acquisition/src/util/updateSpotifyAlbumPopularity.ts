@@ -140,7 +140,7 @@ export async function updateSpotifyAlbumPopularityHelper(token: string, schema: 
   if (beginAt) query = query.gte("listened_at", beginAt.valueOf());
 
   const { data: dbData, error } = data ? { data: data, error: null } : await query;
-  console.log(error)
+  if(error) console.log(error)
 
   if (error) throw error;
   for (const entry of dbData) {
