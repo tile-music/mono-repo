@@ -12,7 +12,7 @@
             <li id="display"><a href="/display">art display</a></li>
             <li id="listening"><a href="/listening">listening data</a></li>
             <li id="profile"><a href="/profile">profile</a></li>
-            <li id="logout"><a href="/logout">logout</a></li>
+            <li id="logout" data-sveltekit-preload-data="off"><a href="/logout">logout</a></li>
         </ul>
     </nav>
     <div class="content">
