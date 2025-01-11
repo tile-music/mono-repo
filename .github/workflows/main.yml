@@ -41,7 +41,7 @@ jobs:
     - name: Apply schema
       env:
         CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
-      run:
+      run: |
         echo supabase/docker/volumes/db/init/data.sql
         psql "$CONNECTION_STRING" -f supabase/docker/volumes/db/init/data.sql
 
