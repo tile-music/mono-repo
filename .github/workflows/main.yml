@@ -42,7 +42,7 @@ jobs:
       env:
         CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
       run: |
-        echo < supabase/docker/volumes/db/init/data.sql
+        cat supabase/docker/volumes/db/init/data.sql
         psql "$CONNECTION_STRING" -f supabase/docker/volumes/db/init/data.sql
 
     - name: Run frontend tests
