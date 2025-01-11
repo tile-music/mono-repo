@@ -136,6 +136,6 @@ supabase/*
 
 .vscode/
 
-tests/util/test-data.json
+
 
 package-lock.json

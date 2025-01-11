@@ -50,13 +50,13 @@ describe("Test updateSpotifyAlbumPopularity", () => {
     if(error) throw error; */
     //await supabase.rpc("clear_test_tables");
   });
-  describe("fetch testdata from db", () => {
+  /* describe("fetch testdata from db", () => {
     test("get data ", async () => {
       const userPlayedData = await supabase.schema("prod").from("played_tracks").select(selectString).limit(50);
       //console.log("data: ", userPlayedData);
       fs.writeFileSync('tests/util/test-data.json', JSON.stringify(userPlayedData.data));
     });
-  })
+  }) */
 
   test("test update SpotifyAlbumPopularityHelper", async () => {
     const data = fs.readFileSync('tests/util/test-data.json', 'utf8');
