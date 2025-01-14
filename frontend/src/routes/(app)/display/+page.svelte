@@ -12,9 +12,11 @@
 
   import { toPng } from "html-to-image";
 
-  let songs: { song: SongInfo; quantity: number }[] = [];
 
-  let artDisplayRef: any;
+  let songs: { song: SongInfo; quantity: number }[] = [];
+  
+  let iFrameRef: HTMLDivElement;
+  let artDisplayRef: HTMLDivElement;
 
   let displayContainerSize = { width: 0, height: 0 };
   $: displaySize = Math.min(
@@ -38,17 +40,25 @@
   let filterVisibility = true;
 
   async function captureDiv() {
-    try {
-      // Capture the div as an image
-      const dataUrl = await toPng(artDisplayRef);
-
-      // Create a link and trigger download
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "art-display.png";
-      link.click();
-    } catch (error) {
-      console.error("Failed to capture div as image:", error);
+    if(artDisplayRef) {
+      try {
+        artDisplayRef.style.transform = "scale(.95)";
+        console.log(displaySize)
+        // Capture the div as an image
+        console.log(iFrameRef)
+        
+        const dataUrl = await toPng(iFrameRef/* , {filter: (element) => element.tagName == "button"} */);
+        // Create a link and trigger download
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = "art-display";
+        link.click();
+        artDisplayRef.style.transform = "scale(1)";
+      } catch (error) {
+        console.error("Failed to capture div as image:", error);
+      }
+    } else {
+      alert("No display to capture!")
     }
   }
 
@@ -307,11 +317,11 @@
     id="display-container"
     bind:clientWidth={displayContainerSize.width}
     bind:clientHeight={displayContainerSize.height}
+    bind:this={iFrameRef}
   >
     {#if squares.length == 0 && refreshStatus.status == "idle"}
       <div
         id="placeholder-display"
-        bind:this={artDisplayRef}
         class="capture-area"
       >
         <h1>No listening data!</h1>
@@ -324,8 +334,8 @@
     {:else if refreshStatus.status == "idle"}
       <div
         id="display"
-        bind:this={artDisplayRef}
         class="capture-area"
+        bind:this={artDisplayRef}
         style="{`width: ${displaySize}px; height: ${displaySize}px`}"
       >
         {#each squares as square, i}
@@ -348,7 +358,6 @@
     {:else if refreshStatus.status == "refreshing"}
       <div
         id="placeholder-display"
-        bind:this={artDisplayRef}
         class="capture-area"
       >
         <h1>Loading...</h1>
@@ -356,7 +365,6 @@
     {:else}
       <div
         id="placeholder-display"
-        bind:this={artDisplayRef}
         class="capture-area"
       >
         <h1>Error!</h1>
@@ -431,7 +439,7 @@
   }
 
   #display {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1 ;
     position: absolute;
   }
 
