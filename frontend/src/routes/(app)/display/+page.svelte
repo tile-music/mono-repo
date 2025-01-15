@@ -1,6 +1,8 @@
 <script lang="ts">
   import Square from "./Square.svelte";
   import Context from "./Context.svelte";
+  // import Header from "./Header.svelte";
+  
   import type { DisplayDataRequest } from "../../../../../lib/Request";
   import { deserialize } from "$app/forms";
   import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
@@ -338,6 +340,8 @@
         bind:this={artDisplayRef}
         style="{`width: ${displaySize}px; height: ${displaySize}px`}"
       >
+        <!-- <Header nameSource="name" position={{top: 0, left: 0}}
+        {dateStrings} {timeFrame} {filters}/> -->
         {#each squares as square, i}
           <Square {square} song={songs[i].song}
            aggregate={filters.aggregate}
