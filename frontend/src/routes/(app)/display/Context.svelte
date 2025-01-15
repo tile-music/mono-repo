@@ -2,6 +2,7 @@
     import type { AlbumInfo } from "../../../../../lib/Song";
     import type { DisplayDataRequest, ContextDataRequest, ContextDataResponse } from "../../../../../lib/Request";
     import type { TimeFrame, DateStrings } from "./filters";
+    import { timeFrameToText } from "./filters";
     import { deserialize } from "$app/forms";
 
     // props
@@ -26,24 +27,6 @@
     $: quantityText = filters.rank_determinant == "time" ?
                       toHoursAndMinutes(quantity) + " listened" :
                       quantity + " plays";
-    
-    export function timeFrameToText(tf: TimeFrame, ds: DateStrings) {
-        switch (tf) {
-            case "this-week": return "this week";
-            case "this-month": return "this month";
-            case "year-to-date": return "year to date";
-            case "this-year": return "this year";
-            case "all-time": return "of all time";
-            case "custom": return customTimeFrameText(ds);
-        }
-    }
-
-    function customTimeFrameText(ds: DateStrings) {
-        if (ds.start == null && ds.end == null) return "of all time";
-        else if (ds.start == null || ds.start == "") return "before " + ds.end;
-        else if (ds.end == null || ds.end == "") return "after " + ds.start;
-        else return `between ${ds.start} and ${ds.end}`;
-    }
 
     function toHoursAndMinutes(ms: number) {
         const hours = Math.floor(ms/1000/60/60);
