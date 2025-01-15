@@ -14,14 +14,16 @@ export type SpotifyUpdateData = {
   album_popularity: number;
   albums: {
     spotify_id: string;
+    ean: string;
+    upc: string;
   }
 }
 export const selectString = `
       listened_at, track_id, album_id, track_popularity, album_popularity,
-      albums (spotify_id) 
+      albums (spotify_id, ean, upc) 
       )
-    `;
-export async function setupSpotifyClient(): Promise<Client> {
+    `; 
+async function setupSpotifyClient(): Promise<Client> {
   const token = process.env.SP_REFRESH;
 
   if (!token) throw new Error("Missing Spotify API token");
@@ -41,12 +43,15 @@ export async function setupSpotifyClient(): Promise<Client> {
   return client;
 }
 
-async function getSpotifyAlbumData(ids: string[], token: string): Promise<any> {
+async function getSpotifyAlbumData(ids: string[], token: string, retries: number = 0): Promise<any> {
+  function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
   if (!Array.isArray(ids) || ids.length === 0) {
     throw new Error('IDs must be a non-empty array of strings.');
   }
   //console.log("ids: ", ids);
-  ids = ids.filter((id) => typeof id === 'string' && id.length > 0);
+  
 
   const url = `https://api.spotify.com/v1/albums?ids=${encodeURIComponent(ids.join(','))}`;
   //console.log("url: ", url);
@@ -60,7 +65,20 @@ async function getSpotifyAlbumData(ids: string[], token: string): Promise<any> {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (response && response.status == 429) {
+        console.log("Rate limit exceeded");
+        const retryAfterHeader = response.headers?.get("Retry-After");
+        const retryAfter: number | null = retryAfterHeader ? parseInt(retryAfterHeader) : 0;
+        if (retryAfter && retries < 5) {
+          console.log(`Retrying after ${retryAfter} seconds`);
+          await sleep(retryAfter * 1000);
+          return getSpotifyAlbumData(ids, token, retries + 1);
+        } else if(retries >= 5) {
+          throw new Error("Rate limit exceeded too many times");
+        } else {
+          throw new Error("something other than rate limit is fucked");
+        }
+      }
     }
 
     const data = await response.json();
@@ -71,11 +89,12 @@ async function getSpotifyAlbumData(ids: string[], token: string): Promise<any> {
   }
 };
 
-async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): Promise<void> {
+export async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): Promise<void> {
   const albumLimit = 20;
   const token: string | undefined = await setupSpotifyClient().then(client => client.token);
   let updated: number = 0;
   let albumSpotifyIdList: string[] = Array.from(ids.keys());
+  albumSpotifyIdList = albumSpotifyIdList.filter((id) => typeof id === 'string' && id.length > 0);
   let remaining = albumSpotifyIdList.length;
   let beginIdx: number = 0;
   let endIdx: number = albumLimit > remaining ? remaining : albumLimit;
@@ -83,18 +102,25 @@ async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): Promise<
   if (!token) throw new Error("Missing Spotify API token");
   if (!albumSpotifyIdList || albumSpotifyIdList.length == 0) throw Error("No items in the playlist");
 
-
+  console.log(`spotify ids len: ${albumSpotifyIdList.length}`);
   while (remaining) {
+    console.log(`beginIdx: ${beginIdx}, endIdx: ${endIdx}, remaining: ${remaining}`);
 
     let tmpAlbums: any[] = await getSpotifyAlbumData(albumSpotifyIdList.slice(beginIdx, endIdx), token);
     //let tmpAlbums : any[] = await this.client.albums.getMultiple(albumSpotifyIdList.slice(beginIdx, endIdx));
+    console.log(`tmpAlbums: ${tmpAlbums.length}`);
     for (const album of tmpAlbums) {
       try{
       //console.log("album: ", album.id);
       let data = ids.get(album.id)
       if (album.popularity !== undefined) {
         if (data) {
+
           data.album_popularity = album.popularity;
+          data.albums.spotify_id = album.id;
+          data.albums.ean = album.external_ids.ean;
+          data.albums.upc = album.external_ids.upc;
+          console.log(data)
           ids.set(album.id, data);
         } else {
           throw Error(`no album found with id: ${album.id}`);
@@ -159,6 +185,9 @@ export async function updateSpotifyAlbumPopularityHelper(token: string, schema: 
   for(const [key, value] of map.entries()) {
     try{
       const {error} = await sbClient.schema(schema).from("played_tracks").update({album_popularity: value.album_popularity}).eq("album_id", value.album_id)
+      const {error: albumInsertError} = await sbClient.schema(schema).from("albums").update(value.albums).eq("album_id", value.album_id);
+      /** postgrest gets mad if you try to update something that is already updated */
+      if (albumInsertError && albumInsertError?.code !== "23505") throw albumInsertError;
       if (error) throw error
 
     } catch (error) {

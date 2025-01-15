@@ -81,7 +81,6 @@ describe("Test updateSpotifyAlbumPopularity", () => {
 
     const { data: updatedData, error: updatedError } = (await supabase.schema("test").from("played_tracks").select(selectString).eq("user_id", userId));
 
-
     //console.log(updatedData);
     const typedUpdatedData = updatedData as unknown as SpotifyUpdateData[];
     typedUpdatedData?.forEach((d) => {
