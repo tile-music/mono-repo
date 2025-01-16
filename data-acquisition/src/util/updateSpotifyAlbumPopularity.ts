@@ -184,7 +184,7 @@ export async function updateSpotifyAlbumPopularityHelper(token: string, schema: 
 
   for(const [key, value] of map.entries()) {
     try{
-      const {error} = await sbClient.schema(schema).from("played_tracks").update({album_popularity: value.album_popularity}).eq("album_id", value.album_id)
+      const {error} = await sbClient.schema(schema).from("played_tracks").update({album_popularity: value.album_popularity, album_popularity_updated_at: Date.now()}).eq("album_id", value.album_id)
       const {error: albumInsertError} = await sbClient.schema(schema).from("albums").update(value.albums).eq("album_id", value.album_id);
       /** postgrest gets mad if you try to update something that is already updated */
       if (albumInsertError && albumInsertError?.code !== "23505") throw albumInsertError;
