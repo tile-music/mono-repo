@@ -94,7 +94,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
     if(data.length === 0) throw new Error("No data found");
     await updateSpotifyAlbumPopularity()
     const {data: updatedData, error: updatedError} = await supabase.schema("test").from("played_tracks").select(selectString).eq("user_id", userId);
-    let typedUpdatedData = updatedData as unknown as SpotifyUpdateData[];
+    const typedUpdatedData = updatedData as unknown as SpotifyUpdateData[];
 
     typedUpdatedData?.forEach((d) => {
       expect(d.album_popularity).toBeGreaterThanOrEqual(0);

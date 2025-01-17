@@ -18,11 +18,15 @@ export type SpotifyUpdateData = {
     upc: string;
   }
 }
+
+
 export const selectString = `
-      listened_at, track_id, album_id, track_popularity, album_popularity,
-      albums (spotify_id, ean, upc) 
-      )
-    `; 
+listened_at, track_id, album_id, track_popularity, album_popularity,
+albums (spotify_id, ean, upc))`; 
+
+type SpotifyAlbums = {albums: []};
+type SpotifyTracks = {tracks: []}; 
+
 async function setupSpotifyClient(): Promise<Client> {
   const token = process.env.SP_REFRESH;
 
@@ -43,17 +47,14 @@ async function setupSpotifyClient(): Promise<Client> {
   return client;
 }
 
-async function getSpotifyAlbumData(ids: string[], token: string, retries: number = 0): Promise<any> {
+async function getSpotifyData(dataType: "albums"| "tracks", ids: string[], token: string, retries: number = 0){
   function sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
   if (!Array.isArray(ids) || ids.length === 0) {
     throw new Error('IDs must be a non-empty array of strings.');
   }
-  //console.log("ids: ", ids);
-  
-
-  const url = `https://api.spotify.com/v1/albums?ids=${encodeURIComponent(ids.join(','))}`;
+  const url = `https://api.spotify.com/v1/${dataType}?ids=${encodeURIComponent(ids.join(','))}`;
   //console.log("url: ", url);
   try {
     const response = await fetch(url, {
@@ -72,7 +73,7 @@ async function getSpotifyAlbumData(ids: string[], token: string, retries: number
         if (retryAfter && retries < 5) {
           console.log(`Retrying after ${retryAfter} seconds`);
           await sleep(retryAfter * 1000);
-          return getSpotifyAlbumData(ids, token, retries + 1);
+          return getSpotifyData(dataType, ids, token, retries + 1);
         } else if(retries >= 5) {
           throw new Error("Rate limit exceeded too many times");
         } else {
@@ -82,12 +83,22 @@ async function getSpotifyAlbumData(ids: string[], token: string, retries: number
     }
 
     const data = await response.json();
-    return data.albums ? data.albums : []; // Return the data for further use
+    return data ? data : []; // Return the data for further use
   } catch (error) {
     console.error('Error fetching albums:', error);
-    throw error; // Re-throw the error for external handling
+
   }
+}
+
+async function getSpotifyAlbumData(ids: string[], token: string): Promise<SpotifyAlbums | []> {
+  const albums : SpotifyAlbums = await getSpotifyData("albums", ids, token);
+  return albums ? albums.albums : [];
 };
+
+async function getSpotifyTrackData(ids: string[], token: string): Promise<SpotifyTracks | []> {
+  const tracks : SpotifyTracks = await getSpotifyData("tracks", ids, token);
+  return tracks ? tracks.tracks : [];
+}
 
 export async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): Promise<void> {
   const albumLimit = 20;
@@ -106,7 +117,7 @@ export async function getAlbumPopularity(ids: Map<string, SpotifyUpdateData>): P
   while (remaining) {
     console.log(`beginIdx: ${beginIdx}, endIdx: ${endIdx}, remaining: ${remaining}`);
 
-    let tmpAlbums: any[] = await getSpotifyAlbumData(albumSpotifyIdList.slice(beginIdx, endIdx), token);
+    let tmpAlbums: SpotifyAlbums | []  = await getSpotifyAlbumData(albumSpotifyIdList.slice(beginIdx, endIdx), token);
     //let tmpAlbums : any[] = await this.client.albums.getMultiple(albumSpotifyIdList.slice(beginIdx, endIdx));
     console.log(`tmpAlbums: ${tmpAlbums.length}`);
     for (const album of tmpAlbums) {
