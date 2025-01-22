@@ -1,17 +1,24 @@
 <script lang="ts">
   import Square from "./Square.svelte";
+  import Context from "./Context.svelte";
+  // import Header from "./Header.svelte";
+  
   import type { DisplayDataRequest } from "../../../../../lib/Request";
   import { deserialize } from "$app/forms";
-  import type { SongInfo } from "../../../../../lib/Song";
+  import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
   import { onMount } from "svelte";
+
+  import type { TimeFrame, DateStrings, ShowCellInfo } from "./filters";
 
   import { generateFullArrangement } from "./pack";
 
   import { toPng } from "html-to-image";
 
-  let songs: { song: SongInfo; quantity: number }[] = [];
 
-  let artDisplayRef: any;
+  let songs: { song: SongInfo; quantity: number }[] = [];
+  
+  let iFrameRef: HTMLDivElement;
+  let artDisplayRef: HTMLDivElement;
 
   let displayContainerSize = { width: 0, height: 0 };
   $: displaySize = Math.min(
@@ -26,33 +33,34 @@
     rank_determinant: "listens",
   };
 
-  let timeFrame:
-    | "this-week"
-    | "this-month"
-    | "year-to-date"
-    | "this-year"
-    | "all-time"
-    | "custom" = "all-time";
+  let timeFrame: TimeFrame = "all-time";
 
-  let dateStrings: {
-    start: string | null;
-    end: string | null;
-  } = { start: null, end: null };
+  let dateStrings: DateStrings = { start: null, end: null };
+
+  let showCellInfo: ShowCellInfo = "on-hover";
 
   let filterVisibility = true;
 
   async function captureDiv() {
-    try {
-      // Capture the div as an image
-      const dataUrl = await toPng(artDisplayRef);
-
-      // Create a link and trigger download
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "art-display.png";
-      link.click();
-    } catch (error) {
-      console.error("Failed to capture div as image:", error);
+    if(artDisplayRef) {
+      try {
+        artDisplayRef.style.transform = "scale(.95)";
+        console.log(displaySize)
+        // Capture the div as an image
+        console.log(iFrameRef)
+        
+        const dataUrl = await toPng(iFrameRef/* , {filter: (element) => element.tagName == "button"} */);
+        // Create a link and trigger download
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = "art-display";
+        link.click();
+        artDisplayRef.style.transform = "scale(1)";
+      } catch (error) {
+        console.error("Failed to capture div as image:", error);
+      }
+    } else {
+      alert("No display to capture!")
     }
   }
 
@@ -92,15 +100,20 @@
     | { status: "idle" }
     | { status: "error"; error: string } = { status: "refreshing" };
   async function refresh() {
-    //console.log("refreshing");
     // set date range
     const startDate = new Date();
     const endDate = new Date();
 
+    // wipe dateStrings if needed
     if (timeFrame != "custom") {
       dateStrings.start = null;
       dateStrings.end = null;
     }
+
+    // make sure dateStrings sare null if no date is entered
+    if (dateStrings.start == "") dateStrings.start = null;
+    if (dateStrings.end == "") dateStrings.end = null;
+
     if (timeFrame != "all-time") {
       switch (timeFrame) {
         case "this-week":
@@ -122,7 +135,6 @@
           ) {
             return;
           } else {
-            //console.log(dateStrings);
             dateStrings.start
               ? startDate.setTime(new Date(dateStrings.start).valueOf())
               : null;
@@ -145,8 +157,10 @@
     // send new data request only if filters have changed
     if (JSON.stringify(filters) == JSON.stringify(prevFilters)) return;
 
-    // send request
+    // close popup
+    focusedAlbumInfo = null;
 
+    // send request
     refreshStatus = { status: "refreshing" };
     const res = await fetch("?/refresh", {
       method: "POST",
@@ -173,9 +187,21 @@
     }
   }
 
+  // context menu display logic
+  let focusedAlbumInfo: {
+    albumInfo: AlbumInfo,
+    quantity: number,
+    rank: number
+  } | null;
+
+  function selectAlbum(albumInfo: AlbumInfo, quantity: number, rank: number) {
+    focusedAlbumInfo = { albumInfo, quantity, rank }
+  }
+
   // generate initial square arrangement
   $: squares = makeSquares(songs.length);
 
+  // make initial data request upon load
   onMount(refresh);
 </script>
 
@@ -269,6 +295,17 @@
         </select>
       </div>
     </div>
+    <div class="input-section">
+      <h2>display style</h2>
+      <div class="labeled-input">
+        <label for="num-cells">include cell info</label>
+        <select id="show-cell-info" bind:value={showCellInfo}>
+          <option value="always">always</option>
+          <option value="on-hover">on hover</option>
+          <option value="never">never</option>
+        </select>
+      </div>
+    </div>
     <div id="lower-btns">
       <button
         on:click={() => (squares = makeSquares(songs.length))}
@@ -282,11 +319,11 @@
     id="display-container"
     bind:clientWidth={displayContainerSize.width}
     bind:clientHeight={displayContainerSize.height}
+    bind:this={iFrameRef}
   >
     {#if squares.length == 0 && refreshStatus.status == "idle"}
       <div
         id="placeholder-display"
-        bind:this={artDisplayRef}
         class="capture-area"
       >
         <h1>No listening data!</h1>
@@ -299,18 +336,32 @@
     {:else if refreshStatus.status == "idle"}
       <div
         id="display"
-        bind:this={artDisplayRef}
         class="capture-area"
+        bind:this={artDisplayRef}
         style="{`width: ${displaySize}px; height: ${displaySize}px`}"
       >
+        <!-- <Header nameSource="name" position={{top: 0, left: 0}}
+        {dateStrings} {timeFrame} {filters}/> -->
         {#each squares as square, i}
-          <Square {square} song={songs[i].song} />
+          <Square {square} song={songs[i].song}
+           aggregate={filters.aggregate}
+           rank_determinant={filters.rank_determinant}
+           quantity={songs[i].quantity}
+           rank={i+1}
+           {showCellInfo}
+           {selectAlbum}/>
         {/each}
       </div>
+      {#if focusedAlbumInfo}
+        <Context album={focusedAlbumInfo.albumInfo}
+        quantity={focusedAlbumInfo.quantity}
+        rank={focusedAlbumInfo.rank}
+        {dateStrings} {filters} {timeFrame}
+        {displayContainerSize} />
+      {/if}
     {:else if refreshStatus.status == "refreshing"}
       <div
         id="placeholder-display"
-        bind:this={artDisplayRef}
         class="capture-area"
       >
         <h1>Loading...</h1>
@@ -318,7 +369,6 @@
     {:else}
       <div
         id="placeholder-display"
-        bind:this={artDisplayRef}
         class="capture-area"
       >
         <h1>Error!</h1>
@@ -393,7 +443,7 @@
   }
 
   #display {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1 ;
     position: absolute;
   }
 
