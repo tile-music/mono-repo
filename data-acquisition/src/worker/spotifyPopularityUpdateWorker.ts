@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { updateSpotifyAlbumPopularity } from '../util/updateSpotifyAlbumPopularity';
+import { updateSpotifyAlbumPopularity } from '../util/updateSpotifyInfo';
 import { connection } from './redis';
 
 

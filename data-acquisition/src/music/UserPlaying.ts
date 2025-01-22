@@ -154,9 +154,6 @@ export class SpotifyUserPlaying extends UserPlaying {
         releaseDateParsed.year,
         item.track.album.totalTracks as number,
         item.track.album.genres,
-        item.track.album.upc,
-        item.track.album.ean,
-        "USRC17607830",
         item.track.album.id
       );
       const trackInfo = new SpotifyTrackInfo(
@@ -258,9 +255,7 @@ export class MockUserPlaying extends UserPlaying {
         track.albumInfo.releaseYear,
         1,
         ["Test Genre"],
-        "Test UPC",
-        "",
-        "" 
+        
      );
       const trackInfo = new TrackInfo(
         track.trackName,

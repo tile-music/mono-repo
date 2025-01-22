@@ -13,9 +13,7 @@ describe('AlbumInfo classes', () => {
         2012,
         12,
         ["Rock"],
-        "123456789012",
-        "1234567890123",
-        "US1234567890"
+        
       );
 
       expect(albumInfo['albumName']).toBe("Lenny Skinny");
@@ -27,9 +25,7 @@ describe('AlbumInfo classes', () => {
       expect(albumInfo['numTracks']).toBe(12);
       expect(albumInfo['image']).toBe("placeholder");
       expect(albumInfo['genre']).toStrictEqual(["Rock"]);
-      expect(albumInfo['upc']).toBe("123456789012");
-      expect(albumInfo['ean']).toBe("1234567890123");
-      expect(albumInfo['albumIsrc']).toBe("US1234567890");
+     
     });
 
     test('createDbEntryObject should return correct object', () => {
@@ -42,10 +38,9 @@ describe('AlbumInfo classes', () => {
         6,
         2021,
         5,
-        ["Pop"],
-        "987654321098",
-        "9876543210987",
-        "US9876543210"
+        ["Pop"]
+        
+        
       );
 
       const dbEntry = albumInfo.createDbEntryObject();
@@ -58,8 +53,6 @@ describe('AlbumInfo classes', () => {
         num_tracks: 5,
         artists: ["new artist"],
         genre: ["Pop"],
-        upc: "987654321098",
-        ean: "9876543210987",
         image: "new_placeholder"
       });
     });
@@ -76,9 +69,7 @@ describe('AlbumInfo classes', () => {
         2012,
         12,
         ["Rock"],
-        "123456789012",
-        "1234567890123",
-        "US1234567890",
+        
         "spoturi1234567890"
       );
 
@@ -91,9 +82,7 @@ describe('AlbumInfo classes', () => {
       expect(albumInfo['numTracks']).toBe(12);
       expect(albumInfo['image']).toBe("placeholder");
       expect(albumInfo['genre']).toStrictEqual(["Rock"]);
-      expect(albumInfo['upc']).toBe("123456789012");
-      expect(albumInfo['ean']).toBe("1234567890123");
-      expect(albumInfo['albumIsrc']).toBe("US1234567890");
+      
       expect(albumInfo['spotifyId']).toBe("spoturi1234567890");
     });
     test('createDbEntryObject should return correct object',()=>{
@@ -107,9 +96,7 @@ describe('AlbumInfo classes', () => {
         2021,
         5,
         ["Pop"],
-        "987654321098",
-        "9876543210987",
-        "US9876543210",
+        
         "9876543210"
       );
 
@@ -123,8 +110,7 @@ describe('AlbumInfo classes', () => {
         num_tracks: 5,
         artists: ["new artist"],
         genre: ["Pop"],
-        upc: "987654321098",
-        ean: "9876543210987",
+        
         image: "new_placeholder",
         spotify_id: "9876543210"
       });

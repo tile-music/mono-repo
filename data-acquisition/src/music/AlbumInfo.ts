@@ -40,9 +40,6 @@ export class AlbumInfo {
   private releaseYear: number;
   private artists: string[];
   private genre: string[];
-  private upc: string;
-  private ean: string;
-  private albumIsrc: string;
   private image: string;
 
   constructor(
@@ -55,9 +52,6 @@ export class AlbumInfo {
     releaseYear: number, 
     numTracks: number,
     genre: string[],
-    upc: string,
-    ean: string,
-    albumIsrc: string,
   ) {
     this.albumName = albumName;
     this.albumType = albumType;
@@ -68,11 +62,6 @@ export class AlbumInfo {
     this.numTracks = numTracks;
     this.image = image;
     this.genre = genre;
-    this.upc = upc;
-    this.ean = ean;
-    this.albumIsrc = albumIsrc;
-
-
     //console.log(this);
   }
   /**
@@ -90,8 +79,6 @@ export class AlbumInfo {
       num_tracks: this.numTracks,
       artists: this.artists,
       genre: this.genre,
-      upc: this.upc,
-      ean: this.ean,
       image: this.image,
     };
   }
@@ -110,12 +97,9 @@ export class SpotifyAlbumInfo extends AlbumInfo {
     releaseYear: number,
     numTracks: number,
     genre: string[],
-    upc: string,
-    ean: string,
-    albumIsrc: string,
     spotifyId: string,
   ) {
-    super(albumName, albumType, artists, image, releaseDay, releaseMonth, releaseYear, numTracks, genre, upc, ean, albumIsrc);
+    super(albumName, albumType, artists, image, releaseDay, releaseMonth, releaseYear, numTracks, genre);
     this.spotifyId = spotifyId;
   }
 

@@ -1,114 +1,173 @@
 [
   {
-    "listened_at": 1736376608997,
-    "track_id": 250814,
-    "album_id": 250822,
-    "track_popularity": 76,
+    "listened_at": 1737047362149,
+    "track_id": 314948,
+    "album_id": 314956,
+    "track_popularity": 30,
     "album_popularity": null,
-    "albums": { "spotify_id": "3Nyjm9NBEdiaiWr2BEaV46" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": null
+    },
+    "tracks": { "spotify_id": "2d0uM9JUGXo3q3IdgEieJ8" }
   },
   {
-    "listened_at": 1736376253295,
-    "track_id": 250816,
-    "album_id": 140187,
-    "track_popularity": 73,
+    "listened_at": 1737047362149,
+    "track_id": 314948,
+    "album_id": 314956,
+    "track_popularity": 30,
     "album_popularity": null,
-    "albums": { "spotify_id": "55t6oH9P2Rf92NQtAm1euu" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": "6blypuaTKOZLkqUbQyfwXa"
+    },
+    "tracks": { "spotify_id": "2d0uM9JUGXo3q3IdgEieJ8" }
   },
   {
-    "listened_at": 1736222366038,
-    "track_id": 182498,
-    "album_id": 182496,
-    "track_popularity": 34,
+    "listened_at": 1737047362149,
+    "track_id": 314948,
+    "album_id": 314956,
+    "track_popularity": 30,
     "album_popularity": null,
-    "albums": { "spotify_id": "2SMbi07p3T8Jq77wWIwbFS" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": "6blypuaTKOZLkqUbQyfwXa"
+    },
+    "tracks": { "spotify_id": "2d0uM9JUGXo3q3IdgEieJ8" }
   },
   {
-    "listened_at": 1736221723089,
-    "track_id": 150888,
-    "album_id": 150888,
-    "track_popularity": 41,
-    "album_popularity": null,
-    "albums": { "spotify_id": "3R9q0veyA51VYC6w6VMDQt" }
-  },
-  {
-    "listened_at": 1736221544665,
-    "track_id": 150883,
-    "album_id": 150883,
-    "track_popularity": 51,
-    "album_popularity": null,
-    "albums": { "spotify_id": "1rknl8JliYRRZJjs6yhsDF" }
-  },
-  {
-    "listened_at": 1736221275372,
-    "track_id": 150877,
-    "album_id": 150877,
+    "listened_at": 1737047200175,
+    "track_id": 314951,
+    "album_id": 314959,
     "track_popularity": 43,
     "album_popularity": null,
-    "albums": { "spotify_id": "5FSoEYwr5CjLMeTheWpmHd" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": "4bkN1XAiEBhDz3wDME6f25"
+    },
+    "tracks": { "spotify_id": "0A11YqPabntCohBrvq0Fqs" }
   },
   {
-    "listened_at": 1736221916788,
-    "track_id": 156959,
-    "album_id": 69910,
-    "track_popularity": 57,
-    "album_popularity": null,
-    "albums": { "spotify_id": "4HTy9WFTYooRjE9giTmzAF" }
-  },
-  {
-    "listened_at": 1736220943226,
-    "track_id": 151112,
-    "album_id": 151112,
-    "track_popularity": 32,
-    "album_popularity": null,
-    "albums": { "spotify_id": "3ojxaH4Z9d4KJPORtcbBlq" }
-  },
-  {
-    "listened_at": 1736221275372,
-    "track_id": 150877,
-    "album_id": 150877,
+    "listened_at": 1737047200175,
+    "track_id": 314951,
+    "album_id": 314959,
     "track_popularity": 43,
     "album_popularity": null,
-    "albums": { "spotify_id": "5FSoEYwr5CjLMeTheWpmHd" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": "4bkN1XAiEBhDz3wDME6f25"
+    },
+    "tracks": { "spotify_id": "0A11YqPabntCohBrvq0Fqs" }
   },
   {
-    "listened_at": 1736220943226,
-    "track_id": 151112,
-    "album_id": 151112,
-    "track_popularity": 32,
+    "listened_at": 1737047200175,
+    "track_id": 314951,
+    "album_id": 314959,
+    "track_popularity": 43,
     "album_popularity": null,
-    "albums": { "spotify_id": "3ojxaH4Z9d4KJPORtcbBlq" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": "4bkN1XAiEBhDz3wDME6f25"
+    },
+    "tracks": { "spotify_id": "0A11YqPabntCohBrvq0Fqs" }
   },
   {
-    "listened_at": 1736221125706,
-    "track_id": 150859,
-    "album_id": 150859,
-    "track_popularity": 58,
+    "listened_at": 1737038638858,
+    "track_id": 314965,
+    "album_id": 314968,
+    "track_popularity": 43,
     "album_popularity": null,
-    "albums": { "spotify_id": "0equCatWbHF6wgpR7Lxh0Q" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": "7EMoYQ7QghVnHSsdNLWv5P"
+    },
+    "tracks": { "spotify_id": "4VD0uDvoaqXu0t706SA4hB" }
   },
   {
-    "listened_at": 1736282195796,
-    "track_id": 138360,
-    "album_id": 138359,
-    "track_popularity": 54,
+    "listened_at": 1737038638858,
+    "track_id": 314965,
+    "album_id": 314968,
+    "track_popularity": 43,
     "album_popularity": null,
-    "albums": { "spotify_id": "42z0CzDpHpFYXLmKIk6NuC" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": null
+    },
+    "tracks": { "spotify_id": "4VD0uDvoaqXu0t706SA4hB" }
   },
   {
-    "listened_at": 1736281914096,
-    "track_id": 227319,
-    "album_id": 150609,
-    "track_popularity": 34,
+    "listened_at": 1737038168901,
+    "track_id": 314951,
+    "album_id": 314959,
+    "track_popularity": 43,
     "album_popularity": null,
-    "albums": { "spotify_id": "33TvUK8kGWO1azjPHwo7gJ" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": "4bkN1XAiEBhDz3wDME6f25"
+    },
+    "tracks": { "spotify_id": "0A11YqPabntCohBrvq0Fqs" }
   },
   {
-    "listened_at": 1736222129137,
-    "track_id": 158964,
-    "album_id": 158964,
-    "track_popularity": 45,
+    "listened_at": 1737038168901,
+    "track_id": 314951,
+    "album_id": 314959,
+    "track_popularity": 43,
     "album_popularity": null,
-    "albums": { "spotify_id": "5NOZLcuyGbB7YSD19hYiR9" }
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": "4bkN1XAiEBhDz3wDME6f25"
+    },
+    "tracks": { "spotify_id": "0A11YqPabntCohBrvq0Fqs" }
+  },
+  {
+    "listened_at": 1736977501962,
+    "track_id": 314954,
+    "album_id": 314962,
+    "track_popularity": 69,
+    "album_popularity": null,
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": "2by9XYSk5DVWxde0qrneyw"
+    },
+    "tracks": { "spotify_id": "5a8z2vyIDKMh5qcRG6w9wu" }
+  },
+  
+ 
+  {
+    "listened_at": 1736976140210,
+    "track_id": 314989,
+    "album_id": 314997,
+    "track_popularity": 37,
+    "album_popularity": null,
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": null
+    },
+    "tracks": { "spotify_id": "4LrFliZpceKHeIx8o8xgp8" }
+  },
+  {
+    "listened_at": 1736975191981,
+    "track_id": 314994,
+    "album_id": 315002,
+    "track_popularity": 60,
+    "album_popularity": null,
+    "albums": {
+      "ean": null,
+      "upc": null,
+      "spotify_id": null
+    },
+    "tracks": { "spotify_id": "6jNM6fKx3WnyHbWBI9hs2r" }
   }
 ]

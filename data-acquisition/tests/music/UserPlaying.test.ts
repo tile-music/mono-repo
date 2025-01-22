@@ -10,9 +10,6 @@ dotenv.config();
 
 let context: any = { refresh_token: process.env.SP_REFRESH };
 
-
-
-
 describe("spotify Listening timestamp sanity check", () => {
   const testData = ["2024-11-15T14:27:57.952Z",
     "2024-11-15T14:24:25.620Z",
@@ -30,7 +27,6 @@ describe("spotify Listening timestamp sanity check", () => {
       // Check if the parsed date matches the original timestamp
       expect(dateTs.toISOString()).toStrictEqual(timestamp);
     }
-
   })
 })
 describe("Spotify UserPlaying Integration", () => {
@@ -46,7 +42,6 @@ describe("Spotify UserPlaying Integration", () => {
       process.env.ANON as string,
       { db: { schema: "test" } }
     );
-
     const { data, error } = await supabase.auth.signUp({
       email: "test2@example.com",
       password: "password",
@@ -107,23 +102,13 @@ describe("Spotify UserPlaying Integration", () => {
           const tsDateObjectSpTimestamp: Date = new Date(spotifyData[i].playedAt)
           expect(data[i].isrc).toStrictEqual(spotifyData[i].track.externalID.isrc);
           expect(data[i].listened_at).toStrictEqual(spotifyTimeStamp.valueOf());
-
-
-
-
         }
       }
-
     })
-
-
-
   });
-
 })
 
 describe("UserPlaying Tests", () => {
-
   describe("UserPlaying Tests", () => {
     beforeAll(async () => {
       supabase = new SupabaseClient(
