@@ -81,7 +81,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
       await supabase.auth.admin.deleteUser(userId);
     })
     test("use real data", async () => {
-      updateSpotifyAlbumPopularity();
+      await updateSpotifyAlbumPopularity();
       let { data, error } = await query;
       let typedData = data as unknown as SpotifyUpdateData[];
       if (error) throw error;
