@@ -6,3 +6,8 @@ env.ps1
 test.env
 
 /scratch
+
+data-acquisition/tests/util/test-data.copy.json
+data-acquisition/package-lock.json
+ps-update-instructions.md
+ps-update-instructions.pdf

@@ -135,3 +135,7 @@ dist
 supabase/*
 
 .vscode/
+
+
+
+package-lock.json

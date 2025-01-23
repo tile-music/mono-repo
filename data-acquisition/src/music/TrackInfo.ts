@@ -58,3 +58,23 @@ export class TrackInfo {
   }
 }
 
+export class SpotifyTrackInfo extends TrackInfo {
+  private spotifyId: string;
+  constructor(
+    trackName: string,
+    trackArtists: string[],
+    isrc: string,
+    durationMs: number,
+    spotifyId: string,
+  ) {
+    super(trackName, trackArtists, isrc, durationMs);
+    this.spotifyId = spotifyId;
+  }
+  public createDbEntryObject() {
+    return {
+      ...super.createDbEntryObject(),
+      spotify_id: this.spotifyId,
+
+    };
+  }
+}

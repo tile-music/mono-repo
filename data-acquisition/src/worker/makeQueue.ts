@@ -10,8 +10,21 @@ import { connection } from './redis';
  *
  * @returns {Queue} A new Queue instance configured with the specified options.
  */
-export function makeQueue(){
+export function makeDataAcqQueue(){
   return new Queue('my-cron-jobs', {
+    connection,
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 1000,
+      },
+    },
+  });
+}
+
+export function makeSpotifyAlbumPopularityQueue(){
+  return new Queue('spotifyAlbumPopularity', {
     connection,
     defaultJobOptions: {
       attempts: 3,

@@ -1,9 +1,7 @@
 import { Worker } from 'bullmq';
-import {makeJobs} from './service-adapter';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SpotifyUserPlaying } from '../music/UserPlaying';
-import { fork } from 'node:child_process';
-import os from 'node:os';
+
 import { connection } from './redis';
 import dotenv from 'dotenv';
 
@@ -65,3 +63,4 @@ process.on('SIGINT', async () => {
   console.log('Worker and queue closed');
   process.exit(0);
 });
+

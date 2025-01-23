@@ -1,12 +1,11 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import { TrackInfo } from "./TrackInfo";
+import { Album, Client, Player, Track, User } from "spotify-api.js";
 
-import { Album, Client, Player, User } from "spotify-api.js";
-import { AlbumInfo } from "./AlbumInfo";
-
+import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo";
+import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo";
 import { PlayedTrack } from "./PlayedTrack";
-import { release } from "os";
+
 
 export type ReleaseDate = {year: number, month?: number, day?: number} 
 
@@ -91,8 +90,9 @@ export abstract class UserPlaying {
           .insert({
             user_id: this.userId,
             track_id: trackData[0].track_id,
+            album_id: albumData[0].album_id,
             listened_at: entry.listened_at,
-            popularity: entry.popularity,
+            track_popularity: entry.track_popularity,
             isrc: entry.track.isrc,
           });
         //console.log(playedData, playedError);
@@ -113,6 +113,8 @@ export class SpotifyUserPlaying extends UserPlaying {
   client!: Client;
   player!: Player;
   items!: any[];
+  albums: any[] = [];
+
   constructor(supabase: SupabaseClient<any,"test"|"prod",any>, userId: any, context: any) {
     super(supabase, userId, context);
   }
@@ -133,13 +135,16 @@ export class SpotifyUserPlaying extends UserPlaying {
     });
     this.player = new Player(this.client);
   }
+  
+
   protected async makeDBEntries(): Promise<void> {
-    for(const item of this.items) {
+    //await this.getAlbumPopularity();
+    for(const [i, item] of this.items.entries()) {
       const releaseDateRaw : any = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
       const releaseDatePrecisionRaw : any = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
       
       const releaseDateParsed : ReleaseDate = SpotifyUserPlaying.parseSpotifyDate(releaseDateRaw, releaseDatePrecisionRaw);
-      const album = new AlbumInfo(
+      const album = new SpotifyAlbumInfo(
         item.track.album.name,
         item.track.album.albumType,
         item.track.album.artists.map((artist: any) => artist.name),
@@ -149,15 +154,14 @@ export class SpotifyUserPlaying extends UserPlaying {
         releaseDateParsed.year,
         item.track.album.totalTracks as number,
         item.track.album.genres,
-        item.track.album.upc,
-        item.track.album.ean,
-        "USRC17607830",
+        item.track.album.id
       );
-      const trackInfo = new TrackInfo(
+      const trackInfo = new SpotifyTrackInfo(
         item.track.name,
         item.track.artists.map((artist: any) => artist.name),
         item.track.externalID.isrc,
-        item.track.duration
+        item.track.duration,
+        item.track.id
       );
       const playedTrackInfo = new PlayedTrack(
         SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
@@ -168,7 +172,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       this.played.push(playedTrackInfo);
       //console.log(playedTrackInfo);
     }
-    for (const track of this.played) {
+    for (const [i, track] of this.played.entries()) {
       await this.dbEntries.p_track_info.push(track.createDbEntryObject());
     }
     this.dbEntries.p_user_id = this.userId;
@@ -177,6 +181,7 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
   public async fire(): Promise<void> {
     this.items = ( await this.player.getRecentlyPlayed({ limit: 50 })).items;
+    //console.log(this.items)
     await this.putInDB();
 
   }
@@ -192,6 +197,7 @@ export class SpotifyUserPlaying extends UserPlaying {
         return { year: parseInt(year), month: parseInt(month) };
       case "day":
         return { year: parseInt(year), month: parseInt(month), day: parseInt(day) };
+        
     }
   }
   public static parseISOToDate(isoString: string): Date {
@@ -228,6 +234,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       )
     );
   }
+  
 }
 
 export class MockUserPlaying extends UserPlaying {
@@ -248,9 +255,7 @@ export class MockUserPlaying extends UserPlaying {
         track.albumInfo.releaseYear,
         1,
         ["Test Genre"],
-        "Test UPC",
-        "",
-        "" 
+        
      );
       const trackInfo = new TrackInfo(
         track.trackName,

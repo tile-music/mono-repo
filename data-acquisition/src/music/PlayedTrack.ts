@@ -1,5 +1,5 @@
-import { AlbumInfo } from "./AlbumInfo";
-import { TrackInfo } from "./TrackInfo";
+import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo";
+import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo";
 
 /**
  * @file PlayedTrack.ts
@@ -28,21 +28,21 @@ import { TrackInfo } from "./TrackInfo";
 export class PlayedTrack {
 
   private listenedAt: number;
-  private trackInfo: TrackInfo;
-  private albumInfo: AlbumInfo;
-  private popularity: number
+  private trackInfo: TrackInfo | SpotifyTrackInfo;
+  private albumInfo: AlbumInfo | SpotifyAlbumInfo;
+  private trackPopularity: number;
 
-  constructor(listenedAt: number, trackInfo: TrackInfo, albumInfo: AlbumInfo, popularity: number) {
+  constructor(listenedAt: number, trackInfo: TrackInfo, albumInfo: AlbumInfo, trackPopularity: number) {
     this.listenedAt = listenedAt;
     this.trackInfo = trackInfo;
     this.albumInfo = albumInfo;
-    this.popularity = popularity;
+    this.trackPopularity = trackPopularity;
   }
 
   public createDbEntryObject() {
     return {
-      popularity: this.popularity,
       listened_at: this.listenedAt,
+      track_popularity: this.trackPopularity,
       track: this.trackInfo.createDbEntryObject(),
       track_album: this.albumInfo.createDbEntryObject(),
     };
