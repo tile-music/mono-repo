@@ -15,31 +15,31 @@
   import { toPng } from "html-to-image";
 
 
-  let songs: { song: SongInfo; quantity: number }[] = [];
+  let songs: { song: SongInfo; quantity: number }[] = $state([]);
   
   let iFrameRef: HTMLDivElement;
-  let artDisplayRef: HTMLDivElement;
+  let artDisplayRef: HTMLDivElement | null = $state(null);
 
-  let displayContainerSize = { width: 0, height: 0 };
-  $: displaySize = Math.min(
+  let displayContainerSize = $state({ width: 0, height: 0 });
+  let displaySize = $derived(Math.min(
     displayContainerSize.width,
     displayContainerSize.height,
-  );
+  ));
 
-  const filters: DisplayDataRequest = {
+  const filters: DisplayDataRequest = $state({
     aggregate: "album",
     num_cells: null,
     date: { start: null, end: null },
     rank_determinant: "listens",
-  };
+  });
 
-  let timeFrame: TimeFrame = "all-time";
+  let timeFrame: TimeFrame = $state("all-time");
 
-  let dateStrings: DateStrings = { start: null, end: null };
+  let dateStrings: DateStrings = $state({ start: null, end: null });
 
-  let showCellInfo: ShowCellInfo = "on-hover";
+  let showCellInfo: ShowCellInfo = $state("on-hover");
 
-  let filterVisibility = true;
+  let filterVisibility = $state(true);
 
   async function captureDiv() {
     if(artDisplayRef) {
@@ -64,9 +64,8 @@
     }
   }
 
-  function makeSquares(
-    maxSquares: number,
-  ): { x: number; y: number; size: number }[] {
+  type squareArrangement = { x: number; y: number; size: number }[]
+  function makeSquares( maxSquares: number ): squareArrangement {
     // skip computation if no squares are being generated
     if (maxSquares == 0) return [];
 
@@ -98,7 +97,7 @@
   let refreshStatus:
     | { status: "refreshing" }
     | { status: "idle" }
-    | { status: "error"; error: string } = { status: "refreshing" };
+    | { status: "error"; error: string } = $state({ status: "refreshing" });
   async function refresh() {
     // set date range
     const startDate = new Date();
@@ -192,14 +191,17 @@
     albumInfo: AlbumInfo,
     quantity: number,
     rank: number
-  } | null;
+  } | null = $state(null);
 
   function selectAlbum(albumInfo: AlbumInfo, quantity: number, rank: number) {
     focusedAlbumInfo = { albumInfo, quantity, rank }
   }
 
   // generate initial square arrangement
-  $: squares = makeSquares(songs.length);
+  let squares: squareArrangement = $state([]);
+  onMount(() => {
+    squares = makeSquares(songs.length);
+  })
 
   // make initial data request upon load
   onMount(refresh);
@@ -207,7 +209,7 @@
 
 <div id="container">
   <div id="open-menu-header" class={filterVisibility ? "hidden" : ""}>
-    <button on:click={() => {filterVisibility = true}}
+    <button onclick={() => {filterVisibility = true}}
       disabled={filterVisibility}
       id="open-menu" class="art-display-menu-button"
       >menu</button
@@ -218,7 +220,7 @@
       <div id="close-menu-header">
         <h1>Filters</h1>
         <button
-          on:click={() => {filterVisibility = false;}}
+          onclick={() => {filterVisibility = false;}}
           id="close-menu"
           class="art-display-menu-button">close</button
         >
@@ -230,7 +232,7 @@
         <select
           id="music-type"
           bind:value={filters.aggregate}
-          on:change={refresh}
+          onchange={refresh}
         >
           <option value="song">song</option>
           <option value="album">album</option>
@@ -238,7 +240,7 @@
       </div>
       <div class="labeled-input">
         <label for="time-frame">time frame</label>
-        <select id="time-frame" bind:value={timeFrame} on:change={refresh}>
+        <select id="time-frame" bind:value={timeFrame} onchange={refresh}>
           <option value="this-week">this week</option>
           <option value="this-month">this month</option>
           <option value="year-to-date">year to date</option>
@@ -255,7 +257,7 @@
               type="date"
               name="start-date"
               bind:value={dateStrings.start}
-              on:blur={refresh}
+              onblur={refresh}
             />
           </div>
           <div class="labeled-input" aria-label="custom-date">
@@ -265,7 +267,7 @@
               type="date"
               name="end-date"
               bind:value={dateStrings.end}
-              on:blur={refresh}
+              onblur={refresh}
             />
           </div>
       {/if}
@@ -279,7 +281,7 @@
           type="number"
           name="num-cells"
           bind:value={filters.num_cells}
-          on:blur={refresh}
+          onblur={refresh}
           placeholder="max"
         />
       </div>
@@ -288,7 +290,7 @@
         <select
           id="rank-determinant"
           bind:value={filters.rank_determinant}
-          on:change={refresh}
+          onchange={refresh}
         >
           <option value="listens">listens</option>
           <option value="time">time</option>
@@ -308,11 +310,11 @@
     </div>
     <div id="lower-btns">
       <button
-        on:click={() => (squares = makeSquares(songs.length))}
+        onclick={() => (squares = makeSquares(songs.length))}
         id="regenerate"
         class="art-display-button">Regenerate</button
       >
-      <button on:click={captureDiv} class="art-display-button">Export</button>
+      <button onclick={captureDiv} class="art-display-button">Export</button>
     </div>
   </div>
   <div

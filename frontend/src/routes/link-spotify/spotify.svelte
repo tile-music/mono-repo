@@ -62,7 +62,7 @@
   <button
     class="link_spotify"
     name="LinkSpotify"
-    on:click={async () => {
+    onclick={async () => {
       await goto("/link-spotify?link=true");
       setTimeout(async () => {
         await checkSpotify();
@@ -79,7 +79,7 @@
     class="link_spotify"
     id="unlink_spotify"
     name="UnlinkSpotify"
-    on:click={async () => {
+    onclick={async () => {
       await fetch("/unlink-spotify", {
         method: "POST",
         headers: {

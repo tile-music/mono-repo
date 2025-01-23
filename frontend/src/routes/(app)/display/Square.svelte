@@ -8,19 +8,32 @@
         size: number
     };
 
-    export let square: squareInfo;
-    export let song: SongInfo;
-    export let aggregate: DisplayDataRequest["aggregate"];
-    export let rank_determinant: DisplayDataRequest["rank_determinant"];
-    export let quantity: number;
-    export let rank: number;
-    export let showCellInfo: ShowCellInfo;
-    export let selectAlbum: (a: AlbumInfo, q: number, r: number) => void;
+    interface Props {
+        square: squareInfo;
+        song: SongInfo;
+        aggregate: DisplayDataRequest["aggregate"];
+        rank_determinant: DisplayDataRequest["rank_determinant"];
+        quantity: number;
+        rank: number;
+        showCellInfo: ShowCellInfo;
+        selectAlbum: (a: AlbumInfo, q: number, r: number) => void;
+    }
 
-    $: cellInfoClass = showCellInfo == "on-hover" ? "show-on-hover" : "";
+    let {
+        square,
+        song,
+        aggregate,
+        rank_determinant,
+        quantity,
+        rank,
+        showCellInfo,
+        selectAlbum
+    }: Props = $props();
 
-    let squareWidth: number = 0;
-    $: fontSize = (0.08 * squareWidth) + "px";
+    let cellInfoClass = $derived(showCellInfo == "on-hover" ? "show-on-hover" : "");
+
+    let squareWidth: number = $state(0);
+    let fontSize = $derived((0.08 * squareWidth) + "px");
 
     function toHoursAndMinutes(ms: number) {
         const hours = Math.floor(ms/1000/60/60);
@@ -32,17 +45,17 @@
         return 100*decimal + "%";
     }
 
-    $: style = `
+    let style = $derived(`
         left: ${percent(square.x)};
         top: ${percent(square.y)};
         width: ${percent(square.size)};
         height: ${percent(square.size)};
-    `
+    `)
 </script>
 
 <button id="square" style={style}
  bind:clientWidth={squareWidth}
- on:click={() => selectAlbum(song.albums[0], quantity, rank)} tabindex={rank}>
+ onclick={() => selectAlbum(song.albums[0], quantity, rank)} tabindex={rank}>
     <img src={song.albums[0].image} alt="">
     {#if showCellInfo != "never"}
         <div id="cell-info" class={cellInfoClass} style={`font-size: ${fontSize}`}>
