@@ -253,7 +253,7 @@ export async function updateSpotifyAlbumPopularity() {
   const spotifyClient: Client = await setupSpotifyClient();
   const schema: "test" | "prod" = process.env.SB_SCHEMA === "test" ? "test" : "prod";
   const internal: boolean = process.env.INTERNAL === "true";
-  await updateSpotifyAlbumPopularityHelper(spotifyClient.token, schema, internal);
+  await updateSpotifyAlbumPopularityHelper(spotifyClient.token, schema, internal, new Date(Date.now().valueOf() - 1000 * 60 * 60 * 24 * 3));
 
 }
 

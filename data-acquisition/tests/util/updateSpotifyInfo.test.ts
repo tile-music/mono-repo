@@ -93,7 +93,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
     }, 10000)
     test("test update using real data with albums having no spotify ids", async () => {
       await supabase.schema("test").from("played_tracks").update({ album_popularity: null }).eq("user_id", userId)
-      await supabase.schema("test").from("albums").update({spotify_id: null}).gte("num_tracks", 0).select("*")
+      await supabase.schema("test").from("albums").update({spotify_id: null}).gte("num_tracks", 0)
 
       await updateSpotifyAlbumPopularity()
       const { data, error } = await query;

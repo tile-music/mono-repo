@@ -61,8 +61,9 @@ export async function makeDataAcqJobs() {
           }
         );
       });
-    });
+    })
 }
+/** if you'd like to update sooner you could get rid of the second 0 and even the first */
 export async function makeSpotifyAlbumPopularityJobs() {
   const queue = makeSpotifyAlbumPopularityQueue();
   console.log("makeJobs for SpotifyAlbumPopularity");
