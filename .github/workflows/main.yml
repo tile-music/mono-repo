@@ -8,13 +8,14 @@ on:
   push:
     branches:
     - main
+    _ ibixler-*
     # We can add more branches/regexes here if we want our dev branches to have constant testing too
 
 jobs:
   test:
     name: Run development tests
     # runs-on: [self-hosted, linux]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - name: Checkout code
