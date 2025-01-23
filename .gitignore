@@ -9,3 +9,4 @@ test.env
 
 data-acquisition/tests/util/test-data.copy.json
 data-acquisition/package-lock.json
+ps-update-instructions.md
