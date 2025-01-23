@@ -11,3 +11,13 @@ export type RankOutput = {
     song: SongInfo,
     quantity: number
 }[];
+
+export type ContextDataRequest = {
+    upc: string
+    date: DisplayDataRequest["date"],
+    rank_determinant: DisplayDataRequest["rank_determinant"],
+};
+
+export type ContextDataResponse = {
+    songs: RankOutput
+}
