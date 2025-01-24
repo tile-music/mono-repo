@@ -35,20 +35,21 @@ describe("Test updateSpotifyAlbumPopularity", () => {
 
   });
   
- /* you can use this if you need to remake the test data
-  describe("fetch testdata from db", () => {
+ //you can use this if you need to remake the test data
+  /* describe("fetch testdata from db", () => {
     test("get data ", async () => {
-      const userPlayedData = await supabase.schema("prod").from("played_tracks").select(selectString).limit(50);
+      const userPlayedData = await supabase.schema("prod").from("played_tracks").select(selectString).limit(25);
       //console.log("data: ", userPlayedData);
       fs.writeFileSync('tests/util/test-data.json', JSON.stringify(userPlayedData.data));
     });
-  })
- */
+  }) */
+
   test("test update SpotifyAlbumPopularityHelper", async () => {
     const data = fs.readFileSync('tests/util/test-data.json', 'utf8');
     spotifyData = JSON.parse(data);
     console.log("spotifyData: ", spotifyData.length);
     const ret = await updateSpotifyAlbumPopularityHelper(spotifyClient.token, "test", false, undefined, spotifyData)
+    expect(ret.size).toBe(spotifyData.length);
     ret.forEach((r) => {
       expect(r.albums.spotify_id).toBeDefined();
       expect(r.album_popularity).toBeGreaterThanOrEqual(0);
@@ -88,21 +89,20 @@ describe("Test updateSpotifyAlbumPopularity", () => {
       expect(data?.length).toBeGreaterThan(0);
       typedData?.forEach((d) => {
         console.log(d)
-        expect(d.album_popularity).toBeDefined();
+        expect(d.album_popularity === null).toBeFalsy();
       })
     }, 10000)
     test("test update using real data with albums having no spotify ids", async () => {
       await supabase.schema("test").from("played_tracks").update({ album_popularity: null }).eq("user_id", userId)
       await supabase.schema("test").from("albums").update({spotify_id: null}).gte("num_tracks", 0)
-
-      await updateSpotifyAlbumPopularity()
+      await updateSpotifyAlbumPopularity();
       const { data, error } = await query;
       const typedUpdatedData = data as unknown as SpotifyUpdateData[];
       expect(data?.length).toBeGreaterThan(0);
       typedUpdatedData?.forEach((d) => {
-        expect(d.album_popularity).toBeDefined();
-        expect(d.albums.spotify_id).toBeDefined();
+        expect(d.album_popularity === null).toBeFalsy();
+        expect(d.albums.spotify_id === null).toBeFalsy();
       })
-    })
+    }, 10000)
   });
 });
