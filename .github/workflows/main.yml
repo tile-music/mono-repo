@@ -15,7 +15,7 @@ jobs:
   test:
     name: Run development tests
     # runs-on: [self-hosted, linux]
-    runs-on: sh-runner-0
+    runs-on: [self-hosted, linux]
 
     steps:
     - name: Checkout code
