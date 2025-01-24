@@ -82,7 +82,7 @@ describe("Test updateSpotifyAlbumPopularity", () => {
       await supabase.auth.admin.deleteUser(userId);
     })
     test("use real data", async () => {
-      await updateSpotifyAlbumPopularity();
+      await  updateSpotifyAlbumPopularityHelper(spotifyClient.token, "test", false)
       let { data, error } = await query;
       let typedData = data as unknown as SpotifyUpdateData[];
       if (error) throw error;
@@ -93,13 +93,18 @@ describe("Test updateSpotifyAlbumPopularity", () => {
       })
     }, 10000)
     test("test update using real data with albums having no spotify ids", async () => {
+      let localQuery = query;
+      localQuery = localQuery.gte("listened_at", new Date(Date.now().valueOf() - (1000 * 60 * 60 * 24)).valueOf());
       await supabase.schema("test").from("played_tracks").update({ album_popularity: null }).eq("user_id", userId)
       await supabase.schema("test").from("albums").update({spotify_id: null}).gte("num_tracks", 0)
       await updateSpotifyAlbumPopularity();
-      const { data, error } = await query;
+      const { data, error } = await localQuery;
+      if (error) throw error;
       const typedUpdatedData = data as unknown as SpotifyUpdateData[];
       expect(data?.length).toBeGreaterThan(0);
+      console.log(data)
       typedUpdatedData?.forEach((d) => {
+      
         expect(d.album_popularity === null).toBeFalsy();
         expect(d.albums.spotify_id === null).toBeFalsy();
       })
