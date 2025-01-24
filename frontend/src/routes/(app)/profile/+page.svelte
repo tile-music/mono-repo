@@ -7,10 +7,14 @@
   import { enhance } from "$app/forms";
   import type { SubmitFunction } from "@sveltejs/kit";
 
-  export let data: PageData;
-  $: ({ user, email } = data);
+  interface Props {
+    data: PageData;
+  }
 
-  let resetProfileStatus = "";
+  let { data = $bindable() }: Props = $props();
+  let { user, email } = $derived(data);
+
+  let resetProfileStatus = $state("");
   async function resetProfileInformation() {
     // confirm with user
     if (!confirm("Are you sure you want to reset your profile information? " +
@@ -40,7 +44,7 @@
 
   // very similar to the function above, but i'm keeping it separate
   // to allow for more robust error handling in the future
-  let resetListeningStatus = "";
+  let resetListeningStatus = $state("");
   async function resetListeningHistory() {
     // confirm with user
     if (!confirm("Are you sure you want to reset your listening history? " +
@@ -63,7 +67,7 @@
     else resetListeningStatus = "failed: unknown error";
   }
 
-  let updateProfileStatus = "";
+  let updateProfileStatus = $state("");
   const handleUpdateProfile: SubmitFunction = () => {
     return async ({ result }) => {
       if (result.type === "success") updateProfileStatus = "updated successfully";
@@ -86,40 +90,42 @@
   <div id="profile">
     <h1>profile</h1>
     <Avatar url={sampleAvatar} size={150} />
-    <form method="POST" action="?/update_profile" use:enhance={handleUpdateProfile}>
-      <div>
-        <label for="username">username</label>
-        <input
-          type="text"
-          name="username"
-          id="username"
-          placeholder="username"
-          bind:value={user.username}
-        />
-      </div>
-      <div>
-        <label for="full name">full name</label>
-        <input
-          type="text"
-          name="full name"
-          id="full name"
-          placeholder="full name"
-          bind:value={user.full_name}
-        />
-      </div>
-      <div>
-        <label for="website">website</label>
-        <input
-          type="text"
-          name="website"
-          id="website"
-          placeholder="website"
-          bind:value={user.website}
-        />
-      </div>
-      <p>{updateProfileStatus}</p>
-      <input type="submit" value="save profile" />
-    </form>
+    {#if user} <!-- TODO: implement a static placeholder form if user is null -->
+      <form method="POST" action="?/update_profile" use:enhance={handleUpdateProfile}>
+        <div>
+          <label for="username">username</label>
+          <input
+            type="text"
+            name="username"
+            id="username"
+            placeholder="username"
+            bind:value={user.username}
+          />
+        </div>
+        <div>
+          <label for="full name">full name</label>
+          <input
+            type="text"
+            name="full name"
+            id="full name"
+            placeholder="full name"
+            bind:value={user.full_name}
+          />
+        </div>
+        <div>
+          <label for="website">website</label>
+          <input
+            type="text"
+            name="website"
+            id="website"
+            placeholder="website"
+            bind:value={user.website}
+          />
+        </div>
+        <p>{updateProfileStatus}</p>
+        <input type="submit" value="save profile" />
+      </form>
+    {/if}
   </div>
   <div id="settings">
     <h1>account settings</h1>
@@ -134,11 +140,11 @@
     <div id="account-actions">
       <h2>account actions</h2>
       <div class="button-status-group">
-        <button class="link-button" on:click={resetListeningHistory}>reset listening history</button>
+        <button class="link-button" onclick={resetListeningHistory}>reset listening history</button>
         <p role="status">{resetListeningStatus}</p>
       </div>
       <div class="button-status-group">
-        <button class="link-button" on:click={resetProfileInformation}>reset profile information</button>
+        <button class="link-button" onclick={resetProfileInformation}>reset profile information</button>
         <p role="status">{resetProfileStatus}</p>
       </div>
       <DeleteUser><div id="delete">delete account</div></DeleteUser>

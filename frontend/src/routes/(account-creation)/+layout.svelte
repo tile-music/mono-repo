@@ -1,5 +1,10 @@
-<script>
+<script lang="ts">
     import sample_collage from '$lib/assets/images/sample_collage.png'
+    interface Props {
+        children?: import('svelte').Snippet;
+    }
+
+    let { children }: Props = $props();
 </script>
 
 <div class="content">
@@ -7,7 +12,7 @@
         <img src={sample_collage} alt="A sample album art collage.">
     </div>
     <div class="right">
-        <slot></slot>
+        {@render children?.()}
     </div>
 </div>
 

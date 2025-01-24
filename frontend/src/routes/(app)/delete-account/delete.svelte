@@ -1,5 +1,10 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  interface Props {
+    children?: import('svelte').Snippet;
+  }
+
+  let { children }: Props = $props();
 
   /**
    * Asynchronous function to delete an account.
@@ -30,8 +35,8 @@
   }
 </script>
 
-<button class="delete-account" name="DeleteAccount" on:click={deleteAccount}>
-  <slot />
+<button class="delete-account" name="DeleteAccount" onclick={deleteAccount}>
+  {@render children?.()}
 </button>
 
 <style>

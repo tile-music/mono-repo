@@ -1,9 +1,13 @@
 <script lang="ts">
     import type { PageData } from './$types';
-    export let data: PageData;
     import Song from './Song.svelte';
 
     import { processSongs } from './processSongs';
+    interface Props {
+        data: PageData;
+    }
+
+    let { data }: Props = $props();
 </script>
 
 <div id="container">

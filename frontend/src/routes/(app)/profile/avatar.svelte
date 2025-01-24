@@ -1,7 +1,11 @@
 <script lang="ts">
-    export let url: string;
-    export let size: number;
-    // export let text_size: number;
+    interface Props {
+        url: string;
+        size: number; // export let text_size: number;
+    }
+
+    let { url, size }: Props = $props();
+    
     // export let content: string;
 </script>
 

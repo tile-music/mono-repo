@@ -2,13 +2,17 @@
     import { enhance } from '$app/forms';
     import type { SubmitFunction } from '@sveltejs/kit';
     import type { Failures } from './validateAccountForm';
-    export let type: "login" | "register";
+    interface Props {
+        type: "login" | "register";
+    }
+
+    let { type }: Props = $props();
 
     let status: {
         submitting: boolean,
         invalidCredentials: boolean,
         failures: Failures
-    } = {
+    } = $state({
         submitting: false,
         invalidCredentials: false,
         failures: {
@@ -23,11 +27,11 @@
             },
             alreadyTaken: false
         }
-    }
+    })
 
-    $: buttonText = status.submitting === true ? "working..." : (type === "login" ? "log in" : "get started");
-    let invalidPasswordText = determineInvalidPasswordText();
-    let invalidEmailText = determineInvalidEmailText();
+    let buttonText = $derived(status.submitting === true ? "working..." : (type === "login" ? "log in" : "get started"));
+    let invalidPasswordText = $state(determineInvalidPasswordText());
+    let invalidEmailText = $state(determineInvalidEmailText());
 
     const submit: SubmitFunction = () => {
         status.submitting = false;

@@ -5,28 +5,29 @@
     import { timeFrameToText } from "./filters";
     import { deserialize } from "$app/forms";
 
-    // props
-    export let album: AlbumInfo;
-    export let quantity: number;
-    export let rank: number;
-    export let dateStrings: DateStrings;
-    export let filters: DisplayDataRequest;
-    export let timeFrame: TimeFrame;
-    export let displayContainerSize: {width: number, height: number};
+    
+    interface Props {
+        // props
+        album: AlbumInfo;
+        quantity: number;
+        rank: number;
+        dateStrings: DateStrings;
+        filters: DisplayDataRequest;
+        timeFrame: TimeFrame;
+        displayContainerSize: {width: number, height: number};
+    }
+
+    let {
+        album,
+        quantity,
+        rank,
+        dateStrings,
+        filters,
+        timeFrame,
+        displayContainerSize
+    }: Props = $props();
 
     const CLOSE_BUFFER_MS = 100;
-
-    // computed state for metadata text
-    $: artistsText = album.artists.length == 1 ? album.artists[0]
-        : album.artists.slice(0, -1).join(", ") + " & " + album.artists[album.artists.length];
-
-    $: altText = `Album art for ${album.title} by ${artistsText}`;
-
-    $: rankText = `#${rank} most ${filters.rank_determinant == "time" ? "listened" : "played"} ` +
-                  timeFrameToText(timeFrame, dateStrings);
-    $: quantityText = filters.rank_determinant == "time" ?
-                      toHoursAndMinutes(quantity) + " listened" :
-                      quantity + " plays";
 
     function toHoursAndMinutes(ms: number) {
         const hours = Math.floor(ms/1000/60/60);
@@ -40,8 +41,8 @@
     }
 
     // drag logic
-    let position = {top: 0, left: 10};
-    let size = { width: 0, height: 0};
+    let position = $state({top: 0, left: 10});
+    let size = $state({ width: 0, height: 0});
     let moving = false;
     let dragTarget: HTMLElement;
 
@@ -68,9 +69,8 @@
 
     // form request logic
     async function fetchContextMenuData(upc: string): Promise<ContextDataResponse> {
-        hidden = false;
-        setTimeout(() => canClose = true, CLOSE_BUFFER_MS);
-        
+        // hidden = false;
+        // setTimeout(() => canClose = true, CLOSE_BUFFER_MS);
         const request: ContextDataRequest = {
             upc,
             date: filters.date,
@@ -94,7 +94,7 @@
     }
 
     // close logic
-    let hidden = false;
+    let hidden = $state(false);
     let canClose = true;
     function clickOutside(node: HTMLElement) {
         const handleClick = (event: MouseEvent) => {
@@ -111,13 +111,29 @@
         } };
     }
 
-    $: contextDataResponse = fetchContextMenuData(album.image);
+    // computed state for metadata text
+    let artistsText = $derived(album.artists.length == 1 ? album.artists[0]
+        : album.artists.slice(0, -1).join(", ") + " & " + album.artists[album.artists.length]);
+    let altText = $derived(`Album art for ${album.title} by ${artistsText}`);
+    let rankText = $derived(`#${rank} most ${filters.rank_determinant == "time" ? "listened" : "played"} ` +
+                  timeFrameToText(timeFrame, dateStrings));
+    let quantityText = $derived(filters.rank_determinant == "time" ?
+                      toHoursAndMinutes(quantity) + " listened" :
+                      quantity + " plays");
+
+    // grab new context menu data every time the selected album changes
+    let contextDataResponse: Promise<ContextDataResponse> = $state(fetchContextMenuData(album.image));
+    $effect(() => {
+        contextDataResponse = fetchContextMenuData(album.image);
+        hidden = false;
+        setTimeout(() => canClose = true, CLOSE_BUFFER_MS);
+    });
 </script>
 
 <div id="context-menu" style={`top:${position.top}px; left:${position.left}px;`}
     class={hidden ? "hidden" : ""} bind:clientWidth={size.width} bind:clientHeight={size.height}
     use:clickOutside>
-    <div id="dragTarget" bind:this={dragTarget} on:mousedown={onMouseDown}
+    <div id="dragTarget" bind:this={dragTarget} onmousedown={onMouseDown}
         role="button" tabindex={-1}>
         <div id="handle"></div>
     </div>
@@ -131,35 +147,37 @@
         </div>
     </div>
     <table id="tracklist">
-        <tr id="headers">
-            <th class="title"><h2>Tracklist</h2></th>
-            <th class="length"><h2>Length</h2></th>
-            <th class="plays"><h2>Plays</h2></th>
-        </tr>
-        {#await contextDataResponse}
-            <p>Waiting...</p>
-            {#each {length: album.tracks - 1} as _}
-                <tr>...</tr> <!-- placeholder songs to avoid jarring menu resize-->
-            {/each}
-        {:then response} 
-            {#each response.songs as entry}
-                <tr>
-                    <td class="title">{entry.song.title}</td>
-                    <td class="length">{toMinutesAndSeconds(entry.song.duration)}</td>
-                    <td class="plays">{filters.rank_determinant == "time" ?
-                        toHoursAndMinutes(entry.quantity) : entry.quantity}</td>
-                </tr>
-            {/each}
-            {#if album.tracks !== response.songs.length}
-                <p><em>+ {album.tracks - response.songs.length} unplayed songs</em></p>
-            {/if}
-        {:catch error}
-            <p>Error: {error.toString()}</p>
-        {/await}
+        <tbody>
+            <tr id="headers">
+                <th class="title"><h2>Tracklist</h2></th>
+                <th class="length"><h2>Length</h2></th>
+                <th class="plays"><h2>Plays</h2></th>
+            </tr>
+            {#await contextDataResponse}
+                <tr><td><p>Waiting...</p></td></tr>
+                {#each {length: album.tracks - 1} as _}
+                    <tr><td>...</td></tr> <!-- placeholder songs to avoid jarring menu resize-->
+                {/each}
+            {:then response} 
+                {#each response.songs as entry}
+                    <tr>
+                        <td class="title">{entry.song.title}</td>
+                        <td class="length">{toMinutesAndSeconds(entry.song.duration)}</td>
+                        <td class="plays">{filters.rank_determinant == "time" ?
+                            toHoursAndMinutes(entry.quantity) : entry.quantity}</td>
+                    </tr>
+                {/each}
+                {#if album.tracks !== response.songs.length}
+                    <tr><td><em>+ {album.tracks - response.songs.length} unplayed songs</em></td></tr>
+                {/if}
+            <!-- {:catch error}
+                <tr><td>Error: {() => {console.log(error); return error.toString()}}</td></tr> -->
+            {/await}
+        </tbody>
     </table>
 </div>
 
-<svelte:window on:mouseup={onMouseUp} on:mousemove={onMouseMove}/>
+<svelte:window onmouseup={onMouseUp} onmousemove={onMouseMove}/>
 
 <style>
     img {

@@ -1,9 +1,14 @@
-<script>
+<script lang="ts">
     import { redirect } from '@sveltejs/kit';
+    interface Props {
+        children?: import('svelte').Snippet;
+    }
 
-    $: logout = async () => {
+    let { children }: Props = $props();
+
+    let logout = $derived(async () => {
         console.log(redirect(302, "/login"));
-	};
+	});
 </script>
 
 <div id="container">
@@ -16,7 +21,7 @@
         </ul>
     </nav>
     <div class="content">
-        <slot></slot>
+        {@render children?.()}
     </div>
 </div>
 

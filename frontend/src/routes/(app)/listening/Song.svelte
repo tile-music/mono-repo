@@ -1,11 +1,13 @@
 <script lang="ts">
     import type { ProcessOutput } from './processSongs';
     import type { SongInfo, AlbumInfo } from '../../../../../lib/Song';
-    export let song: ProcessOutput;
-    let album : AlbumInfo = song.albums[0];
     import refresh from '$lib/assets/icons/refresh.svg';
-    $: album = song.albums[0];
-    $: duration = calculateDuration(song.duration);
+    interface Props {
+        song: ProcessOutput;
+    }
+
+    let { song }: Props = $props();
+    let album : AlbumInfo = $derived(song.albums[0]);
 
     function calculateDuration(ms: number) {
         const minutes = Math.floor(ms / 60000);
@@ -13,7 +15,7 @@
         return minutes + ":" + (seconds < 10 ? '0' : '') + seconds.toFixed(0);
     }
 
-
+    let duration = $derived(calculateDuration(song.duration));
 </script>
 
 <div class="song">
