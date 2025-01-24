@@ -1,3 +1,33 @@
+// IMPORTS
+import type { DisplayDataRequest } from "../../../../../lib/Request";
+
+// STATE
+export const filters: DisplayDataRequest = $state({
+    aggregate: "album",
+    num_cells: null,
+    date: { start: null, end: null },
+    rank_determinant: "listens",
+});
+
+export const filtersContext: FiltersContext = $state({
+    timeFrame: "all-time",
+    dateStrings: {start: null, end: null}
+});
+
+export const generalOptions: GeneralOptions = $state({
+    showCellInfo: "on-hover"
+})
+
+// TYPES AND FUNCTIONS
+interface FiltersContext {
+    timeFrame: TimeFrame,
+    dateStrings: DateStrings
+}
+
+interface GeneralOptions {
+    showCellInfo: ShowCellInfo
+}
+
 export type TimeFrame = "this-week"
     | "this-month" | "year-to-date"
     | "this-year" | "all-time" | "custom";
