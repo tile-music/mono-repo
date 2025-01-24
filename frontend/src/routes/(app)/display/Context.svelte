@@ -1,19 +1,14 @@
 <script lang="ts">
     import type { AlbumInfo } from "../../../../../lib/Song";
-    import type { DisplayDataRequest, ContextDataRequest, ContextDataResponse } from "../../../../../lib/Request";
-    import type { TimeFrame, DateStrings } from "./filters";
-    import { timeFrameToText } from "./filters";
+    import type { ContextDataRequest, ContextDataResponse } from "../../../../../lib/Request";
+    import { filters, filtersContext, timeFrameToText } from "./filters.svelte";
     import { deserialize } from "$app/forms";
-
     
     interface Props {
         // props
         album: AlbumInfo;
         quantity: number;
         rank: number;
-        dateStrings: DateStrings;
-        filters: DisplayDataRequest;
-        timeFrame: TimeFrame;
         displayContainerSize: {width: number, height: number};
     }
 
@@ -21,9 +16,6 @@
         album,
         quantity,
         rank,
-        dateStrings,
-        filters,
-        timeFrame,
         displayContainerSize
     }: Props = $props();
 
@@ -116,7 +108,7 @@
         : album.artists.slice(0, -1).join(", ") + " & " + album.artists[album.artists.length]);
     let altText = $derived(`Album art for ${album.title} by ${artistsText}`);
     let rankText = $derived(`#${rank} most ${filters.rank_determinant == "time" ? "listened" : "played"} ` +
-                  timeFrameToText(timeFrame, dateStrings));
+                  timeFrameToText(filtersContext.timeFrame, filtersContext.dateStrings));
     let quantityText = $derived(filters.rank_determinant == "time" ?
                       toHoursAndMinutes(quantity) + " listened" :
                       quantity + " plays");

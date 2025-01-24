@@ -1,23 +1,14 @@
 <script lang="ts">
-    import type { DisplayDataRequest } from "../../../../../lib/Request";
-    import type { DateStrings, TimeFrame } from "./filters";
-    import { timeFrameToText } from "./filters";
-    
+    import { filters, filtersContext, timeFrameToText } from "./filters.svelte";
 
     interface Props {
         nameSource: "name" | "username";
         position: {left: number, top: number};
-        dateStrings: DateStrings;
-        timeFrame: TimeFrame;
-        filters: DisplayDataRequest;
     }
 
     let {
         nameSource,
         position,
-        dateStrings,
-        timeFrame,
-        filters
     }: Props = $props();
 
     // https://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
@@ -30,7 +21,7 @@
 
     let nameText = $derived(`${nameSource == "name" ? "[name]" : "[username]"}'s`);
     let headingText = $derived(toTitleCase(`${nameText} top ${filters.aggregate + "s"} ` +
-                     timeFrameToText(timeFrame, dateStrings)));
+                     timeFrameToText(filtersContext.timeFrame, filtersContext.dateStrings)));
 </script>
 
 <div id="display-heading"
