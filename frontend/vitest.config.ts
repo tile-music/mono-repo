@@ -1,10 +1,12 @@
 import { defineConfig } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { resolve } from 'node:path'
+import {svelteTesting} from '@testing-library/svelte/vite'
 
 export default defineConfig({
   plugins: [
     svelte({ hot: !process.env.VITEST }),
+    svelteTesting()
   ],
   test: {
     include: ['src/**/*.{test,spec}.ts'],
