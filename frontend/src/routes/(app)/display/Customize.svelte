@@ -2,13 +2,17 @@
   import { filters, filtersContext, generalOptions } from './filters.svelte';
   import type { DisplayDataRequest } from "../../../../../lib/Request";
 
-  let { refresh }: { refresh: (f: DisplayDataRequest) => void} = $props();
+  let { refresh, regenerateDisplay, exportDisplay }: {
+    refresh: (f: DisplayDataRequest) => void,
+    regenerateDisplay: () => void,
+    exportDisplay: () => void
+  } = $props();
 
   // store local copy of filters to compare when changed
-  const localFilters: DisplayDataRequest = $state({...filters})
+  const localFilters: DisplayDataRequest = $state({...filters});
 
   // handles hide/show functionality
-  let hidden = $state(true);
+  let hidden = $state(false);
 
   function updateFilters() {
     // set date range
@@ -67,31 +71,27 @@
 
     // send new data request only if filters have changed
     if (JSON.stringify(filters) != JSON.stringify(localFilters))
-      refresh(localFilters)
+      refresh(localFilters);
   }
 </script>
 
-<div id="open-menu-header" class={hidden ? "hidden" : ""}>
-    <button onclick={() => {hidden = true}}
-      disabled={hidden}
-      id="open-menu" class="art-display-menu-button"
-      >menu</button
-    >
+{#if hidden}
+  <div id="open-menu-header">
+    <button onclick={() => {hidden = false}} id="open-menu"
+    class="art-display-menu-button">Customize</button>
   </div>
-  <div id="filters" class={!hidden ? "hidden" : ""}>
+{:else}
+  <div id="filters">
     <div class="input-section">
       <div id="close-menu-header">
-        <h1>Filters</h1>
-        <button
-          onclick={() => {hidden = false;}}
-          id="close-menu"
-          class="art-display-menu-button">close</button
-        >
+        <h1>Customize</h1>
+        <button onclick={() => {hidden = true}} id="close-menu"
+        class="art-display-menu-button">Close</button>
       </div>
 
-      <h2>basic information</h2>
+      <h2>Basic Information</h2>
       <div class="labeled-input">
-        <label for="music-type">music type</label>
+        <label for="music-type">Music type</label>
         <select
           id="music-type"
           bind:value={localFilters.aggregate}
@@ -102,7 +102,7 @@
         </select>
       </div>
       <div class="labeled-input">
-        <label for="time-frame">time frame</label>
+        <label for="time-frame">Time frame</label>
         <select id="time-frame"
         bind:value={filtersContext.timeFrame}
         onchange={updateFilters}>
@@ -116,7 +116,7 @@
       </div>
       {#if filtersContext.timeFrame == "custom"}
           <div class="labeled-input" aria-label="custom-date">
-            <label for="start-date">start date</label>
+            <label for="start-date">Start date</label>
             <input
               id="start-date"
               type="date"
@@ -126,7 +126,7 @@
             />
           </div>
           <div class="labeled-input" aria-label="custom-date">
-            <label for="end-date">end date</label>
+            <label for="end-date">End date</label>
             <input
               id="end-date"
               type="date"
@@ -138,9 +138,9 @@
       {/if}
     </div>
     <div class="input-section">
-      <h2>display size</h2>
+      <h2>Display Size</h2>
       <div class="labeled-input">
-        <label for="num-cells">number of cells</label>
+        <label for="num-cells">Number of cells</label>
         <input
           id="num-cells"
           type="number"
@@ -151,7 +151,7 @@
         />
       </div>
       <div class="labeled-input">
-        <label for="rank-determinant">rank determinant</label>
+        <label for="rank-determinant">Rank determinant</label>
         <select
           id="rank-determinant"
           bind:value={localFilters.rank_determinant}
@@ -163,9 +163,9 @@
       </div>
     </div>
     <div class="input-section">
-      <h2>display style</h2>
+      <h2>Display Style</h2>
       <div class="labeled-input">
-        <label for="num-cells">include cell info</label>
+        <label for="num-cells">Include cell info</label>
         <select id="show-cell-info" bind:value={generalOptions.showCellInfo}>
           <option value="always">always</option>
           <option value="on-hover">on hover</option>
@@ -173,11 +173,22 @@
         </select>
       </div>
     </div>
+    <div id="lower-btns">
+      <button
+        onclick={regenerateDisplay}
+        id="regenerate"
+        class="art-display-button">Regenerate</button
+      >
+      <button onclick={exportDisplay} class="art-display-button">Export</button>
+    </div>
   </div>
+{/if}
 
 <style>
-      .hidden {
-    display: none !important;
+  #lower-btns {
+    display: flex;
+    gap: 20px;
+    margin-top: auto;
   }
 
   #close-menu-header {

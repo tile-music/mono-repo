@@ -139,17 +139,9 @@
 </script>
 
 <div id="container">
-  <div id="left">
-    <Customize {refresh}/>
-    <div id="lower-btns">
-      <button
-        onclick={() => (squares = makeSquares(songs.length))}
-        id="regenerate"
-        class="art-display-button">Regenerate</button
-      >
-      <button onclick={captureDiv} class="art-display-button">Export</button>
-    </div>
-  </div>
+  <Customize {refresh}
+  regenerateDisplay={() => (squares = makeSquares(songs.length))}
+  exportDisplay={captureDiv}/>
   <div
     id="display-container"
     bind:clientWidth={displayContainerSize.width}
@@ -210,12 +202,6 @@
 </div>
 
 <style>
-  #lower-btns {
-    display: flex;
-    gap: 20px;
-    margin-top: auto;
-  }
-
   #container {
     width: 100%;
     height: 100%;
