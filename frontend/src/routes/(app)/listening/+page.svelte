@@ -1,27 +1,47 @@
 <script lang="ts">
     import type { PageData } from './$types';
+    import { deserialize } from "$app/forms";
+    
+    import Customize from './Customize.svelte';
     import Song from './Song.svelte';
-
+    
     import { processSongs } from './processSongs';
+    
+    //import type {ListeningDataRequest} from "../../../../../lib/Request"
+
     interface Props {
         data: PageData;
     }
 
     let { data }: Props = $props();
+    let refreshStatus:
+    | { status: "refreshing" }
+    | { status: "idle" }
+    | { status: "error"; error: string } = $state({ status: "refreshing" });
+    async function refresh() : Promise<void> {
+        // send request
+        refreshStatus = { status: "refreshing" };
+        const res = await fetch("?/refresh", {
+            method: "POST",
+            body: JSON.stringify({}),
+        });
+
+        // parse response
+        const response = deserialize(await res.text());
+        if (response.type === "success") {
+            refreshStatus = { status: "idle" };
+            data = response.data as typeof data;
+        } else if (response.type === "error") {
+            refreshStatus = { status: "error", error: response.error.message };
+        }
+    }
 </script>
 
 <div id="container">
     <h1>Listening Data</h1>
-    <div id="scroll-container">
+    <div class="scroll-container">
         {#if data.songs != null}
-            <div id="headers">
-                <h2 id="art">art</h2>
-                <h2 id="title">title</h2>
-                <h2 id="artist">artist</h2>
-                <h2 id="album">album</h2>
-                <h2 id="duration">duration</h2>
-                <h2 id="plays">plays</h2>
-            </div>
+            <Customize/>
             <div id="songs">
                     {#each processSongs(data.songs) as song}
                         <Song {song} />
@@ -49,31 +69,7 @@
     
     h1 {
         margin-bottom: 1em;
-    }
-
-    #headers {
-        display: flex;
-        padding: 1em 0 1em 60px;
-        width: fit-content;
-        gap: 10px;
-    }
-
-    /* these values are manually synced with the Song component */
-    #art {
-        width: 50px;
-    }
-
-    #title, #album {
-        width: 300px;
-    }
-
-    #artist {
-        width: 200px;
-    }
-
-    #duration, #plays {
-        width: 100px;
-    }
+    }    
 
     #songs {
         display: flex;

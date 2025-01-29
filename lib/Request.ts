@@ -11,8 +11,9 @@ export type DisplayDataRequest = {
 } & FilterRequest; 
 
 export type ListeningDataRequest = {
-    
-}
+    column: "album_name" | "song_name" | "artist_name" | "listened_at",
+    order: "asc" | "desc" 
+} & FilterRequest;
 export type RankOutput = {
     song: SongInfo,
     quantity: number
