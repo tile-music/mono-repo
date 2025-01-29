@@ -81,7 +81,7 @@
     | { status: "refreshing" }
     | { status: "idle" }
     | { status: "error"; error: string } = $state({ status: "refreshing" });
-  async function refresh(localFilters: DisplayDataRequest) {
+  async function refresh(localFilters: DisplayDataRequest) : Promise<void> {
     // close popup
     focusedAlbumInfo = null;
 
@@ -117,7 +117,9 @@
     }
   }
 
-  // context menu display logic
+  /* context menu display logic 
+     we could make this a type that extends album info */
+  
   let focusedAlbumInfo: {
     albumInfo: AlbumInfo,
     quantity: number,
