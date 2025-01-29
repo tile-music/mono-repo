@@ -1,7 +1,6 @@
 <script lang="ts">
     import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
-    import type { DisplayDataRequest } from "../../../../../lib/Request";
-    import type { ShowCellInfo } from "./filters";
+    import { filters, generalOptions } from "./filters.svelte";
     type squareInfo = {
         x: number
         y: number
@@ -11,26 +10,20 @@
     interface Props {
         square: squareInfo;
         song: SongInfo;
-        aggregate: DisplayDataRequest["aggregate"];
-        rank_determinant: DisplayDataRequest["rank_determinant"];
         quantity: number;
         rank: number;
-        showCellInfo: ShowCellInfo;
         selectAlbum: (a: AlbumInfo, q: number, r: number) => void;
     }
 
     let {
         square,
         song,
-        aggregate,
-        rank_determinant,
         quantity,
         rank,
-        showCellInfo,
         selectAlbum
     }: Props = $props();
 
-    let cellInfoClass = $derived(showCellInfo == "on-hover" ? "show-on-hover" : "");
+    let cellInfoClass = $derived(generalOptions.showCellInfo == "on-hover" ? "show-on-hover" : "");
 
     let squareWidth: number = $state(0);
     let fontSize = $derived((0.08 * squareWidth) + "px");
@@ -57,11 +50,11 @@
  bind:clientWidth={squareWidth}
  onclick={() => selectAlbum(song.albums[0], quantity, rank)} tabindex={rank}>
     <img src={song.albums[0].image} alt="">
-    {#if showCellInfo != "never"}
+    {#if generalOptions.showCellInfo != "never"}
         <div id="cell-info" class={cellInfoClass} style={`font-size: ${fontSize}`}>
-            <p id="title">{aggregate == "song" ? song.title : song.albums[0].title}</p>
+            <p id="title">{filters.aggregate == "song" ? song.title : song.albums[0].title}</p>
             <p id="artist">{song.artists.join(", ")}</p>
-            {#if rank_determinant == "listens"}
+            {#if filters.rank_determinant == "listens"}
                 <p id="rank">{quantity} listens (#{rank})</p>
             {:else}
                 <p id="rank">{toHoursAndMinutes(quantity)} listened (#{rank})</p>
