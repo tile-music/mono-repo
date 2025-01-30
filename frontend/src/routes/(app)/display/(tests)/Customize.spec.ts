@@ -70,6 +70,36 @@ describe('Test customization panel inputs', async () => {
         await user.selectOptions(rankDeterminantInput, "time");
         expect(refresh).not.toBeCalled();
     });
+
+    //This is failing, says refresh isn't being called even though on the app it is
+    test('Modifying time frame should trigger refresh', async () => {
+        const timeFrameInput = screen.getByLabelText("Time frame");
+        await user.selectOptions(timeFrameInput, "this month");
+
+        expect(refresh).toBeCalled();
+        const firstCall = refresh.mock.calls[0][0];
+        expect(firstCall.time_frame).toBe("this-month");
+    });
+
+    test('Entering a value into number of cells should refresh the display', async () => {
+        const numCellsInput = screen.getByLabelText("Number of cells");
+
+        //Clear the current number
+        await user.clear(numCellsInput);
+        expect(numCellsInput).toHaveValue(null);
+
+        //Set the current number to 1
+        await user.type(numCellsInput, "1");
+        expect(numCellsInput).toHaveValue(1);
+
+        //Click somewhere else on the screen (this might need to be changed in the future)
+        const display = screen.getAllByRole("heading")[1]
+        await user.click(display);
+
+        expect(refresh).toBeCalled();
+    });
+
+
 });
 
 describe('Test customization panel buttons', async () => {
