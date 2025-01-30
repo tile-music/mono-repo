@@ -6,8 +6,8 @@ import { filters } from '../filters.svelte';
 import type { DisplayDataRequest } from '../../../../../../lib/Request';
 
 const fieldLabels = [
-    "Music type", "Time frame", "Number of cells",
-    "Rank determinant", "Include cell info"
+    "music type", "time frame", "number of cells",
+    "rank determinant", "include cell info"
 ];
 
 describe('Test customization panel inputs', async () => {
@@ -42,7 +42,7 @@ describe('Test customization panel inputs', async () => {
     });
 
     test('Editing music type should trigger refresh with correct data', async () => {
-        const musicTypeInput = screen.getByLabelText("Music type");
+        const musicTypeInput = screen.getByLabelText("music type");
         await user.selectOptions(musicTypeInput, "song");
 
         expect(refresh).toBeCalled();
@@ -51,13 +51,13 @@ describe('Test customization panel inputs', async () => {
     });
 
     test('Not modifying music type should not trigger refresh', async () => {
-        const musicTypeInput = screen.getByLabelText("Music type");
+        const musicTypeInput = screen.getByLabelText("music type");
         await user.selectOptions(musicTypeInput, "song");
         expect(refresh).not.toBeCalled();
     });
 
     test('Editing rank determinant should trigger refresh with correct data', async () => {
-        const rankDeterminantInput = screen.getByLabelText("Rank determinant");
+        const rankDeterminantInput = screen.getByLabelText("rank determinant");
         await user.selectOptions(rankDeterminantInput, "time");
 
         expect(refresh).toBeCalled();
@@ -66,7 +66,7 @@ describe('Test customization panel inputs', async () => {
     });
 
     test('Not modifying rank determinant should not trigger refresh', async () => {
-        const rankDeterminantInput = screen.getByLabelText("Rank determinant");
+        const rankDeterminantInput = screen.getByLabelText("rank determinant");
         await user.selectOptions(rankDeterminantInput, "time");
         expect(refresh).not.toBeCalled();
     });
@@ -88,22 +88,22 @@ describe('Test customization panel buttons', async () => {
     });
 
     test('Clicking regenerate should call regenerate function', async () => {
-        await user.click(screen.getByText("Regenerate"));
+        await user.click(screen.getByText("regenerate"));
         expect(regenerateDisplay).toBeCalled();
     });
 
     test('Clicking export should call export function', async () => {
-        await user.click(screen.getByText("Export"));
+        await user.click(screen.getByText("export"));
         expect(exportDisplay).toBeCalled();
     });
 
-    test('Clicking "Close" and "Customize" should toggle the customization menu', async () => {
-        await user.click(screen.getByText("Close"));
-        let customizeHeading = screen.queryByRole("heading", { name: "Customize" });
+    test('Clicking "close" and "customize" should toggle the customization menu', async () => {
+        await user.click(screen.getByText("close"));
+        let customizeHeading = screen.queryByRole("heading", { name: "customize" });
         expect(customizeHeading).not.toBeInTheDocument();
 
-        await user.click(screen.getByText("Customize"));
-        customizeHeading = screen.queryByRole("heading", { name: "Customize" });
+        await user.click(screen.getByText("customize"));
+        customizeHeading = screen.queryByRole("heading", { name: "customize" });
         expect(customizeHeading).toBeInTheDocument();
     });
 });

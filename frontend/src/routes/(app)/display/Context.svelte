@@ -141,9 +141,9 @@
     <table id="tracklist">
         <tbody>
             <tr id="headers">
-                <th class="title"><h2>Tracklist</h2></th>
-                <th class="length"><h2>Length</h2></th>
-                <th class="plays"><h2>Plays</h2></th>
+                <th class="title"><h2>tracklist</h2></th>
+                <th class="length"><h2>length</h2></th>
+                <th class="plays"><h2>plays</h2></th>
             </tr>
             {#await contextDataResponse}
                 <tr><td><p>Waiting...</p></td></tr>
