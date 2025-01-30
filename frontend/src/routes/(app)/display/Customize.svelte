@@ -16,7 +16,7 @@
 
   function updateFilters() {
     // set date range
-    const startDate = new Date();
+    const startDate = new Date('1970-01-01');
     const endDate = new Date();
 
     // wipe dateStrings if needed
