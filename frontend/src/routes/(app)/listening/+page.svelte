@@ -5,50 +5,66 @@
     import Customize from './Customize.svelte';
     import Song from './Song.svelte';
     
-    import { processSongs } from './processSongs';
+
+    import type { ListeningDataResponse } from '../../../../../lib/Song';
+
+    import { onMount } from 'svelte';
+    import type { ListeningDataRequest } from '../../../../../lib/Request';
     
-    //import type {ListeningDataRequest} from "../../../../../lib/Request"
+    import { filters } from './filters.svelte';
 
     interface Props {
         data: PageData;
     }
 
-    let { data }: Props = $props();
+    let songs : ListeningDataResponse[] = $state([]);
+
     let refreshStatus:
     | { status: "refreshing" }
     | { status: "idle" }
     | { status: "error"; error: string } = $state({ status: "refreshing" });
-    async function refresh() : Promise<void> {
+    async function refresh(localFilters: ListeningDataRequest) : Promise<void> {
         // send request
+        console.log("refreshing");
         refreshStatus = { status: "refreshing" };
         const res = await fetch("?/refresh", {
             method: "POST",
-            body: JSON.stringify({}),
+            body: JSON.stringify(localFilters),
         });
 
         // parse response
         const response = deserialize(await res.text());
+        console.log(response.data);
         if (response.type === "success") {
             refreshStatus = { status: "idle" };
-            data = response.data as typeof data;
+            songs = response.data!.songs as typeof songs;
+            console.log(`songs: ${songs[0]}`); 
         } else if (response.type === "error") {
             refreshStatus = { status: "error", error: response.error.message };
         }
     }
+    onMount(() => refresh(filters));
 </script>
 
 <div id="container">
     <h1>Listening Data</h1>
-    <div class="scroll-container">
-        {#if data.songs != null}
+    <div id="scroll-container">
+        {#if songs.length}
             <Customize/>
             <div id="songs">
-                    {#each processSongs(data.songs) as song}
+                    {#each songs as song}
                         <Song {song} />
                     {/each}
             </div>
         {:else}
-            <p>No listening data yet!</p>
+            {#if refreshStatus.status == "refreshing"}
+                <p>loading...</p>
+            {:else if refreshStatus.status == "error"}
+                <p>{refreshStatus.error}</p>
+            {:else}
+                <p>No listening data yet!</p>
+            {/if}
+
         {/if}
     </div>
 </div>

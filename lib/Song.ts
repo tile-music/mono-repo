@@ -7,6 +7,12 @@ export type SongInfo = {
   albums: AlbumInfo[]
 }
 
+export type ListeningDataResponse = SongInfo & {
+  repetitions: number,
+  plays: number
+};
+
+
 export type AlbumInfo = {
   title: string
   tracks: number

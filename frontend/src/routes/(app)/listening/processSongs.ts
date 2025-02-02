@@ -1,9 +1,5 @@
 import type { SongInfo } from '../../../../../lib/Song';
 
-export type ProcessOutput = SongInfo & {
-    repetitions: number,
-    plays: number
-};
 
 /**
  * 
@@ -42,6 +38,5 @@ export function processSongs(songs: SongInfo[]): ProcessOutput[] {
             output[output.length - 1].repetitions++;
         }
     }
-
     return output;
 }

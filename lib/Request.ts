@@ -10,10 +10,15 @@ export type DisplayDataRequest = {
     rank_determinant: "listens" | "time",
 } & FilterRequest; 
 
+export type ListeningColumns  = "album_name" | "song_name" | "artist_name" | "listened_at"; 
+
 export type ListeningDataRequest = {
-    column: "album_name" | "song_name" | "artist_name" | "listened_at",
-    order: "asc" | "desc" 
+    column: ListeningColumns;
+    order: "asc" | "desc";
 } & FilterRequest;
+
+
+
 export type RankOutput = {
     song: SongInfo,
     quantity: number
