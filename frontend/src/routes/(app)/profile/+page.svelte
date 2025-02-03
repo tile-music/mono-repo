@@ -6,6 +6,8 @@
   import Avatar from './avatar.svelte';
   import { enhance } from "$app/forms";
   import type { SubmitFunction } from "@sveltejs/kit";
+  import { theme } from '../../theme';
+
 
   interface Props {
     data: PageData;
@@ -84,7 +86,12 @@
       } else updateProfileStatus = "failed to update profile: unknown error"; // just in case
     };
   }
+
+  async function setTheme(type : string) {
+    $theme = type
+  }
 </script>
+
 
 <div id="container">
   <div id="profile">
@@ -149,6 +156,13 @@
       </div>
       <DeleteUser><div id="delete">delete account</div></DeleteUser>
     </div>
+  </div>
+  <div id="themes">
+    <button onclick={() => setTheme("light")}>Light</button>
+    <button onclick={() => setTheme("dark")}>Dark</button>
+    <button>Fun Light</button>
+    <button>Fun Dark</button>
+    <p>{$theme}</p>
   </div>
 </div>
 
