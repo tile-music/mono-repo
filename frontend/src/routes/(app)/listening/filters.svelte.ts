@@ -1,19 +1,14 @@
-import type { ListeningDataRequest, ListeningColumns } from "../../../../../lib/Request";
+import type { ListeningDataRequest, ListeningColumns} from "../../../../../lib/Request";
 
-export type FiltersListening = {
-    column: ListeningColumns;
-    order: "asc" | "desc";
-    dateString: { start: string | null, end: string | null }
-}
-
-export const filters: ListeningDataRequest = $state({
-    column: "listened_at",
-    order: "desc",
-    date: { start: null, end: null }
-})
-
-export const filtersListening: FiltersListening = $state({
-    column: "listened_at",
-    order: "desc",
-    dateStrings: { start: null, end: null }
+export const listeningColumns: ListeningColumns = $state({
+    listened_at: { date:{start:null, end: null }, order: "dsc"},
+    songs: { column: [], order: ""},
+    albums: { column: [], order: ""},
+    artists: { column: [], order: ""},
+    duration: { start: null, end: null, order: ""},
+    upcs: { column: [], order: ""},
+    spotify_track_uri: { column: [], order: ""},
+    spotify_album_uri: { column: [], order: ""},
+    isrcs: { column: [], order: ""},
+    listens: { column: [], order: ""}
 })
