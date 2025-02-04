@@ -12,3 +12,5 @@ data-acquisition/package-lock.json
 ps-update-instructions.md
 ps-update-instructions.pdf
 prodkeys.md
+data-acquisition/.env.prod
+prodkeys.txt
