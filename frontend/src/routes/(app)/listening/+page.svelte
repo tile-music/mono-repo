@@ -83,5 +83,6 @@
         margin-bottom: 20px;
         overflow-y: scroll;
         width: fit-content;
+        min-width: 100%;
     }
 </style>
