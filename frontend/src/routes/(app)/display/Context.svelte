@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { AlbumInfo } from "../../../../../lib/Song";
-    import type { ContextDataRequest, ContextDataResponse } from "../../../../../lib/Request";
+    import type { ContextDataRequest, ContextDataResponse, RankOutput } from "../../../../../lib/Request";
     import { filters, filtersContext, timeFrameToText } from "./filters.svelte";
     import { deserialize } from "$app/forms";
     
@@ -25,12 +25,22 @@
     function toHoursAndMinutes(ms: number) {
         const hours = Math.floor(ms/1000/60/60);
         const minutes = Math.floor((ms/1000/60/60 - hours)*60);
-        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+        return `${hours}h ${minutes.toString()}m`;
     }
 
     function toMinutesAndSeconds(ms: number) {
         const date = new Date(ms);
         return `${date.getMinutes()}:${date.getSeconds().toString().padStart(2, "0")}`;
+    }
+
+    function listenedText(quantity: number) {
+        if (filters.rank_determinant == "time") {
+            return toHoursAndMinutes(quantity)
+        } else if (quantity == 1) {
+            return "1 play"
+        } else {
+            return quantity + " plays"
+        }
     }
 
     // drag logic
@@ -110,9 +120,7 @@
     let altText = $derived(`Album art for ${album.title} by ${artistsText}`);
     let rankText = $derived(`#${rank} most ${filters.rank_determinant == "time" ? "listened" : "played"} ` +
                   timeFrameToText(filtersContext.timeFrame, filtersContext.dateStrings));
-    let quantityText = $derived(filters.rank_determinant == "time" ?
-                      toHoursAndMinutes(quantity) + " listened" :
-                      quantity + " plays");
+    let quantityText = $derived.by(() => listenedText(quantity));
 
     // grab new context menu data every time the selected album changes
     let contextDataResponse: Promise<ContextDataResponse> = $state(fetchContextMenuData(album.image));
@@ -144,7 +152,7 @@
             <tr id="headers">
                 <th class="title"><h2>tracklist</h2></th>
                 <th class="length"><h2>length</h2></th>
-                <th class="plays"><h2>plays</h2></th>
+                <th class="listened"><h2>listened</h2></th>
             </tr>
             {#await contextDataResponse}
                 <tr><td><p>waiting...</p></td></tr>
@@ -156,8 +164,7 @@
                     <tr>
                         <td class="title">{entry.song.title}</td>
                         <td class="length">{toMinutesAndSeconds(entry.song.duration)}</td>
-                        <td class="plays">{filters.rank_determinant == "time" ?
-                            toHoursAndMinutes(entry.quantity) : entry.quantity}</td>
+                        <td class="listened">{listenedText(entry.quantity)}</td>
                     </tr>
                 {/each}
                 {#if album.tracks !== response.songs.length}
@@ -244,15 +251,15 @@
         width: 75px;
     }
 
-    th.plays {
-        width: 75px;
+    th.listened {
+        width: 100px;
     }
 
     .title {
         text-align: left;
     }
 
-    .length, .plays {
+    .length, .listened {
         text-align: right;
     }
 </style>
