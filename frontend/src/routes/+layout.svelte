@@ -13,6 +13,6 @@
     let { children }: Props = $props();
 </script>
 
-<div class={$theme + "-theme"}>
-   {@render children?.()} 
-</div>
+
+{@render children?.()} 
+

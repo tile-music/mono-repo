@@ -7,6 +7,7 @@
   import { enhance } from "$app/forms";
   import type { SubmitFunction } from "@sveltejs/kit";
   import { theme } from '../../theme';
+  import { onMount } from 'svelte';
 
 
   interface Props {
@@ -87,9 +88,38 @@
     };
   }
 
+  function setRoot() {
+    let html = document.querySelector('html');
+    if($theme == "light"){
+      html?.style.setProperty("--background", "#e8e8e8")
+      html?.style.setProperty("--text", "#000000")
+      html?.style.setProperty("--medium", "#5c5853")
+      html?.style.setProperty("--midground", "#787474")
+      html?.style.setProperty("--accent", "#a54d17")      
+    } else if ($theme == "dark") {
+      html?.style.setProperty("--background", "#090808")
+      html?.style.setProperty("--text", "#e5dfd0")
+      html?.style.setProperty("--medium", "#5c5853")
+      html?.style.setProperty("--midground", "#242222")
+      html?.style.setProperty("--accent", "#e7762f")      
+    } else if($theme == "dark-alt") {
+      // html?.style.setProperty("--background", "--background-" + $theme)
+      // html?.style.setProperty("--text", "--text-" + $theme)
+      // html?.style.setProperty("--medium", "#5c5853")
+      // html?.style.setProperty("--midground", "#242222")
+      // html?.style.setProperty("--accent", "#e7762f") 
+    }
+  }
+
   async function setTheme(type : string) {
     $theme = type
+    setRoot()
   }
+
+  onMount(() => {
+    console.log(data);
+		setRoot();
+	});
 </script>
 
 
@@ -158,10 +188,15 @@
     </div>
   </div>
   <div id="themes">
-    <button onclick={() => setTheme("light")}>Light</button>
-    <button onclick={() => setTheme("dark")}>Dark</button>
-    <button>Fun Light</button>
-    <button>Fun Dark</button>
+    <button onclick={() => setTheme("light")} class="theme">
+      Light
+      <div class="inner-theme"></div>
+      <div class="inner-theme"></div>
+      <div class="inner-theme"></div>
+    </button>
+    <button onclick={() => setTheme("dark")} class="theme">Dark</button>
+    <button class="theme">Fun Light</button>
+    <button onclick={() => setTheme("dark-alt")} class="theme">Fun Dark</button>
     <p>{$theme}</p>
   </div>
 </div>
@@ -274,5 +309,17 @@
 
   .button-status-group p {
     margin-bottom: 3px; /* align status message with button */
+  }
+
+  .theme {
+    width: 60px;
+    height: 60px;
+  }
+
+  .inner-theme {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--text);
   }
 </style>
