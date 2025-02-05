@@ -80,7 +80,7 @@ export type ContextDataResponse = {
 /**
  * Listening types:
  * These types are used to request data for the listening display and for page logic,
- * which im trying having all defined together.
+ * which im trying having all defined together. 
  * @alias ListeningDataRequest
  */
 export interface ListeningColumn<T>{
@@ -88,23 +88,28 @@ export interface ListeningColumn<T>{
     order: "asc" | "desc" | "";
 }
 export type ListeningColumns = {
-    listened_at?: ListeningColumn<DateFilter>;
-    songs?: ListeningColumn<TitleColumn>;
-    albums?: ListeningColumn<TitleColumn>;
-    artists?: ListeningColumn<TitleColumn>;
-    duration?: ListeningColumn<DurationFilter>; 
-    upcs?: ListeningColumn<TitleColumn>;
-    spotify_track_uri?: ListeningColumn<SpotifyURI>;
-    spotify_album_uri?: ListeningColumn<SpotifyURI>;
-    isrcs?: ListeningColumn<ISRCColumn>; 
-    listens?: ListeningColumn<ListenCountColumn>;
+    listened_ats: ListeningColumn<DateFilter> | null;
+    songs: ListeningColumn<TitleColumn> | null;
+    albums: ListeningColumn<TitleColumn> | null;
+    artists: ListeningColumn<TitleColumn> | null;
+    durations: ListeningColumn<DurationFilter> | null;
+    upcs: ListeningColumn<TitleColumn> | null;
+    spotify_track_ids: ListeningColumn<SpotifyURI> | null;
+    spotify_album_ids: ListeningColumn<SpotifyURI> | null;
+    isrcs: ListeningColumn<ISRCColumn> | null; 
+    listens: ListeningColumn<ListenCountColumn> | null;
 }
+export type ListeningDataSongInfo = {
+    plays: number;
+    repetitions: number;
+} & SongInfo;
+
 export type ListeningDataRequest = {
 
 } & ListeningColumns;
 
 export type ListeningDataResponse = {
-
+    columns: ListeningColumns;
 };
 
 export type DateFilter = {
@@ -172,17 +177,3 @@ export type ListenCountColumn = number[];
 
 const validate = (t: string[], regex: RegExp, message?: string) =>
     t.forEach(t => {if(!regex.test(t)) throw new Error(`"${t}" is not a valid ${message}.`)});
-/* export type FiltersListening = {
-    column: ListeningColumns;
-    order: "asc" | "desc";
-    dateString: { start: string | null, end: string | null }
-}
-
-export const filters: ListeningDataRequest = $state({
-    column: "listened_at",
-    order: "desc",
-    date: { start: null, end: null }
-})
- */
-
-

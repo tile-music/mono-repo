@@ -11,7 +11,7 @@ export const filters: DisplayDataRequest = $state({
 
 export const filtersContext: FiltersContext = $state({
     timeFrame: "all-time",
-    dateStrings: {start: null, end: null}
+    dateStrings: { start: null, end: null }
 });
 
 export const generalOptions: GeneralOptions = $state({
