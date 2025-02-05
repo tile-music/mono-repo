@@ -5,7 +5,7 @@ import { SpotifyUserPlaying } from "../../src/music/UserPlaying";
 
 import dotenv from "dotenv";
 import fs from 'fs';
-import { PostgrestBuilder } from "@supabase/postgrest-js";
+
 
 dotenv.config();
 describe("Test updateSpotifyAlbumPopularity", () => {

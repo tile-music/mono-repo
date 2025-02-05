@@ -45,7 +45,7 @@ services:
     #     - action: rebuild
     #       path: .
     depends_on:
-      supabase-db:
+      db:
         condition: service_healthy
       analytics:
         condition: service_healthy

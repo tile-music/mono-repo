@@ -63,16 +63,18 @@ export abstract class UserPlaying {
       if (!albumData) {
         //console.log("reached album");
         //console.log(entry);
+        let query = this.supabase
+        .from("albums")
+        .select("*")
+        .eq("album_name", entry.track_album.album_name) // Filter by album_name
+        .eq("image", entry.track_album.image) // Filter by image
+        //.eq("album_type", entry.track_album.album_type)
+        //.eq("release_date", entry.track_album.release_date)
+        .eq("num_tracks", entry.track_album.num_tracks) // Filter by release_dat
+        if (entry.track_album.spotify_id) query = query.eq("spotify_id", entry.track_album.spotify_id)
         
-        const { data: albumDataRet, error: albumErrorRet } = await this.supabase
-          .from("albums")
-          .select("*")
-          .eq("album_name", entry.track_album.album_name) // Filter by album_name
-          .eq("image", entry.track_album.image) // Filter by image
-          //.eq("album_type", entry.track_album.album_type)
-          //.eq("release_date", entry.track_album.release_date)
-          .eq("num_tracks", entry.track_album.num_tracks) // Filter by release_date
-          
+        const { data: albumDataRet, error: albumErrorRet } = await query;
+
         //.eq("(album).album_isrc", entry.track_album.album.album_isrc)
         albumData = albumDataRet;
         albumError = albumErrorRet;

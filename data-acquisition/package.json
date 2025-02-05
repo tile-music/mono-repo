@@ -6,7 +6,7 @@
     "dev": "ts-node ./src/app.ts",
     "build": "rm -r ./dist && tsc",
     "start": "npm run build && node dist/app.js",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "keywords": [],
   "author": "",

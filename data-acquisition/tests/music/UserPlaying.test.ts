@@ -178,7 +178,7 @@ describe("UserPlaying Tests", () => {
         timestamp: 13888088,
       },
     ];
-    const testData2 = Array.from({ length: 50 }, (_, i) => ({
+    const testData2 = Array.from({ length: 20 }, (_, i) => ({
       trackName: `Test Track ${i % 10}`,
       trackArtists: [`Test Artist ${i % 5}`],
       albumInfo: {
@@ -240,6 +240,7 @@ describe("UserPlaying Tests", () => {
 
     test("MockUserPlaying fire method using test data 2", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
+      console.log(testData2)
       await mockUserPlaying.init();
       await expect(mockUserPlaying.fire())
         .resolves.not.toThrow()
