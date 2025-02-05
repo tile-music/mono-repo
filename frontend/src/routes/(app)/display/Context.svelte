@@ -81,7 +81,7 @@
             console.log(response.error);
             throw response.error.message;
         } else {
-            throw "Unknown error occurred.";
+            throw "unknown error occurred.";
         }
     }
 
@@ -134,7 +134,7 @@
         <div id="album-info">
             <h1 id="name">{album.title}</h1>
             <h2 id="artists">{artistsText}</h2>
-            <p id="year">{album.release_year == null ? "Unknown release year" : album.release_year}</p>
+            <p id="year">{album.release_year == null ? "unknown release year" : album.release_year}</p>
             <p id="rank">{rankText} ({quantityText})</p>
         </div>
     </div>
@@ -146,7 +146,7 @@
                 <th class="plays"><h2>plays</h2></th>
             </tr>
             {#await contextDataResponse}
-                <tr><td><p>Waiting...</p></td></tr>
+                <tr><td><p>waiting...</p></td></tr>
                 {#each {length: album.tracks - 1} as _}
                     <tr><td>...</td></tr> <!-- placeholder songs to avoid jarring menu resize-->
                 {/each}
