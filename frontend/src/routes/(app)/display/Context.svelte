@@ -20,6 +20,7 @@
     }: Props = $props();
 
     const CLOSE_BUFFER_MS = 100;
+    let title_size = $derived(30 - album.title.length / 5);
 
     function toHoursAndMinutes(ms: number) {
         const hours = Math.floor(ms/1000/60/60);
@@ -132,7 +133,7 @@
     <div id="metadata">
         <img src={album.image} alt={altText}>
         <div id="album-info">
-            <h1 id="name">{album.title}</h1>
+            <h1 id="name" style={`font-size: ${title_size}px;`}>{album.title}</h1>
             <h2 id="artists">{artistsText}</h2>
             <p id="year">{album.release_year == null ? "unknown release year" : album.release_year}</p>
             <p id="rank">{rankText} ({quantityText})</p>
@@ -179,6 +180,7 @@
     #context-menu {
         position: absolute;
         width: min(400px, 100%);
+        max-width: fit-content;
         height: min(600px, 100%);
         max-height: fit-content;
         padding: 7px 15px 15px 15px;
