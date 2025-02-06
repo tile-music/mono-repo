@@ -1,14 +1,10 @@
 <script lang="ts">
     import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
     import { filters, generalOptions } from "./filters.svelte";
-    type squareInfo = {
-        x: number
-        y: number
-        size: number
-    };
+    import type { SquareInfo } from "./arrangement"
 
     interface Props {
-        square: squareInfo;
+        square: SquareInfo;
         song: SongInfo;
         quantity: number;
         rank: number;

@@ -13,6 +13,7 @@
   // type & state imports
   import type { DisplayDataRequest } from "../../../../../lib/Request";
   import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
+  import type { SquareInfo } from "./arrangement";
   import { generateFullArrangement } from "./pack";
   import { filters } from "./filters.svelte";
 
@@ -51,7 +52,7 @@
     }
   }
 
-  type squareArrangement = { x: number; y: number; size: number }[]
+  type squareArrangement = SquareInfo[]
   function makeSquares( maxSquares: number ): squareArrangement {
     // skip computation if no squares are being generated
     if (maxSquares == 0) return [];
