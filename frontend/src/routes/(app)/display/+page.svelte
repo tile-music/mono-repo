@@ -16,6 +16,8 @@
   import { generateFullArrangement } from "./pack";
   import { filters } from "./filters.svelte";
 
+  import { theme } from '../../theme';
+
   let songs: { song: SongInfo; quantity: number }[] = $state([]);
   
   let iFrameRef: HTMLDivElement;

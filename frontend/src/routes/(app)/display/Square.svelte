@@ -89,8 +89,8 @@
         height: 90%;
         display: flex;
         flex-direction: column;
-        background: rgb(0,0,0);
-        background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.7) 100%);
+        background: var(--background);
+        background: linear-gradient(180deg, rgb(from var(--background) r g b / 0.7) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgb(from var(--background) r g b / 0.7) 100%);
         padding: 5%;
     }
 
@@ -112,8 +112,8 @@
         align-items: center;
         width: calc(100% - 4px);
         height: calc(100% - 4px);
-        outline: 2px solid black;
-        border: 1px solid black;
+        outline: 2px solid var(--background);
+        border: 1px solid var(--background);
         object-fit: cover;
     }
 </style>

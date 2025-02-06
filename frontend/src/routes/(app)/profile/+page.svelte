@@ -88,37 +88,26 @@
     };
   }
 
-  function setRoot() {
+  function setColors() {
     let html = document.querySelector('html');
-    if($theme == "light"){
-      html?.style.setProperty("--background", "#e8e8e8")
-      html?.style.setProperty("--text", "#000000")
-      html?.style.setProperty("--medium", "#5c5853")
-      html?.style.setProperty("--midground", "#787474")
-      html?.style.setProperty("--accent", "#a54d17")      
-    } else if ($theme == "dark") {
-      html?.style.setProperty("--background", "#090808")
-      html?.style.setProperty("--text", "#e5dfd0")
-      html?.style.setProperty("--medium", "#5c5853")
-      html?.style.setProperty("--midground", "#242222")
-      html?.style.setProperty("--accent", "#e7762f")      
-    } else if($theme == "dark-alt") {
-      // html?.style.setProperty("--background", "--background-" + $theme)
-      // html?.style.setProperty("--text", "--text-" + $theme)
-      // html?.style.setProperty("--medium", "#5c5853")
-      // html?.style.setProperty("--midground", "#242222")
-      // html?.style.setProperty("--accent", "#e7762f") 
-    }
+    const root = document.documentElement;
+    const styles = getComputedStyle(root);
+
+    html?.style.setProperty("--background", styles.getPropertyValue('--background-' + $theme))
+    html?.style.setProperty("--text", styles.getPropertyValue('--text-' + $theme))
+    html?.style.setProperty("--medium", styles.getPropertyValue('--medium-'  + $theme))
+    html?.style.setProperty("--midground", styles.getPropertyValue('--midground-'  + $theme))
+    html?.style.setProperty("--accent", styles.getPropertyValue('--accent-' + $theme)) 
   }
 
   async function setTheme(type : string) {
     $theme = type
-    setRoot()
+    setColors()
   }
 
   onMount(() => {
     console.log(data);
-		setRoot();
+		setColors();
 	});
 </script>
 
@@ -188,16 +177,22 @@
     </div>
   </div>
   <div id="themes">
-    <button onclick={() => setTheme("light")} class="theme">
-      Light
-      <div class="inner-theme"></div>
-      <div class="inner-theme"></div>
-      <div class="inner-theme"></div>
+    <button onclick={() => setTheme("light")} class="theme" id="light-theme">
+      <p class="theme-text" style="color: var(--text-light);">light</p>
+      <div class="inner-theme" style="background-color: var(--accent-light);"></div>
+    </button>    
+    <button onclick={() => setTheme("light-alt")} class="theme" id="light-alt-theme">
+      <p class="theme-text" style="color: var(--text-light-alt);">alt light</p>
+      <div class="inner-theme" style="background-color: var(--accent-light-alt);"></div>
     </button>
-    <button onclick={() => setTheme("dark")} class="theme">Dark</button>
-    <button class="theme">Fun Light</button>
-    <button onclick={() => setTheme("dark-alt")} class="theme">Fun Dark</button>
-    <p>{$theme}</p>
+    <button onclick={() => setTheme("dark")} class="theme" id="dark-theme">
+      <p class="theme-text" style="color: var(--text-dark);">dark</p>
+      <div class="inner-theme" style="background-color: var(--accent-dark);"></div>
+    </button>
+    <button onclick={() => setTheme("dark-alt")} class="theme" id="dark-alt-theme">
+      <p class="theme-text" style="color: var(--text-dark-alt);">alt dark</p>
+      <div class="inner-theme" style="background-color: var(--accent-dark-alt);"></div>
+    </button>
   </div>
 </div>
 
@@ -257,7 +252,7 @@
   }
 
   #settings {
-    width: 50%;
+    width: 30%;
     display: flex;
     flex-direction: column;
     gap: 40px;
@@ -311,15 +306,56 @@
     margin-bottom: 3px; /* align status message with button */
   }
 
+  #themes {
+    width: 15%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin: auto 20px;
+  }
+
   .theme {
-    width: 60px;
-    height: 60px;
+    width: 110px;
+    height: 45px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .theme-text {
+    font-family: "Mattone", sans-serif;
+    font-size: 17px;
+    padding-top: 3px;
   }
 
   .inner-theme {
     display: inline-block;
-    width: 10px;
-    height: 10px;
-    border: 1px solid var(--text);
+    width: 20px;
+    height: 20px;
+    border-radius: 15px;
+  }
+
+  #light-theme {
+    background-color: var(--background-light);
+    color: var(--text-light) !important;
+    border: 3px solid var(--accent-light);
+  }
+
+  #dark-theme {
+    background-color: var(--background-dark);
+    color: var(--text-dark);
+    border: 3px solid var(--accent-dark);
+  }
+
+  #dark-alt-theme {
+    background-color: var(--background-dark-alt);
+    color: var(--text-dark-alt);
+    border: 3px solid var(--accent-dark-alt);
+  }
+
+  #light-alt-theme {
+    background-color: var(--background-light-alt);
+    color: var(--text-light-alt);
+    border: 3px solid var(--accent-light-alt);
   }
 </style>
