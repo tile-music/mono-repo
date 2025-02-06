@@ -14,28 +14,40 @@ export type SquareInfo = {
     rotation?: number;  // optional square rotation, in degrees
 };
 
+/**
+ * Represents the options an arrangement can have, which will
+ * be rendered as input elements in the frontend. Includes
+ * number, checkbox, and select inputs.
+ */
 export type ArrangementOptions = Record<string, {
     type: "number";
     label: string;
-    default: number;
+    min?: number;
+    max?: number;
 } | {
     type: "checkbox";
     label: string;
-    default: boolean
+} | {
+    type: "select";
+    label: string;
+    values: readonly string[];
 }>
 
+/**
+ * Represents the state of an arrangement's options. Maps
+ * each option into a key value pair, with number inputs
+ * having number types, checkbox inputs having boolean types,
+ * and select inputs having string union types. Instantiate
+ * using the intended default values for each option.
+ */
 export type ArrangementState<T extends ArrangementOptions> = {
-    [P in keyof T]: T extends { type: "number" } ? number : boolean
-}
+    [P in keyof T]: [T[P]] extends [{ type: "number" }] ? number :
+        [T[P]] extends [{ type: "checkbox" }] ? boolean :
+        [T[P]] extends [{ type: "select" }] ? T[P]["values"][number] : never
+};
 
 export type Arrangement<Options extends ArrangementOptions> = {
     options: Options;
-    generate: (num_squares: number, state: ArrangementState<Options>) => SquareInfo[];
-}
-
-/**
- * Generates an arrangement with user-defined options. Returns a list
- * of square positions, sizes, and optional rotations.
- */
-export function generateArrangement() {
+    state: ArrangementState<Options>;
+    generate: (num_squares: number) => SquareInfo[];
 }
