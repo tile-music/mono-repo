@@ -1,10 +1,7 @@
 <script lang="ts">
     import '$lib/assets/stylesheets/reset.css';
-    import "$lib/assets/stylesheets/theme-dark.css";
+    import "$lib/assets/stylesheets/theme.css";
     import '$lib/assets/stylesheets/global.css';
-    import { theme } from './theme';
-
-    // $inspect(theme)
     
     interface Props {
         children?: import('svelte').Snippet;

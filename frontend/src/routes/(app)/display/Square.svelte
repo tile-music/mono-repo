@@ -89,12 +89,12 @@
         height: 90%;
         display: flex;
         flex-direction: column;
-        background: var(--background);
-        background: linear-gradient(180deg, rgb(from var(--background) r g b / 0.7) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgb(from var(--background) r g b / 0.7) 100%);
+        background: linear-gradient(180deg, var(--gradient-background) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, var(--gradient-background) 100%);
         padding: 5%;
     }
 
     #cell-info>* {
+        color: var(--gradient-text);
         line-height: 1.15;
     }
 

@@ -21,6 +21,12 @@ html:has(.light-theme) {
     --midground: #242222;
     --accent: #e7762f;
 
+    --gradient-background: rgba(29, 29, 29, 0.7);
+    --gradient-text: rgb(233, 233, 233);
+
+    /* rgb(from var(--background) r g b / 0.7) 
+        rgb(from var(--background) r g b / 0.7)*/
+
     --background-dark: #090808;
     --text-dark: #e5dfd0;
     --medium-dark: #5c5853;
