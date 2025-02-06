@@ -1,16 +1,16 @@
 import type { ListeningDataRequest, ListeningColumns} from "../../../../../lib/Request";
 
 export const listeningColumns: ListeningColumns = $state({
-    listened_ats: { column: {start:null, end: null }, order: "desc"},
-    songs: { column: [], order: ""},
-    albums: { column: [], order: ""},
-    artists: { column: [], order: ""},
-    durations: { column: {start: null, end: null}, order: ""},
-    listens: { column: [], order: ""},
-    upcs: null,
-    spotify_track_ids: null,
-    spotify_album_ids: null,
-    isrcs: { column: [], order: ""}
+    listened_at: { column: {start:null, end: null }, order: "desc"},
+    song: { column: [], order: ""},
+    album: { column: [], order: ""},
+    artist: { column: [], order: ""},
+    duration: { column: {start: null, end: null}, order: ""},
+    listen: { column: [], order: ""},
+    upc: null,
+    spotify_track_id: null,
+    spotify_album_id: null,
+    isrc: { column: [], order: ""}
 } as ListeningColumns)
 
 /* export const listeningColumns: ListeningColumns = $state({

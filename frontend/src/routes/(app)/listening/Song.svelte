@@ -60,9 +60,13 @@
         width: 200px;
     }
 
-    .duration, .plays {
+    .plays {
         width: 100px;
     }
+    .duration{
+        width: 125px;
+    }
+
 
     .repetitions {
         display: flex;

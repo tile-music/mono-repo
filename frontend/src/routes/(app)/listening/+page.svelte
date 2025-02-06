@@ -49,7 +49,7 @@
   <h1>Listening Data</h1>
   <div id="scroll-container">
     {#if songs.length}
-      <Customize />
+      <Customize {refresh}/>
       <div id="songs">
         {#each songs as song}
           <Song {song} />

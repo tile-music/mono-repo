@@ -1,24 +1,47 @@
 <script lang="ts">
   import { listeningColumns } from "./filters.svelte";
-  import type { ListeningColumn, ListeningDataRequest, TitleColumn } from "../../../../../lib/Request";
+  import type { ListeningColumn, ListeningColumnKeys, ListeningDataRequest, TitleColumn } from "../../../../../lib/Request";
   import filterIcon from "$lib/assets/icons/filter.svg";
+  import { derived } from "svelte/store";
   let { refresh }: { refresh: (filters: ListeningDataRequest) => void } =
     $props();
   const localFilters: ListeningDataRequest = $state({ ...listeningColumns });
+  const filterColumnList = $derived.by(()=> {
+    const keys : ListeningColumnKeys[] = Object.keys(localFilters) as ListeningColumnKeys[];
+    return keys.filter(column => localFilters[column] !== null)
+  });
   let datePickerVisibile = $state(false);
+  $inspect(`filterColumnList: ${filterColumnList}`);
   const toggleDatePicker = () => (datePickerVisibile = !datePickerVisibile);
-  function updateFilters(sortAction: string) {
-    switch (sortAction) {
-      case "songs":
-        const col: ListeningColumn<TitleColumn> | null = listeningColumns.songs;
-        
-        break;
-      default:
-        filtersListening.songs.sort = "";
-        break;
+  let sortArrows = $derived((key : ListeningColumnKeys) =>  {
+    if(localFilters[key]) {
+      //if(localFilters[currentSortColumn]) localFilters[currentSortColumn].order = ""
+      if(localFilters[key].order == "asc") {
+        return "▲"
+      } else if(localFilters[key].order == "desc") {
+        return "▼"
+      } else {
+        return ""
+      }
+    } else throw new Error(`FATAL: ${key} not found in localFilters`)
+  });
+
+  function updateFilters(sortAction: ListeningColumnKeys) {
+    let columns : ListeningColumnKeys[] = Object.keys(localFilters) as ListeningColumnKeys[]; 
+      for(let column of columns) {
+        if(column != sortAction) {
+          if(localFilters[column])
+          localFilters[column].order = ""
+        }
+      }
+    if (localFilters[sortAction]) {
+      localFilters[sortAction].order =
+        localFilters[sortAction].order == "asc" ? "desc" : "asc";
+    } else {
+      throw new Error(`FATAL: ${sortAction} not found in localFilters`);
     }
     refresh({
-      ...filtersListening,
+      ...localFilters,
     });
   }
 </script>
@@ -35,25 +58,28 @@
   <button class="filter" id="column_selections">columns</button>
 </div>
 <div id="headers">
-  <button id="art"><h2>art</h2></button>
-  <button id="title" onclick={() => updateFilters("songs")}
-    ><h2>title</h2></button
+  <!-- <button id="art"><h2>art</h2></button>
+  <button id="title" onclick={() => updateFilters("song")}
+    ><h2>title{sortArrows("songs")}</h2></button
   >
-  <button id="artist" onclick={() => updateFilters("artists")}
-    ><h2>artist</h2></button
+  <button id="artist" onclick={() => updateFilters("artist")}
+    ><h2>artist{sortArrows("artists")} </h2></button
   >
-  <button id="album" onclick={() => updateFilters("title")}>
-    <h2>album</h2></button
+  <button id="album" onclick={() => updateFilters("album")}>
+    <h2>album{sortArrows("albums")}</h2></button
   >
-  <button id="duration" onclick={() => updateFilters("durations")}>
-    <h2>duration</h2></button
+  <button id="duration" onclick={() => updateFilters("duration")}>
+    <h2>duration {sortArrows("durations")}</h2></button
   >
-  <button id="plays" onclick={() => updateFilters("plays")}
-    ><h2>plays</h2></button
+  <button id="plays" onclick={() => updateFilters("listens  ")}
+    ><h2>plays {sortArrows("listens")}</h2></button
   >
   <button id="listened_at" onclick={() => updateFilters("listened_ats")}
-    ><h2>listened at</h2></button
-  >
+    ><h2>listened at {sortArrows("listened_ats")}</h2></button
+  > -->
+  {#each filterColumnList as column}
+    <button id={column} on:click={() => updateFilters(column)}><h2>{column}{sortArrows(column)}</h2></button>
+  {/each}
 </div>
 
 <style>
@@ -105,9 +131,12 @@
     width: 200px;
   }
 
-  #duration,
+
   #plays {
     width: 100px;
+  }
+  #duration {
+    width: 125px
   }
   button {
     all: unset;
