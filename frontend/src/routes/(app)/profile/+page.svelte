@@ -88,6 +88,31 @@
     };
   }
 
+  let themeStatus = $state("");
+  async function setProfileTheme(themeType : string) {
+
+    const res = await fetch('?/', {
+      method: 'POST',
+      body: themeType
+    });
+
+    // parse response
+    const response = await res.json();
+    const info = JSON.parse(response.data)[0]; // returns an array, for some reason
+
+    // set status message
+    if (info.success) {
+      themeStatus = "theme update successful";
+
+      // reset profile information
+      const userString = JSON.parse(response.data)[2];
+      data.user = JSON.parse(userString);
+    }
+    else if (info.not_authenticated) resetProfileStatus = "failed: not authenticated";
+    else if (info.server_error) resetProfileStatus = "failed: server error";
+    else resetProfileStatus = "failed: unknown error";
+  }
+
   function setColors() {
     let html = document.querySelector('html');
     const root = document.documentElement;

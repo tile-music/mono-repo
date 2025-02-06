@@ -71,6 +71,42 @@ export const actions: Actions = {
         return { success: true }
     },
 
+    update_theme: async ({ request, locals: { supabase, session } }) => {
+        if (session == null) return fail(401, { not_authenticated: true});
+
+        // assemble update object
+        const theme = await request.body
+        const update = {
+            id: session?.user.id,
+            updated_at: new Date(),
+            theme: theme
+        }
+
+        // get profile data
+        let { data: user, error: get_error } = await supabase
+        .from('profiles')
+        .select(`theme`)
+        .eq('id', session.user.id)
+        .single()
+        if (get_error || !user) throw get_error;
+
+        // make sure update is necessary
+        if (user.theme == update.theme) {
+            // update is unnecessary
+            return fail(400, { update_unnecessary: true});
+        }
+  
+        // attempt to perform update
+        const { error: update_error } = await supabase.from('profiles').upsert(update)
+        if (update_error) {
+            console.log(update_error);
+            if (update_error.code === '23514') return fail(400, { username_too_short: true });
+            else return fail(500, { server_error: true });
+        }
+
+        return { success: true }
+    },
+
     reset_profile: async ({ request, locals: { supabase, session } }) => {
         if (session == null) return fail(401, { not_authenticated: true});
 
