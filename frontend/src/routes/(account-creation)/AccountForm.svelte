@@ -61,6 +61,16 @@
         if (status.failures.alreadyTaken) return "this email is already taken"
         return ""
     }
+
+    let passwordVisible = $state(false);
+    function togglePasswordVisibility() {
+        passwordVisible = !passwordVisible;
+    }
+
+    let passwordConfirmVisible = $state(false);
+    function togglePasswordConfirmVisibility() {
+        passwordConfirmVisible = !passwordConfirmVisible;
+    }
 </script>
 
 <div id="content">
@@ -73,12 +83,14 @@
             </div>
             <div>
                 <p>{invalidPasswordText}</p>
-                <input type="password" name="password" id="password" placeholder="password" disabled={status.submitting}>
+                <input type={passwordVisible ? "text" : "password"} name="password" id="password" placeholder="password" disabled={status.submitting}>
+                <button type="button" onclick={togglePasswordVisibility}>show password</button>
             </div>
             {#if type === "register"}
                 <div>
                     <p>{status.failures.passwordMismatch ? "passwords must match" : ""}</p>
-                    <input type="password" name="confirm_password" id="confirm_password" placeholder="confirm password" disabled={status.submitting}>
+                    <input type={passwordConfirmVisible ? "text" : "password"} name="confirm_password" id="confirm_password" placeholder="confirm password" disabled={status.submitting}>
+                    <button type="button" onclick={togglePasswordConfirmVisibility}>show password</button>
                 </div>
             {:else}
                 <p>{status.invalidCredentials ? "invalid credentials. please try again" : ""}</p>
@@ -124,5 +136,16 @@
 
     input[type=submit] {
         width: 10rem;
+    }
+
+    button {
+        background-color: var(--accent);
+        color: var(--background);
+        border: none;
+        padding: 0px 5px;
+        font-size: 0.75em;
+        cursor: pointer;
+        border-radius: 5px;
+        font-family: "Mattone", sans-serif;
     }
 </style>
