@@ -3,7 +3,7 @@ import { assertListeningColumns } from '../../../../../../lib/Request';
 
 export const listeningDataRequest: ListeningDataRequest = {
     listened_at: {column :{start: null, end: null}, order:""},
-    song: {column: [], order: ""},
+    title: {column: [], order: ""},
     album: {column: [], order: ""},
     artist: {column: [], order: ""},
     duration: { column: {start: null, end: null}, order: ""},
@@ -11,7 +11,7 @@ export const listeningDataRequest: ListeningDataRequest = {
     spotify_track_id: {column: [], order: ""},
     spotify_album_id: {column: [], order: ""},
     isrc: {column: [], order: ""},
-    listen: {column: [], order: ""}
+    listens: {column: [], order: ""}
 }
 
 describe("test ListeningDateRequest validation", (() => {
@@ -27,7 +27,7 @@ describe("test ListeningDateRequest validation", (() => {
   test("validate listening request with null", ()=>{
     const nullRequest = {...listeningDataRequest}
     nullRequest.listened_at = null;
-    nullRequest.song = null;
+    nullRequest.title = null;
     nullRequest.album = null;
     nullRequest.artist = null;
     nullRequest.duration = null;

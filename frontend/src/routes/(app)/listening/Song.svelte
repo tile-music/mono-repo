@@ -2,6 +2,7 @@
     import type { ProcessOutput } from './processSongs';
     import type { SongInfo, AlbumInfo } from '../../../../../lib/Song';
     import refresh from '$lib/assets/icons/refresh.svg';
+    import { listeningColumns, filterColumnList } from './filters.svelte';
     interface Props {
         song: ProcessOutput;
     }
@@ -15,7 +16,6 @@
         return minutes + ":" + (seconds < 10 ? '0' : '') + seconds.toFixed(0);
     }
 
-    let duration = $derived(calculateDuration(song.duration));
 </script>
 
 <div class="song">
@@ -25,11 +25,22 @@
         <p class="repetitions"></p>
     {/if}
     <img class="art" src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
-    <p class="title">{song.title}</p>
-    <p class="artist">{song.artists.join(', ')}</p>
-    <p class="album">{album.title}</p>
-    <p class="duration">{duration}</p>
-    <p class="plays">{song.plays}</p>
+    {#each filterColumnList() as column}
+        {#if column === 'duration'}
+            <p class={column}>{calculateDuration(song[column])}</p>
+        {:else if column === "album"}
+            <p class={column}>{album.title}</p>
+        {:else if column === "artist"}
+            <p class={column}>{album.artists.join(', ')}</p>
+        {:else if column === 'listened_at'}
+            <p class={column}>{new Date(song[column]).toLocaleString()}</p>
+        {:else}
+            <p class={column}>{song[column]}</p>
+        {/if}
+
+    {/each}
+    
+
 </div>
 
 <style>
@@ -43,6 +54,7 @@
 
     .repetitions {
         width: 50px;
+        max-width: 50px;
         display: flex;
         justify-content: center;
     }
@@ -54,17 +66,24 @@
 
     .title, .album {
         width: 300px;
+        max-width: 300px;
     }
 
     .artist {
         width: 200px;
+        max-width: 200px;
     }
 
-    .plays {
+    .listens {
         width: 100px;
+        max-width: 100px;
     }
     .duration{
         width: 125px;
+        max-width: 125px;
+    }
+    .listened_at{
+        width: 200px
     }
 
 

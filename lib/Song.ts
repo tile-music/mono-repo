@@ -9,7 +9,7 @@ export type SongInfo = {
 
 export type ListeningDataResponse = SongInfo & {
   repetitions: number,
-  plays: number
+  listens: number
 };
 
 
