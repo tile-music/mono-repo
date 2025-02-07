@@ -1,3 +1,27 @@
+// IMPORTS
+import { Cluster } from "./(arrangements)/Cluster";
+import { Grid } from './(arrangements)/Grid';
+import { filters } from "./filters.svelte";
+
+// STATE
+export let arrangement: {
+    type: typeof arr_types[number],
+    options: ArrangementOptions,
+    state: Record<string, boolean | number | string>,
+    squares: SquareInfo[],
+    change: () => void,
+    generate: () => void
+} = $state({
+    type: "cluster",
+    options: {...Cluster.options},
+    state: {...Cluster.state},
+    squares: [],
+    change, generate
+});
+
+// TYPES AND FUNCTIONS
+const arr_types = ["grid", "cluster"] as const;
+
 /**
  * Represents the properties of an individual square,
  * including the x and y position of its top left corner,
@@ -19,7 +43,7 @@ export type SquareInfo = {
  * be rendered as input elements in the frontend. Includes
  * number, checkbox, and select inputs.
  */
-export type ArrangementOptions = Record<string, {
+type ArrangementOptions = Record<string, {
     type: "number";
     label: string;
     min?: number;
@@ -46,8 +70,32 @@ export type ArrangementState<T extends ArrangementOptions> = {
         [T[P]] extends [{ type: "select" }] ? T[P]["values"][number] : never
 };
 
+type Generate<Options extends ArrangementOptions> =
+    (n_s: number | null, s: ArrangementState<Options>) => SquareInfo[];
+
 export type Arrangement<Options extends ArrangementOptions> = {
     options: Options;
     state: ArrangementState<Options>;
-    generate: (num_squares: number) => SquareInfo[];
+    generate: Generate<Options>;
+}
+
+function change() {
+    switch (arrangement.type) {
+        case "grid":
+            arrangement.options = {...Grid.options}
+            arrangement.state = {...Grid.state}
+            break;
+        case "cluster":
+            arrangement.options = {...Cluster.options}
+            arrangement.state = {...Cluster.state}
+            break;
+    }
+    generate()
+}
+
+function generate() {
+    if (arrangement.type == "grid")
+        arrangement.squares = Grid.generate(filters.num_cells, arrangement.state as typeof Grid.state);
+    else
+        arrangement.squares = Cluster.generate(filters.num_cells, arrangement.state as typeof Cluster.state);
 }

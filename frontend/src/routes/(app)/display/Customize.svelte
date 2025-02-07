@@ -1,6 +1,7 @@
 <script lang="ts">
   import { filters, filtersContext, generalOptions } from './filters.svelte';
   import type { DisplayDataRequest } from "../../../../../lib/Request";
+  import { arrangement } from './arrangement.svelte';
 
   let { refresh, regenerateDisplay, exportDisplay }: {
     refresh: (f: DisplayDataRequest) => void,
@@ -172,6 +173,39 @@
           <option value="never">never</option>
         </select>
       </div>
+    </div>
+    <div class="input-section">
+      <div class="labeled-input">
+        <label for="arr-type">arrangement type</label>
+        <select name="arr-type" id="arr-type"
+        bind:value={arrangement.type} onchange={arrangement.change}>
+          <option value="grid">grid</option>
+          <option value="cluster">cluster</option>
+        </select>
+      </div>
+      <h2>Arrangement Options</h2>
+      {#each Object.entries(arrangement.options) as [name, option] }
+        <div class="labeled-input">
+          <label for={name}>{option.label}</label>
+          {#if option.type == "number"}
+            <input type="number" name={name} id={name}
+            min={option.min || null} max={option.max || null}
+            bind:value={arrangement.state[name]}
+            onchange={arrangement.generate}>
+          {:else if option.type == "checkbox"}
+            <input type="checkbox" name={name} id={name}
+            bind:checked={arrangement.state[name] as boolean}
+            onchange={arrangement.generate}>
+          {:else if option.type == "select"}
+            <select id={name} bind:value={arrangement.state[name]}
+            onchange={arrangement.generate}>
+              {#each option.values as value}
+                <option value={value}>{value}</option>
+              {/each}
+            </select>
+          {/if}
+        </div>
+      {/each}
     </div>
     <div id="lower-btns">
       <button

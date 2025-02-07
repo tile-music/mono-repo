@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
     import { filters, generalOptions } from "./filters.svelte";
-    import type { SquareInfo } from "./arrangement"
+    import type { SquareInfo } from "./arrangement.svelte"
 
     interface Props {
         square: SquareInfo;

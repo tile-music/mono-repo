@@ -13,9 +13,8 @@
   // type & state imports
   import type { DisplayDataRequest } from "../../../../../lib/Request";
   import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
-  import type { SquareInfo } from "./arrangement";
-  import { generateFullArrangement } from "./pack";
   import { filters } from "./filters.svelte";
+  import { arrangement } from "./arrangement.svelte";
 
   let songs: { song: SongInfo; quantity: number }[] = $state([]);
   
@@ -52,32 +51,6 @@
     }
   }
 
-  type squareArrangement = SquareInfo[]
-  function makeSquares( maxSquares: number ): squareArrangement {
-    // skip computation if no squares are being generated
-    if (maxSquares == 0) return [];
-
-    // 1 square requires no computation
-    if (maxSquares == 1) return [{ x: 0, y: 0, size: 1 }];
-
-    const max = Math.min(maxSquares, 14);
-    const arrangement = generateFullArrangement(
-      1,
-      Math.max(max, 0),
-      max,
-      0.0,
-      0.1,
-    );
-
-    // translate the output of arrangement into a form usable by the Square component
-    const squares: { x: number; y: number; size: number }[] = [];
-    for (const square of arrangement) {
-      squares.push({ x: square.x, y: square.y, size: square.width });
-    }
-
-    return squares;
-  }
-
   let refreshStatus:
     | { status: "refreshing" }
     | { status: "idle" }
@@ -107,9 +80,9 @@
 
       // generate new square arrangement
       if (songs) {
-        squares = makeSquares(songs.length);
+        arrangement.generate()
       } else {
-        refreshStatus = { status: "error", error: "No songs found" };
+        refreshStatus = { status: "error", error: "no songs found! try a different filter." };
         songs = [];
       }
     } else if (response.type === "error") {
@@ -129,19 +102,13 @@
     focusedAlbumInfo = { albumInfo, quantity, rank }
   }
 
-  // generate initial square arrangement
-  let squares: squareArrangement = $state([]);
-  onMount(() => {
-    squares = makeSquares(songs.length);
-  });
-
   // make initial data request upon load
   onMount(() => { refresh(filters) });
 </script>
 
 <div id="container">
   <Customize {refresh}
-  regenerateDisplay={() => (squares = makeSquares(songs.length))}
+  regenerateDisplay={arrangement.generate}
   exportDisplay={captureDiv}/>
   <div
     id="display-container"
@@ -149,7 +116,7 @@
     bind:clientHeight={displayContainerSize.height}
     bind:this={iFrameRef}
   >
-    {#if squares.length == 0 && refreshStatus.status == "idle"}
+    {#if arrangement.squares.length == 0 && refreshStatus.status == "idle"}
       <div
         id="placeholder-display"
         class="capture-area"
@@ -170,7 +137,7 @@
       >
         <!-- <Header nameSource="name" position={{top: 0, left: 0}}
         {dateStrings} {timeFrame} {filters}/> -->
-        {#each squares as square, i}
+        {#each arrangement.squares as square, i}
           <Square {square} song={songs[i].song}
            quantity={songs[i].quantity}
            rank={i+1}
