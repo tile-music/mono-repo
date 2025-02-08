@@ -175,21 +175,23 @@
       </div>
     </div>
     <div class="input-section">
+      <h2>Arrangement Options</h2>
       <div class="labeled-input">
         <label for="arr-type">arrangement type</label>
         <select name="arr-type" id="arr-type"
         bind:value={arrangement.type} onchange={arrangement.change}>
           <option value="grid">grid</option>
           <option value="cluster">cluster</option>
+          <option value="grid-cluster">grid cluster</option>
         </select>
       </div>
-      <h2>Arrangement Options</h2>
       {#each Object.entries(arrangement.options) as [name, option] }
         <div class="labeled-input">
           <label for={name}>{option.label}</label>
           {#if option.type == "number"}
             <input type="number" name={name} id={name}
             min={option.min || null} max={option.max || null}
+            step={option.step || null}
             bind:value={arrangement.state[name]}
             onchange={arrangement.generate}>
           {:else if option.type == "checkbox"}

@@ -1,6 +1,7 @@
 // IMPORTS
 import { Cluster } from "./(arrangements)/Cluster";
 import { Grid } from './(arrangements)/Grid';
+import { GridCluster } from './(arrangements)/GridCluster'
 import { filters } from "./filters.svelte";
 
 // STATE
@@ -20,7 +21,7 @@ export let arrangement: {
 });
 
 // TYPES AND FUNCTIONS
-const arr_types = ["grid", "cluster"] as const;
+const arr_types = ["grid", "cluster", "grid-cluster"] as const;
 
 /**
  * Represents the properties of an individual square,
@@ -48,6 +49,7 @@ type ArrangementOptions = Record<string, {
     label: string;
     min?: number;
     max?: number;
+    step?: number;
 } | {
     type: "checkbox";
     label: string;
@@ -89,6 +91,9 @@ function change() {
             arrangement.options = {...Cluster.options}
             arrangement.state = {...Cluster.state}
             break;
+        case "grid-cluster":
+            arrangement.options = {...GridCluster.options}
+            arrangement.state = {...GridCluster.state}
     }
     generate()
 }
@@ -96,6 +101,8 @@ function change() {
 function generate() {
     if (arrangement.type == "grid")
         arrangement.squares = Grid.generate(filters.num_cells, arrangement.state as typeof Grid.state);
-    else
+    else if (arrangement.type == "cluster")
         arrangement.squares = Cluster.generate(filters.num_cells, arrangement.state as typeof Cluster.state);
+    else
+    arrangement.squares = GridCluster.generate(filters.num_cells, arrangement.state as typeof GridCluster.state);
 }
