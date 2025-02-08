@@ -103,10 +103,6 @@
     // set status message
     if (info.success) {
       themeStatus = "theme update successful";
-
-      // reset profile information
-      const userString = JSON.parse(response.data)[2];
-      data.user = JSON.parse(userString);
     }
     else if (info.not_authenticated) resetProfileStatus = "failed: not authenticated";
     else if (info.server_error) resetProfileStatus = "failed: server error";
@@ -128,6 +124,7 @@
   async function setTheme(type : string) {
     $theme = type
     setColors()
+    setProfileTheme(type)
   }
 
   onMount(() => {

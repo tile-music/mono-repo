@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({locals: { supabase, session } }) => 
     // fetch profile data
     let { data: user, error } = await supabase
     .from('profiles')
-    .select(`updated_at, username, full_name, website, avatar_url`)
+    .select(`updated_at, username, full_name, website, avatar_url, theme`)
     .eq('id', session.user.id)
     .single()
     if (error && error.code == 'PGRST116') {
@@ -18,7 +18,8 @@ export const load: PageServerLoad = async ({locals: { supabase, session } }) => 
             username: null,
             full_name: null,
             website: null,
-            avatar_url: null
+            avatar_url: null,
+            theme: "dark"
         }
     } else if (error) throw error;
 
