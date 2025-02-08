@@ -3,18 +3,14 @@ import { generateFullArrangement } from "./pack.js";
 
 // Options
 const options = {
-  offset_min: { type: "number", label: "min offset", min: 0.0, max: 0.3 },
-  offset_max: { type: "number", label: "max offset", min: 0.0, max: 0.3 },
-  checkbox_test: { type: "checkbox", label: "test checkbox" },
-  select_test: { type: "select", label: "test select", values: ["test1", "test2"]}
+  offset_min: { type: "number", label: "min offset", min: 0.0, max: 0.3, step: 0.05 },
+  offset_max: { type: "number", label: "max offset", min: 0.0, max: 0.3, step: 0.05 }
 } as const;
 
 // Defaults
 const state: ArrangementState<typeof options> = {
   offset_min: 0.05,
-  offset_max: 0.15,
-  checkbox_test: true,
-  select_test: "test1"
+  offset_max: 0.15
 }
 
 // Generate function
