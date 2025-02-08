@@ -4,6 +4,13 @@ import { Grid } from './(arrangements)/Grid';
 import { GridCluster } from './(arrangements)/GridCluster'
 import { filters } from "./filters.svelte";
 
+// 
+export const arr_types = {
+    grid: Grid,
+    cluster: Cluster,
+    grid_cluster: GridCluster
+} as const;
+
 // STATE
 export let arrangement: {
     type: keyof typeof arr_types,
@@ -21,11 +28,6 @@ export let arrangement: {
 });
 
 // TYPES AND FUNCTIONS
-export const arr_types = {
-    grid: Grid,
-    cluster: Cluster,
-    grid_cluster: GridCluster
-}
 
 /**
  * Represents the properties of an individual square,
@@ -76,26 +78,40 @@ export type ArrangementState<T extends ArrangementOptions> = {
         [T[P]] extends [{ type: "select" }] ? T[P]["values"][number] : never
 };
 
+/**
+ * A generator function capable of taking in an
+ * arrangement's options, in addition to a max number of squares,
+ * and outputting a list of square positions, sizes, and optional
+ * rotations.
+ */
 type Generate<Options extends ArrangementOptions> =
     (n_s: number | null, s: ArrangementState<Options>) => SquareInfo[];
 
+/**
+ * A full arrangement, complete with options and their default values
+ * as well as a generator function.
+ */
 export type Arrangement<Options extends ArrangementOptions> = {
     options: Options;
     state: ArrangementState<Options>;
     generate: Generate<Options>;
 }
 
+/**
+ * Swaps the current arrangement, regenerating options
+ */
 function change() {
     arrangement.options = { ...arr_types[arrangement.type].options }
     arrangement.state = { ...arr_types[arrangement.type].state }
     generate()
 }
 
+/**
+ * Generates a square arrangement using the current generator
+ * and options.
+ */
 function generate() {
-    if (arrangement.type == "grid")
-        arrangement.squares = Grid.generate(filters.num_cells, arrangement.state as typeof Grid.state);
-    else if (arrangement.type == "cluster")
-        arrangement.squares = Cluster.generate(filters.num_cells, arrangement.state as typeof Cluster.state);
-    else
-    arrangement.squares = GridCluster.generate(filters.num_cells, arrangement.state as typeof GridCluster.state);
+    // super type unsafe, but i simply cannot figure out another way
+    const type = arr_types[arrangement.type] as unknown as Arrangement<{}>;
+    arrangement.squares = type.generate(filters.num_cells, type.state);
 }
