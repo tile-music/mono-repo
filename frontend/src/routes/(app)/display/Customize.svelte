@@ -1,7 +1,7 @@
 <script lang="ts">
   import { filters, filtersContext, generalOptions } from './filters.svelte';
   import type { DisplayDataRequest } from "../../../../../lib/Request";
-  import { arrangement } from './arrangement.svelte';
+  import { arrangement, arr_types } from './arrangement.svelte';
 
   let { refresh, regenerateDisplay, exportDisplay }: {
     refresh: (f: DisplayDataRequest) => void,
@@ -180,9 +180,9 @@
         <label for="arr-type">arrangement type</label>
         <select name="arr-type" id="arr-type"
         bind:value={arrangement.type} onchange={arrangement.change}>
-          <option value="grid">grid</option>
-          <option value="cluster">cluster</option>
-          <option value="grid-cluster">grid cluster</option>
+          {#each Object.keys(arr_types) as arr_type }
+            <option value={arr_type}>{arr_type.replaceAll("_", " ")}</option>
+          {/each}
         </select>
       </div>
       {#each Object.entries(arrangement.options) as [name, option] }

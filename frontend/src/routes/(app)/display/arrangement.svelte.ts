@@ -6,7 +6,7 @@ import { filters } from "./filters.svelte";
 
 // STATE
 export let arrangement: {
-    type: typeof arr_types[number],
+    type: keyof typeof arr_types,
     options: ArrangementOptions,
     state: Record<string, boolean | number | string>,
     squares: SquareInfo[],
@@ -21,7 +21,11 @@ export let arrangement: {
 });
 
 // TYPES AND FUNCTIONS
-const arr_types = ["grid", "cluster", "grid-cluster"] as const;
+export const arr_types = {
+    grid: Grid,
+    cluster: Cluster,
+    grid_cluster: GridCluster
+}
 
 /**
  * Represents the properties of an individual square,
@@ -82,19 +86,8 @@ export type Arrangement<Options extends ArrangementOptions> = {
 }
 
 function change() {
-    switch (arrangement.type) {
-        case "grid":
-            arrangement.options = {...Grid.options}
-            arrangement.state = {...Grid.state}
-            break;
-        case "cluster":
-            arrangement.options = {...Cluster.options}
-            arrangement.state = {...Cluster.state}
-            break;
-        case "grid-cluster":
-            arrangement.options = {...GridCluster.options}
-            arrangement.state = {...GridCluster.state}
-    }
+    arrangement.options = { ...arr_types[arrangement.type].options }
+    arrangement.state = { ...arr_types[arrangement.type].state }
     generate()
 }
 
