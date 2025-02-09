@@ -131,7 +131,7 @@
     <h1>account settings</h1>
     <div>
       <h2>email</h2>
-      <p>your email is <em>{email ?? "[no email found]"}</em>.</p>
+      <p>your email is: <em>{email ?? "[no email found]"}</em>.</p>
     </div>
     <div>
       <h2>linked services</h2>
