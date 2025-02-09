@@ -88,7 +88,7 @@
         body: JSON.stringify(" "),
       })  
       await checkSpotify();
-    }}>Unlink Spotify Account</button
+    }}>unlink spotify account</button
   >
 {:else}
   <button  class="link_spotify" disabled>loading...</button>

@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { AlbumInfo } from "../../../../../lib/Song";
-    import type { ContextDataRequest, ContextDataResponse } from "../../../../../lib/Request";
+    import type { ContextDataRequest, ContextDataResponse, RankOutput } from "../../../../../lib/Request";
     import { filters, filtersContext, timeFrameToText } from "./filters.svelte";
     import { deserialize } from "$app/forms";
     
@@ -20,16 +20,27 @@
     }: Props = $props();
 
     const CLOSE_BUFFER_MS = 100;
+    let title_size = $derived(30 - album.title.length / 5);
 
     function toHoursAndMinutes(ms: number) {
         const hours = Math.floor(ms/1000/60/60);
         const minutes = Math.floor((ms/1000/60/60 - hours)*60);
-        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+        return `${hours}h ${minutes.toString()}m`;
     }
 
     function toMinutesAndSeconds(ms: number) {
         const date = new Date(ms);
         return `${date.getMinutes()}:${date.getSeconds().toString().padStart(2, "0")}`;
+    }
+
+    function listenedText(quantity: number) {
+        if (filters.rank_determinant == "time") {
+            return toHoursAndMinutes(quantity)
+        } else if (quantity == 1) {
+            return "1 play"
+        } else {
+            return quantity + " plays"
+        }
     }
 
     // drag logic
@@ -81,7 +92,7 @@
             console.log(response.error);
             throw response.error.message;
         } else {
-            throw "Unknown error occurred.";
+            throw "unknown error occurred.";
         }
     }
 
@@ -109,9 +120,7 @@
     let altText = $derived(`Album art for ${album.title} by ${artistsText}`);
     let rankText = $derived(`#${rank} most ${filters.rank_determinant == "time" ? "listened" : "played"} ` +
                   timeFrameToText(filtersContext.timeFrame, filtersContext.dateStrings));
-    let quantityText = $derived(filters.rank_determinant == "time" ?
-                      toHoursAndMinutes(quantity) + " listened" :
-                      quantity + " plays");
+    let quantityText = $derived.by(() => listenedText(quantity));
 
     // grab new context menu data every time the selected album changes
     let contextDataResponse: Promise<ContextDataResponse> = $state(fetchContextMenuData(album.image));
@@ -132,21 +141,21 @@
     <div id="metadata">
         <img src={album.image} alt={altText}>
         <div id="album-info">
-            <h1 id="name">{album.title}</h1>
+            <h1 id="name" style={`font-size: ${title_size}px;`}>{album.title}</h1>
             <h2 id="artists">{artistsText}</h2>
-            <p id="year">{album.release_year == null ? "Unknown release year" : album.release_year}</p>
+            <p id="year">{album.release_year == null ? "unknown release year" : album.release_year}</p>
             <p id="rank">{rankText} ({quantityText})</p>
         </div>
     </div>
     <table id="tracklist">
         <tbody>
             <tr id="headers">
-                <th class="title"><h2>Tracklist</h2></th>
-                <th class="length"><h2>Length</h2></th>
-                <th class="plays"><h2>Plays</h2></th>
+                <th class="title"><h2>tracklist</h2></th>
+                <th class="length"><h2>length</h2></th>
+                <th class="listened"><h2>listened</h2></th>
             </tr>
             {#await contextDataResponse}
-                <tr><td><p>Waiting...</p></td></tr>
+                <tr><td><p>waiting...</p></td></tr>
                 {#each {length: album.tracks - 1} as _}
                     <tr><td>...</td></tr> <!-- placeholder songs to avoid jarring menu resize-->
                 {/each}
@@ -155,8 +164,7 @@
                     <tr>
                         <td class="title">{entry.song.title}</td>
                         <td class="length">{toMinutesAndSeconds(entry.song.duration)}</td>
-                        <td class="plays">{filters.rank_determinant == "time" ?
-                            toHoursAndMinutes(entry.quantity) : entry.quantity}</td>
+                        <td class="listened">{listenedText(entry.quantity)}</td>
                     </tr>
                 {/each}
                 {#if album.tracks !== response.songs.length}
@@ -179,6 +187,7 @@
     #context-menu {
         position: absolute;
         width: min(400px, 100%);
+        max-width: fit-content;
         height: min(600px, 100%);
         max-height: fit-content;
         padding: 7px 15px 15px 15px;
@@ -242,15 +251,15 @@
         width: 75px;
     }
 
-    th.plays {
-        width: 75px;
+    th.listened {
+        width: 100px;
     }
 
     .title {
         text-align: left;
     }
 
-    .length, .plays {
+    .length, .listened {
         text-align: right;
     }
 </style>

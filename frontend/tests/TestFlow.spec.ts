@@ -108,7 +108,7 @@ test.describe("FullFlow Test ", async () => {
     await injectSpotifyCreds(getEmail(browserName, testName));
     
     await page.reload();
-    const spotifyButton = page.getByText("Unlink Spotify Account");
+    const spotifyButton = page.getByText("unlink spotify account");
     await expect(spotifyButton).toBeVisible();
     await page.goto("/profile");
     /**for some reason this blocks for like ever... */
