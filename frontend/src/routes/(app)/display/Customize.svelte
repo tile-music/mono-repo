@@ -148,6 +148,7 @@
           bind:value={localFilters.num_cells}
           onblur={updateFilters}
           placeholder="max"
+          min="1"
         />
       </div>
       <div class="labeled-input">

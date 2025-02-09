@@ -68,6 +68,7 @@
   }
   $inspect(`all songs loaded ${allSongsLoaded}`)
   async function refresh(): Promise<void> {
+    allSongsLoaded = false;
     listeningDataRequest.offset = 0;
     // send request
     console.log("refreshing");

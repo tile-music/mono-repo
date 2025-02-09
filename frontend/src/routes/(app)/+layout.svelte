@@ -31,6 +31,10 @@
         display: flex;
         flex-direction: column;
     }
+    #logout{
+        margin-left:auto;
+
+    }
 
     nav {
         
