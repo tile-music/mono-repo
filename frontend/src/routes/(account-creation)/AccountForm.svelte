@@ -121,7 +121,7 @@
     }
 
     form {
-        gap: 40px;
+        gap: 30px;
     }
 
     fieldset {
