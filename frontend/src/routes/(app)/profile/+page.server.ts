@@ -76,7 +76,8 @@ export const actions: Actions = {
         if (session == null) return fail(401, { not_authenticated: true});
 
         // assemble update object
-        const theme = await request.body
+        const theme = await request.json()
+        console.log("theme:" + theme)
         const update = {
             id: session?.user.id,
             updated_at: new Date(),
@@ -105,6 +106,7 @@ export const actions: Actions = {
             else return fail(500, { server_error: true });
         }
 
+        console.log("at end of update theme")
         return { success: true }
     },
 

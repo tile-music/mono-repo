@@ -91,9 +91,9 @@
   let themeStatus = $state("");
   async function setProfileTheme(themeType : string) {
 
-    const res = await fetch('?/', {
+    const res = await fetch('?/update_theme', {
       method: 'POST',
-      body: themeType
+      body: JSON.stringify(themeType)
     });
 
     // parse response
@@ -129,6 +129,8 @@
 
   onMount(() => {
     console.log(data);
+    $theme = user?.theme //This is throwing a bullshit error but the code WORKS killing and biting. 
+    // I've added the theme attribute to EVERY instance of user declaration
 		setColors();
 	});
 </script>
@@ -197,24 +199,26 @@
       </div>
       <DeleteUser><div id="delete">delete account</div></DeleteUser>
     </div>
-  </div>
-  <div id="themes">
-    <button onclick={() => setTheme("light")} class="theme" id="light-theme">
-      <p class="theme-text" style="color: var(--text-light);">light</p>
-      <div class="inner-theme" style="background-color: var(--accent-light);"></div>
-    </button>    
-    <button onclick={() => setTheme("light-alt")} class="theme" id="light-alt-theme">
-      <p class="theme-text" style="color: var(--text-light-alt);">alt light</p>
-      <div class="inner-theme" style="background-color: var(--accent-light-alt);"></div>
-    </button>
-    <button onclick={() => setTheme("dark")} class="theme" id="dark-theme">
-      <p class="theme-text" style="color: var(--text-dark);">dark</p>
-      <div class="inner-theme" style="background-color: var(--accent-dark);"></div>
-    </button>
-    <button onclick={() => setTheme("dark-alt")} class="theme" id="dark-alt-theme">
-      <p class="theme-text" style="color: var(--text-dark-alt);">alt dark</p>
-      <div class="inner-theme" style="background-color: var(--accent-dark-alt);"></div>
-    </button>
+    <div class="theme-row">
+      <button onclick={() => setTheme("light")} class="theme" id="light-theme">
+        <p class="theme-text" style="color: var(--text-light);">light</p>
+        <div class="inner-theme" style="background-color: var(--accent-light);"></div>
+      </button>    
+      <button onclick={() => setTheme("light-alt")} class="theme" id="light-alt-theme">
+        <p class="theme-text" style="color: var(--text-light-alt);">alt light</p>
+        <div class="inner-theme" style="background-color: var(--accent-light-alt);"></div>
+      </button>
+    </div>
+    <div class="theme-row">
+      <button onclick={() => setTheme("dark")} class="theme" id="dark-theme">
+        <p class="theme-text" style="color: var(--text-dark);">dark</p>
+        <div class="inner-theme" style="background-color: var(--accent-dark);"></div>
+      </button>
+      <button onclick={() => setTheme("dark-alt")} class="theme" id="dark-alt-theme">
+        <p class="theme-text" style="color: var(--text-dark-alt);">alt dark</p>
+        <div class="inner-theme" style="background-color: var(--accent-dark-alt);"></div>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -328,18 +332,16 @@
     margin-bottom: 3px; /* align status message with button */
   }
 
-  #themes {
-    width: 15%;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-    margin: auto 20px;
+  .theme-row {
+    display: block !important;
+    /* yes sam i know you hate !important but it's what works */
   }
 
   .theme {
     width: 110px;
     height: 45px;
     border-radius: 10px;
+    margin-right: 20px;
     cursor: pointer;
     display: inline-block;
   }
