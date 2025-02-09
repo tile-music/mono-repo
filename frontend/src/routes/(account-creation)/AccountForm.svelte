@@ -84,7 +84,7 @@
             <div>
                 <p>{invalidPasswordText}</p>
                 <input type={passwordVisible ? "text" : "password"} name="password" id="password" placeholder="password" disabled={status.submitting}>
-                <button type="button" onclick={togglePasswordVisibility}>{passwordConfirmVisible?"hide" : "show" } password</button>
+                <button type="button" onclick={togglePasswordVisibility}>{passwordVisible?"hide" : "show" } password</button>
             </div>
             {#if type === "register"}
                 <div>
