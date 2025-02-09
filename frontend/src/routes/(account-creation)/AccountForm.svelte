@@ -84,13 +84,13 @@
             <div>
                 <p>{invalidPasswordText}</p>
                 <input type={passwordVisible ? "text" : "password"} name="password" id="password" placeholder="password" disabled={status.submitting}>
-                <button type="button" onclick={togglePasswordVisibility}>{passwordVisible?"hide" : "show" } password</button>
+                <button type="button" onclick={togglePasswordVisibility}>{ passwordVisible?"hide" : "show" } password</button>
             </div>
             {#if type === "register"}
                 <div>
                     <p>{status.failures.passwordMismatch ? "passwords must match" : ""}</p>
                     <input type={passwordConfirmVisible ? "text" : "password"} name="confirm_password" id="confirm_password" placeholder="confirm password" disabled={status.submitting}>
-                    <button type="button" onclick={togglePasswordConfirmVisibility}>{passwordConfirmVisible?"hide" : "show" } password</button>
+                    <button type="button" onclick={togglePasswordConfirmVisibility}>{ passwordConfirmVisible?"hide" : "show" } password</button>
                 </div>
             {:else}
                 <p>{status.invalidCredentials ? "invalid credentials. please try again" : ""}</p>
