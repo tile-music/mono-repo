@@ -4,6 +4,7 @@ export type SongInfo = {
   artists: string[]
   duration: number
   listened_at: number
+  spotify_id: string
   albums: AlbumInfo[]
 }
 
@@ -20,5 +21,7 @@ export type AlbumInfo = {
   release_month: number,
   release_year: number,
   artists: string[]
-  image: string
+  image: string,
+  upc: string,
+  spotify_id: string
 }

@@ -6,7 +6,7 @@ import { error } from '@sveltejs/kit';
 import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from "@supabase/supabase-js";
 
 export const actions: Actions = {
-    refresh: async ({ request, locals: { supabase, session } }) => {
+    loaddata: async ({ request, locals: { supabase, session } }) => {
         if (session == null) return error(401, "Not authenticated");
 
         const body = await request.json();

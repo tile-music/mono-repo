@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { listeningColumns, order, sortArray, filterColumnList } from "./filters.svelte";
+  import { listeningDataFilter, order, sortArray, filterColumnList } from "./filters.svelte";
   import type { ListeningColumn, ListeningColumnKeys, ListeningDataRequest, TitleColumn } from "../../../../../lib/Request";
-  import { assertListeningColumns } from "../../../../../lib/Request";
   import filterIcon from "$lib/assets/icons/filter.svg";
   import { derived } from "svelte/store";
   let { refresh }: { refresh: (filters: ListeningDataRequest) => void } =
@@ -10,36 +9,34 @@
   $inspect(`filterColumnList: ${filterColumnList}`);
   const toggleDatePicker = () => (datePickerVisibile = !datePickerVisibile);
   const sortArrows = $derived((key : ListeningColumnKeys) =>  {
-    if(listeningColumns[key]) {
+    if(listeningDataFilter[key]) {
       //if(localFilters[currentSortColumn]) localFilters[currentSortColumn].order = ""
-      if(listeningColumns[key].order == "asc") {
+      if(listeningDataFilter[key].order == "asc") {
         return "▲"
-      } else if(listeningColumns[key].order == "desc") {
+      } else if(listeningDataFilter[key].order == "desc") {
         return "▼"
       } else {
         return ""
       }
-    } else if(listeningColumns === undefined) throw new Error(`FATAL: ${key} did not exist in filters`)
+    } else if(listeningDataFilter === undefined) throw new Error(`FATAL: ${key} did not exist in filters`)
   });
 
+
   function updateFilters(sortAction: ListeningColumnKeys) {
-    () => assertListeningColumns(listeningColumns);
-    let columns : ListeningColumnKeys[] = Object.keys(listeningColumns) as ListeningColumnKeys[]; 
+    let columns : ListeningColumnKeys[] = Object.keys(listeningDataFilter) as ListeningColumnKeys[]; 
       for(let column of columns) {
         if(column != sortAction) {
-          if(listeningColumns[column])
-          listeningColumns[column].order = ""
+          if(listeningDataFilter[column])
+          listeningDataFilter[column].order = ""
         }
       }
-    if (listeningColumns[sortAction]) {
-      listeningColumns[sortAction].order =
-        listeningColumns[sortAction].order == "asc" ? "desc" : "asc";
+    if (listeningDataFilter[sortAction]) {
+      listeningDataFilter[sortAction].order =
+        listeningDataFilter[sortAction].order == "asc" ? "desc" : "asc";
     } else {
       throw new Error(`FATAL: ${sortAction} not found in localFilters`);
     }
-    refresh({
-      ...listeningColumns,
-    });
+    refresh();
   }
 </script>
 <div id="filters">
@@ -62,9 +59,7 @@
 </div>
 
 <style>
-  svg {
-    color: var(--text);
-  }
+  
   #filters {
     left: 0;
     width: 100%;

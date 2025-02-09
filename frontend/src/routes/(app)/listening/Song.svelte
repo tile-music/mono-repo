@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type { ProcessOutput } from './processSongs';
+
     import type { SongInfo, AlbumInfo } from '../../../../../lib/Song';
     import refresh from '$lib/assets/icons/refresh.svg';
-    import { listeningColumns, filterColumnList } from './filters.svelte';
+    import { listeningDataFilter, filterColumnList } from './filters.svelte';
     interface Props {
-        song: ProcessOutput;
+        song: SongInfo;
     }
 
     let { song }: Props = $props();
@@ -19,11 +19,12 @@
 </script>
 
 <div class="song">
-    {#if song.repetitions > 1}
+    <!-- {#if song.repetitions > 1}
         <p class="repetitions"><img src={refresh} alt="A replay icon">{song.repetitions}</p>
     {:else}
         <p class="repetitions"></p>
-    {/if}
+    {/if} -->
+    <p class="repetitions"></p>
     <img class="art" src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
     {#each filterColumnList() as column}
         {#if column === 'duration'}
@@ -37,7 +38,6 @@
         {:else}
             <p class={column}>{song[column]}</p>
         {/if}
-
     {/each}
     
 

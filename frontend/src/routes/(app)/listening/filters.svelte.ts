@@ -1,8 +1,8 @@
-import type { ListeningDataRequest, ListeningColumns, ListeningColumnKeys} from "../../../../../lib/Request";
-import { assertListeningColumns } from "../../../../../lib/Request";
+import type { ListeningDataRequest, ListeningColumnKeys, ListeningColumns} from "../../../../../lib/Request";
 export const order = ["art", "title", "artist", "album", "duration", 
                     "plays", "listened_at", "upc", "isrc", "spotify_track_id", "spotify_album_id"];
-export const listeningColumns: ListeningColumns = $state<ListeningColumns>({
+
+export const listeningDataFilter: ListeningColumns = $state<ListeningColumns>({
     listened_at: { column: {start:null, end: null }, order: "desc"},
     title: { column: [], order: ""},
     album: { column: [], order: ""},
@@ -12,8 +12,10 @@ export const listeningColumns: ListeningColumns = $state<ListeningColumns>({
     upc: null,
     spotify_track_id: null,
     spotify_album_id: null,
-    isrc: null
+    isrc: null,
 } as ListeningColumns)
+
+
 
 /**
  * Sorts an array (`unsortedArrToSort`) based on the order of elements in another array (`sortedArr`).
@@ -53,11 +55,11 @@ export function sortArray(sortedArr : string[], unsortedArr: string[], unsortedA
 
 }
 const filterColumnLists : ListeningColumnKeys[] = $derived.by(()=> {
-    let keys : ListeningColumnKeys[] = Object.keys(listeningColumns) as ListeningColumnKeys[];
+    let keys : ListeningColumnKeys[] = Object.keys(listeningDataFilter) as ListeningColumnKeys[];
     console.log(keys)
-    console.log({...listeningColumns})
+    console.log({...listeningDataFilter})
     keys = sortArray(order, keys, keys) as ListeningColumnKeys[];
-    return keys.filter(column => listeningColumns[column] !== null)
+    return keys.filter(column => listeningDataFilter[column] !== null)
 });
 
 export const filterColumnList = () => filterColumnLists
