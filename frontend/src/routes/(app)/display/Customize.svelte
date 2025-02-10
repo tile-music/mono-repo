@@ -175,7 +175,7 @@
       </div>
     </div>
     <div class="input-section">
-      <h2>Arrangement Options</h2>
+      <h2>arrangement options</h2>
       <div class="labeled-input">
         <label for="arr-type">arrangement type</label>
         <select name="arr-type" id="arr-type"
