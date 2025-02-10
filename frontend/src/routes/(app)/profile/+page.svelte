@@ -8,6 +8,7 @@
   import type { SubmitFunction } from "@sveltejs/kit";
   import { theme } from '../../theme';
   import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
 
 
   interface Props {
@@ -123,6 +124,7 @@
 
   async function setTheme(type : string) {
     $theme = type
+    if (browser) {localStorage.setItem("theme", type)}
     setColors()
     setProfileTheme(type)
   }
@@ -130,6 +132,7 @@
   onMount(() => {
     console.log(data);
     $theme = user?.theme
+    if (browser) {localStorage.setItem("theme", $theme)}
 		setColors();
 	});
 </script>
