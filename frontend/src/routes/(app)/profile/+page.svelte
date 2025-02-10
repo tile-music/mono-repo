@@ -129,8 +129,7 @@
 
   onMount(() => {
     console.log(data);
-    $theme = user?.theme //This is throwing a bullshit error but the code WORKS killing and biting. 
-    // I've added the theme attribute to EVERY instance of user declaration
+    $theme = user?.theme
 		setColors();
 	});
 </script>
