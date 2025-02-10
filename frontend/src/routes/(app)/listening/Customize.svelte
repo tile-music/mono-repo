@@ -1,9 +1,10 @@
 <script lang="ts">
   import { listeningDataFilter, order, sortArray, filterColumnList } from "./filters.svelte";
   import type { ListeningColumn, ListeningColumnKeys, ListeningDataRequest, TitleColumn } from "../../../../../lib/Request";
+  import ColumnSelection from "./ColumnSelection.svelte"
   import filterIcon from "$lib/assets/icons/filter.svg";
   import { derived } from "svelte/store";
-  let { refresh }: { refresh: (filters: ListeningDataRequest) => void } =
+  let { refresh }: { refresh: () => void } =
     $props();
   let datePickerVisibile = $state(false);
   $inspect(`filterColumnList: ${filterColumnList}`);
@@ -41,25 +42,17 @@
 </script>
 <div id="filters">
 
-  <button class="filter">title</button>
-
-  <button class="filter">artist</button>
-  <button class="filter">album</button>
-  <button class="filter">album</button>
-  <button class="filter">duration</button>
-  <button class="filter">plays</button>
-  <button class="filter">date range</button>
-  <button class="filter" id="column_selections">columns</button>
+  <ColumnSelection {refresh}></ColumnSelection>
 </div>
 <div id="headers">
   <button id="art"><h2>art</h2></button>
   {#each filterColumnList() as column}
-    <button id={column} onclick={() => updateFilters(column)}><h2>{column}{sortArrows(column).replace("_"," ")}</h2></button>
+    <button class={column} onclick={() => updateFilters(column)}><h2>{column}{sortArrows(column).replaceAll("_"," ")}</h2></button>
   {/each}
 </div>
 
 <style>
-  
+  @import './styles.css';
   #filters {
     left: 0;
     width: 100%;
@@ -89,29 +82,6 @@
     flex-direction: row;
   }
 
-  #art {
-    width: 50px;
-  }
-
-  #title,
-  #album {
-    width: 300px;
-  }
-
-  #artist {
-    width: 200px;
-  }
-  #listened_at {
-    width: 200px;
-  }
-
-
-  #plays {
-    width: 100px;
-  }
-  #duration {
-    width: 125px
-  }
   button {
     all: unset;
   }

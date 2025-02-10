@@ -87,23 +87,21 @@ export type ContextDataResponse = {
 export type ListeningColumn<T> = {
     column: T;
     order: "asc" | "desc" | "";
+    checked: boolean;
 }
 
-type sort<T> = {
-
-}
 
 export type ListeningColumns = {
-    listened_at: ListeningColumn<DateFilter> | null;
-    title: ListeningColumn<TitleColumn> | null;
-    album: ListeningColumn<TitleColumn> | null;
-    artist: ListeningColumn<TitleColumn> | null;
-    duration: ListeningColumn<DurationFilter> | null;
-    upc: ListeningColumn<TitleColumn> | null;
-    spotify_track_id: ListeningColumn<SpotifyURI> | null;
-    spotify_album_id: ListeningColumn<SpotifyURI> | null;
-    isrc: ListeningColumn<ISRCColumn> | null; 
-    listens: ListeningColumn<ListenCountColumn> | null;
+    listened_at: ListeningColumn<DateFilter>;
+    title: ListeningColumn<TitleColumn>;
+    album: ListeningColumn<TitleColumn>;
+    artist: ListeningColumn<TitleColumn>;
+    duration: ListeningColumn<DurationFilter>;
+    upc: ListeningColumn<TitleColumn>;
+    spotify_track_id: ListeningColumn<SpotifyURI>;
+    spotify_album_id: ListeningColumn<SpotifyURI>;
+    isrc: ListeningColumn<ISRCColumn>; 
+    listens: ListeningColumn<ListenCountColumn>;
 
 }
 

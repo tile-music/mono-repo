@@ -66,7 +66,9 @@
       }
     }
   }
+
   $inspect(`all songs loaded ${allSongsLoaded}`)
+
   async function refresh(): Promise<void> {
     allSongsLoaded = false;
     listeningDataRequest.offset = 0;
@@ -92,29 +94,8 @@
   }
   $inspect(songs)
 
-
   onMount(async () => {
     await refresh();
-    /* let observerOptions = $state({
-      root: loadMore,
-      rootMargin: "0px",
-      threshold: 1,
-    });
-
-    
-    const observer = $derived(new IntersectionObserver(loadData, observerOptions));
-    $inspect(observer) */
-    /* if (scrollContainer) {
-			console.log("listElm is defined");
-			scrollContainer.addEventListener("scroll", function () {
-				if (
-					scrollContainer.scrollTop + scrollContainer.clientHeight >=
-					scrollContainer.scrollHeight
-				) {
-					loadData(listeningColumns);
-				}
-			});
-		} */
   });
 </script>
 
@@ -128,9 +109,8 @@
         {#each songs as song}
           <Song {song} />
         {/each}
-        <IntersectionObserver {element} on:intersect={async(e) => allSongsLoaded ? () => "" : await loadData()} threshold={1}>
+        <IntersectionObserver {element} on:intersect={async() => allSongsLoaded ? () => "" : await loadData()} threshold={1}>
           <div bind:this={element} id=load-more>
-
           </div>
           {#if refreshStatus.status == "loading-more" }
           <p>loading</p>
@@ -160,8 +140,6 @@
   }
   #load-more{
     height: -1000px;
-
-
   }
 
   #scroll-container {

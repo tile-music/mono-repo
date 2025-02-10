@@ -13,7 +13,7 @@
     function calculateDuration(ms: number) {
         const minutes = Math.floor(ms / 60000);
         const seconds = ((ms % 60000) / 1000);
-        return minutes + ":" + (seconds < 10 ? '0' : '') + seconds.toFixed(0);
+        return minutes + ":" + (seconds < 9.5 ? '0' : '') + seconds.toFixed(0);
     }
 
 </script>
@@ -35,63 +35,21 @@
             <p class={column}>{album.artists.join(', ')}</p>
         {:else if column === 'listened_at'}
             <p class={column}>{new Date(song[column]).toLocaleString()}</p>
+        {:else if column === "upc"}
+            <p class={column}>{album.upc}</p>
         {:else}
             <p class={column}>{song[column]}</p>
         {/if}
+
     {/each}
     
 
 </div>
 
 <style>
-    .song {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        height: 50px;
-        flex-shrink: 0;
-    }
+    @import "./styles.css";
 
-    .repetitions {
-        width: 50px;
-        max-width: 50px;
-        display: flex;
-        justify-content: center;
-    }
-
-    .art {
-        height: 100%;
-        aspect-ratio: 1 / 1;
-    }
-
-    .title, .album {
-        width: 300px;
-        max-width: 300px;
-    }
-
-    .artist {
-        width: 200px;
-        max-width: 200px;
-    }
-
-    .listens {
-        width: 100px;
-        max-width: 100px;
-    }
-    .duration{
-        width: 125px;
-        max-width: 125px;
-    }
-    .listened_at{
-        width: 200px
-    }
-
-
-    .repetitions {
-        display: flex;
-        gap: 5px;
-        align-items: center;
-    }
+    
 
     .repetitions img {
         width: 12px;

@@ -3,17 +3,17 @@ export const order = ["art", "title", "artist", "album", "duration",
                     "plays", "listened_at", "upc", "isrc", "spotify_track_id", "spotify_album_id"];
 
 export const listeningDataFilter: ListeningColumns = $state<ListeningColumns>({
-    listened_at: { column: {start:null, end: null }, order: "desc"},
-    title: { column: [], order: ""},
-    album: { column: [], order: ""},
-    artist: { column: [], order: ""},
-    duration: { column: {start: null, end: null}, order: ""},
-    listens: { column: [], order: ""},
-    upc: null,
-    spotify_track_id: null,
-    spotify_album_id: null,
-    isrc: null,
-} as ListeningColumns)
+    listened_at: { column: {start:null, end: null }, order: "desc", checked: true},
+    title: { column: [], order: "", checked: true},
+    album: { column: [], order: "", checked: true},
+    artist: { column: [], order: "", checked: true},
+    duration: { column: {start: null, end: null}, order: "", checked: true},
+    listens: { column: [], order: "", checked: true},
+    upc: { column: [], order: "", checked: false},
+    spotify_track_id: { column: [], order: "", checked: false},
+    spotify_album_id: { column: [], order: "", checked: false},
+    isrc: { column: [], order: "", checked: false},
+})
 
 
 
@@ -59,21 +59,7 @@ const filterColumnLists : ListeningColumnKeys[] = $derived.by(()=> {
     console.log(keys)
     console.log({...listeningDataFilter})
     keys = sortArray(order, keys, keys) as ListeningColumnKeys[];
-    return keys.filter(column => listeningDataFilter[column] !== null)
+    return keys.filter(column => listeningDataFilter[column].checked === true)
 });
 
 export const filterColumnList = () => filterColumnLists
-
-
-/* export const listeningColumns: ListeningColumns = $state({
-    listened_at: { date:{start:null, end: null }, order: "dsc"},
-    songs: { column: [], order: ""},
-    albums: { column: [], order: ""},
-    artists: { column: [], order: ""},
-    duration: { start: null, end: null, order: ""},
-    upcs: { column: [], order: ""},
-    spotify_track_uri: { column: [], order: ""},
-    spotify_album_uri: { column: [], order: ""},
-    isrcs: { column: [], order: ""},
-    listens: { column: [], order: ""}
-}) */
