@@ -48,6 +48,14 @@
   width: 200px
 }
 
+.upc, .isrc{
+  width: 150px;
+}
+.spotify_album_id, .spotify_track_id{
+  width: 175px;
+
+}
+
 .repetitions {
   display: flex;
   gap: 5px;

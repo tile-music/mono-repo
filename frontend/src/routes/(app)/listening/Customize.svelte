@@ -59,15 +59,7 @@
     z-index: 1;
     position: sticky;
   }
-  .filter {
-    background-color: var(--background);
-    border: 0;
-    border-bottom: 2px solid var(--medium);
-    font-family: "Archivo", sans-serif;
-    font-size: 15px;
-    padding: 0 2px; /* compensate for border */
-    color: var(--text);
-  }
+  
   #column_selections {
     position: absolute;
     right: 0;

@@ -37,7 +37,11 @@
             <p class={column}>{new Date(song[column]).toLocaleString()}</p>
         {:else if column === "upc"}
             <p class={column}>{album.upc}</p>
-        {:else}
+        {:else if column === "spotify_album_id"}
+            <p class={column}><a href="https://open.spotify.com/album/{album.spotify_id}">link</p>
+        {:else if column === "spotify_track_id"}
+            <p class={column}><a href="https://open.spotify.com/track/{song.spotify_id}">link</p>
+        {:else}         
             <p class={column}>{song[column]}</p>
         {/if}
 
@@ -48,8 +52,6 @@
 
 <style>
     @import "./styles.css";
-
-    
 
     .repetitions img {
         width: 12px;
