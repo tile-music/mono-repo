@@ -113,5 +113,5 @@ function change() {
 function generate() {
     // super type unsafe, but i simply cannot figure out another way
     const type = arr_types[arrangement.type] as unknown as Arrangement<{}>;
-    arrangement.squares = type.generate(filters.num_cells, type.state);
+    arrangement.squares = type.generate(filters.num_cells, arrangement.state);
 }
