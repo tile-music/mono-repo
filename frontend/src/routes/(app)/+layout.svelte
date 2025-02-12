@@ -1,35 +1,9 @@
 <script lang="ts">
-    import { redirect } from '@sveltejs/kit';
-    import { browser } from '$app/environment';
-    import { onMount } from 'svelte';
-
     interface Props {
         children?: import('svelte').Snippet;
     }
 
     let { children }: Props = $props();
-
-    let logout = $derived(async () => {
-        console.log(redirect(302, "/login"));
-	});
-
-    function setColors(color : string | null) {
-        let html = document.querySelector('html');
-        const root = document.documentElement;
-        const styles = getComputedStyle(root);
-
-        html?.style.setProperty("--background", styles.getPropertyValue('--background-' + color))
-        html?.style.setProperty("--text", styles.getPropertyValue('--text-' + color))
-        html?.style.setProperty("--medium", styles.getPropertyValue('--medium-'  + color))
-        html?.style.setProperty("--midground", styles.getPropertyValue('--midground-'  + color))
-        html?.style.setProperty("--accent", styles.getPropertyValue('--accent-' + color)) 
-    }
-
-    onMount(() => {
-        if( browser && localStorage.getItem("theme") != null) {
-            setColors(localStorage.getItem("theme"))
-        }
-	});
 </script>
 
 <div id="container">

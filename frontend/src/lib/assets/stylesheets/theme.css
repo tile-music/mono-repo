@@ -1,4 +1,4 @@
-html:has(.dark-theme){
+:root {
     --background: #090808;
     --text: #e5dfd0;
     --medium: #5c5853;
@@ -6,7 +6,15 @@ html:has(.dark-theme){
     --accent: #e7762f;
 }
 
-html:has(.light-theme) {
+.theme-default-dark {
+    --background: #090808;
+    --text: #e5dfd0;
+    --medium: #5c5853;
+    --midground: #242222;
+    --accent: #e7762f;
+}
+
+.theme-default-light {
     --background: #e8e8e8;
     --text: #000000;
     --medium: #5c5853;
@@ -14,40 +22,18 @@ html:has(.light-theme) {
     --accent: #a54d17;
 }
 
-:root {
+.theme-alt-dark {
     --background: #090808;
     --text: #e5dfd0;
     --medium: #5c5853;
-    --midground: #242222;
-    --accent: #e7762f;
+    --midground: #2d0038;
+    --accent: #c621dc;
+}
 
-    --gradient-background: rgba(29, 29, 29, 0.7);
-    --gradient-text: rgb(233, 233, 233);
-
-    /* rgb(from var(--background) r g b / 0.7) 
-        rgb(from var(--background) r g b / 0.7)*/
-
-    --background-dark: #090808;
-    --text-dark: #e5dfd0;
-    --medium-dark: #5c5853;
-    --midground-dark: #242222;
-    --accent-dark: #e7762f;
-
-    --background-light: #e8e8e8;
-    --text-light: #000000;
-    --medium-light: #5c5853;
-    --midground-light: #787474;
-    --accent-light: #c34d03;
-
-    --background-dark-alt: #090808;
-    --text-dark-alt: #e5dfd0;
-    --medium-dark-alt: #5c5853;
-    --midground-dark-alt: #2d0038;
-    --accent-dark-alt: #c621dc;
-
-    --background-light-alt: #e8e8e8;
-    --text-light-alt: #000000;
-    --medium-light-alt: #5c5853;
-    --midground-light-alt: #787474;
-    --accent-light-alt: #093bc3;
+.theme-alt-light {
+    --background: #e8e8e8;
+    --text: #000000;
+    --medium: #5c5853;
+    --midground: #787474;
+    --accent: #093bc3;
 }

@@ -3,7 +3,7 @@ import type { Actions } from './$types'
 import { fail } from '@sveltejs/kit';
 import { assembleBlankProfile } from './profile';
 
-export const load: PageServerLoad = async ({locals: { supabase, session } }) => {
+export const load: PageServerLoad = async ({cookies, locals: { supabase, session } }) => {
     if (session == null) throw Error("User does not have session.");
 
     // fetch profile data
@@ -24,6 +24,14 @@ export const load: PageServerLoad = async ({locals: { supabase, session } }) => 
     } else if (error) throw error;
 
     const email = session.user.email ?? null;
+
+    // set theme
+    if (user && user.theme) {
+        cookies.set("theme", user.theme, {
+            path: '/',
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
+        });
+    }
 
     // return the retrieved user, or the blank user if no profile was found
     return { user, email }; 
@@ -72,12 +80,11 @@ export const actions: Actions = {
         return { success: true }
     },
 
-    update_theme: async ({ request, locals: { supabase, session } }) => {
+    update_theme: async ({ cookies, request, locals: { supabase, session } }) => {
         if (session == null) return fail(401, { not_authenticated: true});
 
         // assemble update object
         const theme = await request.json()
-        console.log("theme:" + theme)
         const update = {
             id: session?.user.id,
             updated_at: new Date(),
@@ -106,7 +113,11 @@ export const actions: Actions = {
             else return fail(500, { server_error: true });
         }
 
-        console.log("at end of update theme")
+        cookies.set("theme", theme, {
+            path: '/',
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
+        });
+
         return { success: true }
     },
 
@@ -124,7 +135,6 @@ export const actions: Actions = {
     },
 
     reset_listening_data: async ({ request, locals: { supabase, session } }) => {
-        console.log(request);
         if (session == null) return fail(401, { not_authenticated: true});
 
         // attempt to reset listening data
