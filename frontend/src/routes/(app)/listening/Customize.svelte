@@ -1,36 +1,46 @@
 <script lang="ts">
-  import { listeningDataFilter, order, sortArray, filterColumnList } from "./filters.svelte";
-  import type { ListeningColumn, ListeningColumnKeys, ListeningDataRequest, TitleColumn } from "../../../../../lib/Request";
-  import ColumnSelection from "./ColumnSelection.svelte"
+  import {
+    listeningDataFilter,
+    order,
+    sortArray,
+    filterColumnList,
+  } from "./filters.svelte";
+  import type {
+    ListeningColumn,
+    ListeningColumnKeys,
+    ListeningDataRequest,
+    TitleColumn,
+  } from "../../../../../lib/Request";
+  import ColumnSelection from "./ColumnSelection.svelte";
   import filterIcon from "$lib/assets/icons/filter.svg";
   import { derived } from "svelte/store";
-  let { refresh }: { refresh: () => void } =
-    $props();
+  let { refresh }: { refresh: () => void } = $props();
   let datePickerVisibile = $state(false);
   $inspect(`filterColumnList: ${filterColumnList}`);
   const toggleDatePicker = () => (datePickerVisibile = !datePickerVisibile);
-  const sortArrows = $derived((key : ListeningColumnKeys) =>  {
-    if(listeningDataFilter[key]) {
+  const sortArrows = $derived((key: ListeningColumnKeys) => {
+    if (listeningDataFilter[key]) {
       //if(localFilters[currentSortColumn]) localFilters[currentSortColumn].order = ""
-      if(listeningDataFilter[key].order == "asc") {
-        return "▲"
-      } else if(listeningDataFilter[key].order == "desc") {
-        return "▼"
+      if (listeningDataFilter[key].order == "asc") {
+        return "▲";
+      } else if (listeningDataFilter[key].order == "desc") {
+        return "▼";
       } else {
-        return ""
+        return "";
       }
-    } else if(listeningDataFilter === undefined) throw new Error(`FATAL: ${key} did not exist in filters`)
+    } else if (listeningDataFilter === undefined)
+      throw new Error(`FATAL: ${key} did not exist in filters`);
   });
 
-
   function updateFilters(sortAction: ListeningColumnKeys) {
-    let columns : ListeningColumnKeys[] = Object.keys(listeningDataFilter) as ListeningColumnKeys[]; 
-      for(let column of columns) {
-        if(column != sortAction) {
-          if(listeningDataFilter[column])
-          listeningDataFilter[column].order = ""
-        }
+    let columns: ListeningColumnKeys[] = Object.keys(
+      listeningDataFilter,
+    ) as ListeningColumnKeys[];
+    for (let column of columns) {
+      if (column != sortAction) {
+        if (listeningDataFilter[column]) listeningDataFilter[column].order = "";
       }
+    }
     if (listeningDataFilter[sortAction]) {
       listeningDataFilter[sortAction].order =
         listeningDataFilter[sortAction].order == "asc" ? "desc" : "asc";
@@ -40,31 +50,36 @@
     refresh();
   }
 </script>
-<div id="filters">
 
+<div id="filters">
   <ColumnSelection {refresh}></ColumnSelection>
 </div>
 <div id="headers">
   <button id="art"><h2>art</h2></button>
   {#each filterColumnList() as column}
-    <button class={column} onclick={() => updateFilters(column)}><h2>{column}{sortArrows(column).replaceAll("_"," ")}</h2></button>
+    <button class={column} onclick={() => updateFilters(column)}
+      ><h2>{column}{sortArrows(column).replaceAll("_", " ")}</h2></button
+    >
   {/each}
 </div>
 
 <style>
-  @import './styles.css';
+  @import "./styles.css";
   #filters {
     left: 0;
     width: 100%;
     z-index: 1;
     position: sticky;
+    display: inline-block;
   }
-  
+
   #column_selections {
     position: absolute;
     right: 0;
     margin-right: 10px;
   }
+
+  
 
   #headers {
     display: flex;

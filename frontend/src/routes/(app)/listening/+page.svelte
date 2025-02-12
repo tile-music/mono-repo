@@ -138,6 +138,7 @@
     flex-direction: column;
     height: 100%;
   }
+
   #load-more{
     height: -1000px;
   }

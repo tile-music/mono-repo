@@ -12,16 +12,20 @@
   <button class="filter" onclick={() => (showSelection = !showSelection)}
     >columns</button
   >
-  <div id="column-selection">
+  <div id="column-selection" class:show={showSelection}>
     {#if showSelection}
-      {#each selections as filter}
-        <input
-          type="checkbox"
-          id={filter}
-          bind:checked={listeningDataFilter[filter].checked}
-          onchange={() => refresh()}
-        />{filter.replace(`_`, " ")}
-      {/each}
+      <ul>
+        {#each selections as filter}
+          <li>
+            <input
+              type="checkbox"
+              id={filter}
+              bind:checked={listeningDataFilter[filter].checked}
+              onchange={() => refresh()}
+            />{filter.replace(`_`, " ")}
+          </li>
+        {/each}
+      </ul>
     {/if}
   </div>
 </div>
@@ -31,16 +35,17 @@
     position: relative;
     display: inline-block;
   }
-  #column_selections {
-    display: none;
+
+  #column-selection {
     position: absolute;
-    background-color: white;
+    background-color: var(--background);
     min-width: 160px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1;
     border-radius: 5px;
     overflow: hidden;
+    z-index: 1;
+    display: block;
   }
+
   button {
     background-color: var(--background);
     border: 0;
