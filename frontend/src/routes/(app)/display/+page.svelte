@@ -16,8 +16,6 @@
   import { generateFullArrangement } from "./pack";
   import { filters } from "./filters.svelte";
 
-  import { theme } from '../../theme';
-
   let songs: { song: SongInfo; quantity: number }[] = $state([]);
   
   let iFrameRef: HTMLDivElement;
@@ -34,9 +32,6 @@
     if(artDisplayRef) {
       try {
         artDisplayRef.style.transform = "scale(.95)";
-        console.log(displaySize)
-        // Capture the div as an image
-        console.log(iFrameRef)
         
         const dataUrl = await toPng(iFrameRef/* , {filter: (element) => element.tagName == "button"} */);
         // Create a link and trigger download

@@ -6,10 +6,8 @@
   import Avatar from './avatar.svelte';
   import { enhance } from "$app/forms";
   import type { SubmitFunction } from "@sveltejs/kit";
-  import { theme } from '../../theme';
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
-
 
   interface Props {
     data: PageData;
@@ -91,7 +89,6 @@
 
   let themeStatus = $state("");
   async function setProfileTheme(themeType : string) {
-
     const res = await fetch('?/update_theme', {
       method: 'POST',
       body: JSON.stringify(themeType)
@@ -104,36 +101,26 @@
     // set status message
     if (info.success) {
       themeStatus = "theme update successful";
+      applyTheme(themeType);
     }
-    else if (info.not_authenticated) resetProfileStatus = "failed: not authenticated";
-    else if (info.server_error) resetProfileStatus = "failed: server error";
-    else resetProfileStatus = "failed: unknown error";
+
+    // handle errors
+    else if (info.not_authenticated) themeStatus = "failed: not authenticated";
+    else if (info.server_error) themeStatus = "failed: server error";
+    else if (info.update_unnecessary) themeStatus = "theme already set to that value";
+    else themeStatus = "failed: unknown error";
   }
 
-  function setColors() {
-    let html = document.querySelector('html');
-    const root = document.documentElement;
-    const styles = getComputedStyle(root);
-
-    html?.style.setProperty("--background", styles.getPropertyValue('--background-' + $theme))
-    html?.style.setProperty("--text", styles.getPropertyValue('--text-' + $theme))
-    html?.style.setProperty("--medium", styles.getPropertyValue('--medium-'  + $theme))
-    html?.style.setProperty("--midground", styles.getPropertyValue('--midground-'  + $theme))
-    html?.style.setProperty("--accent", styles.getPropertyValue('--accent-' + $theme)) 
-  }
-
-  async function setTheme(type : string) {
-    $theme = type
-    if (browser) {localStorage.setItem("theme", type)}
-    setColors()
-    setProfileTheme(type)
+  async function applyTheme(themeType: string) {
+    // Set class on html element
+    if (browser) document.documentElement.className = 
+      document.documentElement.className.replace(
+        /^theme-[^\s]*/, `theme-${themeType}`
+      );
   }
 
   onMount(() => {
-    console.log(data);
-    $theme = user?.theme
-    if (browser) {localStorage.setItem("theme", $theme)}
-		setColors();
+    if (user?.theme) applyTheme(user.theme);
 	});
 </script>
 
@@ -202,25 +189,26 @@
       <DeleteUser><div id="delete">delete account</div></DeleteUser>
     </div>
     <div class="theme-row">
-      <button onclick={() => setTheme("light")} class="theme" id="light-theme">
-        <p class="theme-text" style="color: var(--text-light);">light</p>
-        <div class="inner-theme" style="background-color: var(--accent-light);"></div>
+      <button onclick={() => setProfileTheme("default-light")} class="theme theme-default-light">
+        <p class="theme-text">light</p>
+        <div class="inner-theme"></div>
       </button>    
-      <button onclick={() => setTheme("light-alt")} class="theme" id="light-alt-theme">
-        <p class="theme-text" style="color: var(--text-light-alt);">alt light</p>
-        <div class="inner-theme" style="background-color: var(--accent-light-alt);"></div>
+      <button onclick={() => setProfileTheme("alt-light")} class="theme theme-alt-light">
+        <p class="theme-text">alt light</p>
+        <div class="inner-theme"></div>
       </button>
     </div>
     <div class="theme-row">
-      <button onclick={() => setTheme("dark")} class="theme" id="dark-theme">
-        <p class="theme-text" style="color: var(--text-dark);">dark</p>
-        <div class="inner-theme" style="background-color: var(--accent-dark);"></div>
+      <button onclick={() => setProfileTheme("default-dark")} class="theme theme-default-dark">
+        <p class="theme-text">dark</p>
+        <div class="inner-theme"></div>
       </button>
-      <button onclick={() => setTheme("dark-alt")} class="theme" id="dark-alt-theme">
-        <p class="theme-text" style="color: var(--text-dark-alt);">alt dark</p>
-        <div class="inner-theme" style="background-color: var(--accent-dark-alt);"></div>
+      <button onclick={() => setProfileTheme("alt-dark")} class="theme theme-alt-dark">
+        <p class="theme-text">alt dark</p>
+        <div class="inner-theme"></div>
       </button>
     </div>
+    <p>{themeStatus}</p>
   </div>
 </div>
 
@@ -346,12 +334,15 @@
     margin-right: 20px;
     cursor: pointer;
     display: inline-block;
+    background-color: var(--background);
+    border: 3px solid var(--accent);
   }
 
   .theme-text {
     font-family: "Mattone", sans-serif;
     font-size: 17px;
     padding-top: 3px;
+    color: var(--text);
   }
 
   .inner-theme {
@@ -359,29 +350,6 @@
     width: 20px;
     height: 20px;
     border-radius: 15px;
-  }
-
-  #light-theme {
-    background-color: var(--background-light);
-    color: var(--text-light) !important;
-    border: 3px solid var(--accent-light);
-  }
-
-  #dark-theme {
-    background-color: var(--background-dark);
-    color: var(--text-dark);
-    border: 3px solid var(--accent-dark);
-  }
-
-  #dark-alt-theme {
-    background-color: var(--background-dark-alt);
-    color: var(--text-dark-alt);
-    border: 3px solid var(--accent-dark-alt);
-  }
-
-  #light-alt-theme {
-    background-color: var(--background-light-alt);
-    color: var(--text-light-alt);
-    border: 3px solid var(--accent-light-alt);
+    background-color: var(--accent)
   }
 </style>
