@@ -31,7 +31,7 @@
     function toHoursAndMinutes(ms: number) {
         const hours = Math.floor(ms/1000/60/60);
         const minutes = Math.floor((ms/1000/60/60 - hours)*60);
-        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+        return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
     }
 
     function percent(decimal: number) {
@@ -55,7 +55,7 @@
             <p id="title">{filters.aggregate == "song" ? song.title : song.albums[0].title}</p>
             <p id="artist">{song.artists.join(", ")}</p>
             {#if filters.rank_determinant == "listens"}
-                <p id="rank">{quantity} listens (#{rank})</p>
+                <p id="rank">{quantity == 1 ? "1 listen" : quantity + " listens"} (#{rank})</p>
             {:else}
                 <p id="rank">{toHoursAndMinutes(quantity)} listened (#{rank})</p>
             {/if}

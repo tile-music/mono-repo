@@ -1,6 +1,6 @@
-FROM node:current-alpine3.20 AS build
+FROM mdv-lib AS build
 
-WORKDIR /app
+WORKDIR /app/frontend
 
 COPY package*.json .
 
@@ -29,6 +29,7 @@ FROM build AS prod
 
 EXPOSE 4173
 
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 
-CMD [ "npm", "run", "preview", "--", "--host", "0.0.0.0" ]
+CMD [ "node", "--env-file=.env.local","build" ]
+

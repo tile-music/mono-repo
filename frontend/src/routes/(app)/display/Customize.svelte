@@ -16,7 +16,7 @@
 
   function updateFilters() {
     // set date range
-    const startDate = new Date();
+    const startDate = new Date('1970-01-01');
     const endDate = new Date();
 
     // wipe dateStrings if needed
@@ -78,20 +78,20 @@
 {#if hidden}
   <div id="open-menu-header">
     <button onclick={() => {hidden = false}} id="open-menu"
-    class="art-display-menu-button">Customize</button>
+    class="art-display-menu-button">customize</button>
   </div>
 {:else}
   <div id="filters">
     <div class="input-section">
       <div id="close-menu-header">
-        <h1>Customize</h1>
+        <h1>customize</h1>
         <button onclick={() => {hidden = true}} id="close-menu"
-        class="art-display-menu-button">Close</button>
+        class="art-display-menu-button">close</button>
       </div>
 
-      <h2>Basic Information</h2>
+      <h2>basic information</h2>
       <div class="labeled-input">
-        <label for="music-type">Music type</label>
+        <label for="music-type">music type</label>
         <select
           id="music-type"
           bind:value={localFilters.aggregate}
@@ -102,7 +102,7 @@
         </select>
       </div>
       <div class="labeled-input">
-        <label for="time-frame">Time frame</label>
+        <label for="time-frame">time frame</label>
         <select id="time-frame"
         bind:value={filtersContext.timeFrame}
         onchange={updateFilters}>
@@ -116,7 +116,7 @@
       </div>
       {#if filtersContext.timeFrame == "custom"}
           <div class="labeled-input" aria-label="custom-date">
-            <label for="start-date">Start date</label>
+            <label for="start-date">start date</label>
             <input
               id="start-date"
               type="date"
@@ -126,7 +126,7 @@
             />
           </div>
           <div class="labeled-input" aria-label="custom-date">
-            <label for="end-date">End date</label>
+            <label for="end-date">end date</label>
             <input
               id="end-date"
               type="date"
@@ -138,9 +138,9 @@
       {/if}
     </div>
     <div class="input-section">
-      <h2>Display Size</h2>
+      <h2>display size</h2>
       <div class="labeled-input">
-        <label for="num-cells">Number of cells</label>
+        <label for="num-cells">number of cells</label>
         <input
           id="num-cells"
           type="number"
@@ -152,7 +152,7 @@
         />
       </div>
       <div class="labeled-input">
-        <label for="rank-determinant">Rank determinant</label>
+        <label for="rank-determinant">rank determinant</label>
         <select
           id="rank-determinant"
           bind:value={localFilters.rank_determinant}
@@ -164,9 +164,9 @@
       </div>
     </div>
     <div class="input-section">
-      <h2>Display Style</h2>
+      <h2>display style</h2>
       <div class="labeled-input">
-        <label for="num-cells">Include cell info</label>
+        <label for="num-cells">include cell info</label>
         <select id="show-cell-info" bind:value={generalOptions.showCellInfo}>
           <option value="always">always</option>
           <option value="on-hover">on hover</option>
@@ -178,9 +178,9 @@
       <button
         onclick={regenerateDisplay}
         id="regenerate"
-        class="art-display-button">Regenerate</button
+        class="art-display-button">regenerate</button
       >
-      <button onclick={exportDisplay} class="art-display-button">Export</button>
+      <button onclick={exportDisplay} class="art-display-button">export</button>
     </div>
   </div>
 {/if}

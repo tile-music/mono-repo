@@ -189,7 +189,7 @@
         id="placeholder-display"
         class="capture-area"
       >
-        <h1>Loading...</h1>
+        <h1>loading...</h1>
       </div>
     {:else}
       <div
