@@ -1,6 +1,6 @@
-FROM node:current-alpine3.20 AS build
+FROM mdv-lib AS build
 
-WORKDIR /app
+WORKDIR /app/frontend
 
 COPY package*.json .
 

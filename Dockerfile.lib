@@ -1,0 +1,4 @@
+FROM node:current-alpine3.20 AS lib-build
+
+WORKDIR /app/lib
+COPY lib /app/lib

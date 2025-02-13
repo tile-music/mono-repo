@@ -3,16 +3,24 @@ include:
 
   - ./supabase/docker/docker-compose.yml
 services:
+  lib:
+    build:
+      context: .
+      dockerfile: Dockerfile.lib
+    image: mdv-lib 
   frontend:
     build:
       context: ./frontend/
       target: prod
     volumes:
+      - ./lib/:/app/lib
       - MQP:/data/frontend
     ports:
       - "4173:4173"
     networks:
       - default
+    depends_on:
+      - lib
   nginx:
     build:
       context: ./nginx
