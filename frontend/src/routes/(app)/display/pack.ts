@@ -2,7 +2,7 @@ const eps = 0.0001;
 function packSquares(values : number[], maxValue : number) {
     const max = Math.sqrt(maxValue);
     const square0Size = Math.sqrt(values[0]) / max;
-    const squares = [{ x: 0, y: 0, width: square0Size, height: square0Size }];
+    const squares = <Square[]>[{ x: 0, y: 0, width: square0Size, height: square0Size }];
     // This is const, but only the ref. We splice the array as we
     // iterate through the data points, thus changing the value.
     const outline = [[0, 0], [square0Size, 0], [square0Size, square0Size], [0, square0Size]];
@@ -96,7 +96,7 @@ function packSquares(values : number[], maxValue : number) {
 };
 
 // https://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
-function polygonCentroid(vertices) {
+function polygonCentroid(vertices : number[][]) {
     const { A, cx, cy } = vertices.reduce(({ A, cx, cy }, [x1, y1], i) => {
         const [x2, y2] = vertices[(i + 1) % vertices.length];
         const f = (x1 * y2 - x2 * y1);
@@ -108,7 +108,7 @@ function polygonCentroid(vertices) {
     }, { A: 0, cx: 0, cy: 0 });
     return multiply([1 / (6 * 0.5 * A), 1 / (6 * 0.5 * A)], [cx, cy]);
 };
-function pointIsInside([x, y], vs) {
+function pointIsInside([x, y] : number[], vs : number[][]) {
     let inside = false;
     for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
         const [xi, yi] = vs[i];
@@ -143,6 +143,23 @@ const max2 = (a : number[], b : number[]) => [Math.max(a[0], b[0]), Math.max(a[1
 
 /* -------------- Ava's functions start here ---------------- */
 
+type Square = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+type Point = {
+    x: number;
+    y: number;
+}
+
+type PointPair = {
+    left: Point;
+    right: Point;
+}
+
 // Generate a number of squares to be arranged
  function genNums(min  : number, max  : number, numGen  : number) {
     var results = [];
@@ -156,7 +173,7 @@ const max2 = (a : number[], b : number[]) => [Math.max(a[0], b[0]), Math.max(a[1
 }
 
 // Generate an arrangment of squares
-function genSquares(min_size : number, max_size : number, n_squares : number, scale) {
+function genSquares(min_size : number, max_size : number, n_squares : number) {
     var data = genNums(min_size, max_size, n_squares);
     // console.log("Numbers generated: " + data);
     var result = packSquares(data, Math.max.apply(Math, data));
@@ -183,7 +200,7 @@ function genSquares(min_size : number, max_size : number, n_squares : number, sc
 }
 
 // Generate an axis and offset to place arrangments next to one another
-function genPositions(max_offset, min_offset) {
+function genPositions(max_offset : number, min_offset : number) {
     var axis = Math.round(Math.random());
     var offset_direction = Math.random() < 0.5 ? -1 : 1;
     var offset = (Math.random() * max_offset + min_offset) * offset_direction;
@@ -191,11 +208,11 @@ function genPositions(max_offset, min_offset) {
 }
 
 // Find the longest edge on an axis for a given outline
-function findLongestEdge(outline, axis) {
+function findLongestEdge(outline : number[][], axis_label : string) {
     var maxLen = 0;
     var tempLen = 0;
     var samplePoint = [0,0];
-    var axis = (axis == "x") ? 0 : 1;
+    var axis = (axis_label == "x") ? 0 : 1;
     for(var i = 0; i < outline.length - 1; i++){
         var current = outline[i];
         var next = outline[(i + 1)];
@@ -218,7 +235,7 @@ function findLongestEdge(outline, axis) {
 }
 
 // Take an outline made from points and combine any that are part of the same line
-function condenseOutline(outline) {
+function condenseOutline(outline : number[][]) {
     if(outline.length < 3){
         return outline;
     }
@@ -237,7 +254,7 @@ function condenseOutline(outline) {
 }
 
 // Rotate an arrangment by 90 deg
-function rotate(squares) {
+function rotate(squares : Square[]) {
     for(var i = 0; i < squares.length; i++){
         var temp_x = squares[i].x;
         squares[i].x =  (-1 * squares[i].y) - (squares[i].width);
@@ -247,7 +264,7 @@ function rotate(squares) {
 }
 
 // Mirror an arrangment along a given axis
-function mirror(squares, axis, sample_point) {
+function mirror(squares : Square[], axis : number, sample_point : number[]) {
     for(var i = 0; i < squares.length; i++){
         var origin = sample_point[1 - axis];
         if (axis == 0) { //If we are rotating around the x axis, change y-values
@@ -262,7 +279,7 @@ function mirror(squares, axis, sample_point) {
 }
 
 // Shift the origins of all squares in an array to new_x and new_y
-function shiftOrigin(squares, new_x, new_y) {
+function shiftOrigin(squares : Square[], new_x : number, new_y : number) {
     for(var i = 0; i < squares.length; i++){
         squares[i].x += new_x;
         squares[i].y += new_y;
@@ -271,9 +288,9 @@ function shiftOrigin(squares, new_x, new_y) {
 }
 
 // Check if a point is within a square
-function pointIn(sqr, point) {
+function pointIn(sqr : PointPair, point : Point){
     // Between is just "low < mid < top" in javascript
-    const between = (low, mid, top) => ((low < mid) && (mid < top));
+    const between = (low : number, mid : number, top : number) => ((low < mid) && (mid < top));
 
     // If both x and y values of the point are within the x and y bounds of the sqr, there is overlap
     var overlap = between(sqr.left.x, point.x, sqr.right.x) && between(sqr.left.y, point.y, sqr.right.y);
@@ -287,28 +304,28 @@ function pointIn(sqr, point) {
 }
 
 // Check if two squares overlap
-function overlap(s1, s2) {
+function overlap(s1 : Square, s2 : Square) : Boolean{
     // Note: I am fully aware this is not the most efficent approach. 
     // The more efficent approaches straight up didn't work
-    const int = (num) => (Math.round(num * 10000)); // Drop trailing decimals
+    const int = (num : number) => (Math.round(num * 10000)); // Drop trailing decimals
 
     // Get and store top left and bottom right (x,y) points for first square
-    var top_left = {x:int(s1.x), y:int(s1.y)};
-    var bot_right = {x:int(s1.x + s1.width), y:int(s1.y + s1.height)};
-    var sqr = {left: top_left, right: bot_right};
+    var top_left: Point = {x:int(s1.x), y:int(s1.y)};
+    var bot_right: Point = {x:int(s1.x + s1.width), y:int(s1.y + s1.height)};
+    var sqr: PointPair = {left: top_left, right: bot_right};
 
     // Get all 4 verticies of second square
-    var p1 = {x:int(s2.x), y:int(s2.y)};
-    var p2 = {x:int(s2.x + s2.width), y:int(s2.y)};
-    var p3 = {x:int(s2.x + s2.width), y:int(s2.y + s2.height)};  
-    var p4 = {x:int(s2.x), y:int(s2.y + s2.height)};  
+    var p1: Point = {x:int(s2.x), y:int(s2.y)};
+    var p2: Point = {x:int(s2.x + s2.width), y:int(s2.y)};
+    var p3: Point = {x:int(s2.x + s2.width), y:int(s2.y + s2.height)};  
+    var p4: Point = {x:int(s2.x), y:int(s2.y + s2.height)};  
     
     // Get 4 midpoints of second square
     // Yes this is not efficent but it's the only way to solve an edge case
-    var mp1 = {x:int(s2.x + (s2.width / 2)), y:int(s2.y)};
-    var mp2 = {x:int(s2.x + s2.width), y:int(s2.y + (s2.height / 2))};
-    var mp3 = {x:int(s2.x + (s2.width / 2)), y:int(s2.y + s2.height)};  
-    var mp4 = {x:int(s2.x), y:int(s2.y + (s2.height / 2))};  
+    var mp1: Point = {x:int(s2.x + (s2.width / 2)), y:int(s2.y)};
+    var mp2: Point = {x:int(s2.x + s2.width), y:int(s2.y + (s2.height / 2))};
+    var mp3: Point = {x:int(s2.x + (s2.width / 2)), y:int(s2.y + s2.height)};  
+    var mp4: Point = {x:int(s2.x), y:int(s2.y + (s2.height / 2))};  
 
     // Check if all points in square 2 are within square 1
     var p1_overlap = pointIn(sqr, p1);
@@ -327,7 +344,7 @@ function overlap(s1, s2) {
 }
 
 // Check overlap of all squares in an array
-function checkOverlap(squares) {
+function checkOverlap(squares : Square[]) : Boolean{
     //Compare every square with every other square to see if any have overlap
     //I did try to do this recursively and it didn't work :(
     for(var i = 0; i < squares.length; i++){
@@ -348,7 +365,7 @@ function checkOverlap(squares) {
     return false;
 }
 
-function findBorders(squares) {
+function findBorders(squares : Square[]) {
     var max_x = 0;
     var min_x = 0;
     var max_y = 0;
@@ -374,7 +391,7 @@ function findBorders(squares) {
     }
 }
 
-function convertToPercent(squares, len) {
+function convertToPercent(squares : Square[], len : number) {
     for(var i = 0; i < squares.length; i++){
         squares[i].x = squares[i].x / len;
         squares[i].y = squares[i].y / len;
@@ -385,19 +402,19 @@ function convertToPercent(squares, len) {
 }
 
 // Generate, arrange, combine, and check overlap for a full arrangment of squares
-export function generateFullArrangement(scale, min_squares, max_squares, offset_min, offset_max) {
+export function generateFullArrangement(scale : number, min_squares : number, max_squares : number, offset_min : number, offset_max : number) {
     var indv_min = min_squares / 2;
     var indv_max = (max_squares / 2) - indv_min;
     // Generate 2 arrangments to be combined
-    var arr_A = genSquares(1, 25, Math.floor(Math.random() * indv_max + indv_min), scale);
-    var arr_B = genSquares(1, 20, Math.floor(Math.random() * indv_max + indv_min), scale);
+    var arr_A = genSquares(1, 25, Math.floor(Math.random() * indv_max + indv_min));
+    var arr_B = genSquares(1, 20, Math.floor(Math.random() * indv_max + indv_min));
     
     // If either arrangment has overlap, regenerate it
-    while (checkOverlap(arr_A)){
-        arr_A = genSquares(1, 25, Math.floor(Math.random() * indv_max + indv_min), scale);
+    while (checkOverlap(arr_A.squares)){
+        arr_A = genSquares(1, 25, Math.floor(Math.random() * indv_max + indv_min));
     }
-    while (checkOverlap(arr_B)){
-        arr_B = genSquares(1, 20, Math.floor(Math.random() * indv_max + indv_min), scale);  
+    while (checkOverlap(arr_B.squares)){
+        arr_B = genSquares(1, 20, Math.floor(Math.random() * indv_max + indv_min));  
     }
 
     // Generate offset
