@@ -5,8 +5,12 @@
   import Customize from "./Customize.svelte";
   import Song from "./Song.svelte";
 
-  import type { ListeningDataResponse, SongInfo } from "../../../../../lib/Song";
-
+  import type {
+    AlbumInfo,
+    ListeningDataResponse,
+    SongInfo,
+  } from "../../../../../lib/Song";
+  import type { ListeningDataSongInfo } from "./filters.svelte";
   import { onMount } from "svelte";
   import type { ListeningDataRequest } from "../../../../../lib/Request";
 
@@ -14,12 +18,61 @@
 
   import IntersectionObserver from "svelte-intersection-observer";
 
-
   interface Props {
     data: PageData;
   }
-  let allSongsLoaded = $state(false)
-  let songs: ListeningDataResponse[] = $state([]);
+  let allSongsLoaded = $state(false);
+  let unProcessedSongs: SongInfo[] = $state([]);
+  /**
+   * @todo: add validation
+   *
+   * source for one artist matches: https://stackoverflow.com/questions/16312528/check-if-an-array-contains-any-element-of-another-array-in-javascript
+   */
+  let songs: ListeningDataSongInfo[] = $derived.by(() => {
+    let ret: ListeningDataSongInfo[] = [];
+    /*
+    const songComparator = (curr:ListeningDataSongInfo , prev:ListeningDataSongInfo | null, keys: string[] = ["album_title", "track_name", "artist_name"]) => {
+      let ret = false
+
+      //i was trying to be able to pick what metrics the songs were compaired by but i think thats just out of scope atp 
+      const keyConverter = (key: string, song: ListeningDataSongInfo): string | number | string[] => {
+        try{
+          if(key.includes("album_")) return song["albums"][0][key.replace("album_","") as keyof AlbumInfo]
+          if(key.includes("song_") ) {
+            const songKey = key.replace("song_", "") as keyof ListeningDataSongInfo;
+            return song[songKey] 
+          }
+        } catch (e){
+          throw new Error(`FATAL: Error: ${e}, key: ${key}, song: ${song}`)
+        }
+        } 
+        const songComparatorHelper = (e: ListeningDataSongInfo, k: string) => keyConverter(e, k) === keyConverter(e, k)
+        keys.forEach(k => );
+        return ret
+        
+      }
+      */
+
+    for (const [i, songInfo] of unProcessedSongs.entries()) {
+      const ldSongInfo: ListeningDataSongInfo = {
+        ...songInfo,
+        has_children: false,
+        is_child: false,
+        is_parent: false,
+      };
+      if (i > 1) {
+        const prev = unProcessedSongs[i - 1];
+        const oneArtistMatches = () =>
+          songInfo.artists.some((r) => prev.artists.includes(r));
+        const match = () =>
+          prev.title === songInfo.title &&
+          prev.albums[0].title === songInfo.albums[0].title &&
+          oneArtistMatches();
+        if (match()) insert();
+      }
+
+    }
+  });
   let scrollContainer = $state<HTMLElement>(null);
   let element = $state<HTMLElement>();
   let intersecting = $state(false);
@@ -48,26 +101,24 @@
     });
 
     const response = deserialize(await res.text());
-    console.log(response)
+    console.log(response);
     if (response.type === "success") {
-      const newSongs = response.data!.songs as typeof songs
-      if(newSongs.length) {
-        songs.push(...newSongs)
-        refreshStatus = { status: "idle" }; 
-      } else if (songs === null){
-        
-
+      const newSongs = response.data!.songs as typeof unProcessedSongs;
+      if (newSongs.length) {
+        unProcessedSongs.push(...newSongs);
+        refreshStatus = { status: "idle" };
+      } else if (unProcessedSongs === null) {
       }
     } else if (response.type === "error") {
       refreshStatus = { status: "error", error: response.error.message };
       console.log(response.error);
-      if(response.error.message === `"no songs returned"`){
-        allSongsLoaded = true
+      if (response.error.message === `"no songs returned"`) {
+        allSongsLoaded = true;
       }
     }
   }
 
-  $inspect(`all songs loaded ${allSongsLoaded}`)
+  $inspect(`all songs loaded ${allSongsLoaded}`);
 
   async function refresh(): Promise<void> {
     allSongsLoaded = false;
@@ -85,14 +136,14 @@
     console.log(response.data);
     if (response.type === "success") {
       refreshStatus = { status: "idle" };
-      
-      songs = response.data!.songs as typeof songs;
-      console.log(`songs: ${songs[0]}`);
+
+      unProcessedSongs = response.data!.songs as typeof unProcessedSongs;
+      console.log(`songs: ${unProcessedSongs[0]}`);
     } else if (response.type === "error") {
       refreshStatus = { status: "error", error: response.error.message };
     }
   }
-  $inspect(songs)
+  $inspect(unProcessedSongs);
 
   onMount(async () => {
     await refresh();
@@ -103,24 +154,27 @@
   <h1>Listening Data</h1>
   <header class:intersecting></header>
   <div id="scroll-container">
-    {#if songs.length}
+    {#if unProcessedSongs.length}
       <Customize {refresh} />
       <div id="songs" bind:this={scrollContainer}>
-        {#each songs as song}
+        {#each unProcessedSongs as song}
           <Song {song} />
         {/each}
-        <IntersectionObserver {element} on:intersect={async() => allSongsLoaded ? () => "" : await loadData()} threshold={1}>
-          <div bind:this={element} id=load-more>
-          </div>
-          {#if refreshStatus.status == "loading-more" }
-          <p>loading</p>
+        <IntersectionObserver
+          {element}
+          on:intersect={async () =>
+            allSongsLoaded ? () => "" : await loadData()}
+          threshold={1}
+        >
+          <div bind:this={element} id="load-more"></div>
+          {#if refreshStatus.status == "loading-more"}
+            <p>loading</p>
           {/if}
           {#if allSongsLoaded}
-          <p>no more songs to load</p>
+            <p>no more songs to load</p>
           {/if}
         </IntersectionObserver>
       </div>
-
     {:else if refreshStatus.status == "refreshing"}
       <p>loading...</p>
     {:else if refreshStatus.status == "error"}
@@ -139,7 +193,7 @@
     height: 100%;
   }
 
-  #load-more{
+  #load-more {
     height: -1000px;
   }
 

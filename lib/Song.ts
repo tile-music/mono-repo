@@ -8,6 +8,9 @@ export type SongInfo = {
   albums: AlbumInfo[]
 }
 
+/* export function validSongType(s: SongInfo) asserts s is SongInfo{
+
+} */
 export type ListeningDataResponse = SongInfo & {
   repetitions: number,
   listens: number

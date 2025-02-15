@@ -2,9 +2,10 @@
 
     import type { SongInfo, AlbumInfo } from '../../../../../lib/Song';
     import refresh from '$lib/assets/icons/refresh.svg';
-    import { listeningDataFilter, filterColumnList } from './filters.svelte';
+    import Song from "./Song.svelte"
+    import { listeningDataFilter, filterColumnList, type ListeningDataSongInfo } from './filters.svelte';
     interface Props {
-        song: SongInfo;
+        song: ListeningDataSongInfo;
     }
 
     let { song }: Props = $props();
@@ -24,6 +25,9 @@
     {:else}
         <p class="repetitions"></p>
     {/if} -->
+    {#if song.child}
+        <Song song={song.child}/>
+    {/if}
     <p class="repetitions"></p>
     <img class="art" src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
     {#each filterColumnList() as column}
@@ -44,7 +48,6 @@
         {:else}         
             <p class={column}>{song[column]}</p>
         {/if}
-
     {/each}
     
 
