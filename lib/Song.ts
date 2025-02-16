@@ -11,11 +11,15 @@ export type SongInfo = {
 /* export function validSongType(s: SongInfo) asserts s is SongInfo{
 
 } */
-export type ListeningDataResponse = SongInfo & {
-  repetitions: number,
-  listens: number
-};
-
+export type ListeningDataSongInfo = SongInfo & { 
+    child?: ListeningDataSongInfo;
+    is_child: boolean;
+    has_children: boolean;
+    show_children?: boolean;
+    num_children?: number;
+    is_parent: boolean;
+    inserted: boolean;
+}
 
 export type AlbumInfo = {
   title: string

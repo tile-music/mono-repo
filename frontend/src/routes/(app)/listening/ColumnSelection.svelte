@@ -1,7 +1,7 @@
 <script lang="ts">
   import { listeningDataFilter } from "./filters.svelte.js";
   import type { ListeningColumnKeys } from "../../../../../lib/Request";
-  const { refresh }: { refresh: () => void } = $props();
+  const { loadData }: { loadData: (refresh : boolean) => void } = $props();
   let showSelection = $state<boolean>(false);
   let selections = $derived<ListeningColumnKeys[]>(
     Object.keys(listeningDataFilter) as ListeningColumnKeys[],
@@ -21,7 +21,7 @@
               type="checkbox"
               id={filter}
               bind:checked={listeningDataFilter[filter].checked}
-              onchange={() => refresh()}
+              onchange={() => loadData(true)}
             />{filter.replace(`_`, " ")}
           </li>
         {/each}

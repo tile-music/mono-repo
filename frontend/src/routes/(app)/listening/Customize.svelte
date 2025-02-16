@@ -14,7 +14,7 @@
   import ColumnSelection from "./ColumnSelection.svelte";
   import filterIcon from "$lib/assets/icons/filter.svg";
   import { derived } from "svelte/store";
-  let { refresh }: { refresh: () => void } = $props();
+  let { loadData }: { loadData: (refresh:boolean) => void } = $props();
   let datePickerVisibile = $state(false);
   $inspect(`filterColumnList: ${filterColumnList}`);
   const toggleDatePicker = () => (datePickerVisibile = !datePickerVisibile);
@@ -47,12 +47,12 @@
     } else {
       throw new Error(`FATAL: ${sortAction} not found in localFilters`);
     }
-    refresh();
+    loadData(true);
   }
 </script>
 
 <div id="filters">
-  <ColumnSelection {refresh}></ColumnSelection>
+  <ColumnSelection {loadData}></ColumnSelection>
 </div>
 <div id="headers">
   <button id="art"><h2>art</h2></button>

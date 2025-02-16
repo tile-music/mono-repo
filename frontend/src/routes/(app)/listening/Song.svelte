@@ -25,9 +25,9 @@
     {:else}
         <p class="repetitions"></p>
     {/if} -->
-    {#if song.child}
+    <!-- {#if song.child}
         <Song song={song.child}/>
-    {/if}
+    {/if} -->
     <p class="repetitions"></p>
     <img class="art" src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
     {#each filterColumnList() as column}

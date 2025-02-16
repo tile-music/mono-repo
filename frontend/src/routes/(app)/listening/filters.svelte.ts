@@ -1,16 +1,9 @@
 import type { ListeningDataRequest, ListeningColumnKeys, ListeningColumns} from "../../../../../lib/Request";
-import type {SongInfo, AlbumInfo} from "../../../../../lib/Song"
+import type {SongInfo, AlbumInfo } from "../../../../../lib/Song"
 export const order = ["art", "title", "artist", "album", "duration", 
                     "plays", "listened_at", "upc", "isrc", "spotify_track_id", "spotify_album_id"];
 
-export type ListeningDataSongInfo = SongInfo & { 
-    child?: ListeningDataSongInfo;
-    is_child: boolean;
-    has_children: boolean;
-    show_children?: boolean;
-    num_children?: number;
-    is_parent: boolean;
-}
+
 
 
 export const listeningDataFilter: ListeningColumns = $state<ListeningColumns>({
