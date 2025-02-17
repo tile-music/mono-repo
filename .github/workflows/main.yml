@@ -43,6 +43,7 @@ jobs:
       run: |
         npm i
         npm i -g vitest
+        npm run build
         npm run test
 
     - name: Run dataaq tests
@@ -50,6 +51,7 @@ jobs:
       run: |
         npm i
         npm i -g vitest
+        npm run build
         npm run test
 
     - name: Celebrate
