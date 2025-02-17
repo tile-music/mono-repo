@@ -8,6 +8,7 @@
   import type { SubmitFunction } from "@sveltejs/kit";
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
+  import ThemeButton from "./ThemeButton.svelte";
 
   interface Props {
     data: PageData;
@@ -15,6 +16,8 @@
 
   let { data = $bindable() }: Props = $props();
   let { user, email } = $derived(data);
+
+  const all_themes = ["default-light", "alt-light", "default-dark", "alt-dark"]
 
   let resetProfileStatus = $state("");
   async function resetProfileInformation() {
@@ -188,25 +191,10 @@
       </div>
       <DeleteUser><div id="delete">delete account</div></DeleteUser>
     </div>
-    <div class="theme-row">
-      <button onclick={() => setProfileTheme("default-light")} class="theme theme-default-light">
-        <p class="theme-text">light</p>
-        <div class="inner-theme"></div>
-      </button>    
-      <button onclick={() => setProfileTheme("alt-light")} class="theme theme-alt-light">
-        <p class="theme-text">alt light</p>
-        <div class="inner-theme"></div>
-      </button>
-    </div>
-    <div class="theme-row">
-      <button onclick={() => setProfileTheme("default-dark")} class="theme theme-default-dark">
-        <p class="theme-text">dark</p>
-        <div class="inner-theme"></div>
-      </button>
-      <button onclick={() => setProfileTheme("alt-dark")} class="theme theme-alt-dark">
-        <p class="theme-text">alt dark</p>
-        <div class="inner-theme"></div>
-      </button>
+    <div class="theme-box">
+      {#each all_themes as theme}
+        <ThemeButton color={theme} setTheme={setProfileTheme}> </ThemeButton>
+      {/each}
     </div>
     <p>{themeStatus}</p>
   </div>
@@ -322,34 +310,10 @@
     margin-bottom: 3px; /* align status message with button */
   }
 
-  .theme-row {
+  .theme-box {
+    max-width: 500px; /*This keeps the theme rows adaptabe but won't exceed 3 per row*/
     display: block !important;
     /* yes sam i know you hate !important but it's what works */
   }
 
-  .theme {
-    width: 110px;
-    height: 45px;
-    border-radius: 10px;
-    margin-right: 20px;
-    cursor: pointer;
-    display: inline-block;
-    background-color: var(--background);
-    border: 3px solid var(--accent);
-  }
-
-  .theme-text {
-    font-family: "Mattone", sans-serif;
-    font-size: 17px;
-    padding-top: 3px;
-    color: var(--text);
-  }
-
-  .inner-theme {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border-radius: 15px;
-    background-color: var(--accent)
-  }
 </style>
