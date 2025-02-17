@@ -72,7 +72,7 @@ describe('Test customization panel inputs', async () => {
     });
 
     test('Entering a value into number of cells should refresh the display', async () => {
-        const numCellsInput = screen.getByLabelText("Number of cells");
+        const numCellsInput = screen.getByLabelText("number of cells");
 
         //Clear the current number (not strictly nessecary but doesn't hurt)
         await user.clear(numCellsInput);
