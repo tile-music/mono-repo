@@ -1,7 +1,7 @@
 import type { Arrangement, ArrangementState, SquareInfo } from "../arrangement.svelte";
 
 const options = {
-    grid_size: { type: "number", label: "grid size", min: 100, max: 100},
+    grid_size: { type: "number", label: "grid size", min: 5, max: 100},
     min_size: { type: "number", label: "min size", min: 1, max: 25},
     max_size: { type: "number", label: "max size", min: 1, max: 25},
 } as const;
