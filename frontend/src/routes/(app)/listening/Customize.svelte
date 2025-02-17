@@ -14,7 +14,7 @@
   import ColumnSelection from "./ColumnSelection.svelte";
   import filterIcon from "$lib/assets/icons/filter.svg";
   import { derived } from "svelte/store";
-  let { loadData }: { loadData: (refresh:boolean) => void } = $props();
+  let { loadData, firstLoadSuccess }: { loadData: (refresh:boolean) => void, firstLoadSuccess:boolean } = $props();
   let datePickerVisibile = $state(false);
   $inspect(`filterColumnList: ${filterColumnList}`);
   const toggleDatePicker = () => (datePickerVisibile = !datePickerVisibile);
@@ -78,8 +78,6 @@
     right: 0;
     margin-right: 10px;
   }
-
-  
 
   #headers {
     display: flex;

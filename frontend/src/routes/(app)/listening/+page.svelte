@@ -22,10 +22,11 @@
   }
   let allSongsLoaded = $state(false);
   let unProcessedSongs: ListeningDataSongInfo[] = $state([]);
-  let songs: ListeningDataSongInfo[] = $state([])
-  let scrollContainer = $state<HTMLElement>(null);
+  let songs: ListeningDataSongInfo[] = $state([]);
+  let scrollContainer = $state<HTMLElement>();
   let element = $state<HTMLElement>();
   let intersecting = $state(false);
+  let firstLoadSuccess : boolean = $state(false)
   let refreshStatus:
     | { status: "refreshing" }
     | { status: "idle" }
@@ -37,34 +38,48 @@
       limit: 100,
       offset: 0,
     });
+  const insertChild = (
+    parent: ListeningDataSongInfo,
+    child: ListeningDataSongInfo,
+    count: number = 0,
+    grandParent: ListeningDataSongInfo = parent,
+  ): void => {
+    const setSize = (grandParent: ListeningDataSongInfo, size: number) =>
+      (grandParent.size = size);
+    if (count === 0) {
+      console.log("count is zero");
+      parent.show_children = false;
+      parent.is_parent = true;
+    }
+    if (!parent.child) {
+      console.log("inserting child");
+      //parent.has_children = true;
+      child.albums[0].image = "";
+      child.is_child = true;
+      parent.child = { ...child };
+      setSize(grandParent, count + 1);
+      return;
+    } else if (parent.child) {
+      return insertChild(parent.child, child, count + 1, grandParent);
+    }
+  };
+  const childPropagation = (song: ListeningDataSongInfo) => {
+    song.show_children = !song.show_children;
+    if (song.child) childPropagation(song.child);
+  };
+
   $inspect(listeningDataRequest);
   /**
    * @todo: add validation
    *
    * source for one artist matches: https://stackoverflow.com/questions/16312528/check-if-an-array-contains-any-element-of-another-array-in-javascript
    */
-  const processSongs = () => {
-    const insertChild = (
-      parent: ListeningDataSongInfo,
-      child: ListeningDataSongInfo,
-      count: number = 0,
-    ): void => {
-      if (!parent.child) {
-        if (count === 0) parent.is_parent = true;
-        parent.has_children = true;
-        parent.child = { ...child };
-        return;
-      } else if (parent.child && parent.has_children) {
-        insertChild(parent.child, child, count + 1);
-      }
-    };
-    for (let [i, songInfo] of unProcessedSongs.entries()) {
-      //console.log(`offset: ${listeningDataRequest.offset}`)
-      const k = i + listeningDataRequest.offset
-      //console.log(`i: ${i}, songinfo: ${JSON.stringify(songInfo)} `)
-      if (k > 1) {
-        const prev = unProcessedSongs[k - 1];
-        const curr = unProcessedSongs[k]
+  const processSongs = (newSongs: ListeningDataSongInfo[]) => {
+    for (let i = 0; i < newSongs.length; i++) {
+      const curr = newSongs[i];
+      // Check previous song only if it's in the new batch
+      if (i > 0) {
+        const prev = newSongs[i - 1];
         const oneArtistMatches = () =>
           curr.artists.some((a) => prev.artists.includes(a));
         const match = () =>
@@ -73,20 +88,21 @@
           oneArtistMatches();
         if (match()) {
           insertChild(prev, curr);
-         console.log(JSON.stringify(prev))
+          //console.log(JSON.stringify(prev));
+          newSongs.splice(i, 1);
+          i -= 1;
           continue;
         }
       }
-      songs.push(songInfo);
+      songs.push(curr);
     }
-  }
-  $inspect(songs)
+  };
+  //$inspect(songs);
   async function loadData(refresh: boolean) {
-    if (refresh){ 
+    if (refresh) {
       listeningDataRequest.offset = 0;
       songs = [];
-    }
-    else
+    } else
       listeningDataRequest.offset =
         listeningDataRequest.limit + listeningDataRequest.offset;
     console.log("fetching data");
@@ -101,13 +117,14 @@
     const response = deserialize(await res.text());
     console.log(response);
     if (response.type === "success") {
+      firstLoadSuccess = true
       const newSongs = response.data!.songs as typeof unProcessedSongs;
       if (newSongs.length) {
         if (refresh)
           unProcessedSongs = response.data!.songs as typeof unProcessedSongs;
         else unProcessedSongs.push(...newSongs);
         refreshStatus = { status: "idle" };
-        processSongs();
+        processSongs(newSongs);
       }
     } else if (response.type === "error") {
       refreshStatus = { status: "error", error: response.error.message };
@@ -134,13 +151,13 @@
       <Customize {loadData} />
       <div id="songs" bind:this={scrollContainer}>
         {#each songs as song}
-          <Song {song} />
+          <Song song={song} childPropagation={childPropagation} />
         {/each}
         <IntersectionObserver
           {element}
           on:intersect={async () =>
             allSongsLoaded ? () => "" : await loadData(false)}
-          threshold={.1}
+          threshold={0.1}
         >
           <div bind:this={element} id="load-more"></div>
           {#if refreshStatus.status == "loading-more"}
@@ -151,12 +168,12 @@
           {/if}
         </IntersectionObserver>
       </div>
-    {:else if refreshStatus.status == "refreshing"}
+    {:else if refreshStatus.status == "refreshing" && firstLoadSuccess === false}
       <p>loading...</p>
     {:else if refreshStatus.status == "error"}
       <h2>Error:</h2>
       <p>{refreshStatus.error}</p>
-    {:else}
+    {:else if firstLoadSuccess===false}
       <p>No listening data yet!</p>
     {/if}
   </div>
