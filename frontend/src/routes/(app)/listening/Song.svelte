@@ -1,13 +1,11 @@
 <script lang="ts">
     import type {
-        SongInfo,
         AlbumInfo,
         ListeningDataSongInfo,
     } from "../../../../../lib/Song";
-    import refresh from "$lib/assets/icons/refresh.svg";
     import arrow from "$lib/assets/icons/down-arrow-56.svg";
     import Song from "./Song.svelte";
-    import { listeningDataFilter, filterColumnList } from "./filters.svelte";
+    import { filterColumnList } from "./filters.svelte";
     interface Props {
         song: ListeningDataSongInfo;
         childPropagation: (song: ListeningDataSongInfo) => void;
