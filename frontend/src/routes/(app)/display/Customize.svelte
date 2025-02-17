@@ -14,6 +14,9 @@
   // handles hide/show functionality
   let hidden = $state(false);
 
+  // needed for correct focus when incrementing max cells
+  let numCells = $state<HTMLInputElement>();
+
   function updateFilters() {
     // set date range
     const startDate = new Date('1970-01-01');
@@ -70,6 +73,7 @@
     }
 
     // send new data request only if filters have changed
+    // console.log("Filters: " + JSON.stringify(filters) + "\n Local: " + JSON.stringify(localFilters))
     if (JSON.stringify(filters) != JSON.stringify(localFilters))
       refresh(localFilters);
   }
@@ -145,7 +149,10 @@
           id="num-cells"
           type="number"
           name="num-cells"
+          min="0"
           bind:value={localFilters.num_cells}
+          bind:this={numCells}
+          onchange={() => numCells?.focus()}
           onblur={updateFilters}
           placeholder="max"
         />

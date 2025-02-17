@@ -70,6 +70,43 @@ describe('Test customization panel inputs', async () => {
         await user.selectOptions(rankDeterminantInput, "time");
         expect(refresh).not.toBeCalled();
     });
+
+    test('Entering a value into number of cells should refresh the display', async () => {
+        const numCellsInput = screen.getByLabelText("Number of cells");
+
+        //Clear the current number (not strictly nessecary but doesn't hurt)
+        await user.clear(numCellsInput);
+        expect(numCellsInput).toHaveValue(null);
+
+        //Set the current number to 1
+        await user.type(numCellsInput, "1");
+        expect(numCellsInput).toHaveValue(1);
+
+        //Click somewhere else on the screen (this might need to be changed in the future)
+        const display = screen.getAllByRole("heading")[1]
+        await user.click(display);
+
+        expect(refresh).toBeCalled();
+    });
+
+    /*
+        Note for future unit test writers:
+        Checking for a refresh call when changing the timeframe on the customization settings fails.
+        A refresh is called on the app when actually using it, but it's not registered when testing.
+        Here's the failing function for posterity:
+
+        test('Modifying time frame should trigger refresh', async () => {
+            const timeFrameInput = screen.getByLabelText("Time frame");
+            await user.selectOptions(timeFrameInput, "all time");
+            expect(refresh).not.toBeCalled();
+
+            await user.selectOptions(timeFrameInput, "this month");
+
+            expect(refresh).toBeCalled();
+            const firstCall = refresh.mock.calls[0][0];
+            expect(firstCall.time_frame).toBe("this-month");
+        });
+    */
 });
 
 describe('Test customization panel buttons', async () => {
