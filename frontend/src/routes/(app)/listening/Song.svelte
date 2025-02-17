@@ -116,6 +116,9 @@
     #song {
         height: 50px;
     }
+    svg{
+        filter: var(--text)
+    }
     #vertical_line {
         background-image: linear-gradient(var(--text), var(--text));
         background-size: 2px 100%;

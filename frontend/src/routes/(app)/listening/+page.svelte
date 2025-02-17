@@ -147,7 +147,7 @@
   <h1>Listening Data</h1>
   <header class:intersecting></header>
   <div id="scroll-container">
-    {#if songs.length}
+    {#if songs}
       <Customize {loadData} />
       <div id="songs" bind:this={scrollContainer}>
         {#each songs as song}
