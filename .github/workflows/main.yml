@@ -38,12 +38,6 @@ jobs:
         docker compose build
         docker compose up -d
 
-    - name: Apply schema
-      env:
-        CONNECTION_STRING: ${{ secrets.CONNECTION_STRING }}
-      run:
-        psql "$CONNECTION_STRING" -f supabase/docker/volumes/db/init/data.sql
-
     - name: Run frontend tests
       working-directory: frontend/
       run: |
