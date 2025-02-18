@@ -12,11 +12,12 @@
 
   // type & state imports
   import type { DisplayDataRequest } from "../../../../../lib/Request";
-  import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
+  import type { AlbumInfo } from "../../../../../lib/Song";
   import { filters } from "./filters.svelte";
   import { arrangement } from "./arrangement.svelte";
+  import type { AggregatedSongs } from "./arrangement.svelte";
 
-  let songs: { song: SongInfo; quantity: number }[] = $state([]);
+  let songs: AggregatedSongs = $state([]);
   
   let iFrameRef: HTMLDivElement;
   let artDisplayRef: HTMLDivElement | null = $state(null);
@@ -80,7 +81,7 @@
 
       // generate new square arrangement
       if (songs) {
-        arrangement.generate()
+        arrangement.generate(songs)
       } else {
         refreshStatus = { status: "error", error: "no songs found! try a different filter." };
         songs = [];
@@ -107,9 +108,8 @@
 </script>
 
 <div id="container">
-  <Customize {refresh}
-  regenerateDisplay={arrangement.generate}
-  exportDisplay={captureDiv}/>
+  <Customize {refresh} {songs}
+  exportDisplay={captureDiv} />
   <div
     id="display-container"
     bind:clientWidth={displayContainerSize.width}

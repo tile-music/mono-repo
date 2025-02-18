@@ -1,4 +1,4 @@
-import type { Arrangement, ArrangementState, SquareInfo } from "../arrangement.svelte";
+import type { Arrangement, ArrangementState, SquareInfo, AggregatedSongs } from "../arrangement.svelte";
 
 const options = {
     grid_size: { type: "number", label: "grid size", min: 5, max: 100},
@@ -12,9 +12,9 @@ const state: ArrangementState<typeof options> = {
     max_size: 15
 } as const;
 
-function generate(n_s: number | null, s: ArrangementState<typeof options>) {
+function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
     // initialize number of squares if not specified
-    const num_squares = n_s ?? Math.floor((s.grid_size / (s.max_size - s.min_size)) ** 2);
+    const num_squares = Math.min(songs.length, Math.floor((s.grid_size / (s.max_size - s.min_size)) ** 2));
 
     // generate a list of random sizes and initialize the grid
     const sizes = generateSizes(num_squares, s.min_size, s.max_size);

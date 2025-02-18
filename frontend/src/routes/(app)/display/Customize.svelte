@@ -1,12 +1,13 @@
 <script lang="ts">
   import { filters, filtersContext, generalOptions } from './filters.svelte';
   import type { DisplayDataRequest } from "../../../../../lib/Request";
+  import type { AggregatedSongs } from './arrangement.svelte';
   import { arrangement, arr_types } from './arrangement.svelte';
 
-  let { refresh, regenerateDisplay, exportDisplay }: {
+  let { refresh, exportDisplay, songs }: {
     refresh: (f: DisplayDataRequest) => void,
-    regenerateDisplay: () => void,
-    exportDisplay: () => void
+    exportDisplay: () => void,
+    songs: AggregatedSongs
   } = $props();
 
   // store local copy of filters to compare when changed
@@ -179,7 +180,7 @@
       <div class="labeled-input">
         <label for="arr-type">arrangement type</label>
         <select name="arr-type" id="arr-type"
-        bind:value={arrangement.type} onchange={arrangement.change}>
+        bind:value={arrangement.type} onchange={() => arrangement.change(songs)}>
           {#each Object.keys(arr_types) as arr_type }
             <option value={arr_type}>{arr_type.replaceAll("_", " ")}</option>
           {/each}
@@ -193,14 +194,14 @@
             min={option.min || null} max={option.max || null}
             step={option.step || null}
             bind:value={arrangement.state[name]}
-            onchange={arrangement.generate}>
+            onchange={() => arrangement.generate(songs)}>
           {:else if option.type == "checkbox"}
             <input type="checkbox" name={name} id={name}
             bind:checked={arrangement.state[name] as boolean}
-            onchange={arrangement.generate}>
+            onchange={() => arrangement.generate(songs)}>
           {:else if option.type == "select"}
             <select id={name} bind:value={arrangement.state[name]}
-            onchange={arrangement.generate}>
+            onchange={() => arrangement.generate(songs)}>
               {#each option.values as value}
                 <option value={value}>{value}</option>
               {/each}
@@ -211,7 +212,7 @@
     </div>
     <div id="lower-btns">
       <button
-        onclick={regenerateDisplay}
+        onclick={() => arrangement.generate(songs)}
         id="regenerate"
         class="art-display-button">Regenerate</button
       >

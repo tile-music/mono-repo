@@ -1,4 +1,4 @@
-import type { Arrangement, ArrangementState } from "../arrangement.svelte";
+import type { Arrangement, ArrangementState, AggregatedSongs } from "../arrangement.svelte";
 
 const options = {
     width: { type: "number", label: "width", min: 1, max: 10},
@@ -12,7 +12,7 @@ const state: ArrangementState<typeof options> = {
     size_modifier: "linear"
 } as const;
 
-function generate(_: number | null, s: ArrangementState<typeof options>) {
+function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
     const squares = [];
     let y = 0;
     let row_width = s.width;
@@ -23,6 +23,7 @@ function generate(_: number | null, s: ArrangementState<typeof options>) {
         y += 1 / row_width;
         if (s.size_modifier == "linear") row_width++;
     }
+    squares.length = Math.min(songs.length, squares.length);
     return squares
 }
 

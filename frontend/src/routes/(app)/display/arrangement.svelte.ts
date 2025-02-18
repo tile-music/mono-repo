@@ -3,8 +3,9 @@ import { Cluster } from "./(arrangements)/Cluster";
 import { Grid } from './(arrangements)/Grid';
 import { GridCluster } from './(arrangements)/GridCluster'
 import { filters } from "./filters.svelte";
+import type { SongInfo } from "../../../../../lib/Song";
 
-// 
+// ARRANGEMENTS
 export const arr_types = {
     grid: Grid,
     cluster: Cluster,
@@ -17,8 +18,8 @@ export let arrangement: {
     options: ArrangementOptions,
     state: Record<string, boolean | number | string>,
     squares: SquareInfo[],
-    change: () => void,
-    generate: () => void
+    change: (songs: AggregatedSongs) => void,
+    generate: (songs: AggregatedSongs) => void
 } = $state({
     type: "cluster",
     options: {...Cluster.options},
@@ -26,6 +27,8 @@ export let arrangement: {
     squares: [],
     change, generate
 });
+
+export let songs: AggregatedSongs = $state([]);
 
 // TYPES AND FUNCTIONS
 
@@ -79,13 +82,20 @@ export type ArrangementState<T extends ArrangementOptions> = {
 };
 
 /**
+ * Represents the songs being passed to the generator function.
+ * Includes a list of song info objects, as well as the total
+ * number of times each song appeared.
+ */
+export type AggregatedSongs = { song: SongInfo; quantity: number }[];
+
+/**
  * A generator function capable of taking in an
  * arrangement's options, in addition to a max number of squares,
  * and outputting a list of square positions, sizes, and optional
  * rotations.
  */
 type Generate<Options extends ArrangementOptions> =
-    (n_s: number | null, s: ArrangementState<Options>) => SquareInfo[];
+    (songs: AggregatedSongs, s: ArrangementState<Options>) => SquareInfo[];
 
 /**
  * A full arrangement, complete with options and their default values
@@ -100,18 +110,18 @@ export type Arrangement<Options extends ArrangementOptions> = {
 /**
  * Swaps the current arrangement, regenerating options
  */
-function change() {
-    arrangement.options = { ...arr_types[arrangement.type].options }
-    arrangement.state = { ...arr_types[arrangement.type].state }
-    generate()
+function change(songs: AggregatedSongs) {
+    arrangement.options = { ...arr_types[arrangement.type].options };
+    arrangement.state = { ...arr_types[arrangement.type].state };
+    generate(songs);
 }
 
 /**
  * Generates a square arrangement using the current generator
  * and options.
  */
-function generate() {
+function generate(songs: AggregatedSongs) {
     // super type unsafe, but i simply cannot figure out another way
     const type = arr_types[arrangement.type] as unknown as Arrangement<{}>;
-    arrangement.squares = type.generate(filters.num_cells, arrangement.state);
+    arrangement.squares = type.generate(songs, arrangement.state);
 }
