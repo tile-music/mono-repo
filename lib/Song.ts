@@ -18,7 +18,6 @@ export type ListeningDataSongInfo = SongInfo & {
     show_children?: boolean;
     num_children?: number;
     is_parent: boolean;
-    inserted: boolean;
     size: number;
 }
 

@@ -3,9 +3,6 @@ import type {SongInfo, AlbumInfo } from "../../../../../lib/Song"
 export const order = ["art", "title", "artist", "album", "duration", 
                     "plays", "listened_at", "upc", "isrc", "spotify_track_id", "spotify_album_id"];
 
-
-
-
 export const listeningDataFilter: ListeningColumns = $state<ListeningColumns>({
     listened_at: { column: {start:null, end: null }, order: "desc", checked: true},
     title: { column: [], order: "", checked: true},
@@ -19,8 +16,6 @@ export const listeningDataFilter: ListeningColumns = $state<ListeningColumns>({
     isrc: { column: [], order: "", checked: false},
 })
 
-
-
 /**
  * Sorts an array (`unsortedArrToSort`) based on the order of elements in another array (`sortedArr`).
  * 
@@ -33,7 +28,6 @@ export const listeningDataFilter: ListeningColumns = $state<ListeningColumns>({
  * source: https://stackoverflow.com/questions/13304543/sort-a-javascript-array-based-on-another-array
  */
 export function sortArray(sortedArr : string[], unsortedArr: string[], unsortedArrToSort: string[]){
-
     let holderArr = []
     let invertedIndex : any = {}
     // initialize
@@ -54,10 +48,20 @@ export function sortArray(sortedArr : string[], unsortedArr: string[], unsortedA
 
         invertedIndex[sortValue]['index']+=1
     }
-
     return holderArr
-
 }
+
+/**
+ * A derived store that computes a filtered list of `ListeningColumnKeys` based on the `listeningDataFilter` object.
+ * 
+ * This store performs the following operations:
+ * 1. Retrieves the keys from `listeningDataFilter` and casts them to `ListeningColumnKeys[]`.
+ * 2. Logs the keys and the `listeningDataFilter` object to the console.
+ * 3. Sorts the keys using the `sortArray` function with the provided `order`.
+ * 4. Filters the keys to include only those where the corresponding `listeningDataFilter` entry has `checked` set to `true`.
+ * 
+ * @returns {ListeningColumnKeys[]} An array of filtered and sorted `ListeningColumnKeys`.
+ */
 const filterColumnLists : ListeningColumnKeys[] = $derived.by(()=> {
     let keys : ListeningColumnKeys[] = Object.keys(listeningDataFilter) as ListeningColumnKeys[];
     console.log(keys)

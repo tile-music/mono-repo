@@ -16,8 +16,11 @@
   import { derived } from "svelte/store";
   let { loadData, firstLoadSuccess }: { loadData: (refresh:boolean) => void, firstLoadSuccess:boolean } = $props();
   let datePickerVisibile = $state(false);
+  
   $inspect(`filterColumnList: ${filterColumnList}`);
+
   const toggleDatePicker = () => (datePickerVisibile = !datePickerVisibile);
+  
   const sortArrows = $derived((key: ListeningColumnKeys) => {
     if (listeningDataFilter[key]) {
       //if(localFilters[currentSortColumn]) localFilters[currentSortColumn].order = ""
@@ -32,6 +35,20 @@
       throw new Error(`FATAL: ${key} did not exist in filters`);
   });
 
+  /**
+   * Updates the sorting order of the specified column in the listening data filter.
+   * 
+   * @param {ListeningColumnKeys} sortAction - The key of the column to update the sorting order for.
+   * 
+   * This function iterates through all columns in the listening data filter and resets their sorting order
+   * if they are not the specified column (`sortAction`). If the specified column exists in the filter, 
+   * its sorting order is toggled between "asc" (ascending) and "desc" (descending). If the column does not 
+   * exist in the filter, an error is thrown.
+   * 
+   * After updating the sorting order, the `loadData` function is called with `true` to reload the data.
+   * 
+   * @throws {Error} If the specified column (`sortAction`) is not found in the listening data filter.
+   */
   function updateFilters(sortAction: ListeningColumnKeys) {
     let columns: ListeningColumnKeys[] = Object.keys(
       listeningDataFilter,

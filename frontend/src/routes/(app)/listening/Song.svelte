@@ -13,22 +13,25 @@
 
     let { song, childPropagation }: Props = $props();
     let album: AlbumInfo = $derived(song.albums[0]);
-    let dropdown: HTMLImageElement = $state();
+    let dropdown = $state<HTMLImageElement>();
 
+    /**
+     * Calculates the duration of a song in minutes and seconds from milliseconds.
+     *
+     * @param {number} ms - The duration of the song in milliseconds.
+     * @returns {string} The formatted duration string in "minutes:seconds" format.
+     */
     function calculateDuration(ms: number) {
         const minutes = Math.floor(ms / 60000);
         const seconds = (ms % 60000) / 1000;
         return minutes + ":" + (seconds < 9.5 ? "0" : "") + seconds.toFixed(0);
     }
+
     /**
      * This function wraps the childPropagation callback which is located in listening/+page.svelte.
      * It calls the childPropagation function with the provided song and toggles the rotation of a dropdown element.
      * 
      * @param {ListeningDataSongInfo} song - The song information to be propagated.
-     */
-    /**
-     * this function wraps the childPropogation callback which is located in listening/+page.svelte
-     * @param song
      */
     function childPropogationRotation(song : ListeningDataSongInfo){
         childPropagation(song)
