@@ -102,6 +102,7 @@
     if (refresh) {
       listeningDataRequest.offset = 0;
       songs = [];
+      allSongsLoaded = false
     } else
       listeningDataRequest.offset =
         listeningDataRequest.limit + listeningDataRequest.offset;
