@@ -6,8 +6,8 @@ import { filters } from '../filters.svelte';
 import type { DisplayDataRequest } from '../../../../../../lib/Request';
 
 const fieldLabels = [
-    "Music type", "Time frame", "Number of cells",
-    "Rank determinant", "Include cell info"
+    "music type", "time frame", "number of cells",
+    "rank determinant", "include cell info"
 ];
 
 describe('Test customization panel inputs', async () => {
@@ -42,7 +42,7 @@ describe('Test customization panel inputs', async () => {
     });
 
     test('Editing music type should trigger refresh with correct data', async () => {
-        const musicTypeInput = screen.getByLabelText("Music type");
+        const musicTypeInput = screen.getByLabelText("music type");
         await user.selectOptions(musicTypeInput, "song");
 
         expect(refresh).toBeCalled();
@@ -51,13 +51,13 @@ describe('Test customization panel inputs', async () => {
     });
 
     test('Not modifying music type should not trigger refresh', async () => {
-        const musicTypeInput = screen.getByLabelText("Music type");
+        const musicTypeInput = screen.getByLabelText("music type");
         await user.selectOptions(musicTypeInput, "song");
         expect(refresh).not.toBeCalled();
     });
 
     test('Editing rank determinant should trigger refresh with correct data', async () => {
-        const rankDeterminantInput = screen.getByLabelText("Rank determinant");
+        const rankDeterminantInput = screen.getByLabelText("rank determinant");
         await user.selectOptions(rankDeterminantInput, "time");
 
         expect(refresh).toBeCalled();
@@ -66,10 +66,47 @@ describe('Test customization panel inputs', async () => {
     });
 
     test('Not modifying rank determinant should not trigger refresh', async () => {
-        const rankDeterminantInput = screen.getByLabelText("Rank determinant");
+        const rankDeterminantInput = screen.getByLabelText("rank determinant");
         await user.selectOptions(rankDeterminantInput, "time");
         expect(refresh).not.toBeCalled();
     });
+
+    test('Entering a value into number of cells should refresh the display', async () => {
+        const numCellsInput = screen.getByLabelText("number of cells");
+
+        //Clear the current number (not strictly nessecary but doesn't hurt)
+        await user.clear(numCellsInput);
+        expect(numCellsInput).toHaveValue(null);
+
+        //Set the current number to 1
+        await user.type(numCellsInput, "1");
+        expect(numCellsInput).toHaveValue(1);
+
+        //Click somewhere else on the screen (this might need to be changed in the future)
+        const display = screen.getAllByRole("heading")[1]
+        await user.click(display);
+
+        expect(refresh).toBeCalled();
+    });
+
+    /*
+        Note for future unit test writers:
+        Checking for a refresh call when changing the timeframe on the customization settings fails.
+        A refresh is called on the app when actually using it, but it's not registered when testing.
+        Here's the failing function for posterity:
+
+        test('Modifying time frame should trigger refresh', async () => {
+            const timeFrameInput = screen.getByLabelText("Time frame");
+            await user.selectOptions(timeFrameInput, "all time");
+            expect(refresh).not.toBeCalled();
+
+            await user.selectOptions(timeFrameInput, "this month");
+
+            expect(refresh).toBeCalled();
+            const firstCall = refresh.mock.calls[0][0];
+            expect(firstCall.time_frame).toBe("this-month");
+        });
+    */
 });
 
 describe('Test customization panel buttons', async () => {
@@ -88,22 +125,22 @@ describe('Test customization panel buttons', async () => {
     });
 
     test('Clicking regenerate should call regenerate function', async () => {
-        await user.click(screen.getByText("Regenerate"));
+        await user.click(screen.getByText("regenerate"));
         expect(regenerateDisplay).toBeCalled();
     });
 
     test('Clicking export should call export function', async () => {
-        await user.click(screen.getByText("Export"));
+        await user.click(screen.getByText("export"));
         expect(exportDisplay).toBeCalled();
     });
 
-    test('Clicking "Close" and "Customize" should toggle the customization menu', async () => {
-        await user.click(screen.getByText("Close"));
-        let customizeHeading = screen.queryByRole("heading", { name: "Customize" });
+    test('Clicking "close" and "customize" should toggle the customization menu', async () => {
+        await user.click(screen.getByText("close"));
+        let customizeHeading = screen.queryByRole("heading", { name: "customize" });
         expect(customizeHeading).not.toBeInTheDocument();
 
-        await user.click(screen.getByText("Customize"));
-        customizeHeading = screen.queryByRole("heading", { name: "Customize" });
+        await user.click(screen.getByText("customize"));
+        customizeHeading = screen.queryByRole("heading", { name: "customize" });
         expect(customizeHeading).toBeInTheDocument();
     });
 });

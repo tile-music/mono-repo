@@ -7,6 +7,7 @@ dotenv.config();
 
 
 export type SpotifyUpdateData = {
+  play_id: number;
   listened_at: number;
   track_id: number;
   album_id: number;
@@ -24,7 +25,7 @@ export type SpotifyUpdateData = {
 
 
 export const selectString = `
-listened_at, track_id, album_id, track_popularity, album_popularity,
+play_id, listened_at, track_id, album_id, track_popularity, album_popularity,
 albums (spotify_id, ean, upc),
 tracks (spotify_id)`;
 
@@ -239,6 +240,7 @@ export async function getPopularity(ids: Map<string, SpotifyUpdateData>, functio
     beginIdx = updated;
     endIdx = remaining > limit ? beginIdx + limit : remaining + beginIdx;
   }
+  if (updated !== spotifyIdList.length) throw new Error(`FATAL: Updated ${updated} items, expected ${spotifyIdList.length}`);
 }
 
 /**
@@ -253,7 +255,7 @@ export async function updateSpotifyAlbumPopularity() {
   const spotifyClient: Client = await setupSpotifyClient();
   const schema: "test" | "prod" = process.env.SB_SCHEMA === "test" ? "test" : "prod";
   const internal: boolean = process.env.INTERNAL === "true";
-  await updateSpotifyAlbumPopularityHelper(spotifyClient.token, schema, internal, new Date(Date.now().valueOf() - 1000 * 60 * 60 * 24 * 3));
+  await updateSpotifyAlbumPopularityHelper(spotifyClient.token, schema, internal, new Date(Date.now().valueOf() - (1000 * 60 * 60 * 24)));
 
 }
 
@@ -268,7 +270,8 @@ export async function updateSpotifyAlbumPopularity() {
  * @returns {Promise<Map<string, SpotifyUpdateData>>} - A promise that resolves to a map of Spotify album data.
  * @throws {Error} - Throws an error if Supabase URL or Service Role Key is missing.
  */
-export async function updateSpotifyAlbumPopularityHelper(token: string, schema: "test" | "prod", internal: boolean, beginAt?: Date, data?: SpotifyUpdateData[]): Promise<Map<string, SpotifyUpdateData>> {
+export async function updateSpotifyAlbumPopularityHelper(token: string, schema: "test" | "prod", internal: boolean, beginAt?: Date, data?: SpotifyUpdateData[]): 
+Promise<Map<string, SpotifyUpdateData>> {
   if (!(process.env.SB_URL || process.env.SB_URL_TEST) || !process.env.SERVICE) throw new Error("Missing Supabase URL or Service Role Key");
   const sbUrl = internal ? process.env.SB_URL : process.env.SB_URL_TEST;
   const serviceRoleKey = process.env.SERVICE;
@@ -315,7 +318,9 @@ export async function updateSpotifyAlbumPopularityHelper(token: string, schema: 
 
   for (const [key, value] of albumMap.entries()) {
     try {
-      const { error } = await sbClient.schema(schema).from("played_tracks").update({ album_popularity: value.album_popularity, album_popularity_updated_at: Date.now() }).eq("album_id", value.album_id)
+      let query = sbClient.schema(schema).from("played_tracks").update({ album_popularity: value.album_popularity, album_popularity_updated_at: Date.now() }).eq("album_id", value.album_id);
+      if(beginAt) query = query.gte("listened_at", beginAt.valueOf());
+      const { error } = await query;
       const { error: albumInsertError } = await sbClient.schema(schema).from("albums").update(value.albums).eq("album_id", value.album_id);
       /** postgrest gets mad if you try to update something that is already updated */
       if (albumInsertError && albumInsertError?.code !== "23505") throw albumInsertError;

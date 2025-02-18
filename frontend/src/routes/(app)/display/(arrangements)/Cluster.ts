@@ -1,5 +1,5 @@
 import type { Arrangement, ArrangementState, AggregatedSongs } from "../arrangement.svelte";
-import { generateFullArrangement } from "./pack.js";
+import { generateFullArrangement } from "./pack";
 
 // Options
 const options = {

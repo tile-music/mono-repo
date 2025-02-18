@@ -4,7 +4,7 @@
   "main": "src/app.js",
   "scripts": {
     "dev": "ts-node ./src/app.ts",
-    "build": "rm -r ./dist && tsc",
+    "build": "[ -d ./dist ] && rm -r ./dist; tsc",
     "start": "npm run build && node dist/app.js",
     "test": "jest --runInBand"
   },
