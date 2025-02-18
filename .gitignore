@@ -11,3 +11,5 @@ data-acquisition/tests/util/test-data.copy.json
 data-acquisition/package-lock.json
 ps-update-instructions.md
 ps-update-instructions.pdf
+prodkeys.txt
+data-acquisition/.env.prod

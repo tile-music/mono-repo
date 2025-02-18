@@ -3,6 +3,11 @@ include:
 
   - ./supabase/docker/docker-compose.yml
 services:
+  lib:
+    build:
+      context: .
+      dockerfile: Dockerfile.lib
+    image: mdv-lib 
   frontend:
     build:
       context: ./frontend/
@@ -13,6 +18,8 @@ services:
       - "4173:4173"
     networks:
       - default
+    depends_on:
+      - lib
   nginx:
     build:
       context: ./nginx
