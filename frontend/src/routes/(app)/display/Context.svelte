@@ -3,6 +3,7 @@
     import type { ContextDataRequest, ContextDataResponse, RankOutput } from "../../../../../lib/Request";
     import { filters, filtersContext, timeFrameToText } from "./filters.svelte";
     import { deserialize } from "$app/forms";
+
     
     interface Props {
         // props
@@ -116,7 +117,8 @@
 
     // computed state for metadata text
     let artistsText = $derived(album.artists.length == 1 ? album.artists[0]
-        : album.artists.slice(0, -1).join(", ") + " & " + album.artists[album.artists.length]);
+        : album.artists.slice(0, -1).join(", ") + " & " + album.artists[album.artists.length -1]);
+
     let altText = $derived(`Album art for ${album.title} by ${artistsText}`);
     let rankText = $derived(`#${rank} most ${filters.rank_determinant == "time" ? "listened" : "played"} ` +
                   timeFrameToText(filtersContext.timeFrame, filtersContext.dateStrings));
