@@ -1,8 +1,8 @@
 import type { Arrangement, ArrangementState, AggregatedSongs } from "../arrangement.svelte";
 
 const options = {
-    width: { type: "number", label: "width", min: 1, max: 10},
-    height: { type: "number", label: "height", min: 1, max: 10},
+    width: { type: "number", label: "width", min: 1, max: 25},
+    height: { type: "number", label: "height", min: 1, max: 25},
     size_modifier: { type: "select", label: "size modifier", values: ["none", "linear"]}
 } as const;
 

@@ -121,6 +121,21 @@ function change(songs: AggregatedSongs) {
  * and options.
  */
 function generate(songs: AggregatedSongs) {
+    for (const key in arrangement.options) {
+        const option = arrangement.options[key];
+        if (option.type == "number") { 
+            if (typeof arrangement.state[key] == "number") {
+                if (option.max)
+                    arrangement.state[key] = Math.min(arrangement.state[key], option.max);
+                if (option.min)
+                    arrangement.state[key] = Math.max(arrangement.state[key], option.min);
+            } else {
+                const default_state = arr_types[arrangement.type].state;
+                arrangement.state[key] = default_state[key as keyof typeof default_state];
+            }
+        }
+    }
+
     // super type unsafe, but i simply cannot figure out another way
     const type = arr_types[arrangement.type] as unknown as Arrangement<{}>;
     arrangement.squares = type.generate(songs, arrangement.state);
