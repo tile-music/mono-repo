@@ -21,7 +21,7 @@
 
   function updateFilters() {
     // set date range
-    const startDate = new Date('1970-01-01');
+    const startDate = new Date();
     const endDate = new Date();
 
     // wipe dateStrings if needed
@@ -38,16 +38,16 @@
     if (filtersContext.timeFrame != "all-time") {
       switch (filtersContext.timeFrame) {
         case "this-week":
-          startDate.setDate(startDate.getDate() - 7);
+          startDate.setDate(endDate.getDate() - 7);
           break;
         case "this-month":
-          startDate.setMonth(startDate.getMonth() - 1);
+          startDate.setMonth(endDate.getMonth() - 1);
           break;
         case "year-to-date":
-          startDate.setFullYear(startDate.getFullYear(), 0, 1);
+          startDate.setFullYear(endDate.getFullYear(), 0, 1);
           break;
         case "this-year":
-          startDate.setMonth(startDate.getMonth() - 12);
+          startDate.setMonth(endDate.getMonth() - 12);
           break;
         case "custom":
           // if neither date is a valid date, panic
@@ -55,6 +55,8 @@
             !(filtersContext.dateStrings.start?.split("-").length == 3) &&
             !(filtersContext.dateStrings.end?.split("-").length == 3)
           ) return;
+
+          startDate.setTime(0);
 
           // translate value from date picker to timestamps
           filtersContext.dateStrings.start
