@@ -77,9 +77,10 @@
   const processSongs = (newSongs: ListeningDataSongInfo[]) => {
     for (let i = 0; i < newSongs.length; i++) {
       const curr = newSongs[i];
+      const prev = i ? newSongs[i - 1] : songs[-1];
       // Check previous song only if it's in the new batch
       if (i > 0) {
-        const prev = newSongs[i - 1];
+        
         const oneArtistMatches = () =>
           curr.artists.some((a) => prev.artists.includes(a));
         const match = () =>

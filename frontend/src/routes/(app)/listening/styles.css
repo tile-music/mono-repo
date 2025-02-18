@@ -5,6 +5,8 @@
   height: 50px;
   flex-shrink: 0;
   padding-right: 20px;
+  overflow: hidden; /*https://stackoverflow.com/questions/37132752/adding-when-text-is-too-long-in-a-div-with-only-css */
+  text-overflow: ellipsis;
 }
 
 .repetitions {
