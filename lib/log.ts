@@ -15,6 +15,7 @@
  * @param message - The log message to be recorded.
  *
  * @throws Will throw an error if an inappropriate log level is passed.
+ * @todo add a default param that makes it log to the console and then if the default param that logs it to a log file
  */
 export function log(level: number, setLevel: number, service: string, message: string) : void{
   if(level > setLevel) return
