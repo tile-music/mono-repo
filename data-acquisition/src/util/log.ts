@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const logLevel: number  = Number(process.env.LOG_LEVEL) ?? 6
+const logLevel: number = Number(process.env.LOG_LEVEL) ?? 6;
 
 const serviceName = "data acquisition";
 

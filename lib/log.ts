@@ -45,7 +45,7 @@ export function log(level: number, setLevel: number, service: string, message: s
 
   try{
     console.log(logTextGen(level, service, message));
-  } catch (e ) {
+  } catch (e) {
     const error = e as Error
     console.log(logTextGen(0, `logger logging ${service}`, error.message ));
   }

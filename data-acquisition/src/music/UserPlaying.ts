@@ -7,6 +7,7 @@ import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo";
 import { PlayedTrack } from "./PlayedTrack";
 
 import { log } from "../util/log"
+import { json } from "express";
 
 export type ReleaseDate = { year: number, month?: number, day?: number }
 
@@ -36,24 +37,25 @@ export abstract class UserPlaying {
   public async putInDB(): Promise<void> {
     await this.makeDBEntries();
     //console.log(this.dbEntries);
-    let i = 1;
+
     for (let entry of this.dbEntries.p_track_info) {
 
-        let { data: trackData, error: trackError } = await this.supabase
+        let { data: trackData, error: trackError } = await this.supabase.schema("prod")
           .from("tracks")
           .insert(entry.track)
           .select("*");
+        log(6, `trackData: ${JSON.stringify(trackData)}, trackError: ${JSON.stringify(trackError)}`)
         if (trackError && trackError?.code !== "23505") throw trackError;
-        let { data: albumData, error: albumError } = await this.supabase
+        let { data: albumData, error: albumError } = await this.supabase.schema("prod")
           .from("albums")
           .insert(entry.track_album)
           .select("*");
         if (albumError && albumError?.code !== "23505") throw albumError;
         //console.log(albumData, trackData, albumError, trackError);
         if (!trackData) {
-
           //console.log("reached track");
           const { data: trackDataRet, error: trackErrorRet } = await this.supabase
+            .schema("prod")
             .from("tracks")
             .select("*")
             .eq("isrc", entry.track.isrc);
@@ -66,15 +68,15 @@ export abstract class UserPlaying {
           //console.log("reached album");
           //console.log(entry);
           let query = this.supabase
+            .schema("prod")
             .from("albums")
             .select("*")
             .eq("album_name", entry.track_album.album_name) // Filter by album_name
-            .eq("image", entry.track_album.image) // Filter by image
+            //.eq("image", entry.track_album.image) // Filter by image
             //.eq("album_type", entry.track_album.album_type)
             //.eq("release_date", entry.track_album.release_date)
-            .eq("num_tracks", entry.track_album.num_tracks) // Filter by release_dat
           if (entry.track_album.spotify_id) query = query.eq("spotify_id", entry.track_album.spotify_id)
-
+          
           const { data: albumDataRet, error: albumErrorRet } = await query;
           log(5, `data: ${albumDataRet}, error: ${albumErrorRet}`)
 
@@ -86,11 +88,13 @@ export abstract class UserPlaying {
         if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
           //console.log("reached track albums");
           const { data: trackAlbumData, error: trackAlbumError } =
-            await this.supabase.from("track_albums").insert({
+            await this.supabase.schema("prod").from("track_albums").insert({
               track_id: trackData[0].track_id,
               album_id: albumData[0].album_id,
             });
+
           const { data: playedData, error: playedError } = await this.supabase
+            .schema("prod")
             .from("played_tracks")
             .insert({
               user_id: this.userId,
@@ -106,7 +110,9 @@ export abstract class UserPlaying {
           } */
           // improve error handling
         } else {
-          //console.error("No data returned from insert or albumData is undefined or empty");
+          log(1, `track data ${JSON.stringify(trackData)} album data: ${JSON.stringify(albumData)}, 
+                  ${JSON.stringify(entry)}` )
+
           throw new Error("No data returned from insert or albumData is undefined or empty");
         }
       
