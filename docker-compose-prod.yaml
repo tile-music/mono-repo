@@ -43,11 +43,9 @@ services:
     networks:
       - default
     depends_on:
-      db:
-        condition: service_healthy
-      analytics:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - db
+      - analytics
+      - redis
+      - lib
 volumes:
   MQP:
