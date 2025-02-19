@@ -41,7 +41,7 @@ export function log(level: number, setLevel: number, service: string, message: s
   }
 
   const logTextGen = (level: number, service: string, message: string) => 
-    `service: ${service} ${new Date().toString()} ${logLeveltoLogText(level)}: ${message}`;
+    `service: ${service} timestamp: ${new Date().toString()} - ${logLeveltoLogText(level)} ${message}`;
 
   try{
     console.log(logTextGen(level, service, message));
