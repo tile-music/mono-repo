@@ -1,4 +1,4 @@
-import {log as logBase} from "../../../lib/logging/log"
+import {log as logBase} from "../../../lib/log"
 import dotenv from "dotenv";
 
 dotenv.config();
