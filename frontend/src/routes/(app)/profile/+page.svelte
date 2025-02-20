@@ -17,7 +17,12 @@
   let { data = $bindable() }: Props = $props();
   let { user, email } = $derived(data);
 
-  const all_themes = ["default-light", "alt-light", "default-dark", "alt-dark"]
+  const all_themes = [
+    "default-dark", "default-light",
+    "faire", "mocha",
+    "avocado", "myspace", "beads",
+    "spotify"
+  ]
 
   let resetProfileStatus = $state("");
   async function resetProfileInformation() {

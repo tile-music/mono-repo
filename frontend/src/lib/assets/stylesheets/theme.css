@@ -15,25 +15,57 @@
 }
 
 .theme-default-light {
-    --background: #e8e8e8;
-    --text: #000000;
-    --medium: #5c5853;
-    --midground: #787474;
-    --accent: #a54d17;
+    --background: #efefef;
+    --text: #1f1f1f;
+    --medium: #818181;
+    --midground: #d0d0d0;
+    --accent: #4199c8;
 }
 
-.theme-alt-dark {
-    --background: #090808;
-    --text: #e5dfd0;
-    --medium: #5c5853;
-    --midground: #2d0038;
-    --accent: #c621dc;
+.theme-faire {
+    --background: #1e1e1e;
+    --text: #c5c5c5;
+    --medium: #ffffff;
+    --midground: #0d0d0d;
+    --accent: #f1ef54;
 }
 
-.theme-alt-light {
-    --background: #e8e8e8;
-    --text: #000000;
+.theme-mocha {
+    --background: #2c1810;  /* Dark roasted coffee bean color */
+    --text: #e6d5c7;       /* Creamy coffee color */
+    --medium: #8b5e3c;     /* Medium roast brown */
+    --midground: #3a2218;  /* Slightly lighter than background */
+    --accent: #c87f46;     /* Caramel accent color */
+}
+
+.theme-avocado {
+    --background: #ddf0e6;  /* Light sage white */
+    --text: #1a2419;       /* Dark forest green-black */
+    --medium: #829980;     /* Muted sage green */
+    --midground: #c9d4c6;  /* Slightly darker than background */
+    --accent: #236429;     /* Deep forest green */
+}
+
+.theme-myspace {
+    --background: #c44e89;  /* Light pink background */
+    --text: #000000;       /* Dark text for contrast */
+    --medium: #a93770;     /* Medium pink */
+    --midground: #d05894;  /* Slightly darker pink background */
+    --accent: #e3a5c6;     /* Off-white accent */
+}
+
+.theme-beads {
+    --background: #135240;  /* Light pink background */
+    --text: #eef3ef;       /* Dark text for contrast */
+    --medium: #c77b42;     /* Medium pink */
+    --midground: #1d6853;  /* Slightly darker pink background */
+    --accent: #2a8cc5;     /* Off-white accent */
+}
+
+.theme-spotify {
+    --background: #121212;
+    --text: #FFFFFF;
     --medium: #5c5853;
-    --midground: #787474;
-    --accent: #093bc3;
+    --midground: #242222;
+    --accent: #1ed860;
 }
