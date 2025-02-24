@@ -1,8 +1,7 @@
 #Build stage
-FROM node:alpine3.20 AS base
+FROM mdv-lib AS build
 
-RUN rm -rf /app
-WORKDIR /app
+WORKDIR /app/data-acq
 
 COPY . .
 COPY .env .
@@ -13,7 +12,7 @@ RUN npm i -g typescript
 
 RUN npm install
 
-FROM base AS dev
+FROM build AS dev
 
 #RUN npm install -g typescript
 #RUN npm intall -g @angular/cli
@@ -22,12 +21,12 @@ CMD ["npm", "run", "dev"]
 EXPOSE 3001
 
 #test stage
-FROM base AS test
+FROM build AS test
 
 CMD ["npm", "run", "test"]
 
 #Production stage
 
-FROM base AS prod
+FROM build AS prod
 
 CMD ["npm", "run", "start"]

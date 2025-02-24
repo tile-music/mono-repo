@@ -30,7 +30,7 @@ describe("spotify Listening timestamp sanity check", () => {
   })
 })
 describe("Spotify UserPlaying Integration", () => {
-  let supabase: SupabaseClient<any, "test", any>;
+  let supabase: SupabaseClient<any, "test" | "prod", any>;
   let userId: string;
   let spotifyClient: Client;
   let player: Player;
@@ -40,7 +40,7 @@ describe("Spotify UserPlaying Integration", () => {
     supabase = new SupabaseClient(
       process.env.SB_URL_TEST as string,
       process.env.ANON as string,
-      { db: { schema: "test" } }
+      { db: { schema: "prod" } }
     );
     const { data, error } = await supabase.auth.signUp({
       email: "test2@example.com",
@@ -75,6 +75,7 @@ describe("Spotify UserPlaying Integration", () => {
     if (error) throw error;
     //await supabase.rpc("clear_test_tables");
   });
+  
   test("SpotifyUserPlaying fire method data integrity", async () => {
     const spotifyUserPlaying = new SpotifyUserPlaying(
       supabase,
