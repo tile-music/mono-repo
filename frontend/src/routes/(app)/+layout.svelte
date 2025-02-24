@@ -1,14 +1,9 @@
 <script lang="ts">
-    import { redirect } from '@sveltejs/kit';
     interface Props {
         children?: import('svelte').Snippet;
     }
 
     let { children }: Props = $props();
-
-    let logout = $derived(async () => {
-        console.log(redirect(302, "/login"));
-	});
 </script>
 
 <div id="container">
