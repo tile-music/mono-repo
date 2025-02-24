@@ -33,9 +33,6 @@
     if(artDisplayRef) {
       try {
         artDisplayRef.style.transform = "scale(.95)";
-        console.log(displaySize)
-        // Capture the div as an image
-        console.log(iFrameRef)
         
         const dataUrl = await toPng(iFrameRef/* , {filter: (element) => element.tagName == "button"} */);
         // Create a link and trigger download

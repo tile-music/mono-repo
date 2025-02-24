@@ -8,7 +8,9 @@
 </div>
 
 <style>
+
     #content {
+        color: var(--text-dark);
         margin: 20px;
         display: flex;
         flex-direction: column;
@@ -16,6 +18,7 @@
     }
 
     ul {
+        color: var(--accent-dark);
         display: flex;
         gap: 10px;
     }

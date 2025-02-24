@@ -99,6 +99,16 @@ const authGuard: Handle = async ({ event, resolve }) => {
   return response;
 }
 
+const userTheme: Handle = async ({ event, resolve }) => {
+  const themeCookie = event.cookies.get("theme");
+  console.log("themeCookie: ", themeCookie);
+  const theme = themeCookie ? `theme-${themeCookie}` : "theme-default-dark";
+
+  return await resolve(event, {
+    transformPageChunk: ({ html }) => html.replace('[theme]', theme)
+  })
+}
+
 const originalConsoleWarn = console.debug
 
 console.warn = function (...args) {
@@ -118,4 +128,4 @@ console.warn = function (...args) {
   }
 };
 
-export const handle: Handle = sequence(supabase, authGuard);
+export const handle: Handle = sequence(supabase, authGuard, userTheme);
