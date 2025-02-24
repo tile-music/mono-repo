@@ -42,13 +42,13 @@ export abstract class UserPlaying {
 
         let { data: trackData, error: trackError } = await this.supabase
           .from("tracks")
-          .upsert(entry.track)
+          .insert(entry.track)
           .select("*");
         log(6, `trackData: ${JSON.stringify(trackData)}, trackError: ${JSON.stringify(trackError)}`)
         if (trackError && trackError?.code !== "23505") throw trackError;
         let { data: albumData, error: albumError } = await this.supabase
           .from("albums")
-          .upsert(entry.track_album)
+          .insert(entry.track_album)
           .select("*");
         if (albumError && albumError?.code !== "23505") throw albumError;
         //console.log(albumData, trackData, albumError, trackError);
@@ -66,27 +66,32 @@ export abstract class UserPlaying {
       if (!albumData) {
         //console.log("reached album");
         //console.log(entry);
-        let query = this.supabase
+        let query1 = this.supabase
         .from("albums")
         .select("*")
+
         const albumSpotifyId = entry.track_album.spotify_id;
         console.log(`spotify album id: ${albumSpotifyId}`)
         if (albumSpotifyId) {
-          const query1 = query.eq("spotify_id", albumSpotifyId);
+          query1 = query1.eq("spotify_id", albumSpotifyId);
           ({ data: albumData, error: albumError } = await query1);
           log(6, `will fallback execute ${( Array.isArray(albumData) && albumData["length"] === 0)}`)
-        } else if(!albumSpotifyId || ( Array.isArray(albumData) && albumData["length"] === 0)){
+        }
+        if(!albumSpotifyId || (Array.isArray(albumData) && albumData.length === 0)){
           console.log("executing fallback query")
-
+          let query = this.supabase.from("albums").select("*")
           query = query.eq("album_name", entry.track_album.album_name); // Filter by album_name
           //.eq("image", entry.track_album.image) // Filter by image
           query = query.eq("album_type", entry.track_album.album_type);
           //.eq("release_date", entry.track_album.release_date)
           query = query.eq("num_tracks", entry.track_album.num_tracks); // Filter by release_dat
-          log(6, JSON.stringify(query));
+          log(6, `query ${JSON.stringify(query)}`);
           ({ data: albumData, error: albumError } = await query);
+          log(6,`album data: ${albumData}, albumError: ${albumError}` )
+
         }
         //.eq("artists", entry.track_album.artists)
+        log(6, `Album data: ${albumData}`)
         console.log(entry.track_album.spotify_id);
 
 
@@ -96,13 +101,12 @@ export abstract class UserPlaying {
         if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
           //console.log("reached track albums");
           const { data: trackAlbumData, error: trackAlbumError } =
-            await this.supabase.schema("prod").from("track_albums").insert({
+            await this.supabase.from("track_albums").insert({
               track_id: trackData[0].track_id,
               album_id: albumData[0].album_id,
             });
 
           const { data: playedData, error: playedError } = await this.supabase
-            .schema("prod")
             .from("played_tracks")
             .insert({
               user_id: this.userId,
@@ -119,9 +123,10 @@ export abstract class UserPlaying {
           // improve error handling
         } else {
           log(1, `track data ${JSON.stringify(trackData)} album data: ${JSON.stringify(albumData)}, 
-                  ${JSON.stringify(entry)}` )
+                  ${JSON.stringify(entry)}
+                  No data returned from insert or albumData is undefined or empty` )
 
-          throw new Error("No data returned from insert or albumData is undefined or empty");
+          throw new Error("");
         }
       
     }
