@@ -3,6 +3,7 @@ import Customize from '../Customize.svelte';
 import userEvent from '@testing-library/user-event';
 
 import { filters } from '../filters.svelte';
+import { arrangement } from '../arrangement.svelte';
 import type { DisplayDataRequest } from '../../../../../../lib/Request';
 
 const fieldLabels = [
@@ -28,8 +29,8 @@ describe('Test customization panel inputs', async () => {
         // pass our mocked function in the refresh prop
         render(Customize, {
             refresh,
-            regenerateDisplay: () => {},
-            exportDisplay: () => {}
+            exportDisplay: () => {},
+            songs: []
         });
     });
 
@@ -111,22 +112,24 @@ describe('Test customization panel inputs', async () => {
 
 describe('Test customization panel buttons', async () => {
     const user = userEvent.setup();
-    const regenerateDisplay = vi.fn();
     const exportDisplay = vi.fn();
+    const generate = vi.fn();
+    arrangement.generate = generate;
 
     // clear calls of mock function and render customization panel
     beforeEach(() => {
+        generate.mockClear();
         // pass our mocked function in the refresh prop
         render(Customize, {
             refresh: () => {},
-            regenerateDisplay,
-            exportDisplay
+            exportDisplay,
+            songs: []
         });
     });
 
     test('Clicking regenerate should call regenerate function', async () => {
         await user.click(screen.getByText("regenerate"));
-        expect(regenerateDisplay).toBeCalled();
+        expect(generate).toBeCalled();
     });
 
     test('Clicking export should call export function', async () => {
