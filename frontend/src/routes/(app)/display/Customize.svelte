@@ -153,13 +153,12 @@
           id="num-cells"
           type="number"
           name="num-cells"
-          min="0"
+          min="1"
           bind:value={localFilters.num_cells}
           bind:this={numCells}
           onchange={() => numCells?.focus()}
           onblur={updateFilters}
           placeholder="max"
-          min="1"
         />
       </div>
       <div class="labeled-input">
