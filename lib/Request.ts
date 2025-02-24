@@ -101,7 +101,6 @@ export type ListeningColumns = {
     spotify_track_id: ListeningColumn<SpotifyURI>;
     spotify_album_id: ListeningColumn<SpotifyURI>;
     isrc: ListeningColumn<ISRCColumn>; 
-    listens: ListeningColumn<ListenCountColumn>;
     
 }
 
@@ -117,7 +116,6 @@ export const assertListeningColumns = (columns: ListeningColumns): asserts colum
     if(columns.spotify_track_id === undefined) throw new Error("spotify_track_ids is required");
     if(columns.spotify_album_id === undefined) throw new Error("spotify_album_ids is required");
     if(columns.isrc === undefined) throw new Error("isrcs is required");
-    if(columns.listens === undefined) throw new Error("listens is required");
     const keys : ListeningColumnKeys[] = Object.keys(columns) as ListeningColumnKeys[];
     for(const key of keys){
         if(columns[key] === null) nullCount++;

@@ -22,7 +22,7 @@
               id={filter}
               bind:checked={listeningDataFilter[filter].checked}
               onchange={() => loadData(true)}
-            />{filter.replace(`_`, " ")}
+            />{filter.replaceAll(`_`, " ")}
           </li>
         {/each}
       </ul>

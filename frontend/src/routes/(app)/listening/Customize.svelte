@@ -66,6 +66,9 @@
     }
     loadData(true);
   }
+
+
+
 </script>
 
 <div id="filters">
@@ -75,7 +78,7 @@
   <button id="art"><h2>art</h2></button>
   {#each filterColumnList() as column}
     <button class={column} onclick={() => updateFilters(column)}
-      ><h2>{column}{sortArrows(column).replaceAll("_", " ")}</h2></button
+      ><h2>{column.replaceAll("_"," ")}{sortArrows(column)}</h2></button
     >
   {/each}
 </div>

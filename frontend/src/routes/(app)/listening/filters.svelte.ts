@@ -9,7 +9,6 @@ export const listeningDataFilter: ListeningColumns = $state<ListeningColumns>({
     album: { column: [], order: "", checked: true},
     artist: { column: [], order: "", checked: true},
     duration: { column: {start: null, end: null}, order: "", checked: true},
-    listens: { column: [], order: "", checked: true},
     upc: { column: [], order: "", checked: false},
     spotify_track_id: { column: [], order: "", checked: false},
     spotify_album_id: { column: [], order: "", checked: false},
