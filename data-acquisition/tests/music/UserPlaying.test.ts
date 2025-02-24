@@ -75,11 +75,7 @@ describe("Spotify UserPlaying Integration", () => {
     if (error) throw error;
     //await supabase.rpc("clear_test_tables");
   });
-  test("sanity", async () => {
-    
-    let {data, error} = await supabase.schema("prod").from("albums").select("*").eq('spotify_id', '4PIVdqvL1Rc7T7Vfsr8n8Q');
-    console.log("am i insane", data, error)
-  })
+  
   test("SpotifyUserPlaying fire method data integrity", async () => {
     const spotifyUserPlaying = new SpotifyUserPlaying(
       supabase,
