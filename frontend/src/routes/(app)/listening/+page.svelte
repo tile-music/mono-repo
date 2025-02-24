@@ -11,7 +11,7 @@
 </script>
 
 <div id="container">
-    <h1>Listening Data</h1>
+    <h1>listening data</h1>
     <div id="scroll-container">
         {#if data.songs != null}
             <div id="headers">
@@ -83,5 +83,6 @@
         margin-bottom: 20px;
         overflow-y: scroll;
         width: fit-content;
+        min-width: 100%;
     }
 </style>
