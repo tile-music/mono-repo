@@ -16,6 +16,7 @@ export default defineConfig({
     alias: {
       "$app/forms": resolve('./__mocks__/$app.forms.ts'),
       "$app/navigation": resolve('./__mocks__/$app.navigation.ts'),
+      "$app/environment": resolve('./__mocks__/$app.environment.ts'),
       "$lib": resolve('./src/lib')
     }
   }

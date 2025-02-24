@@ -16,7 +16,7 @@ export const filtersContext: FiltersContext = $state({
 
 export const generalOptions: GeneralOptions = $state({
     showCellInfo: "on-hover"
-})
+});
 
 // TYPES AND FUNCTIONS
 interface FiltersContext {

@@ -1,11 +1,13 @@
 <script lang="ts">
   import { filters, filtersContext, generalOptions } from './filters.svelte';
   import type { DisplayDataRequest } from "../../../../../lib/Request";
+  import type { AggregatedSongs } from './arrangement.svelte';
+  import { arrangement, arr_types } from './arrangement.svelte';
 
-  let { refresh, regenerateDisplay, exportDisplay }: {
+  let { refresh, exportDisplay, songs }: {
     refresh: (f: DisplayDataRequest) => void,
-    regenerateDisplay: () => void,
-    exportDisplay: () => void
+    exportDisplay: () => void,
+    songs: AggregatedSongs
   } = $props();
 
   // store local copy of filters to compare when changed
@@ -14,9 +16,12 @@
   // handles hide/show functionality
   let hidden = $state(false);
 
+  // needed for correct focus when incrementing max cells
+  let numCells = $state<HTMLInputElement>();
+
   function updateFilters() {
     // set date range
-    const startDate = new Date('1970-01-01');
+    const startDate = new Date();
     const endDate = new Date();
 
     // wipe dateStrings if needed
@@ -33,16 +38,16 @@
     if (filtersContext.timeFrame != "all-time") {
       switch (filtersContext.timeFrame) {
         case "this-week":
-          startDate.setDate(startDate.getDate() - 7);
+          startDate.setDate(endDate.getDate() - 7);
           break;
         case "this-month":
-          startDate.setMonth(startDate.getMonth() - 1);
+          startDate.setMonth(endDate.getMonth() - 1);
           break;
         case "year-to-date":
-          startDate.setFullYear(startDate.getFullYear(), 0, 1);
+          startDate.setFullYear(endDate.getFullYear(), 0, 1);
           break;
         case "this-year":
-          startDate.setMonth(startDate.getMonth() - 12);
+          startDate.setMonth(endDate.getMonth() - 12);
           break;
         case "custom":
           // if neither date is a valid date, panic
@@ -50,6 +55,8 @@
             !(filtersContext.dateStrings.start?.split("-").length == 3) &&
             !(filtersContext.dateStrings.end?.split("-").length == 3)
           ) return;
+
+          startDate.setTime(0);
 
           // translate value from date picker to timestamps
           filtersContext.dateStrings.start
@@ -70,6 +77,7 @@
     }
 
     // send new data request only if filters have changed
+    // console.log("Filters: " + JSON.stringify(filters) + "\n Local: " + JSON.stringify(localFilters))
     if (JSON.stringify(filters) != JSON.stringify(localFilters))
       refresh(localFilters);
   }
@@ -145,7 +153,10 @@
           id="num-cells"
           type="number"
           name="num-cells"
+          min="0"
           bind:value={localFilters.num_cells}
+          bind:this={numCells}
+          onchange={() => numCells?.focus()}
           onblur={updateFilters}
           placeholder="max"
           min="1"
@@ -174,9 +185,44 @@
         </select>
       </div>
     </div>
+    <div class="input-section">
+      <h2>arrangement options</h2>
+      <div class="labeled-input">
+        <label for="arr-type">arrangement type</label>
+        <select name="arr-type" id="arr-type"
+        bind:value={arrangement.type} onchange={() => arrangement.change(songs)}>
+          {#each Object.keys(arr_types) as arr_type }
+            <option value={arr_type}>{arr_type.replaceAll("_", " ")}</option>
+          {/each}
+        </select>
+      </div>
+      {#each Object.entries(arrangement.options) as [name, option] }
+        <div class="labeled-input">
+          <label for={name}>{option.label}</label>
+          {#if option.type == "number"}
+            <input type="number" name={name} id={name}
+            min={option.min || null} max={option.max || null}
+            step={option.step || null}
+            bind:value={arrangement.state[name]}
+            onchange={() => arrangement.generate(songs)}>
+          {:else if option.type == "checkbox"}
+            <input type="checkbox" name={name} id={name}
+            bind:checked={arrangement.state[name] as boolean}
+            onchange={() => arrangement.generate(songs)}>
+          {:else if option.type == "select"}
+            <select id={name} bind:value={arrangement.state[name]}
+            onchange={() => arrangement.generate(songs)}>
+              {#each option.values as value}
+                <option value={value}>{value}</option>
+              {/each}
+            </select>
+          {/if}
+        </div>
+      {/each}
+    </div>
     <div id="lower-btns">
       <button
-        onclick={regenerateDisplay}
+        onclick={() => arrangement.generate(songs)}
         id="regenerate"
         class="art-display-button">regenerate</button
       >

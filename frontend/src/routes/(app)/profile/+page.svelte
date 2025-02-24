@@ -6,6 +6,9 @@
   import Avatar from './avatar.svelte';
   import { enhance } from "$app/forms";
   import type { SubmitFunction } from "@sveltejs/kit";
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
+  import ThemeButton from "./ThemeButton.svelte";
 
   interface Props {
     data: PageData;
@@ -13,6 +16,13 @@
 
   let { data = $bindable() }: Props = $props();
   let { user, email } = $derived(data);
+
+  const all_themes = [
+    "default-dark", "default-light",
+    "faire", "mocha",
+    "avocado", "myspace", "beads",
+    "spotify"
+  ]
 
   let resetProfileStatus = $state("");
   async function resetProfileInformation() {
@@ -84,7 +94,44 @@
       } else updateProfileStatus = "failed to update profile: unknown error"; // just in case
     };
   }
+
+  let themeStatus = $state("");
+  async function setProfileTheme(themeType : string) {
+    const res = await fetch('?/update_theme', {
+      method: 'POST',
+      body: JSON.stringify(themeType)
+    });
+
+    // parse response
+    const response = await res.json();
+    const info = JSON.parse(response.data)[0]; // returns an array, for some reason
+
+    // set status message
+    if (info.success) {
+      themeStatus = "theme update successful";
+      applyTheme(themeType);
+    }
+
+    // handle errors
+    else if (info.not_authenticated) themeStatus = "failed: not authenticated";
+    else if (info.server_error) themeStatus = "failed: server error";
+    else if (info.update_unnecessary) themeStatus = "theme already set to that value";
+    else themeStatus = "failed: unknown error";
+  }
+
+  async function applyTheme(themeType: string) {
+    // Set class on html element
+    if (browser) document.documentElement.className = 
+      document.documentElement.className.replace(
+        /^theme-[^\s]*/, `theme-${themeType}`
+      );
+  }
+
+  onMount(() => {
+    if (user?.theme) applyTheme(user.theme);
+	});
 </script>
+
 
 <div id="container">
   <div id="profile">
@@ -149,6 +196,12 @@
       </div>
       <DeleteUser><div id="delete">delete account</div></DeleteUser>
     </div>
+    <div class="theme-box">
+      {#each all_themes as theme}
+        <ThemeButton color={theme} setTheme={setProfileTheme}> </ThemeButton>
+      {/each}
+    </div>
+    <p>{themeStatus}</p>
   </div>
 </div>
 
@@ -208,7 +261,7 @@
   }
 
   #settings {
-    width: 50%;
+    width: 30%;
     display: flex;
     flex-direction: column;
     gap: 40px;
@@ -261,4 +314,11 @@
   .button-status-group p {
     margin-bottom: 3px; /* align status message with button */
   }
+
+  .theme-box {
+    max-width: 500px; /*This keeps the theme rows adaptabe but won't exceed 3 per row*/
+    display: block !important;
+    /* yes sam i know you hate !important but it's what works */
+  }
+
 </style>
