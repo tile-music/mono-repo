@@ -1,79 +1,129 @@
 <script lang="ts">
-    import type { ProcessOutput } from './processSongs';
-    import type { SongInfo, AlbumInfo } from '../../../../../lib/Song';
-    import refresh from '$lib/assets/icons/refresh.svg';
+    import type {
+        AlbumInfo,
+        ListeningDataSongInfo,
+    } from "../../../../../lib/Song";
+    import arrow from "$lib/assets/icons/down-arrow-56.svg";
+    import Song from "./Song.svelte";
+    import { filterColumnList } from "./filters.svelte";
     interface Props {
-        song: ProcessOutput;
+        song: ListeningDataSongInfo;
+        childPropagation: (song: ListeningDataSongInfo) => void;
     }
 
-    let { song }: Props = $props();
-    let album : AlbumInfo = $derived(song.albums[0]);
+    let { song, childPropagation }: Props = $props();
+    let album: AlbumInfo = $derived(song.albums[0]);
+    let dropdown = $state<HTMLImageElement>();
 
+    /**
+     * Calculates the duration of a song in minutes and seconds from milliseconds.
+     *
+     * @param {number} ms - The duration of the song in milliseconds.
+     * @returns {string} The formatted duration string in "minutes:seconds" format.
+     */
     function calculateDuration(ms: number) {
         const minutes = Math.floor(ms / 60000);
-        const seconds = ((ms % 60000) / 1000);
-        return minutes + ":" + (seconds < 10 ? '0' : '') + seconds.toFixed(0);
+        const seconds = (ms % 60000) / 1000;
+        return minutes + ":" + (seconds < 9.5 ? "0" : "") + seconds.toFixed(0);
     }
 
-    let duration = $derived(calculateDuration(song.duration));
+    /**
+     * This function wraps the childPropagation callback which is located in listening/+page.svelte.
+     * It calls the childPropagation function with the provided song and toggles the rotation of a dropdown element.
+     * 
+     * @param {ListeningDataSongInfo} song - The song information to be propagated.
+     */
+    function childPropogationRotation(song : ListeningDataSongInfo){
+        childPropagation(song)
+        if(dropdown){
+            console.log(dropdown.style.transform )
+            if(dropdown.style.transform === "" || dropdown.style.transform == "rotate(270deg)") dropdown.style.transform = "rotate(0deg)"
+            else dropdown.style.transform = "rotate(270deg)"
+        }
+    }
 </script>
 
 <div class="song">
-    {#if song.repetitions > 1}
-        <p class="repetitions"><img src={refresh} alt="A replay icon">{song.repetitions}</p>
+    {#if song.is_parent}
+        <p class="repetitions" onclick={() =>{ childPropogationRotation(song) }}>
+            <img src={arrow} bind:this={dropdown}  alt="show plays" />({song.size + 1})
+        </p>
     {:else}
         <p class="repetitions"></p>
     {/if}
-    <img class="art" src={album.image} alt={`The album art for ${album.title} by ${album.artists.join(', ')}.`}>
-    <p class="title">{song.title}</p>
-    <p class="artist">{song.artists.join(', ')}</p>
-    <p class="album">{album.title}</p>
-    <p class="duration">{duration}</p>
-    <p class="plays">{song.plays}</p>
+
+    {#if !song.is_child}
+        <img
+            class="art"
+            src={album.image}
+            alt={`The album art for ${album.title} by ${album.artists.join(", ")}.`}
+        />
+    {:else}
+        <div class="art" id="vertical_line"></div>
+    {/if}
+
+    {#each filterColumnList() as column}
+        {#if column === "duration"}
+            <p class={column}>{calculateDuration(song[column])}</p>
+        {:else if column === "album"}
+            <p class={column}>{album.title}</p>
+        {:else if column === "artist"}
+            <p class={column}>{album.artists.join(", ")}</p>
+        {:else if column === "listened_at"}
+            <p class={column}>{new Date(song[column]).toLocaleString()}</p>
+        {:else if column === "upc"}
+            <p class={column}>{album.upc}</p>
+        {:else if column === "spotify_album_id"}
+            <p class={column}>
+                <a href="https://open.spotify.com/album/{album.spotify_id}"
+                    >link</a
+                >
+            </p>
+        {:else if column === "spotify_track_id"}
+            <p class={column}>
+                <a href="https://open.spotify.com/track/{song.spotify_id}"
+                    >link</a
+                >
+            </p>
+        {:else}
+            <p class={column}>{song[column]}</p>
+        {/if}
+    {/each}
 </div>
 
+{#if song.child && song.show_children}
+    <div id="children">
+        <Song song={song.child} {childPropagation} id="song" />
+    </div>
+{/if}
+
 <style>
-    .song {
+    @import "./styles.css";
+    #children {
         display: flex;
-        gap: 10px;
-        align-items: center;
-        height: 50px;
-        flex-shrink: 0;
-    }
-
-    .repetitions {
-        width: 50px;
-        display: flex;
-        justify-content: center;
-    }
-
-    .art {
-        height: 100%;
-        aspect-ratio: 1 / 1;
-    }
-
-    .title, .album {
-        width: 300px;
-    }
-
-    .artist {
-        width: 200px;
-    }
-
-    .duration, .plays {
-        width: 100px;
-    }
-
-    .repetitions {
-        display: flex;
-        gap: 5px;
-        align-items: center;
+        flex-direction: column;
+        padding-right: 20px;
     }
 
     .repetitions img {
-        width: 12px;
-        height: 12px;
-        transform: rotate(130deg);
-        z-index: -1 /* ????? */
+        z-index: -1;
+        height: 30px;
+        width: auto;
+        transform: rotate(270deg);
+    }
+    img {
+        color: var(--text);
+    }
+    #song {
+        height: 50px;
+    }
+    svg{
+        filter: var(--text)
+    }
+    #vertical_line {
+        background-image: linear-gradient(var(--text), var(--text));
+        background-size: 2px 100%;
+        background-repeat: no-repeat;
+        background-position: center center;
     }
 </style>

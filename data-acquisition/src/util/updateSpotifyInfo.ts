@@ -131,7 +131,7 @@ async function getSpotifyData(dataType: "albums" | "tracks", ids: string[], toke
             console.error("WARNING: Rate limit exceeded");
             const retryAfterHeader = response.headers?.get("Retry-After");
             const retryAfter: number | null = retryAfterHeader ? parseInt(retryAfterHeader) : 0;
-            console.log(`Retrying after ${retryAfter} seconds`);
+            console.log(`  Retrying after ${retryAfter} seconds`);
             await sleep(retryAfter * 1000);
             return getSpotifyData(dataType, ids, token, retries + 1);
           default:

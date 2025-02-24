@@ -153,7 +153,7 @@
           id="num-cells"
           type="number"
           name="num-cells"
-          min="0"
+          min="1"
           bind:value={localFilters.num_cells}
           bind:this={numCells}
           onchange={() => numCells?.focus()}
@@ -269,7 +269,7 @@
     display: flex;
     align-items: center;
   }
-
+  
   .labeled-input label {
     width: 150px;
   }
@@ -277,21 +277,19 @@
   select,
   input[type="number"],
   input[type="date"] {
+    
     background-color: var(--background);
     border: 0;
     border-bottom: 2px solid var(--medium);
     font-family: "Archivo", sans-serif;
     font-size: 15px;
-    padding: 0 2px; /* compensate for border */
+    padding:  2px; /* compensate for border */
     color: var(--text);
-  }
-  /* make the colors the same!!*/
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 24 24"><path fill="%23bbbbbb" d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>');
   }
 
   select {
     width: 100px;
+    -webkit-appearance:none;
   }
 
   input[type="number"] {
