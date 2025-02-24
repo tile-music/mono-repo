@@ -40,49 +40,57 @@ export abstract class UserPlaying {
 
     for (let entry of this.dbEntries.p_track_info) {
 
-        let { data: trackData, error: trackError } = await this.supabase.schema("prod")
+        let { data: trackData, error: trackError } = await this.supabase
           .from("tracks")
-          .insert(entry.track)
+          .upsert(entry.track)
           .select("*");
         log(6, `trackData: ${JSON.stringify(trackData)}, trackError: ${JSON.stringify(trackError)}`)
         if (trackError && trackError?.code !== "23505") throw trackError;
-        let { data: albumData, error: albumError } = await this.supabase.schema("prod")
+        let { data: albumData, error: albumError } = await this.supabase
           .from("albums")
-          .insert(entry.track_album)
+          .upsert(entry.track_album)
           .select("*");
         if (albumError && albumError?.code !== "23505") throw albumError;
         //console.log(albumData, trackData, albumError, trackError);
         if (!trackData) {
           //console.log("reached track");
           const { data: trackDataRet, error: trackErrorRet } = await this.supabase
-            .schema("prod")
             .from("tracks")
             .select("*")
             .eq("isrc", entry.track.isrc);
           trackData = trackDataRet;
           trackError = trackErrorRet;
 
-          //console.log(trackData, trackError);
-        }
-        if (!albumData) {
-          //console.log("reached album");
-          //console.log(entry);
-          let query = this.supabase
-            .schema("prod")
-            .from("albums")
-            .select("*")
-            .eq("album_name", entry.track_album.album_name) // Filter by album_name
-            //.eq("image", entry.track_album.image) // Filter by image
-            //.eq("album_type", entry.track_album.album_type)
-            //.eq("release_date", entry.track_album.release_date)
-          if (entry.track_album.spotify_id) query = query.eq("spotify_id", entry.track_album.spotify_id)
-          
-          const { data: albumDataRet, error: albumErrorRet } = await query;
-          log(5, `data: ${albumDataRet}, error: ${albumErrorRet}`)
+        //console.log(trackData, trackError);
+      }
+      if (!albumData) {
+        //console.log("reached album");
+        //console.log(entry);
+        let query = this.supabase
+        .from("albums")
+        .select("*")
+        const albumSpotifyId = entry.track_album.spotify_id;
+        console.log(`spotify album id: ${albumSpotifyId}`)
+        if (albumSpotifyId) {
+          const query1 = query.eq("spotify_id", albumSpotifyId);
+          ({ data: albumData, error: albumError } = await query1);
+          log(6, `will fallback execute ${( Array.isArray(albumData) && albumData["length"] === 0)}`)
+        } else if(!albumSpotifyId || ( Array.isArray(albumData) && albumData["length"] === 0)){
+          console.log("executing fallback query")
 
-          //.eq("(album).album_isrc", entry.track_album.album.album_isrc)
-          albumData = albumDataRet;
-          albumError = albumErrorRet;
+          query = query.eq("album_name", entry.track_album.album_name); // Filter by album_name
+          //.eq("image", entry.track_album.image) // Filter by image
+          query = query.eq("album_type", entry.track_album.album_type);
+          //.eq("release_date", entry.track_album.release_date)
+          query = query.eq("num_tracks", entry.track_album.num_tracks); // Filter by release_dat
+          log(6, JSON.stringify(query));
+          ({ data: albumData, error: albumError } = await query);
+        }
+        //.eq("artists", entry.track_album.artists)
+        console.log(entry.track_album.spotify_id);
+
+
+          //.eq("(album).album_isrc", entry.track_album.album.album_isrc;
           //console.log(albumData, albumError);
         }
         if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
