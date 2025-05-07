@@ -7,5 +7,7 @@
     "markdown.expand-tabs.tabWidth": 4,
     "jest.runMode": {
         "type": "on-demand"
-    }
+    },
+    "deno.enable": true,
+    "deno.enablePaths": ["supabase/docker/volumes/functions/"],
 }
