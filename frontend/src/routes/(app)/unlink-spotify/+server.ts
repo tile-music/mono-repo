@@ -1,7 +1,7 @@
 // src/routes/+page.server.ts
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "@sveltejs/kit";
-import {removeJob} from "../../../lib/remove-job"
+import { removeJob } from "../../../lib/remove-job";
 /**
  * Handles the POST request to unlink Spotify credentials for the authenticated user.
  *
@@ -22,41 +22,41 @@ import {removeJob} from "../../../lib/remove-job"
  * 6. If the session is null, returns a 400 response with an error message.
  */
 export const POST: RequestHandler = async ({
-  locals: { supabase, session },
-  request,
+    locals: { supabase, session },
+    request,
 }) => {
-  let body = await request.json();
-  if (session !== null) {
-    const headers = {
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    };
-    const { data, error } = await supabase.auth.getUser();
-    console.log("data", data);
-    const userId = data.user?.id;
-    if (!userId) throw new Error("User not found");
-    console.log("userId", userId);
-    const { data: dbData, error: error2 } = await supabase
-      .from("spotify_credentials")
-      .delete()
-      .eq("id", userId);
-    
-    console.log("removing job")
-    await removeJob(userId);
-    return new Response(JSON.stringify(body), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  } else {
-    body = JSON.stringify({ error: "User does not have session." });
-    return new Response(body, {
-      status: 400,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
+    let body = await request.json();
+    if (session !== null) {
+        const headers = {
+            headers: {
+                Authorization: `Bearer ${session.access_token}`,
+            },
+        };
+        const { data, error } = await supabase.auth.getUser();
+        console.log("data", data);
+        const userId = data.user?.id;
+        if (!userId) throw new Error("User not found");
+        console.log("userId", userId);
+        const { data: dbData, error: error2 } = await supabase
+            .from("spotify_credentials")
+            .delete()
+            .eq("id", userId);
+
+        console.log("removing job");
+        await removeJob(userId);
+        return new Response(JSON.stringify(body), {
+            status: 200,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    } else {
+        body = JSON.stringify({ error: "User does not have session." });
+        return new Response(body, {
+            status: 400,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
 };

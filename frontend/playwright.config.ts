@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Read environment variables from file.
@@ -12,39 +12,41 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
-  testMatch: '**/*.spec.ts',
-  fullyParallel: true,
-  reporter: 'html',
-  
-  
-  use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: "http://localhost:5173",
-    trace: 'on-first-retry',
-  },
+    testDir: "./tests",
+    testMatch: "**/*.spec.ts",
+    fullyParallel: true,
+    reporter: "html",
 
-  /* Configure projects for major browsers, 
-   * only running Chrome when testing locally. */
-  projects: (process.env.LOCAL == '1') ? [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    }
-  ] : [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+    use: {
+        /* Base URL to use in actions like `await page.goto('/')`. */
+        baseURL: "http://localhost:5173",
+        trace: "on-first-retry",
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    /* Configure projects for major browsers,
+     * only running Chrome when testing locally. */
+    projects:
+        process.env.LOCAL == "1"
+            ? [
+                  {
+                      name: "chromium",
+                      use: { ...devices["Desktop Chrome"] },
+                  },
+              ]
+            : [
+                  {
+                      name: "chromium",
+                      use: { ...devices["Desktop Chrome"] },
+                  },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-  ]
+                  {
+                      name: "firefox",
+                      use: { ...devices["Desktop Firefox"] },
+                  },
+
+                  {
+                      name: "webkit",
+                      use: { ...devices["Desktop Safari"] },
+                  },
+              ],
 });

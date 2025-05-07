@@ -1,15 +1,23 @@
-import type { Arrangement, ArrangementState, AggregatedSongs } from "../arrangement.svelte";
+import type {
+    Arrangement,
+    ArrangementState,
+    AggregatedSongs,
+} from "../arrangement.svelte";
 
 const options = {
-    width: { type: "number", label: "width", min: 1, max: 25},
-    height: { type: "number", label: "height", min: 1, max: 25},
-    size_modifier: { type: "select", label: "size modifier", values: ["none", "linear"]}
+    width: { type: "number", label: "width", min: 1, max: 25 },
+    height: { type: "number", label: "height", min: 1, max: 25 },
+    size_modifier: {
+        type: "select",
+        label: "size modifier",
+        values: ["none", "linear"],
+    },
 } as const;
 
 const state: ArrangementState<typeof options> = {
     width: 3,
     height: 4,
-    size_modifier: "linear"
+    size_modifier: "linear",
 } as const;
 
 function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
@@ -24,9 +32,11 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
         if (s.size_modifier == "linear") row_width++;
     }
     squares.length = Math.min(songs.length, squares.length);
-    return squares
+    return squares;
 }
 
 export const Grid: Arrangement<typeof options> = {
-    options, state, generate
-}
+    options,
+    state,
+    generate,
+};

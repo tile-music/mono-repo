@@ -1,9 +1,12 @@
-import type { PageServerLoad } from './$types'
+import type { PageServerLoad } from "./$types";
 
-
-import type { Actions } from './$types'
-import { error } from '@sveltejs/kit';
-import { FunctionsHttpError, FunctionsRelayError, FunctionsFetchError } from "@supabase/supabase-js";
+import type { Actions } from "./$types";
+import { error } from "@sveltejs/kit";
+import {
+    FunctionsHttpError,
+    FunctionsRelayError,
+    FunctionsFetchError,
+} from "@supabase/supabase-js";
 
 export const actions: Actions = {
     loaddata: async ({ request, locals: { supabase, session } }) => {
@@ -12,10 +15,14 @@ export const actions: Actions = {
         const body = await request.json();
 
         // send request
-        const { data, error: functionError } = await supabase.functions.invoke("get-listening-data", {
-            headers: { Authorization: `Bearer ${session.access_token}` }, body
-        });
-        
+        const { data, error: functionError } = await supabase.functions.invoke(
+            "get-listening-data",
+            {
+                headers: { Authorization: `Bearer ${session.access_token}` },
+                body,
+            },
+        );
+
         // handle edge function errors
         if (functionError) {
             if (functionError instanceof FunctionsHttpError)
@@ -28,5 +35,5 @@ export const actions: Actions = {
 
         // parse and return list of songs
         return { songs: JSON.parse(data) };
-    }
-}
+    },
+};
