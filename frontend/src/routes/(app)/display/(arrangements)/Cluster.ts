@@ -5,7 +5,6 @@ import type {
 } from "../arrangement.svelte";
 import { generateFullArrangement } from "./pack";
 
-// Options
 const options = {
     offset_min: {
         type: "number",
@@ -23,13 +22,11 @@ const options = {
     },
 } as const;
 
-// Defaults
 const state: ArrangementState<typeof options> = {
     offset_min: 0.05,
     offset_max: 0.15,
 };
 
-// Generate function
 function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
     // skip computation if no squares are being generated
     if (songs.length == 0) return [];

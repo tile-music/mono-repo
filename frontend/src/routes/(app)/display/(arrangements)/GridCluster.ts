@@ -163,6 +163,12 @@ function checkCollisions(grid: boolean[][], sq: SquareInfo) {
     return true;
 }
 
+/**
+ * normalizes the coordinates of the squares to be between 0 and 1
+ * @param squares the squares to normalize
+ * @param gs the grid size
+ * @returns the normalized squares
+ */
 function normalizeSquareCoordinates(squares: SquareInfo[], gs: number) {
     // find minimum and maximum coordinate values that squares occupy
     const bounds = { left: gs, right: 0, top: gs, bottom: 0 };
