@@ -128,6 +128,7 @@ export const actions: Actions = {
             else return fail(500, { server_error: true });
         }
 
+        // set theme cookie to expire in 7 days
         cookies.set("theme", theme, {
             path: "/",
             expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
@@ -139,6 +140,7 @@ export const actions: Actions = {
     reset_profile: async ({ request, locals: { supabase, session } }) => {
         if (session == null) return fail(401, { not_authenticated: true });
 
+        // replace profile with blank profile, retaining user id and email
         const blankProfile = assembleBlankProfile(
             session.user.id,
             session.user.email,
@@ -153,7 +155,6 @@ export const actions: Actions = {
     },
 
     reset_listening_data: async ({
-        request,
         locals: { supabase, session },
     }) => {
         if (session == null) return fail(401, { not_authenticated: true });

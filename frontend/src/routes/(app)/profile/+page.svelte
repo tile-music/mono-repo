@@ -80,8 +80,11 @@
   let updateProfileStatus = $state("");
   const handleUpdateProfile: SubmitFunction = () => {
     return async ({ result }) => {
-      if (result.type === "success") updateProfileStatus = "updated successfully";
-      else if (result.type === "failure") {
+      if (result.type === "success") {
+        // handle success
+        updateProfileStatus = "updated successfully";
+      } else if (result.type === "failure") {
+        // handle known errors
         if (!result.data || result.data.server_error)
           updateProfileStatus = "failed to update profile: server error";
         else if (result.data.not_authenticated)
@@ -90,8 +93,12 @@
           updateProfileStatus = "failed to update profile: username must be at least 3 characters";
         else if (result.data.update_unnecessary)
           updateProfileStatus = "change fields to update profile"
-        else updateProfileStatus = "failed to update profile: unknown error";
-      } else updateProfileStatus = "failed to update profile: unknown error"; // just in case
+        else
+        updateProfileStatus = "failed to update profile: unknown error";
+      } else {
+        // fallback for unknown result types
+        updateProfileStatus = "failed to update profile: unknown error";
+      }
     };
   }
 
