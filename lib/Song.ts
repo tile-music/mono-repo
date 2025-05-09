@@ -12,13 +12,10 @@ export type SongInfo = {
 
 } */
 export type ListeningDataSongInfo = SongInfo & { 
-    child?: ListeningDataSongInfo;
+    children: ListeningDataSongInfo[];
     is_child: boolean;
-    has_children: boolean;
-    show_children?: boolean;
-    num_children?: number;
-    is_parent: boolean;
-    size: number;
+    is_parent:boolean;
+    show_children: boolean;
 }
 
 export type AlbumInfo = {
