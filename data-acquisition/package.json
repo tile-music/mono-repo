@@ -28,6 +28,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "ioredis": "^5.4.1",
+    "musicbrainz-api": "^0.25.0",
     "spotify-api.js": "^9.2.5",
     "supabase": "^1.203.0",
     "wakaq": "^2.2.1"

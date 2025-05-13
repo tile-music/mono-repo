@@ -1,5 +1,6 @@
 import { AlbumInfo, SpotifyAlbumInfo } from '../../src/music/AlbumInfo';
 
+
 describe('AlbumInfo classes', () => {
   describe('base classes', () => {
     test('constructor should initialize properties correctly', () => {
@@ -96,7 +97,6 @@ describe('AlbumInfo classes', () => {
         2021,
         5,
         ["Pop"],
-        
         "9876543210"
       );
 

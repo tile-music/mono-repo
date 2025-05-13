@@ -4,7 +4,7 @@
 env.sh
 env.ps1
 test.env
-
+/.idea
 /scratch
 
 data-acquisition/tests/util/test-data.copy.json

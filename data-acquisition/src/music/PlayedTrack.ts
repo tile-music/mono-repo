@@ -39,6 +39,14 @@ export class PlayedTrack {
     this.trackPopularity = trackPopularity;
   }
 
+  public getTrackInfo() : TrackInfo | SpotifyTrackInfo {
+    return this.trackInfo;
+  }
+
+  public getAlbumInfo() : AlbumInfo | SpotifyAlbumInfo {
+    return this.albumInfo;
+  }
+
   public createDbEntryObject() {
     return {
       listened_at: this.listenedAt,
