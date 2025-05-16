@@ -2,12 +2,16 @@ import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
 import { assembleBlankProfile } from "./profile";
+import { log } from "$lib/log"
 
 export const load: PageServerLoad = async ({
     cookies,
     locals: { supabase, session },
 }) => {
-    if (session == null) throw Error("User does not have session.");
+    if (session == null) {
+        log(3, "User does not have session in protected route.");
+        throw Error("User does not have session in protected route.");
+    }
 
     // fetch profile data
     let { data: user, error } = await supabase
@@ -16,6 +20,7 @@ export const load: PageServerLoad = async ({
         .eq("id", session.user.id)
         .single();
     if (error && error.code == "PGRST116") {
+        // profile not found, create blank profile
         user = {
             updated_at: null,
             username: null,
@@ -24,7 +29,13 @@ export const load: PageServerLoad = async ({
             avatar_url: null,
             theme: "dark",
         };
-    } else if (error) throw error;
+
+        log(3, "No profile found for user, creating blank profile.");
+    } else if (error) {
+        // unexpected PostgREST error
+        log(2, "Error fetching profile data: " + error);
+        throw error;
+    }
 
     const email = session.user.email ?? null;
 
@@ -36,13 +47,16 @@ export const load: PageServerLoad = async ({
         });
     }
 
-    // return the retrieved user, or the blank user if no profile was found
+    // return the retrieved (or blank) user profile
     return { user, email };
 };
 
 export const actions: Actions = {
     update_profile: async ({ request, locals: { supabase, session } }) => {
-        if (session == null) return fail(401, { not_authenticated: true });
+        if (session == null) {
+            log(3, "User does not have session in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
 
         // assemble update object
         const formData = await request.formData();
@@ -61,7 +75,15 @@ export const actions: Actions = {
             .select(`updated_at, username, full_name, website, avatar_url`)
             .eq("id", session.user.id)
             .single();
-        if (get_error || !user) throw get_error;
+        if (get_error || !user) {
+            if (get_error) {
+                log(2, "Error fetching profile data: " + get_error);
+                throw get_error;
+            } else {
+                log(3, "Error fetching profile data: no user");
+                return fail(404, { no_user: true });
+            }
+        }
 
         // make sure update is necessary
         if (
@@ -71,6 +93,7 @@ export const actions: Actions = {
             user.avatar_url == update.avatar_url
         ) {
             // update is unnecessary
+            log(5, `Not updating ${session.user.id}: update is unnecessary`);
             return fail(400, { update_unnecessary: true });
         }
 
@@ -79,10 +102,13 @@ export const actions: Actions = {
             .from("profiles")
             .upsert(update);
         if (update_error) {
-            console.log(update_error);
-            if (update_error.code === "23514")
+            if (update_error.code === "23514") {
+                log(5, `Not updating ${session.user.id}: username too short`);
                 return fail(400, { username_too_short: true });
-            else return fail(500, { server_error: true });
+            } else {
+                log(2, "Error updating user: " + update_error);
+                return fail(500, { server_error: true });
+            }
         }
 
         return { success: true };
@@ -93,7 +119,10 @@ export const actions: Actions = {
         request,
         locals: { supabase, session },
     }) => {
-        if (session == null) return fail(401, { not_authenticated: true });
+        if (session == null) {
+            log(3, "User does not have session in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
 
         // assemble update object
         const theme = await request.json();
@@ -109,11 +138,20 @@ export const actions: Actions = {
             .select(`theme`)
             .eq("id", session.user.id)
             .single();
-        if (get_error || !user) throw get_error;
+        if (get_error || !user) {
+            if (get_error) {
+                log(2, "Error fetching profile data: " + get_error);
+                throw get_error;
+            } else {
+                log(3, "Error fetching profile data: no user");
+                return fail(404, { no_user: true });
+            }
+        }
 
         // make sure update is necessary
         if (user.theme == update.theme) {
             // update is unnecessary
+            log(5, `Not updating ${session.user.id} theme: update is unnecessary`);
             return fail(400, { update_unnecessary: true });
         }
 
@@ -122,10 +160,8 @@ export const actions: Actions = {
             .from("profiles")
             .upsert(update);
         if (update_error) {
-            console.log(update_error);
-            if (update_error.code === "23514")
-                return fail(400, { username_too_short: true });
-            else return fail(500, { server_error: true });
+            log(2, "Error updating profile data: " + update_error);
+            return fail(500, { server_error: true });
         }
 
         // set theme cookie to expire in 7 days
@@ -138,7 +174,10 @@ export const actions: Actions = {
     },
 
     reset_profile: async ({ request, locals: { supabase, session } }) => {
-        if (session == null) return fail(401, { not_authenticated: true });
+        if (session == null) {
+            log(3, "User does not have session in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
 
         // replace profile with blank profile, retaining user id and email
         const blankProfile = assembleBlankProfile(
@@ -147,7 +186,7 @@ export const actions: Actions = {
         );
         const { error } = await supabase.from("profiles").upsert(blankProfile);
         if (error) {
-            console.error(error); // log unexpected error
+            log(2, "Error resetting profile: " + error);
             return fail(500, { server_error: true });
         }
 
@@ -157,7 +196,10 @@ export const actions: Actions = {
     reset_listening_data: async ({
         locals: { supabase, session },
     }) => {
-        if (session == null) return fail(401, { not_authenticated: true });
+        if (session == null) {
+            log(3, "User does not have session in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
 
         // attempt to reset listening data
         const headers = {
@@ -165,10 +207,14 @@ export const actions: Actions = {
                 Authorization: `Bearer ${session.access_token}`,
             },
         };
-        const { data } = await supabase.functions.invoke(
+        const { data, error } = await supabase.functions.invoke(
             "reset-listening-data",
             headers,
         );
+        if (error) {
+            log(2, "Error resetting listening data: " + error);
+            return fail(500, { server_error: true });
+        }
 
         // handle errors
         const response = JSON.parse(data);
