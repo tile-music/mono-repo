@@ -1,9 +1,8 @@
-import { SpotifyUserPlaying, UserPlaying } from "../music/UserPlaying";
-import { SupabaseClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
-import { Queue } from "bullmq";
-import { connection } from "./redis";
-import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./makeQueue";
+import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import dotenv from "npm:dotenv";
+import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./makeQueue.ts";
+import process from "node:process";
+
 dotenv.config();
 /**
  */

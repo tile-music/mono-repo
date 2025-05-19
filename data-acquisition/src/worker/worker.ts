@@ -1,9 +1,10 @@
-import { Worker } from 'bullmq';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { SpotifyUserPlaying } from '../music/UserPlaying';
+import { Worker } from 'npm:bullmq';
+import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { SpotifyUserPlaying } from '../music/UserPlaying.ts';
 
-import { connection } from './redis';
-import dotenv from 'dotenv';
+import { connection } from './redis.ts';
+import dotenv from 'npm:dotenv';
+import process from "node:process";
 
 dotenv.config();
 /**
@@ -39,7 +40,7 @@ export async function spotifyFire(userId: string, refreshToken: string, supabase
 
 const worker = new Worker(
   'my-cron-jobs',
-  async (job: any) => {
+  async (job) => {
     const { userId, refreshToken } = job.data.data;
     
     await spotifyFire(userId, refreshToken, process.env.SB_SCHEMA as SupabaseSchema); 

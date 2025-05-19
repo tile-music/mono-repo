@@ -1,8 +1,6 @@
-import express from 'express';
-import { Queue } from 'bullmq';
-import { connection } from './redis';  // Assuming you already have the Redis connection
-import { spotifyFire } from './worker';       // Import the spotifyFire function
-import { makeDataAcqQueue } from './makeQueue';
+import express from 'npm:express';
+import { makeDataAcqQueue } from './makeQueue.ts';
+import process from "node:process";
 
 const queue = makeDataAcqQueue();
 // Create an instance of Express
@@ -72,7 +70,7 @@ app.post('/add-job', async (req, res) => {
     // Add job to queue with specified cron expression
     
   } catch (err) {
-    res.status(500).json({ error: 'Failed to add job' });
+    res.status(500).json({ error: 'Failed to add job: ' + err });
   }
 });
 
@@ -96,7 +94,7 @@ app.post('/remove-job', async (req, res) => {
     }else{
       return res.status(400).json({ error: 'Invalid type' });
     }
-  } catch (err : any) {
+  } catch (err) {
     if(err instanceof Error){
       switch(err.message){
         case "Failed to remove job from queue something is blocking it or one of its dependencies":

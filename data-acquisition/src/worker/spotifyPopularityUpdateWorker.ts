@@ -1,7 +1,7 @@
-import { Worker } from 'bullmq';
-import { updateSpotifyAlbumPopularity } from '../util/updateSpotifyInfo';
-import { connection } from './redis';
-
+import { Worker } from 'npm:bullmq';
+import { updateSpotifyAlbumPopularity } from '../util/updateSpotifyInfo.ts';
+import { connection } from './redis.ts';
+import process from "node:process";
 
 const worker = new Worker('spotifyAlbumPopularity', async () => {
   try {
