@@ -1,16 +1,17 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { SpotifyUserPlaying, MockUserPlaying } from "../../src/music/UserPlaying";
-import { Client, Player } from "spotify-api.js";
+import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { SpotifyUserPlaying, MockUserPlaying } from "../../src/music/UserPlaying.ts";
+import { Client, Player } from "npm:spotify-api.js@latest";
 
-import dotenv from "dotenv";
-import { parse } from "path";
-import { time } from "console";
 
-dotenv.config();
 
-let context: any = { refresh_token: process.env.SP_REFRESH };
+import { expect } from "jsr:@std/expect";
+import {beforeAll, afterAll, beforeEach, describe} from "jsr:@std/testing/bdd";
 
-describe("spotify Listening timestamp sanity check", () => {
+
+
+let context: any = { refresh_token: Deno.env.get("SP_REFRESH") };
+
+Deno.test("spotify Listening timestamp sanity check", (t) => {
   const testData = ["2024-11-15T14:27:57.952Z",
     "2024-11-15T14:24:25.620Z",
     "2024-11-15T14:22:30.406Z",
@@ -20,7 +21,7 @@ describe("spotify Listening timestamp sanity check", () => {
     "2024-11-15T14:06:07.862Z",
     "2024-11-15T13:59:51.570Z",
     "2024-11-15T13:56:10.273Z"]
-  test("SpotifyUserPlaying parseSpotifyListeningTimestamp", () => {
+  t.step("SpotifyUserPlaying parseSpotifyListeningTimestamp", () => {
     for (const timestamp of testData) { // Use for...of to iterate over values
       const date = SpotifyUserPlaying.parseISOToDate(timestamp);
       const dateTs = new Date(timestamp)
@@ -38,8 +39,8 @@ describe("Spotify UserPlaying Integration", () => {
 
   beforeAll(async () => {
     supabase = new SupabaseClient(
-      process.env.SB_URL_TEST as string,
-      process.env.ANON as string,
+      Deno.env.get("SB_URL_TEST") as string,
+      Deno.env.get("ANON") as string,
       { db: { schema: "prod" } }
     );
     const { data, error } = await supabase.auth.signUp({
@@ -49,9 +50,9 @@ describe("Spotify UserPlaying Integration", () => {
     spotifyClient = await Client.create({
       refreshToken: true,
       token: {
-        clientID: process.env.SP_CID as string,
-        clientSecret: process.env.SP_SECRET as string,
-        refreshToken: process.env.SP_REFRESH as string,
+        clientID: Deno.env.get("SP_CID") as string,
+        clientSecret: Deno.env.get("SP_SECRET") as string,
+        refreshToken: Deno.env.get("SP_REFRESH") as string,
       },
       onRefresh: () => {
         console.log("token refreshed");
@@ -68,15 +69,15 @@ describe("Spotify UserPlaying Integration", () => {
   afterAll(async () => {
     const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
     supabase = new SupabaseClient(
-      process.env.SB_URL_TEST as string,
-      process.env.SERVICE as string
+      Deno.env.get("SB_URL_TEST") as string,
+      Deno.env.get("SERVICE") as string
     );
     const { data, error } = await supabase.auth.admin.deleteUser(userId);
     if (error) throw error;
     //await supabase.rpc("clear_test_tables");
   });
   
-  test("SpotifyUserPlaying fire method data integrity", async () => {
+  Deno.test("SpotifyUserPlaying fire method data integrity", async () => {
     const spotifyUserPlaying = new SpotifyUserPlaying(
       supabase,
       userId,
@@ -113,8 +114,8 @@ describe("UserPlaying Tests", () => {
   describe("UserPlaying Tests", () => {
     beforeAll(async () => {
       supabase = new SupabaseClient(
-        process.env.SB_URL_TEST as string,
-        process.env.ANON as string,
+        Deno.env.get("SB_URL_TEST") as string,
+        Deno.env.get("ANON") as string,
         { db: { schema: "test" } }
       );
 
@@ -128,8 +129,8 @@ describe("UserPlaying Tests", () => {
     afterAll(async () => {
 
       supabase = new SupabaseClient(
-        process.env.SB_URL_TEST as string,
-        process.env.SERVICE as string
+        Deno.env.get("SB_URL_TEST") as string,
+        Deno.env.get("SERVICE") as string
       );
       const { data, error } = await supabase.auth.admin.deleteUser(userId);
       if (error) throw error;
@@ -204,7 +205,7 @@ describe("UserPlaying Tests", () => {
       await expect(postgres.query("SELECT * from test.tracks")).resolves.not.toThrow();
     }); */
 
-    test("SpotifyUserPlaying init method", async () => {
+    Deno.test("SpotifyUserPlaying init method", async () => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
         supabase,
         userId,
@@ -213,12 +214,12 @@ describe("UserPlaying Tests", () => {
       await expect(spotifyUserPlaying.init()).resolves.not.toThrow();
     });
 
-    test("MockUserPlaying init method", async () => {
+    Deno.test("MockUserPlaying init method", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
       await expect(mockUserPlaying.init()).resolves.not.toThrow();
     });
 
-    test("MockUserPlaying fire method", async () => {
+    Deno.test("MockUserPlaying fire method", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
       await mockUserPlaying.init();
       await expect(mockUserPlaying.fire())
@@ -234,12 +235,12 @@ describe("UserPlaying Tests", () => {
             })
         );
     });
-    test("MockUserPlaying init method using test data 2", async () => {
+    Deno.test("MockUserPlaying init method using test data 2", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
       await expect(mockUserPlaying.init()).resolves.not.toThrow();
     });
 
-    test("MockUserPlaying fire method using test data 2", async () => {
+    Deno.test("MockUserPlaying fire method using test data 2", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
       console.log(testData2)
       await mockUserPlaying.init();
@@ -252,7 +253,7 @@ describe("UserPlaying Tests", () => {
             .eq("user_id", userId)
         );
     });
-    test("MockUserPlaying data integrity", async () => {
+    Deno.test("MockUserPlaying data integrity", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
       await mockUserPlaying.init();
       //await mockUserPlaying.fire();
@@ -260,14 +261,14 @@ describe("UserPlaying Tests", () => {
       expect(mockUserPlaying.mockData[0].trackName).toBe("Test Track");
     });
 
-    test("SpotifyUserPlaying Parse Spotify Date Function", async () => {
+    Deno.test("SpotifyUserPlaying Parse Spotify Date Function", async () => {
       expect(SpotifyUserPlaying.parseSpotifyDate("1999-12-22", "day")).toStrictEqual({ year: 1999, month: 12, day: 22 });
       expect(SpotifyUserPlaying.parseSpotifyDate("1999-12", "month")).toStrictEqual({ year: 1999, month: 12 });
       expect(SpotifyUserPlaying.parseSpotifyDate("1999", "year")).toStrictEqual({ year: 1999 });
     })
 
 
-    test("SpotifyUserPlaying fire method", async () => {
+    Deno.test("SpotifyUserPlaying fire method", async () => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
         supabase,
         userId,
@@ -276,7 +277,7 @@ describe("UserPlaying Tests", () => {
       await spotifyUserPlaying.init();
       await expect(spotifyUserPlaying.fire()).resolves.not.toThrow();
     });
-    test("SpotifyUserPlaying fire method does not create duplicates", async () => {
+    Deno.test("SpotifyUserPlaying fire method does not create duplicates", async () => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
         supabase,
         userId,
@@ -303,7 +304,7 @@ describe("UserPlaying Tests", () => {
           expect(newData.length).toBeLessThanOrEqual(data.length);
         });
     }, 10000);
-    test("test using real spotify data", async() => {
+    Deno.test("test using real spotify data", async() => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
         supabase,
         userId,
