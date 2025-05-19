@@ -4,3 +4,9 @@ import { TrackInfo, SpotifyTrackInfo } from "../music/TrackInfo";
 
 
 
+/**
+ * @todo 
+ */
+
+
+async function addMusicBrainz

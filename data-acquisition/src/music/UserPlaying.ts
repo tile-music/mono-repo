@@ -129,8 +129,7 @@ export abstract class UserPlaying {
           throw new Error(`track data ${JSON.stringify(trackData)} album data: ${JSON.stringify(albumData)}, 
                   ${JSON.stringify(entry)}
                   No data returned from insert or albumData is undefined or empty`);
-        }
-      
+        } 
     }
   }
 }

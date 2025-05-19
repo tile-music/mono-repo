@@ -7,9 +7,9 @@ const config = {
 };
 
 const mbAPI = new MusicBrainzApi(config);
+async function run(){
 
-describe("musicbrainz Playground", async () => {
+  console.log(await mbAPI.lookupUrl('https://open.spotify.com/track/2AMysGXOe0zzZJMtH3Nizb'));
+}
+run();
 
-  console.log(await mbAPI.lookup("recording", {isrcs: "USXXX930483"}))
-
-});
