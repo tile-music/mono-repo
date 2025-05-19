@@ -103,7 +103,7 @@ export class SpotifyAlbumInfo extends AlbumInfo {
     this.spotifyId = spotifyId;
   }
 
-  public createDbEntryObject() {
+  public override createDbEntryObject() {
     return {
       ...super.createDbEntryObject(),
       spotify_id: this.spotifyId

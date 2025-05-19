@@ -1,5 +1,6 @@
-import {log as logBase} from "../../../lib/log"
-import dotenv from "dotenv";
+import {log as logBase} from "../../../lib/log.ts"
+import dotenv from "npm:dotenv";
+import process from "node:process";
 
 dotenv.config();
 
