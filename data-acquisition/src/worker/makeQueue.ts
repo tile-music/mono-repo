@@ -1,6 +1,6 @@
-import { Queue, Worker, QueueEvents } from 'bullmq';
+import { Queue } from 'npm:bullmq';
 
-import { connection } from './redis';
+import { connection } from './redis.ts';
 /**
  * Creates and returns a new Queue instance configured for cron jobs.
  *

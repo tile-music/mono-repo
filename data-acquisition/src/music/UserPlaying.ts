@@ -1,13 +1,13 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import process from "node:process";
 
-import { Album, Client, Player, Track, User } from "spotify-api.js";
+import { Client, Player } from "npm:spotify-api.js";
 
-import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo";
-import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo";
-import { PlayedTrack } from "./PlayedTrack";
+import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
+import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
+import { PlayedTrack } from "./PlayedTrack.ts";
 
-import { log } from "../util/log"
-import { json } from "express";
+import { log } from "../util/log.ts"
 
 export type ReleaseDate = { year: number, month?: number, day?: number }
 
@@ -25,21 +25,20 @@ export abstract class UserPlaying {
     this.context = context;
     this.inited = false;
   }
-  protected async makeDBEntries(): Promise<void> {
+  protected makeDBEntries(): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  public async init(): Promise<void> {
+  public init(): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  public async fire(): Promise<void> {
+  public fire(): Promise<void> {
     throw new Error("Method not implemented.");
   }
   public async putInDB(): Promise<void> {
     await this.makeDBEntries();
     //console.log(this.dbEntries);
 
-    for (let entry of this.dbEntries.p_track_info) {
-
+    for (const entry of this.dbEntries.p_track_info) {
         let { data: trackData, error: trackError } = await this.supabase
           .from("tracks")
           .insert(entry.track)
@@ -100,13 +99,13 @@ export abstract class UserPlaying {
         }
         if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
           //console.log("reached track albums");
-          const { data: trackAlbumData, error: trackAlbumError } =
+          const { data: _trackAlbumData, error: _trackAlbumError } =
             await this.supabase.from("track_albums").insert({
               track_id: trackData[0].track_id,
               album_id: albumData[0].album_id,
             });
 
-          const { data: playedData, error: playedError } = await this.supabase
+          const { data: _playedData, error: _playedError } = await this.supabase
             .from("played_tracks")
             .insert({
               user_id: this.userId,
@@ -144,7 +143,7 @@ export class SpotifyUserPlaying extends UserPlaying {
   constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: any, context: any) {
     super(supabase, userId, context);
   }
-  public async init(): Promise<void> {
+  public override async init(): Promise<void> {
     //console.log(this.context);
     this.client = await Client.create({
       refreshToken: true,
@@ -163,9 +162,9 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
 
 
-  protected async makeDBEntries(): Promise<void> {
+  protected override async makeDBEntries(): Promise<void> {
     //await this.getAlbumPopularity();
-    for (const [i, item] of this.items.entries()) {
+    for (const [_, item] of this.items.entries()) {
       const releaseDateRaw: any = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
       const releaseDatePrecisionRaw: any = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
 
@@ -198,14 +197,14 @@ export class SpotifyUserPlaying extends UserPlaying {
       this.played.push(playedTrackInfo);
       //console.log(playedTrackInfo);
     }
-    for (const [i, track] of this.played.entries()) {
+    for (const [_, track] of this.played.entries()) {
       await this.dbEntries.p_track_info.push(track.createDbEntryObject());
     }
     this.dbEntries.p_user_id = this.userId;
 
 
   }
-  public async fire(): Promise<void> {
+  public override async fire(): Promise<void> {
     this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
     //console.log(this.items)
     await this.putInDB();
@@ -215,7 +214,7 @@ export class SpotifyUserPlaying extends UserPlaying {
     if (!date) {
       throw new Error("Date is undefined");
     }
-    let [year, month, day] = date.split("-");
+    const [year, month, day] = date.split("-");
     switch (datePrecision) {
       case "year":
         return { year: parseInt(date) };
@@ -269,8 +268,8 @@ export class MockUserPlaying extends UserPlaying {
     super(supabase, userId, context);
     this.mockData = context;
   }
-  protected async makeDBEntries(): Promise<void> {
-    for (let track of this.mockData) {
+  protected override async makeDBEntries(): Promise<void> {
+    for (const track of this.mockData) {
       const album = new AlbumInfo(
         track.albumInfo.albumName,
         "Album",
@@ -297,7 +296,7 @@ export class MockUserPlaying extends UserPlaying {
       );
       this.played.push(playedTrackInfo);
     }
-    for (let track of this.played) {
+    for (const track of this.played) {
       await this.dbEntries.p_track_info.push(track.createDbEntryObject());
     }
 
@@ -305,11 +304,11 @@ export class MockUserPlaying extends UserPlaying {
 
   }
 
-  public async init(): Promise<void> {
+  public override async init(): Promise<void> {
     this.inited = true;
     console.log("Mock init");
   }
-  public async fire(): Promise<void> {
+  public override async fire(): Promise<void> {
     await this.putInDB();
   }
 }
