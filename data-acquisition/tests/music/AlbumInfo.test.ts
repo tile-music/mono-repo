@@ -1,9 +1,10 @@
-import { AlbumInfo, SpotifyAlbumInfo } from '../../src/music/AlbumInfo';
+import { AlbumInfo, SpotifyAlbumInfo } from '../../src/music/AlbumInfo.ts';
+import { expect } from "jsr:@std/expect";
 
 
-describe('AlbumInfo classes', () => {
-  describe('base classes', () => {
-    test('constructor should initialize properties correctly', () => {
+
+  Deno.test('base classes', () => {
+    Deno.test('constructor should initialize properties correctly', () => {
       const albumInfo = new AlbumInfo(
         "Lenny Skinny",
         "Album",
@@ -29,7 +30,7 @@ describe('AlbumInfo classes', () => {
      
     });
 
-    test('createDbEntryObject should return correct object', () => {
+    Deno.test('createDbEntryObject should return correct object', () => {
       const albumInfo = new AlbumInfo(
         "New Artist",
         "Single",
@@ -58,8 +59,8 @@ describe('AlbumInfo classes', () => {
       });
     });
   });
-  describe('spotify classes',()=>{
-    test('constructor should initialize properties correctly',()=>{
+  Deno.test('spotify classes',()=>{
+    Deno.test('constructor should initialize properties correctly',()=>{
       const albumInfo = new SpotifyAlbumInfo(
         "Lenny Skinny",
         "Album",
@@ -86,7 +87,7 @@ describe('AlbumInfo classes', () => {
       
       expect(albumInfo['spotifyId']).toBe("spoturi1234567890");
     });
-    test('createDbEntryObject should return correct object',()=>{
+    Deno.test('createDbEntryObject should return correct object',()=>{
       const albumInfo = new SpotifyAlbumInfo(
         "New Artist",
         "Single",
@@ -117,4 +118,3 @@ describe('AlbumInfo classes', () => {
 
     });
   });
-});
