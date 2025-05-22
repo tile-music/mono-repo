@@ -3,8 +3,8 @@ import { expect } from "jsr:@std/expect";
 
 
 
-  Deno.test('base classes', () => {
-    Deno.test('constructor should initialize properties correctly', () => {
+  await Deno.test('base classes', async (t) => {
+    await t.step('constructor should initialize properties correctly',  () => {
       const albumInfo = new AlbumInfo(
         "Lenny Skinny",
         "Album",
@@ -30,7 +30,7 @@ import { expect } from "jsr:@std/expect";
      
     });
 
-    Deno.test('createDbEntryObject should return correct object', () => {
+    await t.step('createDbEntryObject should return correct object',  () => {
       const albumInfo = new AlbumInfo(
         "New Artist",
         "Single",
@@ -59,8 +59,8 @@ import { expect } from "jsr:@std/expect";
       });
     });
   });
-  Deno.test('spotify classes',()=>{
-    Deno.test('constructor should initialize properties correctly',()=>{
+  Deno.test('spotify classes',async (t)=>{
+    await t.step('constructor should initialize properties correctly',()=>{
       const albumInfo = new SpotifyAlbumInfo(
         "Lenny Skinny",
         "Album",
@@ -87,7 +87,7 @@ import { expect } from "jsr:@std/expect";
       
       expect(albumInfo['spotifyId']).toBe("spoturi1234567890");
     });
-    Deno.test('createDbEntryObject should return correct object',()=>{
+    await t.step('createDbEntryObject should return correct object',async()=>{
       const albumInfo = new SpotifyAlbumInfo(
         "New Artist",
         "Single",
@@ -111,7 +111,6 @@ import { expect } from "jsr:@std/expect";
         num_tracks: 5,
         artists: ["new artist"],
         genre: ["Pop"],
-        
         image: "new_placeholder",
         spotify_id: "9876543210"
       });

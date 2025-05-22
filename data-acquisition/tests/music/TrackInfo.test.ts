@@ -4,9 +4,9 @@ import { expect } from "jsr:@std/expect";
 /**
  * sharted by chat
  */
-Deno.test('TrackInfo classes', (t) => {
-  t.step("base class", (t) => {
-    t.step('should create an instance of TrackInfo with correct properties', () => {
+Deno.test('TrackInfo classes', async (t) => {
+  await t.step("base class", async (t) => {
+    await t.step('should create an instance of TrackInfo with correct properties', () => {
       const trackName = 'Test Track';
       const trackArtists = ['Artist1', 'Artist2'];
       const isrc = 'US1234567890';
@@ -21,7 +21,7 @@ Deno.test('TrackInfo classes', (t) => {
       expect(trackInfo['durationMs']).toBe(durationMs);
     });
 
-    t.step('should create a correct database entry object', () => {
+    await t.step('should create a correct database entry object', async () => {
       const trackName = 'Test Track';
       const trackArtists = ['Artist1', 'Artist2'];
       const isrc = 'US1234567890';
@@ -38,8 +38,8 @@ Deno.test('TrackInfo classes', (t) => {
       });
     });
   });
-  t.step("spotify class", (t) => {
-    t.step('should create an instance of SpotifyTrackInfo with correct properties', () => {
+  await t.step("spotify class", async (t) => {
+    await t.step('should create an instance of SpotifyTrackInfo with correct properties', async () => {
       const trackName = 'Test Track';
       const trackArtists = ['Artist1', 'Artist2'];
       const isrc = 'US1234567890';
@@ -57,7 +57,7 @@ Deno.test('TrackInfo classes', (t) => {
       expect(spotifyTrackInfo['spotifyId']).toBe(spotifyId);
     });
 
-    t.step('should create a correct database entry object', () => {
+    await t.step('should create a correct database entry object', async () => {
       const trackName = 'Test Track';
       const trackArtists = ['Artist1', 'Artist2'];
       const isrc = 'US1234567890';
