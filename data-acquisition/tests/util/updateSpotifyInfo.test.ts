@@ -1,28 +1,29 @@
-import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+
 import { SpotifyUpdateData, updateSpotifyAlbumPopularityHelper, selectString, updateSpotifyAlbumPopularity } from "../../src/util/updateSpotifyInfo.ts";
-import { Client } from "npm:spotify-api.js@latest";
+
 import { SpotifyUserPlaying } from "../../src/music/UserPlaying.ts";
 import { expect } from "jsr:@std/expect";
 
-import fs from 'node:fs';
+
 
 
 
 Deno.test("Test updateSpotifyAlbumPopularity", async (t: Deno.TestContext) => {
-  let supabase: SupabaseClient<any, "test", any> = new SupabaseClient(
-    Deno.env.get("SB_URL_TEST") as string,
-    Deno.env.get("SERVICE") as string,
-    { db: { schema: "test" } }
-  );;
+  console.log("dfsf")
+  let supabase: SupabaseClient = new SupabaseClient(
+    Deno.env.get("SB_URL_TEST") || "",
+    Deno.env.get("SERVICE") || "",
+    
+  );
   let spotifyClient: Client;
   let spotifyData: SpotifyUpdateData[] = [];
 
   spotifyClient = await Client.create({
     refreshToken: true,
     token: {
-      clientID: Deno.env.get("SP_CID") as string,
-      clientSecret: Deno.env.get("SP_SECRET") as string,
-      refreshToken: Deno.env.get("SP_REFRESH") as string,
+      clientID: Deno.env.get("SP_CID") || "",
+      clientSecret: Deno.env.get("SP_SECRET") || "",
+      refreshToken: Deno.env.get("SP_REFRESH") || "",
     },
     onRefresh: () => {
       console.log("token refreshed");
@@ -38,7 +39,7 @@ Deno.test("Test updateSpotifyAlbumPopularity", async (t: Deno.TestContext) => {
     });
   }) */
 
-  t.step("test update SpotifyAlbumPopularityHelper", async (t: Deno.TestContext) => {
+  await t.step("test update SpotifyAlbumPopularityHelper", async (t: Deno.TestContext) => {
     const data = fs.readFileSync('tests/util/test-data.json', 'utf8');
     spotifyData = JSON.parse(data);
     console.log("spotifyData: ", spotifyData.length);
@@ -53,14 +54,14 @@ Deno.test("Test updateSpotifyAlbumPopularity", async (t: Deno.TestContext) => {
     let userId: string;
     let spotifyUserPlaying;
     /** the type should be some kind of postgrest builder but im lazy👅 */
-    let query: any;
+    let query;
 
     const { data, error } = await supabase.auth.signUp({
       email: "test4@example.com",
       password: "password",
     });
     if (error) throw error;
-    userId = data.user?.id as string;
+    userId = data.user?.id || "";
     if (userId === '' || userId === undefined) throw Error("userId is empty");
     spotifyUserPlaying = new SpotifyUserPlaying(
       supabase,
