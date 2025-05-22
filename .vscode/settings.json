@@ -8,5 +8,9 @@
     "jest.runMode": {
         "type": "on-demand"
     },
-    "deno.enablePaths": ["./data-acquisition/"]
+    "deno.enablePaths": ["./data-acquisition/"],
+    "deno.testing.args": [
+        "--allow-all",
+        "--no-check"
+    ]
 }
