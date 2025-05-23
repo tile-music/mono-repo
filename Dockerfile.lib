@@ -1,4 +1,9 @@
-FROM node:current-alpine3.20 AS lib-build
+FROM denoland/deno:latest AS lib-build-deno
+
+WORKDIR /app/lib
+COPY lib /app/lib
+
+FROM node:current-alpine3.20 AS lib-build-node
 
 WORKDIR /app/lib
 COPY lib /app/lib
