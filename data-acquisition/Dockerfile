@@ -16,13 +16,8 @@ CMD ["deno", "run", "--allow-all", "./src/app.ts"]
 
 EXPOSE 3001
 
-#test stage
-FROM build AS test
-
-CMD ["npm", "run", "test"]
-
 #Production stage
 
 FROM build AS prod
 
-CMD ["npm", "run", "start"]
+CMD ["deno", "run", "--allow-env", "--allow-read", "--allow-ffi", "--allow-net", "--allow-run", "src/app.ts"]
