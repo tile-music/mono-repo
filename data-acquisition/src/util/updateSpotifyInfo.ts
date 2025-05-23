@@ -1,8 +1,6 @@
-import { Client } from 'npm:spotify-api.js';
-import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
-import process from "node:process";
+import { Client, SupabaseClient, process, dotenv } from "../../deps.ts";
 
-import * as dotenv from "npm:dotenv";
+dotenv.config();
 
 dotenv.config();
 

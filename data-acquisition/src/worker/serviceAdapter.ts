@@ -1,7 +1,5 @@
-import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
-import dotenv from "npm:dotenv";
+import { SupabaseClient, dotenv, process } from "../../deps.ts";
 import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./makeQueue.ts";
-import process from "node:process";
 
 dotenv.config();
 /**
