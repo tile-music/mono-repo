@@ -1,4 +1,4 @@
-import { Queue } from 'npm:bullmq';
+import { Queue } from '../../deps.ts';
 
 import { connection } from './redis.ts';
 /**

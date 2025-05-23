@@ -1,10 +1,6 @@
-import { Worker } from 'npm:bullmq';
-import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { Worker, SupabaseClient, dotenv, process } from '../../deps.ts';
 import { SpotifyUserPlaying } from '../music/UserPlaying.ts';
-
 import { connection } from './redis.ts';
-import dotenv from 'npm:dotenv';
-import process from "node:process";
 
 dotenv.config();
 /**
