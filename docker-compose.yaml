@@ -2,11 +2,18 @@ include:
   #- ./mb-docker/docker-compose.yml
   - ./supabase/docker/docker-compose.yml
 services:
-  lib:
+  lib-node:
     build:
       context: .
       dockerfile: Dockerfile.lib
-    image: mdv-lib 
+      target: lib-build-node
+    image: mdv-lib-node
+  lib-deno:
+    build:
+      context: .
+      dockerfile: Dockerfile.lib
+      target: lib-build-deno
+    image: mdv-lib-deno
   frontend:
     build:
       context: ./frontend/
@@ -26,7 +33,7 @@ services:
     networks:
       - default
     depends_on:
-      - lib
+      - lib-node
   redis:
     image: "redis:alpine"
     ports:
@@ -57,7 +64,7 @@ services:
       - db
       - analytics
       - redis
-      - lib
+      - lib-deno
       
     # healthcheck:
     #   test:
