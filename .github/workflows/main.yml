@@ -52,7 +52,7 @@ jobs:
     - name: Run dataaq tests
       working-directory: data-acquisition/
       run: |
-        deno test --skip-check --allow-all
+        deno test --no-check --allow-all
 
     - name: Celebrate
       run: echo "Hurray! Nothing broke before this! At least I hope..."
