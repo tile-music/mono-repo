@@ -1,4 +1,4 @@
-FROM mdv-lib AS build
+FROM mdv-lib-node AS build
 
 WORKDIR /app/frontend
 

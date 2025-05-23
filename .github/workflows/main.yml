@@ -21,7 +21,10 @@ jobs:
       uses: actions/checkout@v4 # This is very cool we do not need to manually checkout
       with:
         submodules: recursive
-
+    - name: Install Deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: v2.x
     - name: Setup env
       env: 
         ENV_SH_CONTENT: ${{ secrets.ENV_SH }}
@@ -49,10 +52,7 @@ jobs:
     - name: Run dataaq tests
       working-directory: data-acquisition/
       run: |
-        npm i
-        npm i -g vitest
-        npm run build
-        npm run test
+        deno test --no-check --allow-all
 
     - name: Celebrate
       run: echo "Hurray! Nothing broke before this! At least I hope..."

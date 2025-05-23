@@ -1,4 +1,3 @@
-import { AlbumInfo } from "./AlbumInfo";
 /**
  * @file TrackInfo.ts
  * @description This file contains the definition of the TrackInfo class, which represents information about a music track.
@@ -70,7 +69,7 @@ export class SpotifyTrackInfo extends TrackInfo {
     super(trackName, trackArtists, isrc, durationMs);
     this.spotifyId = spotifyId;
   }
-  public createDbEntryObject() {
+  public override createDbEntryObject() {
     return {
       ...super.createDbEntryObject(),
       spotify_id: this.spotifyId,

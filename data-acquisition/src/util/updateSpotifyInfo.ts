@@ -1,10 +1,6 @@
-import { Client } from 'spotify-api.js';
-import { SupabaseClient } from "@supabase/supabase-js";
+import { Client, SupabaseClient} from "../../deps.ts";
 
-import * as dotenv from "dotenv";
-
-dotenv.config();
-
+import "jsr:@std/dotenv/load";
 
 export type SpotifyUpdateData = {
   play_id: number;
@@ -62,14 +58,14 @@ type spotifyDataFn = (ids: string[], token: string) => Promise<SpotifyAlbum[] | 
  
 
 async function setupSpotifyClient(): Promise<Client> {
-  const token = process.env.SP_REFRESH;
+  const token = Deno.env.get("SP_REFRESH");
 
   if (!token) throw new Error("FATAL: Missing Spotify API token");
   const client = await Client.create({
     refreshToken: true,
     token: {
-      clientID: process.env.SP_CID as string,
-      clientSecret: process.env.SP_SECRET as string,
+      clientID: Deno.env.get("SP_CID")!,
+      clientSecret: Deno.env.get("SP_SECRET")!,
       refreshToken: token,
     },
     onRefresh: () => {
@@ -113,7 +109,7 @@ async function getSpotifyData(dataType: "albums" | "tracks", ids: string[], toke
     if (!response.ok) {
       if (retries <= 5) {
         switch (response.status) {
-          case 401:
+          case 401: {
             console.error(`WARNING: Token expired, refreshing token
               THIS SHOULD NEVER EVER HAPPEN, IN THEORY,
               the spotify js lib should automatically update the token
@@ -125,15 +121,17 @@ async function getSpotifyData(dataType: "albums" | "tracks", ids: string[], toke
             /** we should probably just throw and gtfo */
             const client = await setupSpotifyClient();
             return getSpotifyData(dataType, ids, client.token, retries + 5);
+          }
           case 404:
             throw new Error(`Resource not found, ${dataType} URL: ${url} IDS: ${ids.entries}`);
-          case 429:
+          case 429: {
             console.error("WARNING: Rate limit exceeded");
             const retryAfterHeader = response.headers?.get("Retry-After");
             const retryAfter: number | null = retryAfterHeader ? parseInt(retryAfterHeader) : 0;
             console.log(`  Retrying after ${retryAfter} seconds`);
             await sleep(retryAfter * 1000);
             return getSpotifyData(dataType, ids, token, retries + 1);
+          }
           default:
             throw new Error(`FATAL: Error fetching data, ${response.status} ${response.statusText}`);
         }
@@ -194,7 +192,7 @@ export async function getPopularity(ids: Map<string, SpotifyUpdateData>, functio
   while (remaining) {
     //console.log(`beginIdx: ${beginIdx}, endIdx: ${endIdx}, remaining: ${remaining}`);
 
-    let tmp: SpotifyAlbum[] | SpotifyTrack[] = await functionPtr(spotifyIdList.slice(beginIdx, endIdx), token);
+    const tmp: SpotifyAlbum[] | SpotifyTrack[] = await functionPtr(spotifyIdList.slice(beginIdx, endIdx), token);
 
     //console.log(`tmpAlbums: ${tmp.length}`);
     /** e is either a spotifyAlbum or Spotify track 
@@ -204,7 +202,7 @@ export async function getPopularity(ids: Map<string, SpotifyUpdateData>, functio
     for (const e of tmp) {
       try {
         //console.log("album: ", album.id);
-        let data = ids.get(e.id)
+        const data = ids.get(e.id)
         if ('id' in e && 'popularity' in e && !('album' in e)) {
           if (data) {
             data.album_popularity = e.popularity;
@@ -253,8 +251,8 @@ export async function getPopularity(ids: Map<string, SpotifyUpdateData>, functio
  */
 export async function updateSpotifyAlbumPopularity() {
   const spotifyClient: Client = await setupSpotifyClient();
-  const schema: "test" | "prod" = process.env.SB_SCHEMA === "test" ? "test" : "prod";
-  const internal: boolean = process.env.INTERNAL === "true";
+  const schema: "test" | "prod" = Deno.env.get("SB_SCHEMA") === "test" ? "test" : "prod";
+  const internal: boolean = Deno.env.get("INTERNAL") === "true";
   await updateSpotifyAlbumPopularityHelper(spotifyClient.token, schema, internal, new Date(Date.now().valueOf() - (1000 * 60 * 60 * 24)));
 
 }
@@ -272,9 +270,9 @@ export async function updateSpotifyAlbumPopularity() {
  */
 export async function updateSpotifyAlbumPopularityHelper(token: string, schema: "test" | "prod", internal: boolean, beginAt?: Date, data?: SpotifyUpdateData[]): 
 Promise<Map<string, SpotifyUpdateData>> {
-  if (!(process.env.SB_URL || process.env.SB_URL_TEST) || !process.env.SERVICE) throw new Error("Missing Supabase URL or Service Role Key");
-  const sbUrl = internal ? process.env.SB_URL : process.env.SB_URL_TEST;
-  const serviceRoleKey = process.env.SERVICE;
+  if (!(Deno.env.get("SB_URL") || Deno.env.get("SB_URL_TEST")) || !Deno.env.get("SERVICE")) throw new Error("Missing Supabase URL or Service Role Key");
+  const sbUrl = internal ? Deno.env.get("SB_URL") : Deno.env.get("SB_URL_TEST");
+  const serviceRoleKey = Deno.env.get("SERVICE");
   const albumMap: Map<string, SpotifyUpdateData> = new Map();
   const trackMap: Map<string, SpotifyUpdateData> = new Map();
 
@@ -292,7 +290,7 @@ Promise<Map<string, SpotifyUpdateData>> {
 
   if (error) throw error;
   
-  for (const [i, entry] of dbData.entries()) {
+  for (const [_, entry] of dbData.entries()) {
     const typedEntry = entry as unknown as SpotifyUpdateData;
     if (!typedEntry.albums.spotify_id){
       console.error(`WARNING: No spotify id found for entry
@@ -309,14 +307,14 @@ Promise<Map<string, SpotifyUpdateData>> {
   */
   if(trackMap.size > 0){
     await getPopularity(trackMap, getSpotifyTrackData);
-    for(const [key, value] of trackMap.entries()){
+    for(const [_, value] of trackMap.entries()){
       if(value.albums.spotify_id) albumMap.set(value.albums.spotify_id, value);
       else console.error(`WARNING: No album id found for track: ${value}`);
     }
   } 
   await getPopularity(albumMap, getSpotifyAlbumData);
 
-  for (const [key, value] of albumMap.entries()) {
+  for (const [_, value] of albumMap.entries()) {
     try {
       let query = sbClient.schema(schema).from("played_tracks").update({ album_popularity: value.album_popularity, album_popularity_updated_at: Date.now() }).eq("album_id", value.album_id);
       if(beginAt) query = query.gte("listened_at", beginAt.valueOf());

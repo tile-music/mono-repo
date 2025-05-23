@@ -1,11 +1,12 @@
 
-import { TrackInfo, SpotifyTrackInfo } from '../../src/music/TrackInfo';
+import { TrackInfo, SpotifyTrackInfo } from '../../src/music/TrackInfo.ts';
+import { expect } from "jsr:@std/expect";
 /**
  * sharted by chat
  */
-describe('TrackInfo classes', () => {
-  describe("base class", () => {
-    test('should create an instance of TrackInfo with correct properties', () => {
+Deno.test('TrackInfo classes', async (t) => {
+  await t.step("base class", async (t) => {
+    await t.step('should create an instance of TrackInfo with correct properties', () => {
       const trackName = 'Test Track';
       const trackArtists = ['Artist1', 'Artist2'];
       const isrc = 'US1234567890';
@@ -20,7 +21,7 @@ describe('TrackInfo classes', () => {
       expect(trackInfo['durationMs']).toBe(durationMs);
     });
 
-    test('should create a correct database entry object', () => {
+    await t.step('should create a correct database entry object', async () => {
       const trackName = 'Test Track';
       const trackArtists = ['Artist1', 'Artist2'];
       const isrc = 'US1234567890';
@@ -37,8 +38,8 @@ describe('TrackInfo classes', () => {
       });
     });
   });
-  describe("spotify class", () => {
-    test('should create an instance of SpotifyTrackInfo with correct properties', () => {
+  await t.step("spotify class", async (t) => {
+    await t.step('should create an instance of SpotifyTrackInfo with correct properties', async () => {
       const trackName = 'Test Track';
       const trackArtists = ['Artist1', 'Artist2'];
       const isrc = 'US1234567890';
@@ -56,7 +57,7 @@ describe('TrackInfo classes', () => {
       expect(spotifyTrackInfo['spotifyId']).toBe(spotifyId);
     });
 
-    test('should create a correct database entry object', () => {
+    await t.step('should create a correct database entry object', async () => {
       const trackName = 'Test Track';
       const trackArtists = ['Artist1', 'Artist2'];
       const isrc = 'US1234567890';
