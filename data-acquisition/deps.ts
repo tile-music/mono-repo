@@ -1,8 +1,13 @@
-// BullMQ for queue management
+// BullMQ for task scheduling
 export { Queue, Worker, QueueEvents } from "npm:bullmq";
 
 // Spotify API client
 export { Client, Player } from "npm:spotify-api.js";
+
+// Musicbrainz Client
+
+export { MusicBrainzApi } from 'npm:musicbrainz-api';
+
 
 // Supabase client
 export { SupabaseClient } from "jsr:@supabase/supabase-js@2";
@@ -13,3 +18,4 @@ export { default as process } from "node:process";
 
 // Express for web server
 export { default as express } from "npm:express";
+
