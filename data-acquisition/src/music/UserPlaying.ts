@@ -1,7 +1,4 @@
-import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
-import process from "node:process";
-
-import { Client, Player } from "npm:spotify-api.js";
+import { SupabaseClient, process, Client, Player } from "../../deps.ts";
 
 import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
 import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";

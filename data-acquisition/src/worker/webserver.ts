@@ -1,6 +1,5 @@
-import express from 'npm:express';
+import { express, process } from "../../deps.ts";
 import { makeDataAcqQueue } from './makeQueue.ts';
-import process from "node:process";
 
 const queue = makeDataAcqQueue();
 // Create an instance of Express
