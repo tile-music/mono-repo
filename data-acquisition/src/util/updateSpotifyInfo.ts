@@ -1,9 +1,6 @@
-import { Client, SupabaseClient, process, dotenv } from "../../deps.ts";
+import { Client, SupabaseClient} from "../../deps.ts";
 
-dotenv.config();
-
-dotenv.config();
-
+import "jsr:@std/dotenv/load";
 
 export type SpotifyUpdateData = {
   play_id: number;
@@ -61,14 +58,14 @@ type spotifyDataFn = (ids: string[], token: string) => Promise<SpotifyAlbum[] | 
  
 
 async function setupSpotifyClient(): Promise<Client> {
-  const token = process.env.SP_REFRESH;
+  const token = Deno.env.get("SP_REFRESH");
 
   if (!token) throw new Error("FATAL: Missing Spotify API token");
   const client = await Client.create({
     refreshToken: true,
     token: {
-      clientID: process.env.SP_CID as string,
-      clientSecret: process.env.SP_SECRET as string,
+      clientID: Deno.env.get("SP_CID")!,
+      clientSecret: Deno.env.get("SP_SECRET")!,
       refreshToken: token,
     },
     onRefresh: () => {
@@ -254,8 +251,8 @@ export async function getPopularity(ids: Map<string, SpotifyUpdateData>, functio
  */
 export async function updateSpotifyAlbumPopularity() {
   const spotifyClient: Client = await setupSpotifyClient();
-  const schema: "test" | "prod" = process.env.SB_SCHEMA === "test" ? "test" : "prod";
-  const internal: boolean = process.env.INTERNAL === "true";
+  const schema: "test" | "prod" = Deno.env.get("SB_SCHEMA") === "test" ? "test" : "prod";
+  const internal: boolean = Deno.env.get("INTERNAL") === "true";
   await updateSpotifyAlbumPopularityHelper(spotifyClient.token, schema, internal, new Date(Date.now().valueOf() - (1000 * 60 * 60 * 24)));
 
 }
@@ -273,9 +270,9 @@ export async function updateSpotifyAlbumPopularity() {
  */
 export async function updateSpotifyAlbumPopularityHelper(token: string, schema: "test" | "prod", internal: boolean, beginAt?: Date, data?: SpotifyUpdateData[]): 
 Promise<Map<string, SpotifyUpdateData>> {
-  if (!(process.env.SB_URL || process.env.SB_URL_TEST) || !process.env.SERVICE) throw new Error("Missing Supabase URL or Service Role Key");
-  const sbUrl = internal ? process.env.SB_URL : process.env.SB_URL_TEST;
-  const serviceRoleKey = process.env.SERVICE;
+  if (!(Deno.env.get("SB_URL") || Deno.env.get("SB_URL_TEST")) || !Deno.env.get("SERVICE")) throw new Error("Missing Supabase URL or Service Role Key");
+  const sbUrl = internal ? Deno.env.get("SB_URL") : Deno.env.get("SB_URL_TEST");
+  const serviceRoleKey = Deno.env.get("SERVICE");
   const albumMap: Map<string, SpotifyUpdateData> = new Map();
   const trackMap: Map<string, SpotifyUpdateData> = new Map();
 

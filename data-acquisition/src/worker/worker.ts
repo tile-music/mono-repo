@@ -1,8 +1,9 @@
-import { Worker, SupabaseClient, dotenv, process } from '../../deps.ts';
+import { Worker, SupabaseClient, process } from '../../deps.ts';
 import { SpotifyUserPlaying } from '../music/UserPlaying.ts';
 import { connection } from './redis.ts';
 
-dotenv.config();
+import "jsr:@std/dotenv/load";
+
 /**
  * Fetches and processes the currently playing track for a Spotify user.
  *
@@ -19,8 +20,8 @@ type SupabaseSchema = "test" | "prod";
 
 export async function spotifyFire(userId: string, refreshToken: string, supabaseSchema: SupabaseSchema) {
   const supabaseInd = new SupabaseClient(
-    process.env.SB_URL as string,
-    process.env.SERVICE as string,
+    Deno.env.get("SB_URL")!,
+    Deno.env.get("SERVICE")!,
     { db: { schema: supabaseSchema} }
   );
 
@@ -39,7 +40,11 @@ const worker = new Worker(
   async (job) => {
     const { userId, refreshToken } = job.data.data;
     
-    await spotifyFire(userId, refreshToken, process.env.SB_SCHEMA as SupabaseSchema); 
+    const SB_SCHEMA = Deno.env.get("SB_SCHEMA");
+    if (SB_SCHEMA !== "test" && SB_SCHEMA !== "prod")
+      throw new Error("Invalid Supabase schema. Must be 'test' or 'prod'.");
+
+    await spotifyFire(userId, refreshToken, Deno.env.get("SB_SCHEMA") as SupabaseSchema); 
 
     console.log(
       `Processing job ${job.id} at ${new Date()} for user ${userId}`
