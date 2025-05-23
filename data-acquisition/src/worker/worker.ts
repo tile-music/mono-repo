@@ -44,7 +44,7 @@ const worker = new Worker(
     if (SB_SCHEMA !== "test" && SB_SCHEMA !== "prod")
       throw new Error("Invalid Supabase schema. Must be 'test' or 'prod'.");
 
-    await spotifyFire(userId, refreshToken, Deno.env.get("SB_SCHEMA") as SupabaseSchema); 
+    await spotifyFire(userId, refreshToken, SB_SCHEMA); 
 
     console.log(
       `Processing job ${job.id} at ${new Date()} for user ${userId}`
