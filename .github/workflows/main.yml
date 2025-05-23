@@ -49,7 +49,7 @@ jobs:
     - name: Run dataaq tests
       working-directory: data-acquisition/
       run: |
-        sudo apt install -y deno
+        curl -fsSL https://deno.land/install.sh | sh
         deno test --skip-check --allow-all
 
     - name: Celebrate
