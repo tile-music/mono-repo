@@ -1,7 +1,8 @@
-import { SupabaseClient, dotenv, process } from "../../deps.ts";
+import { SupabaseClient } from "../../deps.ts";
 import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./makeQueue.ts";
 
-dotenv.config();
+import "jsr:@std/dotenv/load";
+
 /**
  */
 /**
@@ -22,8 +23,8 @@ export async function makeDataAcqJobs() {
   const queue = makeDataAcqQueue();
   console.log("makeJobs");
   const supabase = new SupabaseClient(
-    process.env.SB_URL as string,
-    process.env.SERVICE as string,
+    Deno.env.get("SB_URL")!,
+    Deno.env.get("SERVICE")!,
     { db: { schema: "public" } }
   );
   await supabase
