@@ -1,5 +1,7 @@
-import { express, process } from "../../deps.ts";
+import { express } from "../../deps.ts";
 import { makeDataAcqQueue } from './makeQueue.ts';
+
+import "jsr:@std/dotenv/load";
 
 const queue = makeDataAcqQueue();
 // Create an instance of Express
@@ -22,7 +24,7 @@ async function removeJob(jobId: string) {
  * @param req.body.refreshToken - The refresh token for the user session.
  * @param req.body.type - The type of request or user action.
  */
-app.post('/add-job', async (req, res) => {
+app.post('/add-job', async (req: any, res: any) => {
   const { userId, refreshToken, type } = req.body;
   console.log(req.body)
   console.log("userId", userId)
@@ -73,7 +75,7 @@ app.post('/add-job', async (req, res) => {
   }
 });
 
-app.post('/remove-job', async (req, res) => {
+app.post('/remove-job', async (req: any, res: any) => {
   console.log("remove job")
   const { userId, type } = req.body;
   console.log(req.body)
@@ -105,7 +107,14 @@ app.post('/remove-job', async (req, res) => {
 });
 
 // Start the server on a specified port
-const PORT = process.env.PORT || 3000;
+let PORT = 3000;
+if (Deno.env.get("PORT") === undefined)
+  console.log("PORT is not set, using default port 3000");
+else if (isNaN(parseInt(Deno.env.get("PORT")!)))
+  console.log("PORT is not a number, using default port 3000");
+else
+  PORT = parseInt(Deno.env.get("PORT")!);
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

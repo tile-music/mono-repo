@@ -1,4 +1,6 @@
-import { SupabaseClient, process, Client, Player } from "../../deps.ts";
+import { SupabaseClient, Client, Player } from "../../deps.ts";
+
+import "jsr:@std/dotenv/load";
 
 import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
 import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
@@ -145,8 +147,8 @@ export class SpotifyUserPlaying extends UserPlaying {
     this.client = await Client.create({
       refreshToken: true,
       token: {
-        clientID: process.env.SP_CID as string,
-        clientSecret: process.env.SP_SECRET as string,
+        clientID: Deno.env.get("SP_CID") as string,
+        clientSecret: Deno.env.get("SP_SECRET") as string,
         refreshToken: this.context.refresh_token,
       },
       onRefresh: () => {
