@@ -49,10 +49,8 @@ jobs:
     - name: Run dataaq tests
       working-directory: data-acquisition/
       run: |
-        npm i
-        npm i -g vitest
-        npm run build
-        npm run test
+        sudo apt install -y deno
+        deno test --skip-check --allow-all
 
     - name: Celebrate
       run: echo "Hurray! Nothing broke before this! At least I hope..."
