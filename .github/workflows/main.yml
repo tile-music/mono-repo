@@ -21,7 +21,10 @@ jobs:
       uses: actions/checkout@v4 # This is very cool we do not need to manually checkout
       with:
         submodules: recursive
-
+    - name: Install Deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: v2.x
     - name: Setup env
       env: 
         ENV_SH_CONTENT: ${{ secrets.ENV_SH }}
@@ -49,7 +52,6 @@ jobs:
     - name: Run dataaq tests
       working-directory: data-acquisition/
       run: |
-        curl -fsSL https://deno.land/install.sh | sh
         deno test --skip-check --allow-all
 
     - name: Celebrate
