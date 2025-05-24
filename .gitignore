@@ -14,3 +14,5 @@ ps-update-instructions.pdf
 prodkeys.md
 data-acquisition/.env.prod
 prodkeys.txt
+
+.idea/

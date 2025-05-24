@@ -1,13 +1,12 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { SupabaseClient, Client, Player } from "../../deps.ts";
 
-import { Album, Client, Player, Track, User } from "spotify-api.js";
+import "jsr:@std/dotenv/load";
 
-import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo";
-import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo";
-import { PlayedTrack } from "./PlayedTrack";
+import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
+import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
+import { PlayedTrack } from "./PlayedTrack.ts";
 
-import { log } from "../util/log"
-import { json } from "express";
+import { log } from "../util/log.ts"
 
 export type ReleaseDate = { year: number, month?: number, day?: number }
 
@@ -19,57 +18,60 @@ export abstract class UserPlaying {
   postgres!: any;
   played: PlayedTrack[] = [];
   dbEntries: any = { p_track_info: [], p_user_id: "" };
+
   constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: string, context: any) {
     this.supabase = supabase;
     this.userId = userId;
     this.context = context;
     this.inited = false;
   }
-  protected async makeDBEntries(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  public async init(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  public async fire(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
+
+  protected abstract makeDBEntries(): Promise<void>
+  public abstract init(): Promise<void>
+  public abstract fire(): Promise<void>
+
   public async putInDB(): Promise<void> {
     await this.makeDBEntries();
     //console.log(this.dbEntries);
 
-    for (let entry of this.dbEntries.p_track_info) {
+    for (const entry of this.dbEntries.p_track_info) {
+      // attempt to insert track
+      let { data: trackData, error: trackError } = await this.supabase
+        .from("tracks")
+        .insert(entry.track)
+        .select("*");
+      log(6, `trackData: ${JSON.stringify(trackData)}, trackError: ${JSON.stringify(trackError)}`)
 
-        let { data: trackData, error: trackError } = await this.supabase
+      // check for unexpected error (ignoring duplicates)
+      if (trackError && trackError?.code !== "23505") throw trackError;
+
+      // attempt to insert album
+      let { data: albumData, error: albumError } = await this.supabase
+        .from("albums")
+        .insert(entry.track_album)
+        .select("*");
+
+      // check for unexpected error (ignoring duplicates)
+      if (albumError && albumError?.code !== "23505") throw albumError;
+
+      // track has been inserted already, find using isrc
+      if (!trackData) {
+        const { data: trackDataRet, error: trackErrorRet } = await this.supabase
           .from("tracks")
-          .insert(entry.track)
-          .select("*");
-        log(6, `trackData: ${JSON.stringify(trackData)}, trackError: ${JSON.stringify(trackError)}`)
-        if (trackError && trackError?.code !== "23505") throw trackError;
-        let { data: albumData, error: albumError } = await this.supabase
-          .from("albums")
-          .insert(entry.track_album)
-          .select("*");
-        if (albumError && albumError?.code !== "23505") throw albumError;
-        //console.log(albumData, trackData, albumError, trackError);
-        if (!trackData) {
-          //console.log("reached track");
-          const { data: trackDataRet, error: trackErrorRet } = await this.supabase
-            .from("tracks")
-            .select("*")
-            .eq("isrc", entry.track.isrc);
-          trackData = trackDataRet;
-          trackError = trackErrorRet;
-
-        //console.log(trackData, trackError);
+          .select("*")
+          .eq("isrc", entry.track.isrc);
+        trackData = trackDataRet;
+        trackError = trackErrorRet;
       }
+
+      // album has been inserted already, find using spotify id and fallback if needed
       if (!albumData) {
-        //console.log("reached album");
-        //console.log(entry);
+        // select all albums
         let query1 = this.supabase
         .from("albums")
         .select("*")
 
+        // album has a spotify id
         const albumSpotifyId = entry.track_album.spotify_id;
         log(6,`spotify album id: ${albumSpotifyId}`)
         if (albumSpotifyId) {
@@ -77,59 +79,53 @@ export abstract class UserPlaying {
           ({ data: albumData, error: albumError } = await query1);
           log(6, `will fallback execute ${( Array.isArray(albumData) && albumData["length"] === 0)}`)
         }
+
+        // album has missing or incorrect spotify id, fallback to other fields
         if(!albumSpotifyId || (Array.isArray(albumData) && albumData.length === 0)){
           log(6, "executing fallback query")
           let query = this.supabase.from("albums").select("*")
-          query = query.eq("album_name", entry.track_album.album_name); // Filter by album_name
-          //.eq("image", entry.track_album.image) // Filter by image
-          query = query.eq("album_type", entry.track_album.album_type);
-          //.eq("release_date", entry.track_album.release_date)
-          query = query.eq("num_tracks", entry.track_album.num_tracks); // Filter by release_dat
+
+          query = query.eq("album_name", entry.track_album.album_name); // Filter by album name
+          query = query.eq("album_type", entry.track_album.album_type); // Filter by album type
+          query = query.eq("num_tracks", entry.track_album.num_tracks); // Filter by number of tracks
+
           log(6, `query ${JSON.stringify(query)}`);
           ({ data: albumData, error: albumError } = await query);
           log(6,`album data: ${albumData}, albumError: ${albumError}` )
 
+          //.eq("image", entry.track_album.image) // Filter by image
+          //.eq("release_date", entry.track_album.release_date) // Filter by release_date
         }
-        //.eq("artists", entry.track_album.artists)
+
         log(6, `Album data: ${albumData}`)
         log(6, entry.track_album.spotify_id);
+      }
 
+      // check if we have a valid track and album
+      if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
+        // make sure the track and album are linked
+        await this.supabase.from("track_albums").insert({
+          track_id: trackData[0].track_id,
+          album_id: albumData[0].album_id,
+        });
 
-          //.eq("(album).album_isrc", entry.track_album.album.album_isrc;
-          //console.log(albumData, albumError);
-        }
-        if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
-          //console.log("reached track albums");
-          const { data: trackAlbumData, error: trackAlbumError } =
-            await this.supabase.from("track_albums").insert({
-              track_id: trackData[0].track_id,
-              album_id: albumData[0].album_id,
-            });
-
-          const { data: playedData, error: playedError } = await this.supabase
-            .from("played_tracks")
-            .insert({
-              user_id: this.userId,
-              track_id: trackData[0].track_id,
-              album_id: albumData[0].album_id,
-              listened_at: entry.listened_at,
-              track_popularity: entry.track_popularity,
-              isrc: entry.track.isrc,
-            });
-          //console.log(playedData, playedError);
-          /* if(playedError){
-            console.log("Duplicate entry")
-          } */
-          // improve error handling
-        } else {
-          log(1, `track data ${JSON.stringify(trackData)} album data: ${JSON.stringify(albumData)}, 
-                  ${JSON.stringify(entry)}
-                  No data returned from insert or albumData is undefined or empty` )
-
-          throw new Error(`track data ${JSON.stringify(trackData)} album data: ${JSON.stringify(albumData)}, 
-                  ${JSON.stringify(entry)}
-                  No data returned from insert or albumData is undefined or empty`);
-        }
+        // insert played track
+        const { data: _playedData, error: _playedError } = await this.supabase
+          .from("played_tracks")
+          .insert({
+            user_id: this.userId,
+            track_id: trackData[0].track_id,
+            album_id: albumData[0].album_id,
+            listened_at: entry.listened_at,
+            track_popularity: entry.track_popularity,
+            isrc: entry.track.isrc,
+          });
+      } else {
+        // if we still don't have a valid track or album, throw an error
+        throw new Error(`track data ${JSON.stringify(trackData)} album data: ${JSON.stringify(albumData)}, 
+                ${JSON.stringify(entry)}
+                No data returned from insert or albumData is undefined or empty`);
+      }
       
     }
   }
@@ -144,13 +140,13 @@ export class SpotifyUserPlaying extends UserPlaying {
   constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: any, context: any) {
     super(supabase, userId, context);
   }
-  public async init(): Promise<void> {
+  public override async init(): Promise<void> {
     //console.log(this.context);
     this.client = await Client.create({
       refreshToken: true,
       token: {
-        clientID: process.env.SP_CID as string,
-        clientSecret: process.env.SP_SECRET as string,
+        clientID: Deno.env.get("SP_CID") as string,
+        clientSecret: Deno.env.get("SP_SECRET") as string,
         refreshToken: this.context.refresh_token,
       },
       onRefresh: () => {
@@ -163,9 +159,9 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
 
 
-  protected async makeDBEntries(): Promise<void> {
+  protected override async makeDBEntries(): Promise<void> {
     //await this.getAlbumPopularity();
-    for (const [i, item] of this.items.entries()) {
+    for (const [_, item] of this.items.entries()) {
       const releaseDateRaw: any = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
       const releaseDatePrecisionRaw: any = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
 
@@ -198,24 +194,24 @@ export class SpotifyUserPlaying extends UserPlaying {
       this.played.push(playedTrackInfo);
       //console.log(playedTrackInfo);
     }
-    for (const [i, track] of this.played.entries()) {
+    for (const [_, track] of this.played.entries()) {
       await this.dbEntries.p_track_info.push(track.createDbEntryObject());
     }
     this.dbEntries.p_user_id = this.userId;
 
 
   }
-  public async fire(): Promise<void> {
+  public override async fire(): Promise<void> {
     this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
-    //console.log(this.items)
-    await this.putInDB();
-
+    
+    try { await this.putInDB(); }
+    catch (e) { log(1, `Error putting in DB: ${e}`); }
   }
   public static parseSpotifyDate(date: string, datePrecision: "year" | "month" | "day"): ReleaseDate {
     if (!date) {
       throw new Error("Date is undefined");
     }
-    let [year, month, day] = date.split("-");
+    const [year, month, day] = date.split("-");
     switch (datePrecision) {
       case "year":
         return { year: parseInt(date) };
@@ -269,8 +265,8 @@ export class MockUserPlaying extends UserPlaying {
     super(supabase, userId, context);
     this.mockData = context;
   }
-  protected async makeDBEntries(): Promise<void> {
-    for (let track of this.mockData) {
+  protected override async makeDBEntries(): Promise<void> {
+    for (const track of this.mockData) {
       const album = new AlbumInfo(
         track.albumInfo.albumName,
         "Album",
@@ -297,7 +293,7 @@ export class MockUserPlaying extends UserPlaying {
       );
       this.played.push(playedTrackInfo);
     }
-    for (let track of this.played) {
+    for (const track of this.played) {
       await this.dbEntries.p_track_info.push(track.createDbEntryObject());
     }
 
@@ -305,11 +301,12 @@ export class MockUserPlaying extends UserPlaying {
 
   }
 
-  public async init(): Promise<void> {
+  public override init(): Promise<void> {
     this.inited = true;
     console.log("Mock init");
+    return Promise.resolve();
   }
-  public async fire(): Promise<void> {
+  public override async fire(): Promise<void> {
     await this.putInDB();
   }
 }

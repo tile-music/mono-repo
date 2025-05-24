@@ -1,5 +1,5 @@
-import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo";
-import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo";
+import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
+import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
 
 /**
  * @file PlayedTrack.ts

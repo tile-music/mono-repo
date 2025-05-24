@@ -1,11 +1,9 @@
-import { Worker } from 'bullmq';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { SpotifyUserPlaying } from '../music/UserPlaying';
+import { Worker, SupabaseClient, process } from '../../deps.ts';
+import { SpotifyUserPlaying } from '../music/UserPlaying.ts';
+import { connection } from './redis.ts';
 
-import { connection } from './redis';
-import dotenv from 'dotenv';
+import "jsr:@std/dotenv/load";
 
-dotenv.config();
 /**
  * Fetches and processes the currently playing track for a Spotify user.
  *
@@ -22,8 +20,8 @@ type SupabaseSchema = "test" | "prod";
 
 export async function spotifyFire(userId: string, refreshToken: string, supabaseSchema: SupabaseSchema) {
   const supabaseInd = new SupabaseClient(
-    process.env.SB_URL as string,
-    process.env.SERVICE as string,
+    Deno.env.get("SB_URL")!,
+    Deno.env.get("SERVICE")!,
     { db: { schema: supabaseSchema} }
   );
 
@@ -39,10 +37,14 @@ export async function spotifyFire(userId: string, refreshToken: string, supabase
 
 const worker = new Worker(
   'my-cron-jobs',
-  async (job: any) => {
+  async (job) => {
     const { userId, refreshToken } = job.data.data;
     
-    await spotifyFire(userId, refreshToken, process.env.SB_SCHEMA as SupabaseSchema); 
+    const SB_SCHEMA = Deno.env.get("SB_SCHEMA");
+    if (SB_SCHEMA !== "test" && SB_SCHEMA !== "prod")
+      throw new Error("Invalid Supabase schema. Must be 'test' or 'prod'.");
+
+    await spotifyFire(userId, refreshToken, SB_SCHEMA); 
 
     console.log(
       `Processing job ${job.id} at ${new Date()} for user ${userId}`

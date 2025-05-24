@@ -1,10 +1,8 @@
-import { SpotifyUserPlaying, UserPlaying } from "../music/UserPlaying";
-import { SupabaseClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
-import { Queue } from "bullmq";
-import { connection } from "./redis";
-import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./makeQueue";
-dotenv.config();
+import { SupabaseClient } from "../../deps.ts";
+import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./makeQueue.ts";
+
+import "jsr:@std/dotenv/load";
+
 /**
  */
 /**
@@ -25,8 +23,8 @@ export async function makeDataAcqJobs() {
   const queue = makeDataAcqQueue();
   console.log("makeJobs");
   const supabase = new SupabaseClient(
-    process.env.SB_URL as string,
-    process.env.SERVICE as string,
+    Deno.env.get("SB_URL")!,
+    Deno.env.get("SERVICE")!,
     { db: { schema: "public" } }
   );
   await supabase

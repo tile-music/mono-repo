@@ -1,32 +1,23 @@
 #Build stage
-FROM mdv-lib AS build
+FROM mdv-lib-deno AS build
 
 WORKDIR /app/data-acq
 
 COPY . .
 COPY .env .
+COPY deps.ts .
 
-COPY package*.json .
-
-RUN npm i -g typescript
-
-RUN npm install
+# Cache dependencies
+RUN deno cache deps.ts
 
 FROM build AS dev
 
-#RUN npm install -g typescript
-#RUN npm intall -g @angular/cli
-CMD ["npm", "run", "dev"]
+CMD ["deno", "run", "--allow-all", "./src/app.ts"]
 
 EXPOSE 3001
-
-#test stage
-FROM build AS test
-
-CMD ["npm", "run", "test"]
 
 #Production stage
 
 FROM build AS prod
 
-CMD ["npm", "run", "start"]
+CMD ["deno", "run", "--allow-env", "--allow-read", "--allow-ffi", "--allow-net", "--allow-run", "src/app.ts"]
