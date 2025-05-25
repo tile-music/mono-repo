@@ -1,11 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
+import { log } from "$lib/log";
 
 import {
     PUBLIC_SUPABASE_URL,
     PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
+import type { Profile } from "$shared/Profile";
 
 const supabase: Handle = async ({ event, resolve }) => {
     /**
@@ -126,12 +128,39 @@ const authGuard: Handle = async ({ event, resolve }) => {
 
 const userTheme: Handle = async ({ event, resolve }) => {
     const themeCookie = event.cookies.get("theme");
-    console.log("themeCookie: ", themeCookie);
     const theme = themeCookie ? `theme-${themeCookie}` : "theme-default-dark";
 
     return await resolve(event, {
         transformPageChunk: ({ html }) => html.replace("[theme]", theme),
     });
+};
+
+const profile: Handle = async ({ event, resolve }) => {
+    const { user } = event.locals;
+
+    // if no user is logged in, set profile to null
+    if (!user) {
+        event.locals.profile = null;
+        return resolve(event);
+    }
+
+    // fetch the user's profile from the database
+    const fetchResult = await event.locals.supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+    // if there's an error fetching the profile, log it and set profile to null
+    if (fetchResult.error) {
+        log(3, "Error fetching profile of authenticated user:" + fetchResult.error);
+        event.locals.profile = null;
+        return resolve(event);
+    }
+
+    const profile = fetchResult.data as Profile;
+    event.locals.profile = profile;
+    return resolve(event);
 };
 
 const originalConsoleWarn = console.debug;
@@ -140,10 +169,10 @@ console.warn = function (...args) {
     const shouldLog = args.every((arg) => {
         if (typeof arg === "string") {
             /*
-      current supabase auth implementation sucks and spits out an unnecessary warning every
-      time session data is needed on a page, even though nothing we're doing is unsafe.
-      we need to manually suppress that warning, unfortunately.
-      */
+            current supabase auth implementation sucks and spits out an unnecessary warning every
+            time session data is needed on a page, even though nothing we're doing is unsafe.
+            we need to manually suppress that warning, unfortunately.
+            */
             return !arg.includes("Using the user object");
         }
         return true;
@@ -153,4 +182,4 @@ console.warn = function (...args) {
     }
 };
 
-export const handle: Handle = sequence(supabase, authGuard, userTheme);
+export const handle: Handle = sequence(supabase, authGuard, userTheme, profile);

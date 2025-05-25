@@ -1,4 +1,5 @@
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
+import type { Profile } from "$shared/Profile";
 
 declare global {
     namespace App {
@@ -11,9 +12,11 @@ declare global {
             }>;
             session: Session | null;
             user: User | null;
+            profile: Profile | null;
         }
         interface PageData {
             session: Session | null;
+            profile: Profile | null;
         }
         // interface PageState {}
         // interface Platform {}
