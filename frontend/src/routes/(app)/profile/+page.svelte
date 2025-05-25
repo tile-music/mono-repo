@@ -6,7 +6,6 @@
   import Avatar from './avatar.svelte';
   import { enhance } from "$app/forms";
   import type { SubmitFunction } from "@sveltejs/kit";
-  import { onMount } from 'svelte';
   import { browser } from '$app/environment';
   import ThemeButton from "./ThemeButton.svelte";
 
@@ -15,7 +14,7 @@
   }
 
   let { data = $bindable() }: Props = $props();
-  let { user, email } = $derived(data);
+  let { profile, email } = $derived(data);
 
   const all_themes = [
     "default-dark", "default-light",
@@ -41,11 +40,9 @@
 
     // set status message
     if (info.success) {
+      // refresh page
       resetProfileStatus = "reset successfully";
-
-      // reset profile information
-      const userString = JSON.parse(response.data)[2];
-      data.user = JSON.parse(userString);
+      window.location.href = window.location.href;
     }
     else if (info.not_authenticated) resetProfileStatus = "failed: not authenticated";
     else if (info.server_error) resetProfileStatus = "failed: server error";
@@ -83,6 +80,7 @@
       if (result.type === "success") {
         // handle success
         updateProfileStatus = "updated successfully";
+        window.location.href = window.location.href; // refresh page to show changes
       } else if (result.type === "failure") {
         // handle known errors
         if (!result.data || result.data.server_error)
@@ -133,10 +131,6 @@
         /^theme-[^\s]*/, `theme-${themeType}`
       );
   }
-
-  onMount(() => {
-    if (user?.theme) applyTheme(user.theme);
-	});
 </script>
 
 
@@ -144,7 +138,7 @@
   <div id="profile">
     <h1>profile</h1>
     <Avatar url={sampleAvatar} size={150} />
-    {#if user} <!-- TODO: implement a static placeholder form if user is null -->
+    {#if profile} <!-- TODO: implement a static placeholder form if user is null -->
       <form method="POST" action="?/update_profile" use:enhance={handleUpdateProfile}>
         <div>
           <label for="username">username</label>
@@ -153,7 +147,7 @@
             name="username"
             id="username"
             placeholder="username"
-            bind:value={user.username}
+            bind:value={profile.username}
           />
         </div>
         <div>
@@ -163,7 +157,7 @@
             name="full name"
             id="full name"
             placeholder="full name"
-            bind:value={user.full_name}
+            bind:value={profile.full_name}
           />
         </div>
         <div>
@@ -173,7 +167,7 @@
             name="website"
             id="website"
             placeholder="website"
-            bind:value={user.website}
+            bind:value={profile.website}
           />
         </div>
         <p>{updateProfileStatus}</p>

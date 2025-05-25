@@ -12,40 +12,16 @@ export const load: PageServerLoad = async ({
         throw Error("User does not have session in protected route.");
     }
 
-    // fetch profile data
-    let { data: user, error } = await supabase
-        .from("profiles")
-        .select(`updated_at, username, full_name, website, avatar_url, theme`)
-        .eq("id", session.user.id)
-        .single();
-    if (error && error.code == "PGRST116") {
-        // profile not found, create blank profile
-        user = {
-            updated_at: null,
-            username: null,
-            full_name: null,
-            website: null,
-            avatar_url: null,
-            theme: "dark",
-        };
-
-        log(3, "No profile found for user, creating blank profile.");
-    } else if (error) {
-        // unexpected PostgREST error
-        log(2, "Error fetching profile data: " + error);
-        throw error;
-    }
-
     const email = session.user.email ?? null;
 
     // return the retrieved (or blank) user profile
-    return { user, email, profile };
+    return { email, profile };
 };
 
 export const actions: Actions = {
-    update_profile: async ({ request, locals: { supabase, session } }) => {
-        if (session == null) {
-            log(3, "User does not have session in protected route.");
+    update_profile: async ({ request, locals: { supabase, session, profile } }) => {
+        if (session == null || profile == null) {
+            log(3, "User does not have session or profile in protected route.");
             return fail(401, { not_authenticated: true });
         }
 
@@ -60,28 +36,12 @@ export const actions: Actions = {
             avatar_url: null,
         };
 
-        // get profile data
-        let { data: user, error: get_error } = await supabase
-            .from("profiles")
-            .select(`updated_at, username, full_name, website, avatar_url`)
-            .eq("id", session.user.id)
-            .single();
-        if (get_error || !user) {
-            if (get_error) {
-                log(2, "Error fetching profile data: " + get_error);
-                throw get_error;
-            } else {
-                log(3, "Error fetching profile data: no user");
-                return fail(404, { no_user: true });
-            }
-        }
-
         // make sure update is necessary
         if (
-            user.username == update.username &&
-            user.full_name == update.full_name &&
-            user.website == update.website &&
-            user.avatar_url == update.avatar_url
+            profile.username == update.username &&
+            profile.full_name == update.full_name &&
+            profile.website == update.website &&
+            profile.avatar_url == update.avatar_url
         ) {
             // update is unnecessary
             log(5, `Not updating ${session.user.id}: update is unnecessary`);
