@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { AlbumInfo, SongInfo } from "../../../../../lib/Song";
+    import type { AlbumInfo, SongInfo } from "$shared/Song";
     import { filters, generalOptions } from "./filters.svelte";
     import type { SquareInfo } from "./arrangement.svelte"
 

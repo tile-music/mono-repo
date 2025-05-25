@@ -11,8 +11,8 @@
   // import Header from "./Header.svelte";
 
   // type & state imports
-  import type { DisplayDataRequest } from "../../../../../lib/Request";
-  import type { AlbumInfo } from "../../../../../lib/Song";
+  import type { DisplayDataRequest } from "$shared/Request";
+  import type { AlbumInfo } from "$shared/Song";
   import { filters } from "./filters.svelte";
   import { arrangement } from "./arrangement.svelte";
   import type { AggregatedSongs } from "./arrangement.svelte";

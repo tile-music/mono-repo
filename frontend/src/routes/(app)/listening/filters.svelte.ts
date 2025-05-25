@@ -2,8 +2,8 @@ import type {
     ListeningDataRequest,
     ListeningColumnKeys,
     ListeningColumns,
-} from "../../../../../lib/Request";
-import type { SongInfo, AlbumInfo } from "../../../../../lib/Song";
+} from "$shared/Request";
+
 export const order = [
     "art",
     "title",

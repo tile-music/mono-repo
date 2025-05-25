@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 
 import { filters } from "../filters.svelte";
 import { arrangement } from "../arrangement.svelte";
-import type { DisplayDataRequest } from "../../../../../../lib/Request";
+import type { DisplayDataRequest } from "$shared/Request";
 
 const fieldLabels = [
     "music type",

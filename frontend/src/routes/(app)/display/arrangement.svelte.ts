@@ -2,8 +2,7 @@
 import { Cluster } from "./(arrangements)/Cluster";
 import { Grid } from "./(arrangements)/Grid";
 import { GridCluster } from "./(arrangements)/GridCluster";
-import { filters } from "./filters.svelte";
-import type { SongInfo } from "../../../../../lib/Song";
+import type { SongInfo } from "$shared/Song";
 
 // ARRANGEMENTS
 export const arr_types = {

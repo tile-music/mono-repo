@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { AlbumInfo } from "../../../../../lib/Song";
-    import type { ContextDataRequest, ContextDataResponse, RankOutput } from "../../../../../lib/Request";
+    import type { AlbumInfo } from "$shared/Song";
+    import type { ContextDataRequest, ContextDataResponse, RankOutput } from "$shared/Request";
     import { filters, filtersContext, timeFrameToText } from "./filters.svelte";
     import { deserialize } from "$app/forms";
 

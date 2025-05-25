@@ -1,5 +1,5 @@
 // IMPORTS
-import type { DisplayDataRequest } from "../../../../../lib/Request";
+import type { DisplayDataRequest } from "$shared/Request";
 
 // STATE
 export const filters: DisplayDataRequest = $state({
