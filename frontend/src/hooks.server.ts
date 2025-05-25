@@ -126,15 +126,6 @@ const authGuard: Handle = async ({ event, resolve }) => {
     return response;
 };
 
-const userTheme: Handle = async ({ event, resolve }) => {
-    const themeCookie = event.cookies.get("theme");
-    const theme = themeCookie ? `theme-${themeCookie}` : "theme-default-dark";
-
-    return await resolve(event, {
-        transformPageChunk: ({ html }) => html.replace("[theme]", theme),
-    });
-};
-
 const profile: Handle = async ({ event, resolve }) => {
     const { user } = event.locals;
 
@@ -163,6 +154,15 @@ const profile: Handle = async ({ event, resolve }) => {
     return resolve(event);
 };
 
+const userTheme: Handle = async ({ event, resolve }) => {
+    const { profile } = event.locals;
+    const theme = `theme-${profile?.theme ?? "theme-default-dark"}`;
+
+    return await resolve(event, {
+        transformPageChunk: ({ html }) => html.replace("[theme]", theme),
+    });
+};
+
 const originalConsoleWarn = console.debug;
 
 console.warn = function (...args) {
@@ -182,4 +182,4 @@ console.warn = function (...args) {
     }
 };
 
-export const handle: Handle = sequence(supabase, authGuard, userTheme, profile);
+export const handle: Handle = sequence(supabase, authGuard, profile, userTheme);

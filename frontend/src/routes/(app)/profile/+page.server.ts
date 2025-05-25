@@ -5,8 +5,7 @@ import { assembleBlankProfile } from "./profile";
 import { log } from "$lib/log"
 
 export const load: PageServerLoad = async ({
-    cookies,
-    locals: { supabase, session },
+    locals: { supabase, session, profile },
 }) => {
     if (session == null) {
         log(3, "User does not have session in protected route.");
@@ -39,16 +38,8 @@ export const load: PageServerLoad = async ({
 
     const email = session.user.email ?? null;
 
-    // set theme
-    if (user && user.theme) {
-        cookies.set("theme", user.theme, {
-            path: "/",
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-        });
-    }
-
     // return the retrieved (or blank) user profile
-    return { user, email };
+    return { user, email, profile };
 };
 
 export const actions: Actions = {
@@ -117,7 +108,7 @@ export const actions: Actions = {
     update_theme: async ({
         cookies,
         request,
-        locals: { supabase, session },
+        locals: { supabase, session, profile },
     }) => {
         if (session == null) {
             log(3, "User does not have session in protected route.");
@@ -132,24 +123,8 @@ export const actions: Actions = {
             theme: theme,
         };
 
-        // get profile data
-        let { data: user, error: get_error } = await supabase
-            .from("profiles")
-            .select(`theme`)
-            .eq("id", session.user.id)
-            .single();
-        if (get_error || !user) {
-            if (get_error) {
-                log(2, "Error fetching profile data: " + get_error);
-                throw get_error;
-            } else {
-                log(3, "Error fetching profile data: no user");
-                return fail(404, { no_user: true });
-            }
-        }
-
         // make sure update is necessary
-        if (user.theme == update.theme) {
+        if (profile && profile.theme == update.theme) {
             // update is unnecessary
             log(5, `Not updating ${session.user.id} theme: update is unnecessary`);
             return fail(400, { update_unnecessary: true });
@@ -160,15 +135,9 @@ export const actions: Actions = {
             .from("profiles")
             .upsert(update);
         if (update_error) {
-            log(2, "Error updating profile data: " + update_error);
+            log(2, "Error updating profile theme: " + update_error);
             return fail(500, { server_error: true });
         }
-
-        // set theme cookie to expire in 7 days
-        cookies.set("theme", theme, {
-            path: "/",
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-        });
 
         return { success: true };
     },
