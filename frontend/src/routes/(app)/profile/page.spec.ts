@@ -4,8 +4,8 @@ import Page from "./+page.svelte";
 const testData = {
     session: null,
     cookies: [],
-    user: {
-        updated_at: new Date(),
+    profile: {
+        updated_at: "2025-05-25 03:02:01.877+00",
         username: "testuser",
         full_name: "john smith",
         website: "www.example.com",
@@ -25,12 +25,12 @@ describe("Test profile page component", async () => {
     test("Profile info is placed in correct inputs", async () => {
         render(Page, { data: testData });
         expect(
-            screen.getByDisplayValue(testData.user.username),
+            screen.getByDisplayValue(testData.profile.username),
         ).toHaveAttribute("name", "username");
         expect(
-            screen.getByDisplayValue(testData.user.full_name),
+            screen.getByDisplayValue(testData.profile.full_name),
         ).toHaveAttribute("name", "full name");
-        expect(screen.getByDisplayValue(testData.user.website)).toHaveAttribute(
+        expect(screen.getByDisplayValue(testData.profile.website)).toHaveAttribute(
             "name",
             "website",
         );
@@ -65,12 +65,14 @@ describe("Test profile page component with missing or incomplete data", async ()
         ).toBeInTheDocument();
     });
 
-    test("Profile info has appropriate placeholder text", async () => {
-        render(Page, { data: noData });
-        expect(screen.getByPlaceholderText("username")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("full name")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("website")).toBeInTheDocument();
-    });
+    // no need to test for empty profile info inputs,
+    // as they are not rendered if no data is present
+    // test("Profile info has appropriate placeholder text", async () => {
+    //     render(Page, { data: noData });
+    //     expect(screen.getByPlaceholderText("username")).toBeInTheDocument();
+    //     expect(screen.getByPlaceholderText("full name")).toBeInTheDocument();
+    //     expect(screen.getByPlaceholderText("website")).toBeInTheDocument();
+    // });
 
     test("Email has appropriate placeholder value", async () => {
         render(Page, { data: noData });
