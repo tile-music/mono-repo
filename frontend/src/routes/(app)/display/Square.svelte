@@ -1,12 +1,13 @@
 <script lang="ts">
     import type { AlbumInfo, SongInfo } from "$shared/Song";
     import { filters, generalOptions } from "./filters.svelte";
-    import type { SquareInfo } from "./arrangement.svelte"
+    import type { SquareInfo, Squares } from "./arrangement.svelte"
 
     interface Props {
         square: SquareInfo;
         song: SongInfo;
         quantity: number;
+        context: Squares;
         rank: number;
         selectAlbum: (a: AlbumInfo, q: number, r: number) => void;
     }
@@ -15,6 +16,7 @@
         square,
         song,
         quantity,
+        context,
         rank,
         selectAlbum
     }: Props = $props();
@@ -35,10 +37,10 @@
     }
 
     let style = $derived(`
-        left: ${percent(square.x)};
-        top: ${percent(square.y)};
-        width: ${percent(square.size)};
-        height: ${percent(square.size)};
+        left: ${percent(square.x / context.width)};
+        top: ${percent(square.y / context.height)};
+        width: ${percent(square.size / context.width)};
+        height: ${percent(square.size / context.height)};
     `)
 </script>
 

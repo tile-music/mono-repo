@@ -24,10 +24,21 @@
 
   // download art display logic
   let displayContainerSize = $state({ width: 0, height: 0 });
-  let displaySize = $derived(Math.min(
-    displayContainerSize.width,
-    displayContainerSize.height,
-  ));
+  let displaySize = $derived.by(() => {
+    const containerAspectRatio = 
+      displayContainerSize.width / displayContainerSize.height;
+    const displayAspectRatio = 
+      arrangement.squares.width / arrangement.squares.height;
+
+    if (containerAspectRatio > displayAspectRatio) return {
+      height: displayContainerSize.height,
+      width: displayContainerSize.height * displayAspectRatio
+    }
+    else return {
+      width: displayContainerSize.width,
+      height: displayContainerSize.width / displayAspectRatio
+    }
+  });
 
   async function captureDiv() {
     if(artDisplayRef) {
@@ -115,7 +126,7 @@
     bind:clientHeight={displayContainerSize.height}
     bind:this={iFrameRef}
   >
-    {#if arrangement.squares.length == 0 && refreshStatus.status == "idle"}
+    {#if arrangement.squares.list.length == 0 && refreshStatus.status == "idle"}
       <div
         id="placeholder-display"
         class="capture-area"
@@ -132,14 +143,15 @@
         id="display"
         class="capture-area"
         bind:this={artDisplayRef}
-        style="{`width: ${displaySize}px; height: ${displaySize}px`}"
+        style="{`width: ${displaySize.width}px; height: ${displaySize.height}px`}"
       >
         <!-- <Header nameSource="name" position={{top: 0, left: 0}}
         {dateStrings} {timeFrame} {filters}/> -->
-        {#each arrangement.squares as square, i}
+        {#each arrangement.squares.list as square, i}
           <Square {square} song={songs[i].song}
            quantity={songs[i].quantity}
            rank={i+1}
+           context={arrangement.squares}
            {selectAlbum}/>
         {/each}
       </div>
@@ -186,8 +198,7 @@
   }
 
   #display {
-    aspect-ratio: 1 / 1 ;
-    position: absolute;
+    position: relative;
   }
 
   #placeholder-display {
