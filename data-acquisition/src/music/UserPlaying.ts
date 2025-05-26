@@ -7,6 +7,7 @@ import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
 import { PlayedTrack } from "./PlayedTrack.ts";
 
 import { log } from "../util/log.ts"
+import { parseEnv } from "node:util";
 
 export type ReleaseDate = { year: number, month?: number, day?: number }
 
@@ -128,6 +129,14 @@ export abstract class UserPlaying {
       }
       
     }
+  }
+
+  protected async findMBID(): Promise<void>{
+    this.played.forEach((t : PlayedTrack)=>{
+      const albumInfo = t.getAlbumInfo();
+      albumInfo 
+      
+    })
   }
 }
 
