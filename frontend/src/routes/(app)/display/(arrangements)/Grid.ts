@@ -25,9 +25,6 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
     let y = 0;
     let row_width = s.width;
     for (let i = 0; i < s.height; i++) {
-        // end computation if a new row would be out of bounds
-        if (y + 1 / row_width > 1) break;
-
         // generate a row of squares
         for (let j = 0; j < row_width; j++)
             squares.push({ x: j / row_width, y: y, size: 1 / row_width });
@@ -39,7 +36,7 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
     
     // fix number of squares to the number of songs
     squares.length = Math.min(songs.length, squares.length);
-    return squares;
+    return { list: squares, width: 1, height: y};
 }
 
 export const Grid: Arrangement<typeof options> = {
