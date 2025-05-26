@@ -78,7 +78,7 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
     }
 
     // transform squares from grid coordinates to 0-1 coordinates
-    return normalizeSquareCoordinates(grid_squares, s.grid_size);
+    return fitBoundaryBox(grid_squares, s.grid_size);
 }
 
 /**
@@ -164,12 +164,12 @@ function checkCollisions(grid: boolean[][], sq: SquareInfo) {
 }
 
 /**
- * normalizes the coordinates of the squares to be between 0 and 1
- * @param squares the squares to normalize
+ * fits a boundary box around the squares, fitting square coordinates within them.
+ * @param squares the squares to fit
  * @param gs the grid size
- * @returns the normalized squares
+ * @returns the fit squares and the width and height of the arrangement
  */
-function normalizeSquareCoordinates(squares: SquareInfo[], gs: number) {
+function fitBoundaryBox(squares: SquareInfo[], gs: number) {
     // find minimum and maximum coordinate values that squares occupy
     const bounds = { left: gs, right: 0, top: gs, bottom: 0 };
     for (const square of squares) {
@@ -181,20 +181,20 @@ function normalizeSquareCoordinates(squares: SquareInfo[], gs: number) {
             bounds.bottom = square.y + square.size;
     }
 
-    // translate coordinate bounds to domain
-    const d =
-        bounds.right - bounds.left > bounds.bottom - bounds.top
-            ? { min: bounds.left, max: bounds.right }
-            : { min: bounds.top, max: bounds.bottom };
-
-    // map square coordinates to fill 0-1
-    return squares.map((sq) => {
+    // fit squares to the top left corner of the grid
+    const mapped_squares = squares.map((square) => {
         return {
-            x: (sq.x - d.min) / (d.max - d.min),
-            y: (sq.y - d.min) / (d.max - d.min),
-            size: sq.size / (d.max - d.min),
-        };
+            x: square.x - bounds.left,
+            y: square.y - bounds.top,
+            size: square.size,
+        }
     });
+
+    return {
+        list: mapped_squares,
+        width: bounds.right - bounds.left,
+        height: bounds.bottom - bounds.top,
+    }
 }
 
 export const GridCluster: Arrangement<typeof options> = {
