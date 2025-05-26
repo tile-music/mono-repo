@@ -5,6 +5,8 @@
   import Customize from "./Customize.svelte";
   import Song from "./Song.svelte";
 
+
+
   import type {
     AlbumInfo,
     ListeningDataSongInfo,
@@ -32,16 +34,16 @@
     | { status: "idle" }
     | { status: "loading-more" }
     | { status: "error"; error: string } = $state({ status: "refreshing" });
+
   const listeningDataRequest: ListeningDataRequest =
     $derived<ListeningDataRequest>({
       ...listeningDataFilter,
-      limit: 100,
+      limit: 25,
       offset: 0,
     });
-  const childPropagation = (song: ListeningDataSongInfo) => {
+  const childPropagation = (song: ListeningDataSongInfo) => 
     song.show_children = !song.show_children;
     //if (song.child) childPropagation(song.child);
-  };
 
   $inspect(listeningDataRequest);
   /**
@@ -54,8 +56,8 @@
       const curr = newSongs[i];
       const prev = i ? newSongs[i - 1] : songs[-1];
       // Check previous song only if it's in the new batch
+      console.log(curr)
       if (i > 0) {
-        
         const oneArtistMatches = () =>
           curr.artists.some((a) => prev.artists.includes(a));
         const match = () =>

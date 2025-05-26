@@ -44,10 +44,11 @@
 </script>
 
 <div class="song">
-    {#if song.is_parent}
-        <p class="repetitions" onclick={() =>{ childPropogationRotation(song) }}>
+    {#if song.children.length > 0} 
+        <a type="button" class="repetitions" onclick={() =>{ childPropogationRotation(song) }} aria-label="Show plays">
+            
             <img src={arrow} bind:this={dropdown}  alt="show plays" />({song.children.length + 1})
-        </p>
+        </a>
     {:else}
         <p class="repetitions"></p>
     {/if}
