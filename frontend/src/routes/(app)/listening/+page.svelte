@@ -65,7 +65,8 @@
           prev.albums[0].title === curr.albums[0].title &&
           oneArtistMatches();
         if (match()) {
-          prev.children.push(curr)
+          curr.is_child = true;
+          prev.children.push(curr);
           //console.log(JSON.stringify(prev));
           newSongs.splice(i, 1);
           i -= 1;
