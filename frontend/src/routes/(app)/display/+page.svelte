@@ -22,22 +22,16 @@
   let iFrameRef: HTMLDivElement;
   let artDisplayRef: HTMLDivElement | null = $state(null);
 
-  // download art display logic
+  // derived state for display size
   let displayContainerSize = $state({ width: 0, height: 0 });
   let displaySize = $derived.by(() => {
-    const containerAspectRatio = 
-      displayContainerSize.width / displayContainerSize.height;
-    const displayAspectRatio = 
-      arrangement.squares.width / arrangement.squares.height;
+    const containerAspectRatio = displayContainerSize.width / displayContainerSize.height;
+    const displayAspectRatio = arrangement.squares.width / arrangement.squares.height;
 
-    if (containerAspectRatio > displayAspectRatio) return {
-      height: displayContainerSize.height,
-      width: displayContainerSize.height * displayAspectRatio
-    }
-    else return {
-      width: displayContainerSize.width,
-      height: displayContainerSize.width / displayAspectRatio
-    }
+    // if the container is smaller than the display, scale the display to fit
+    return containerAspectRatio > displayAspectRatio
+      ? { height: 100, width: (displayAspectRatio / containerAspectRatio) * 100 }
+      : { width: 100, height: (containerAspectRatio / displayAspectRatio) * 100 };
   });
 
   async function captureDiv() {
@@ -143,7 +137,7 @@
         id="display"
         class="capture-area"
         bind:this={artDisplayRef}
-        style="{`width: ${displaySize.width}px; height: ${displaySize.height}px`}"
+        style="{`width: ${displaySize.width}%; height: ${displaySize.height}%`}"
       >
         <!-- <Header nameSource="name" position={{top: 0, left: 0}}
         {dateStrings} {timeFrame} {filters}/> -->
