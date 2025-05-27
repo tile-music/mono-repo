@@ -44,6 +44,9 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
         s.offset_max,
     );
 
+    // sort the squares by size, so that larger squares are placed first
+    arrangement.sort((a, b) => b.width - a.width);
+
     // translate the output of arrangement into a form usable by the Square component
     const squares: { x: number; y: number; size: number }[] = [];
     for (const square of arrangement) {
