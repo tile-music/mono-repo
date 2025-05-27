@@ -5,6 +5,8 @@
   import Customize from "./Customize.svelte";
   import Song from "./Song.svelte";
 
+
+
   import type {
     AlbumInfo,
     ListeningDataSongInfo,
@@ -32,41 +34,16 @@
     | { status: "idle" }
     | { status: "loading-more" }
     | { status: "error"; error: string } = $state({ status: "refreshing" });
+
   const listeningDataRequest: ListeningDataRequest =
     $derived<ListeningDataRequest>({
       ...listeningDataFilter,
-      limit: 100,
+      limit: 25,
       offset: 0,
     });
-  const insertChild = (
-    parent: ListeningDataSongInfo,
-    child: ListeningDataSongInfo,
-    count: number = 0,
-    grandParent: ListeningDataSongInfo = parent,
-  ): void => {
-    const setSize = (grandParent: ListeningDataSongInfo, size: number) =>
-      (grandParent.size = size);
-    if (count === 0) {
-      console.log("count is zero");
-      parent.show_children = false;
-      parent.is_parent = true;
-    }
-    if (!parent.child) {
-      console.log("inserting child");
-      //parent.has_children = true;
-      child.albums[0].image = "";
-      child.is_child = true;
-      parent.child = { ...child };
-      setSize(grandParent, count + 1);
-      return;
-    } else if (parent.child) {
-      return insertChild(parent.child, child, count + 1, grandParent);
-    }
-  };
-  const childPropagation = (song: ListeningDataSongInfo) => {
+  const childPropagation = (song: ListeningDataSongInfo) => 
     song.show_children = !song.show_children;
-    if (song.child) childPropagation(song.child);
-  };
+    //if (song.child) childPropagation(song.child);
 
   $inspect(listeningDataRequest);
   /**
@@ -79,8 +56,8 @@
       const curr = newSongs[i];
       const prev = i ? newSongs[i - 1] : songs[-1];
       // Check previous song only if it's in the new batch
+      console.log(curr)
       if (i > 0) {
-        
         const oneArtistMatches = () =>
           curr.artists.some((a) => prev.artists.includes(a));
         const match = () =>
@@ -88,7 +65,8 @@
           prev.albums[0].title === curr.albums[0].title &&
           oneArtistMatches();
         if (match()) {
-          insertChild(prev, curr);
+          curr.is_child = true;
+          prev.children.push(curr);
           //console.log(JSON.stringify(prev));
           newSongs.splice(i, 1);
           i -= 1;
