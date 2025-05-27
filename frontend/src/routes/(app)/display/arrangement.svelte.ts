@@ -1,5 +1,5 @@
 // IMPORTS
-import { Cluster } from "./(arrangements)/Cluster";
+import { CloudCluster } from "./(arrangements)/CloudCluster";
 import { Grid } from "./(arrangements)/Grid";
 import { GridCluster } from "./(arrangements)/GridCluster";
 import type { SongInfo } from "$shared/Song";
@@ -7,7 +7,7 @@ import type { SongInfo } from "$shared/Song";
 // ARRANGEMENTS
 export const arr_types = {
     grid: Grid,
-    cluster: Cluster,
+    cloud_cluster: CloudCluster,
     grid_cluster: GridCluster,
 } as const;
 
@@ -20,9 +20,9 @@ export let arrangement: {
     change: (songs: AggregatedSongs) => void;
     generate: (songs: AggregatedSongs) => void;
 } = $state({
-    type: "cluster",
-    options: { ...Cluster.options },
-    state: { ...Cluster.state },
+    type: "cloud_cluster",
+    options: { ...CloudCluster.options },
+    state: { ...CloudCluster.state },
     squares: { list: [], width: 0, height: 0 },
     change,
     generate,
