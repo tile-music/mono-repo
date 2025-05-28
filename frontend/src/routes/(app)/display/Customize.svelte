@@ -1,6 +1,6 @@
 <script lang="ts">
   import { filters, filtersContext, generalOptions } from './filters.svelte';
-  import type { DisplayDataRequest } from "../../../../../lib/Request";
+  import type { DisplayDataRequest } from "$shared/Request";
   import type { AggregatedSongs } from './arrangement.svelte';
   import { arrangement, arr_types } from './arrangement.svelte';
 
@@ -289,7 +289,8 @@
 
   select {
     width: 100px;
-    -webkit-appearance:none;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   input[type="number"] {

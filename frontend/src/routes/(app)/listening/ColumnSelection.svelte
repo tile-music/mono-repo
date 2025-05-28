@@ -1,6 +1,6 @@
 <script lang="ts">
   import { listeningDataFilter } from "./filters.svelte.js";
-  import type { ListeningColumnKeys } from "../../../../../lib/Request";
+  import type { ListeningColumnKeys } from "$shared/Request";
   const { loadData }: { loadData: (refresh : boolean) => void } = $props();
   let showSelection = $state<boolean>(false);
   let selections = $derived<ListeningColumnKeys[]>(

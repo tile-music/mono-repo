@@ -9,9 +9,9 @@
     AlbumInfo,
     ListeningDataSongInfo,
     SongInfo,
-  } from "../../../../../lib/Song";
+  } from "$shared/Song";
   import { onMount } from "svelte";
-  import type { ListeningDataRequest } from "../../../../../lib/Request";
+  import type { ListeningDataRequest } from "$shared/Request";
 
   import { listeningDataFilter } from "./filters.svelte";
 

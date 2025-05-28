@@ -8,7 +8,7 @@
     "jest.runMode": {
         "type": "on-demand"
     },
-    "deno.enablePaths": ["./data-acquisition/"],
+    "deno.enablePaths": ["./data-acquisition/", "supabase/docker/volumes/functions/"],
     "deno.testing.args": [
         "--allow-all",
         "--no-check"

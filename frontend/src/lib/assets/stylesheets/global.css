@@ -9,7 +9,8 @@
 }
 
 /* basic elements */
-html, body {
+html,
+body {
     height: 100%;
 }
 
@@ -17,12 +18,18 @@ body {
     background-color: var(--background);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: "Mattone";
     color: var(--text);
 }
 
-p, div {
+p,
+div {
     font-family: "Archivo";
     color: var(--text);
 }
@@ -37,7 +44,8 @@ h1 {
 }
 
 /* input elements */
-input[type="text"], input[type="password"] {
+input[type="text"],
+input[type="password"] {
     background-color: var(--background);
     border: 2px solid var(--medium);
     border-radius: 5px;
@@ -47,7 +55,9 @@ input[type="text"], input[type="password"] {
     color: var(--text);
 }
 
-input[type="submit"], .art-display-button, .art-display-menu-button {
+input[type="submit"],
+.art-display-button,
+.art-display-menu-button {
     height: 40px;
     border-radius: 20px;
     border: none;

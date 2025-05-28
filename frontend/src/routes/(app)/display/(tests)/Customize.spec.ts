@@ -1,17 +1,20 @@
-import { render, screen } from '@testing-library/svelte';
-import Customize from '../Customize.svelte';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from "@testing-library/svelte";
+import Customize from "../Customize.svelte";
+import userEvent from "@testing-library/user-event";
 
-import { filters } from '../filters.svelte';
-import { arrangement } from '../arrangement.svelte';
-import type { DisplayDataRequest } from '../../../../../../lib/Request';
+import { filters } from "../filters.svelte";
+import { arrangement } from "../arrangement.svelte";
+import type { DisplayDataRequest } from "$shared/Request";
 
 const fieldLabels = [
-    "music type", "time frame", "number of cells",
-    "rank determinant", "include cell info"
+    "music type",
+    "time frame",
+    "number of cells",
+    "rank determinant",
+    "include cell info",
 ];
 
-describe('Test customization panel inputs', async () => {
+describe("Test customization panel inputs", async () => {
     const user = userEvent.setup();
     const refresh = vi.fn();
 
@@ -20,7 +23,7 @@ describe('Test customization panel inputs', async () => {
         filters.aggregate = localFilters.aggregate;
         filters.num_cells = localFilters.num_cells;
         filters.rank_determinant = localFilters.rank_determinant;
-        filters.date = {...localFilters.date};
+        filters.date = { ...localFilters.date };
     });
 
     // clear calls of mock function and render customization panel
@@ -30,11 +33,11 @@ describe('Test customization panel inputs', async () => {
         render(Customize, {
             refresh,
             exportDisplay: () => {},
-            songs: []
+            songs: [],
         });
     });
 
-    test('All expected fields should be enabled', async () => {
+    test("All expected fields should be enabled", async () => {
         for (const label of fieldLabels) {
             const musicTypeInput = screen.getByLabelText(label);
             expect(musicTypeInput).toBeInTheDocument();
@@ -42,7 +45,7 @@ describe('Test customization panel inputs', async () => {
         }
     });
 
-    test('Editing music type should trigger refresh with correct data', async () => {
+    test("Editing music type should trigger refresh with correct data", async () => {
         const musicTypeInput = screen.getByLabelText("music type");
         await user.selectOptions(musicTypeInput, "song");
 
@@ -51,13 +54,13 @@ describe('Test customization panel inputs', async () => {
         expect(firstCall.aggregate).toBe("song");
     });
 
-    test('Not modifying music type should not trigger refresh', async () => {
+    test("Not modifying music type should not trigger refresh", async () => {
         const musicTypeInput = screen.getByLabelText("music type");
         await user.selectOptions(musicTypeInput, "song");
         expect(refresh).not.toBeCalled();
     });
 
-    test('Editing rank determinant should trigger refresh with correct data', async () => {
+    test("Editing rank determinant should trigger refresh with correct data", async () => {
         const rankDeterminantInput = screen.getByLabelText("rank determinant");
         await user.selectOptions(rankDeterminantInput, "time");
 
@@ -66,13 +69,13 @@ describe('Test customization panel inputs', async () => {
         expect(firstCall.rank_determinant).toBe("time");
     });
 
-    test('Not modifying rank determinant should not trigger refresh', async () => {
+    test("Not modifying rank determinant should not trigger refresh", async () => {
         const rankDeterminantInput = screen.getByLabelText("rank determinant");
         await user.selectOptions(rankDeterminantInput, "time");
         expect(refresh).not.toBeCalled();
     });
 
-    test('Entering a value into number of cells should refresh the display', async () => {
+    test("Entering a value into number of cells should refresh the display", async () => {
         const numCellsInput = screen.getByLabelText("number of cells");
 
         //Clear the current number (not strictly nessecary but doesn't hurt)
@@ -84,7 +87,7 @@ describe('Test customization panel inputs', async () => {
         expect(numCellsInput).toHaveValue(1);
 
         //Click somewhere else on the screen (this might need to be changed in the future)
-        const display = screen.getAllByRole("heading")[1]
+        const display = screen.getAllByRole("heading")[1];
         await user.click(display);
 
         expect(refresh).toBeCalled();
@@ -110,7 +113,7 @@ describe('Test customization panel inputs', async () => {
     */
 });
 
-describe('Test customization panel buttons', async () => {
+describe("Test customization panel buttons", async () => {
     const user = userEvent.setup();
     const exportDisplay = vi.fn();
     const generate = vi.fn();
@@ -123,23 +126,25 @@ describe('Test customization panel buttons', async () => {
         render(Customize, {
             refresh: () => {},
             exportDisplay,
-            songs: []
+            songs: [],
         });
     });
 
-    test('Clicking regenerate should call regenerate function', async () => {
+    test("Clicking regenerate should call regenerate function", async () => {
         await user.click(screen.getByText("regenerate"));
         expect(generate).toBeCalled();
     });
 
-    test('Clicking export should call export function', async () => {
+    test("Clicking export should call export function", async () => {
         await user.click(screen.getByText("export"));
         expect(exportDisplay).toBeCalled();
     });
 
     test('Clicking "close" and "customize" should toggle the customization menu', async () => {
         await user.click(screen.getByText("close"));
-        let customizeHeading = screen.queryByRole("heading", { name: "customize" });
+        let customizeHeading = screen.queryByRole("heading", {
+            name: "customize",
+        });
         expect(customizeHeading).not.toBeInTheDocument();
 
         await user.click(screen.getByText("customize"));

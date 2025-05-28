@@ -1,20 +1,28 @@
-import type { Arrangement, ArrangementState, SquareInfo, AggregatedSongs } from "../arrangement.svelte";
+import type {
+    Arrangement,
+    ArrangementState,
+    SquareInfo,
+    AggregatedSongs,
+} from "../arrangement.svelte";
 
 const options = {
-    grid_size: { type: "number", label: "grid size", min: 5, max: 100},
-    min_size: { type: "number", label: "min size", min: 1, max: 25},
-    max_size: { type: "number", label: "max size", min: 1, max: 25},
+    grid_size: { type: "number", label: "grid size", min: 5, max: 100 },
+    min_size: { type: "number", label: "min size", min: 1, max: 25 },
+    max_size: { type: "number", label: "max size", min: 1, max: 25 },
 } as const;
 
 const state: ArrangementState<typeof options> = {
     grid_size: 50,
     min_size: 5,
-    max_size: 15
+    max_size: 15,
 } as const;
 
 function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
     // initialize number of squares if not specified
-    const num_squares = Math.min(songs.length, Math.floor((s.grid_size / (s.max_size - s.min_size)) ** 2));
+    const num_squares = Math.min(
+        songs.length,
+        Math.floor((s.grid_size / (s.max_size - s.min_size)) ** 2),
+    );
 
     // generate a list of random sizes and initialize the grid
     const sizes = generateSizes(num_squares, s.min_size, s.max_size);
@@ -28,14 +36,14 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
         const size = sizes.pop()!;
 
         // initialize the candidate position and its distance to center
-        let bestSq: SquareInfo = {size, x: 0, y: 0}
+        let bestSq: SquareInfo = { size, x: 0, y: 0 };
         let minDistSq = Number.MAX_SAFE_INTEGER;
         let foundPosition = false;
 
         // iterate through every possible position
         for (let i = 0; i < s.grid_size; i++) {
             for (let j = 0; j < s.grid_size; j++) {
-                const newSq = {size, x: j, y: i}
+                const newSq = { size, x: j, y: i };
 
                 // make sure the square doesn't overlap
                 if (checkCollisions(grid, newSq)) {
@@ -45,10 +53,12 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
                     // find the distance of the new square to the center
                     const ctrX = newSq.x + newSq.size / 2;
                     const ctrY = newSq.y + newSq.size / 2;
-                    let distSq = (ctrX - s.grid_size/2) ** 2 + (ctrY - s.grid_size/2) ** 2
+                    let distSq =
+                        (ctrX - s.grid_size / 2) ** 2 +
+                        (ctrY - s.grid_size / 2) ** 2;
 
                     // add a random modifier to the distance
-                    distSq += Math.floor(Math.random() * newSq.size / 2);
+                    distSq += Math.floor((Math.random() * newSq.size) / 2);
 
                     // if the distance is closer than the minimum distance,
                     // make this position the new candidate position
@@ -77,11 +87,15 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
  */
 function generateSizes(num: number, minSize: number, maxSize: number) {
     // populate sizes with random numbers in between range
-    const sizes: number[] = []
+    const sizes: number[] = [];
     for (let i = 0; i < num; i++)
-        sizes.push(Math.floor((Math.random() ** 3) * ((maxSize + 1) - minSize)) + minSize);
+        sizes.push(
+            Math.floor(Math.random() ** 3 * (maxSize + 1 - minSize)) + minSize,
+        );
 
-    return sizes.sort((a, b) => { return a - b; });
+    return sizes.sort((a, b) => {
+        return a - b;
+    });
 }
 
 /**
@@ -106,7 +120,7 @@ function placeSquare(grid: boolean[][], sq: SquareInfo) {
     // find the width and height of the grid
     const gs = {
         x: grid[0].length,
-        y: grid.length
+        y: grid.length,
     };
 
     // make xsure square can fit in grid
@@ -114,8 +128,8 @@ function placeSquare(grid: boolean[][], sq: SquareInfo) {
         throw `Square (size ${sq.size}) is too large to fit into grid at position (x: ${sq.x}, y: ${sq.y})`;
 
     // populate grid
-    for (let i = sq.y; i < sq.y+sq.size; i++) {
-        for (let j = sq.x; j < sq.x+sq.size; j++) {
+    for (let i = sq.y; i < sq.y + sq.size; i++) {
+        for (let j = sq.x; j < sq.x + sq.size; j++) {
             grid[i][j] = true;
         }
     }
@@ -133,15 +147,15 @@ function checkCollisions(grid: boolean[][], sq: SquareInfo) {
     // find the width and height of the grid
     const gs = {
         x: grid[0].length,
-        y: grid.length
+        y: grid.length,
     };
 
     // make sure square can fit in grid
-    if (sq.x + sq.size > gs.x || sq.y + sq.size > gs.y) return false
+    if (sq.x + sq.size > gs.x || sq.y + sq.size > gs.y) return false;
 
     // determine if any cells the square would fill are occupied already
-    for (let i = sq.y; i < sq.y+sq.size; i++) {
-        for (let j = sq.x; j < sq.x+sq.size; j++) {
+    for (let i = sq.y; i < sq.y + sq.size; i++) {
+        for (let j = sq.x; j < sq.x + sq.size; j++) {
             if (grid[i][j] === true) return false;
         }
     }
@@ -149,31 +163,42 @@ function checkCollisions(grid: boolean[][], sq: SquareInfo) {
     return true;
 }
 
+/**
+ * normalizes the coordinates of the squares to be between 0 and 1
+ * @param squares the squares to normalize
+ * @param gs the grid size
+ * @returns the normalized squares
+ */
 function normalizeSquareCoordinates(squares: SquareInfo[], gs: number) {
     // find minimum and maximum coordinate values that squares occupy
-    const bounds = { left: gs, right: 0, top: gs, bottom: 0 }
+    const bounds = { left: gs, right: 0, top: gs, bottom: 0 };
     for (const square of squares) {
         if (square.x < bounds.left) bounds.left = square.x;
-        if (square.x + square.size > bounds.right) bounds.right = square.x + square.size;
+        if (square.x + square.size > bounds.right)
+            bounds.right = square.x + square.size;
         if (square.y < bounds.top) bounds.top = square.y;
-        if (square.y + square.size > bounds.bottom) bounds.bottom = square.y + square.size;
+        if (square.y + square.size > bounds.bottom)
+            bounds.bottom = square.y + square.size;
     }
 
     // translate coordinate bounds to domain
-    const d = (bounds.right - bounds.left > bounds.bottom - bounds.top) ?
-        { min: bounds.left, max: bounds.right } :
-        { min: bounds.top, max: bounds.bottom };
+    const d =
+        bounds.right - bounds.left > bounds.bottom - bounds.top
+            ? { min: bounds.left, max: bounds.right }
+            : { min: bounds.top, max: bounds.bottom };
 
     // map square coordinates to fill 0-1
     return squares.map((sq) => {
         return {
             x: (sq.x - d.min) / (d.max - d.min),
             y: (sq.y - d.min) / (d.max - d.min),
-            size: sq.size / (d.max - d.min)
-        }
+            size: sq.size / (d.max - d.min),
+        };
     });
 }
 
 export const GridCluster: Arrangement<typeof options> = {
-    options, state, generate
-}
+    options,
+    state,
+    generate,
+};

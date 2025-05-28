@@ -1,4 +1,7 @@
-export function validateAccountForm(type: "login" | "register", formData: FormData): FormValidation {
+export function validateAccountForm(
+    type: "login" | "register",
+    formData: FormData,
+): FormValidation {
     const failures: Failures = {
         missingEmail: false,
         missingPassword: false,
@@ -7,10 +10,10 @@ export function validateAccountForm(type: "login" | "register", formData: FormDa
         invalidPassword: {
             tooShort: false,
             tooLong: false,
-            noNumbers: false
+            noNumbers: false,
         },
-        alreadyTaken: false
-    }
+        alreadyTaken: false,
+    };
 
     const email = formData.get("email")?.toString();
     if (!email || email.length === 0) failures.missingEmail = true;
@@ -26,15 +29,24 @@ export function validateAccountForm(type: "login" | "register", formData: FormDa
     }
 
     const missingAttribute = failures.missingEmail || failures.missingPassword;
-    const invalidPassword = failures.invalidPassword.tooLong || failures.invalidPassword.tooShort || failures.invalidPassword.noNumbers
-    const malformedCredentials = failures.passwordMismatch || failures.invalidEmail || invalidPassword
-    if (missingAttribute || type === "register" && malformedCredentials) return { valid: false, failures};
+    const invalidPassword =
+        failures.invalidPassword.tooLong ||
+        failures.invalidPassword.tooShort ||
+        failures.invalidPassword.noNumbers;
+    const malformedCredentials =
+        failures.passwordMismatch || failures.invalidEmail || invalidPassword;
+    if (missingAttribute || (type === "register" && malformedCredentials))
+        return { valid: false, failures };
 
-    return { valid: true, failures: failures, data: { email: email!, password: password! }}
+    return {
+        valid: true,
+        failures: failures,
+        data: { email: email!, password: password! },
+    };
 }
 
 function validateWellFormedEmail(email: string) {
-    const regex = /(.+)@(.+){2,}\.(.+){2,}/
+    const regex = /(.+)@(.+){2,}\.(.+){2,}/;
     return regex.test(email);
 }
 
@@ -43,7 +55,7 @@ function validateWellFormedPassword(password: string): InvalidPassword {
         tooShort: false,
         tooLong: false,
         noNumbers: false,
-    }
+    };
 
     if (password.length < 8) invalidPassword.tooShort = true;
     if (password.length > 64) invalidPassword.tooLong = true;
@@ -54,29 +66,31 @@ function validateWellFormedPassword(password: string): InvalidPassword {
     return invalidPassword;
 }
 
-type FormValidation = {
-    valid: true,
-    failures: Failures,
-    data: {
-        email: string,
-        password: string
-    }
-} | {
-    valid: false,
-    failures: Failures
-}
+type FormValidation =
+    | {
+          valid: true;
+          failures: Failures;
+          data: {
+              email: string;
+              password: string;
+          };
+      }
+    | {
+          valid: false;
+          failures: Failures;
+      };
 
 export type Failures = {
-    missingEmail: boolean
-    missingPassword: boolean
-    passwordMismatch: boolean
-    invalidEmail: boolean
-    invalidPassword: InvalidPassword
-    alreadyTaken: boolean
-}
+    missingEmail: boolean;
+    missingPassword: boolean;
+    passwordMismatch: boolean;
+    invalidEmail: boolean;
+    invalidPassword: InvalidPassword;
+    alreadyTaken: boolean;
+};
 
 type InvalidPassword = {
-    tooShort: boolean
-    tooLong: boolean
-    noNumbers: boolean
-}
+    tooShort: boolean;
+    tooLong: boolean;
+    noNumbers: boolean;
+};

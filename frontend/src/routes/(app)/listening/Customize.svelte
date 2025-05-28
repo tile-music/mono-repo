@@ -10,7 +10,7 @@
     ListeningColumnKeys,
     ListeningDataRequest,
     TitleColumn,
-  } from "../../../../../lib/Request";
+  } from "$shared/Request";
   import ColumnSelection from "./ColumnSelection.svelte";
   import filterIcon from "$lib/assets/icons/filter.svg";
   import { derived } from "svelte/store";
