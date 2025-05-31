@@ -1,5 +1,5 @@
 // IMPORTS
-import { Cluster } from "./(arrangements)/Cluster";
+import { CloudCluster } from "./(arrangements)/CloudCluster";
 import { Grid } from "./(arrangements)/Grid";
 import { GridCluster } from "./(arrangements)/GridCluster";
 import type { SongInfo } from "$shared/Song";
@@ -7,7 +7,7 @@ import type { SongInfo } from "$shared/Song";
 // ARRANGEMENTS
 export const arr_types = {
     grid: Grid,
-    cluster: Cluster,
+    cloud_cluster: CloudCluster,
     grid_cluster: GridCluster,
 } as const;
 
@@ -16,14 +16,14 @@ export let arrangement: {
     type: keyof typeof arr_types;
     options: ArrangementOptions;
     state: Record<string, boolean | number | string>;
-    squares: SquareInfo[];
+    squares: Squares;
     change: (songs: AggregatedSongs) => void;
     generate: (songs: AggregatedSongs) => void;
 } = $state({
-    type: "cluster",
-    options: { ...Cluster.options },
-    state: { ...Cluster.state },
-    squares: [],
+    type: "cloud_cluster",
+    options: { ...CloudCluster.options },
+    state: { ...CloudCluster.state },
+    squares: { list: [], width: 0, height: 0 },
     change,
     generate,
 });
@@ -47,6 +47,18 @@ export type SquareInfo = {
     size: number; // square size, 0 to 1
     rotation?: number; // optional square rotation, in degrees
 };
+
+/**
+ * Represents the properties of a square arrangement,
+ * including a list of square info objects, and the
+ * width and height of the square container. May
+ * contain other contextual information in the future.
+ */
+export type Squares = {
+    list: SquareInfo[];
+    width: number;
+    height: number;
+}
 
 /**
  * Represents the options an arrangement can have, which will
@@ -106,7 +118,7 @@ export type AggregatedSongs = { song: SongInfo; quantity: number }[];
 type Generate<Options extends ArrangementOptions> = (
     songs: AggregatedSongs,
     s: ArrangementState<Options>,
-) => SquareInfo[];
+) => Squares;
 
 /**
  * A full arrangement, complete with options and their default values
