@@ -1,7 +1,7 @@
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
-import { assembleBlankProfile } from "./profile";
+import { assembleBlankProfile } from "./settings/profile";
 import { log } from "$lib/log"
 
 export const load: PageServerLoad = async ({
