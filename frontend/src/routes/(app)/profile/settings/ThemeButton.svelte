@@ -8,16 +8,15 @@
 
     function parseName() {
         var split_name = color.split("-");
-        console.log(split_name)
-        if(split_name[0] == "default") {
-            return split_name[1]
+        if (split_name[0] == "default") {
+            return split_name[1];
         } else {
-            var name = ""
+            var name = "";
             split_name.forEach(n => {
                 name = name + " " + n;
             });
+            return name;
         }
-        return name;
     }
 </script>
 
