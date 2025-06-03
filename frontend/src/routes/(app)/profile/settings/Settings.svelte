@@ -119,6 +119,15 @@
         <h2>linked services</h2>
         <LinkSpotify></LinkSpotify>
     </div>
+    <div id="themes">
+        <div id="theme-header">
+            <h2>theme</h2>
+            <p>{themeStatus}</p>
+        </div>
+        {#each all_themes as theme}
+        <ThemeButton color={theme} setTheme={setProfileTheme}> </ThemeButton>
+        {/each}
+    </div>
     <div id="account-actions">
         <h2>account actions</h2>
         <div class="button-status-group">
@@ -130,15 +139,6 @@
             <p role="status">{resetProfileStatus}</p>
         </div>
         <DeleteUser><div id="delete">delete account</div></DeleteUser>
-    </div>
-    <div id="themes">
-        <div id="theme-header">
-            <h2>theme</h2>
-            <p>{themeStatus}</p>
-        </div>
-        {#each all_themes as theme}
-        <ThemeButton color={theme} setTheme={setProfileTheme}> </ThemeButton>
-        {/each}
     </div>
 </div>
 
