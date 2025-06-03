@@ -5,7 +5,7 @@
     import ThemeButton from "./ThemeButton.svelte";
     
     interface Props {
-        email: string | null;
+        email?: string;
     }
     
     let { email }: Props = $props();
@@ -92,8 +92,7 @@
         else if (info.update_unnecessary) themeStatus = "theme already set to that value";
         else themeStatus = "failed: unknown error";
 
-        if (themeStatusTimeout)
-            clearTimeout(themeStatusTimeout);
+        if (themeStatusTimeout) clearTimeout(themeStatusTimeout);
         themeStatusTimeout = setTimeout(() => {
             themeStatus = "";
         }, 2000); // clear status message after 2 seconds

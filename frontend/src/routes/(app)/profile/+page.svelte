@@ -1,18 +1,18 @@
 <script lang="ts">
   import type { PageData } from "./$types";
-  import ProfilePanel from "./panel/ProfilePanel.svelte";
+  import Profile from "./panel/Profile.svelte";
   import Settings from "./settings/Settings.svelte";
 
   interface Props {
     data: PageData;
   }
 
-  let { data = $bindable() }: Props = $props();
+  let { data }: Props = $props();
   let { profile, email } = $derived(data);
 </script>
 
 <div id="container">
-  <ProfilePanel {profile} />
+  <Profile {profile} />
   <Settings {email} />
 </div>
 

@@ -2,7 +2,7 @@ import { redirect } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
 import { validateAccountForm } from "../validateAccountForm";
-import { assembleBlankProfile } from "../../(app)/profile/settings/profile";
+import { assembleBlankProfile } from "../../(app)/profile/profile";
 
 export const actions: Actions = {
     register: async ({ request, locals: { supabase } }) => {

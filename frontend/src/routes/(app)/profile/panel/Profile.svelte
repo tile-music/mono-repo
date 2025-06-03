@@ -4,12 +4,18 @@
     import { enhance } from "$app/forms";
     import type { SubmitFunction } from "@sveltejs/kit";
     import type { Profile } from "$shared/Profile";
+    import { onMount } from 'svelte';
   
     interface Props {
-        profile: Profile | null;
+        profile?: Profile;
     }
 
-    let { profile = $bindable() }: Props = $props();
+    let { profile }: Props = $props();
+    let updatedProfile = $state<Profile | null>(null);
+
+    onMount(() => {
+        if (profile) updatedProfile = { ...profile }
+    });
   
     let updateProfileStatus = $state("");
     const handleUpdateProfile: SubmitFunction = () => {
@@ -40,8 +46,8 @@
 
 <div id="profile">
     <h1>profile</h1>
-    <Avatar url={sampleAvatar} size={150} />
-    {#if profile} <!-- TODO: implement a static placeholder form if user is null -->
+    {#if updatedProfile} <!-- TODO: implement a static placeholder form if user is null -->
+        <Avatar url={sampleAvatar} size={150} />
         <form method="POST" action="?/update_profile" use:enhance={handleUpdateProfile}>
             <div>
                 <label for="username">username</label>
@@ -50,7 +56,7 @@
                     name="username"
                     id="username"
                     placeholder="username"
-                    bind:value={profile.username}
+                    bind:value={updatedProfile.username}
                 />
             </div>
             <div>
@@ -60,7 +66,7 @@
                     name="full name"
                     id="full name"
                     placeholder="full name"
-                    bind:value={profile.full_name}
+                    bind:value={updatedProfile.full_name}
                 />
             </div>
             <div>
@@ -70,12 +76,17 @@
                     name="website"
                     id="website"
                     placeholder="website"
-                    bind:value={profile.website}
+                    bind:value={updatedProfile.website}
                 />
             </div>
             <p>{updateProfileStatus}</p>
             <input type="submit" value="save profile" />
         </form>
+    {:else}
+        <p id="loading-error">
+            Unable to load profile information.
+            Please try again later.
+        </p>
     {/if}
 </div>
 
@@ -126,5 +137,12 @@
         border-bottom: 2px solid var(--medium);
         border-radius: 0;
         background-color: transparent;
+    }
+
+    #loading-error {
+        margin: 200px auto;
+        width: 60%;
+        line-height: 1.5;
+        text-align: center;
     }
 </style>
