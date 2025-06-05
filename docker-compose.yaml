@@ -1,6 +1,8 @@
 include:
   #- ./mb-docker/docker-compose.yml
-  - ./supabase/docker/docker-compose.yml
+  - path:
+    - ./supabase/docker/docker-compose.yml
+    - ./supabase/docker/docker-compose.s3.yml
 services:
   lib-node:
     build:
