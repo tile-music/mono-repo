@@ -3,7 +3,7 @@ import type { Actions } from "./$types";
 import { fail, error } from "@sveltejs/kit";
 import { assembleBlankProfile } from "./profile";
 import { log } from "$lib/log"
-import type { Profile } from "$shared/Profile";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 
 export const load: PageServerLoad = async ({
     locals: { supabase, session, profile },
@@ -170,5 +170,93 @@ export const actions: Actions = {
         // handle errors
         const response = JSON.parse(data);
         return response;
+    },
+
+    change_avatar: async ({ request, locals: { supabase, session, profile } }) => {
+        if (session == null) {
+            log(3, "User does not have session in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
+
+        if (profile == null) {
+            log(3, "User does not have profile in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
+
+        // remove existing avatar
+        if (profile.avatar_url) {
+            const headers = {
+                headers: { Authorization: `Bearer ${session.access_token}` },
+            };
+            const { error } = await supabase.functions.invoke(
+                "delete-avatar", { ...headers }
+            );
+    
+            if (error) {
+                if (error instanceof FunctionsHttpError) {
+                    const message = await error.context.text();
+                    log(3, "Error uploading avatar: " + message);
+                    return fail(400, { function_error: true, error: message });
+                }
+                return fail(500, { server_error: true });
+            }
+        }
+
+        // upload new avatar
+        const formData = await request.formData();
+        const headers = {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+        };
+        const { error } = await supabase.functions.invoke(
+            "upload-avatar", { body: formData, ...headers }
+        );
+
+        if (error) {
+            if (error instanceof FunctionsHttpError) {
+                const message = await error.context.text();
+                log(3, "Error uploading avatar: " + message);
+                return fail(400, { function_error: true, error: message });
+            }
+            return fail(500, { server_error: true });
+        }
+
+        return { success: true }
+    },
+
+    remove_avatar: async ({
+        locals: { supabase, session, profile },
+    }) => {
+        if (session == null) {
+            log(3, "User does not have session in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
+
+        if (profile == null) {
+            log(3, "User does not have profile in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
+
+        if (!profile.avatar_url) {
+            log(3, "User does not have avatar to remove.");
+            return fail(400, { no_avatar: true });
+        }
+
+        const headers = {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+        };
+        const { error } = await supabase.functions.invoke(
+            "delete-avatar", { ...headers }
+        );
+
+        if (error) {
+            if (error instanceof FunctionsHttpError) {
+                const message = await error.context.text();
+                log(3, "Error uploading avatar: " + message);
+                return fail(400, { function_error: true, error: message });
+            }
+            return fail(500, { server_error: true });
+        }
+
+        return { success: true }
     },
 };

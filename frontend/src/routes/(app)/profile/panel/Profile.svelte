@@ -1,5 +1,4 @@
 <script lang="ts">
-    import sampleAvatar from '$lib/assets/images/sample_avatar.jpg'
     import Avatar from './Avatar.svelte';
     import { enhance } from "$app/forms";
     import type { SubmitFunction } from "@sveltejs/kit";
@@ -47,7 +46,7 @@
 <div id="profile">
     <h1>profile</h1>
     {#if updatedProfile} <!-- TODO: implement a static placeholder form if user is null -->
-        <Avatar url={sampleAvatar} size={150} />
+        <Avatar url={profile?.avatar_url} size={150} />
         <form method="POST" action="?/update_profile" use:enhance={handleUpdateProfile}>
             <div>
                 <label for="username">username</label>
