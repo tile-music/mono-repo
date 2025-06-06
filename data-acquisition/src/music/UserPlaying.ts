@@ -7,10 +7,48 @@ import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
 import { PlayedTrack } from "./PlayedTrack.ts";
 
 import { log } from "../util/log.ts"
-import { parseEnv } from "node:util";
+
+import { MusicBrainzApi } from "../../deps.ts";
+
 
 export type ReleaseDate = { year: number, month?: number, day?: number }
 
+/**
+ * Abstract class representing a user's music playback session and handling database operations.
+ * 
+ * @template SupabaseClient - The Supabase client type for database operations.
+ * @template PlayedTrack - The type representing a played track.
+ * 
+ * @property userId - The unique identifier for the user.
+ * @property supabase - The Supabase client instance for database interactions.
+ * @property context - Additional context or configuration for the user session.
+ * @property inited - Indicates whether the user session has been initialized.
+ * @property postgres - Optional property for direct Postgres access or configuration.
+ * @property played - Array of played tracks for the user.
+ * @property dbEntries - Object containing database entries to be inserted, including track info and user ID.
+ * @property matched - Indicates whether the played tracks have been matched to database entries.
+ * 
+ * @constructor
+ * @param supabase - The Supabase client instance.
+ * @param userId - The unique identifier for the user.
+ * @param context - Additional context or configuration for the user session.
+ * 
+ * @method makeDBEntries - Abstract method to prepare database entries from played tracks.
+ * @returns Promise<void>
+ * 
+ * @method init - Abstract method to initialize the user session.
+ * @returns Promise<void>
+ * 
+ * @method fire - Abstract method to trigger the main logic for the user session.
+ * @returns Promise<void>
+ * 
+ * @method putInDB - Inserts played track and album information into the database, handling duplicates and linking tracks to albums.
+ * @returns Promise<void>
+ * @throws Error if track or album data cannot be found or inserted.
+ * 
+ * @method findMBID - Attempts to find MusicBrainz IDs (MBIDs) for played tracks and albums.
+ * @returns Promise<void>
+ */
 export abstract class UserPlaying {
   userId!: string;
   supabase!: SupabaseClient<any, "test" | "prod", any>;
@@ -19,6 +57,7 @@ export abstract class UserPlaying {
   postgres!: any;
   played: PlayedTrack[] = [];
   dbEntries: any = { p_track_info: [], p_user_id: "" };
+
 
   constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: string, context: any) {
     this.supabase = supabase;
@@ -131,13 +170,7 @@ export abstract class UserPlaying {
     }
   }
 
-  protected async findMBID(): Promise<void>{
-    this.played.forEach((t : PlayedTrack)=>{
-      const albumInfo = t.getAlbumInfo();
-      albumInfo 
-      
-    })
-  }
+  
 }
 
 export class SpotifyUserPlaying extends UserPlaying {

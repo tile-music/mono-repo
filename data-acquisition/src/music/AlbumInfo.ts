@@ -32,15 +32,15 @@
  * @returns {Object} An object containing the album information formatted for database entry.
  */
 export class AlbumInfo {
-  private albumName: string;
-  private albumType: string;
-  private numTracks: number;
-  private releaseDay: number | null;
-  private releaseMonth: number| null;
-  private releaseYear: number;
-  private artists: string[];
-  private genre: string[];
-  private image: string;
+  readonly albumName: string;
+  readonly albumType: string;
+  readonly numTracks: number;
+  readonly releaseDay: number | null;
+  readonly releaseMonth: number| null;
+  readonly releaseYear: number;
+  readonly artists: string[];
+  readonly genre: string[];
+  readonly image: string;
 
   constructor(
     albumName: string,

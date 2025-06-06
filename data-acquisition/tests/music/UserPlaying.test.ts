@@ -7,7 +7,7 @@ const supabase: SupabaseClient<any, "test", any>  = new SupabaseClient(
   Deno.env.get("SERVICE") as string,
   { db: { schema: "test" } }
 );
-Deno.test( "User Playing Tests", async (t) => {
+Deno.test( "User Playing Tests ", async (t) => {
 
   console.log("test env", Deno.env.get("SB_URL_TEST"))
   const testData1 = [
@@ -115,6 +115,11 @@ Deno.test( "User Playing Tests", async (t) => {
             .eq("user_id", userId)
         );
     });
+
+    await t.step("MockUserPlaying get Musicbrainz releases", () => {
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
+      
+    })
   });
   await t.step("Spotify User Playing tests", async (t)=>{
     const context  = { refresh_token: Deno.env.get("SP_REFRESH") };
@@ -181,6 +186,8 @@ Deno.test( "User Playing Tests", async (t) => {
       });
     })
   })
+
+
 
   await supabase.auth.admin.deleteUser(userId);
 

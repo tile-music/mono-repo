@@ -24,10 +24,10 @@
  * @todo Change how `indb` is set because this might create a state mismatch.
  */
 export class TrackInfo {
-  private trackName: string;
-  private trackArtists: string[];
-  private isrc: string;
-  private durationMs: number;
+  readonly trackName: string;
+  readonly trackArtists: string[];
+  readonly isrc: string;
+  readonly durationMs: number;
 
   constructor(
     trackName: string,

@@ -31,6 +31,7 @@ export class PlayedTrack {
   private trackInfo: TrackInfo | SpotifyTrackInfo;
   private albumInfo: AlbumInfo | SpotifyAlbumInfo;
   private trackPopularity: number;
+  matched: boolean = false;
 
   constructor(listenedAt: number, trackInfo: TrackInfo, albumInfo: AlbumInfo, trackPopularity: number) {
     this.listenedAt = listenedAt;
@@ -39,12 +40,16 @@ export class PlayedTrack {
     this.trackPopularity = trackPopularity;
   }
 
-  public getTrackInfo() : TrackInfo | SpotifyTrackInfo {
+  public getTrackInfo(): TrackInfo | SpotifyTrackInfo {
     return this.trackInfo;
   }
 
-  public getAlbumInfo() : AlbumInfo | SpotifyAlbumInfo {
+  public getAlbumInfo(): AlbumInfo | SpotifyAlbumInfo {
     return this.albumInfo;
+  }
+
+  public setMatched(s: boolean): void {
+    this.matched = s;
   }
 
   public createDbEntryObject() {
