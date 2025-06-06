@@ -26,7 +26,6 @@ export type ReleaseDate = { year: number, month?: number, day?: number }
  * @property postgres - Optional property for direct Postgres access or configuration.
  * @property played - Array of played tracks for the user.
  * @property dbEntries - Object containing database entries to be inserted, including track info and user ID.
- * @property matched - Indicates whether the played tracks have been matched to database entries.
  * 
  * @constructor
  * @param supabase - The Supabase client instance.
