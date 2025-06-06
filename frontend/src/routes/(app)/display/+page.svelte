@@ -8,7 +8,7 @@
   import Square from "./Square.svelte";
   import Context from "./Context.svelte";
   import Customize from "./Customize.svelte";
-  // import Header from "./Header.svelte";
+  import Header from "./Header.svelte";
 
   // type & state imports
   import type { DisplayDataRequest } from "$shared/Request";
@@ -16,6 +16,12 @@
   import { filters } from "./filters.svelte";
   import { arrangement } from "./arrangement.svelte";
   import type { AggregatedSongs } from "./arrangement.svelte";
+  import type { PageData } from "./$types";
+
+  // page data
+  interface Props { data: PageData }
+  let { data }: Props = $props();
+  let { profile } = $derived(data);
 
   let songs: AggregatedSongs = $state([]);
   
@@ -133,14 +139,13 @@
         </p>
       </div>
     {:else if refreshStatus.status == "idle"}
+      {#if profile} <Header {profile}/> {/if}
       <div
         id="display"
         class="capture-area"
         bind:this={artDisplayRef}
         style="{`width: ${displaySize.width}%; height: ${displaySize.height}%`}"
       >
-        <!-- <Header nameSource="name" position={{top: 0, left: 0}}
-        {dateStrings} {timeFrame} {filters}/> -->
         {#each arrangement.squares.list as square, i}
           <Square {square} song={songs[i].song}
            quantity={songs[i].quantity}
@@ -183,12 +188,16 @@
   }
 
   #display-container {
-    width: 100%;
-    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex: 1;
     position: relative;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 20px;
+    margin: 20px;
   }
 
   #display {

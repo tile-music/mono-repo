@@ -16,6 +16,11 @@ export const filtersContext: FiltersContext = $state({
 
 export const generalOptions: GeneralOptions = $state({
     showCellInfo: "on-hover",
+    headerOptions: {
+        showHeader: true,
+        nameSource: "name",
+        showAvatar: true,
+    },
 });
 
 // TYPES AND FUNCTIONS
@@ -26,6 +31,7 @@ interface FiltersContext {
 
 interface GeneralOptions {
     showCellInfo: ShowCellInfo;
+    headerOptions: HeaderOptions;
 }
 
 export type TimeFrame =
@@ -42,6 +48,12 @@ export type DateStrings = {
 };
 
 export type ShowCellInfo = "never" | "on-hover" | "always";
+
+export type HeaderOptions = {
+    showHeader: boolean;
+    nameSource: "name" | "username";
+    showAvatar: boolean;
+}
 
 export function timeFrameToText(tf: TimeFrame, ds: DateStrings) {
     switch (tf) {
