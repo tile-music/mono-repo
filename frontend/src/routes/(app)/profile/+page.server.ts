@@ -1,20 +1,43 @@
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "./$types";
-import { fail } from "@sveltejs/kit";
+import { fail, error } from "@sveltejs/kit";
 import { assembleBlankProfile } from "./profile";
 import { log } from "$lib/log"
+import type { Profile } from "$shared/Profile";
 
 export const load: PageServerLoad = async ({
     locals: { supabase, session, profile },
 }) => {
-    if (session == null) {
+    if (!session) {
         log(3, "User does not have session in protected route.");
-        throw Error("User does not have session in protected route.");
+        throw error(401, "Not authenticated");
     }
 
-    const email = session.user.email ?? null;
+    const email = session.user.email;
+    if (!email) {
+        log(3, "User does not have email in session.");
+        throw error(401, "Not authenticated");
+    }
 
-    // return the retrieved (or blank) user profile
+    if (!profile) {
+        log(3, "User does not have profile in protected route.");
+
+        // Insert blank profile
+        const blankProfile = assembleBlankProfile(session.user.id, email);
+        const { data: newProfile, error: insertError } = await supabase
+            .from("profiles")
+            .insert(blankProfile)
+            .select();
+
+        if (insertError || !newProfile || !newProfile[0]) {
+            log(2, "Error inserting blank profile: " +
+                (insertError ? insertError.message : "profile was created but not returned"));
+            throw error(500, "Server error while creating profile");
+        }
+
+        profile = newProfile[0];
+    }
+
     return { email, profile };
 };
 
@@ -66,7 +89,6 @@ export const actions: Actions = {
     },
 
     update_theme: async ({
-        cookies,
         request,
         locals: { supabase, session, profile },
     }) => {
@@ -102,7 +124,7 @@ export const actions: Actions = {
         return { success: true };
     },
 
-    reset_profile: async ({ request, locals: { supabase, session } }) => {
+    reset_profile: async ({ locals: { supabase, session } }) => {
         if (session == null) {
             log(3, "User does not have session in protected route.");
             return fail(401, { not_authenticated: true });
