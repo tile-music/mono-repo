@@ -56,15 +56,13 @@ export const actions: Actions = {
             username: formData.get("username") as string,
             full_name: formData.get("full name") as string,
             website: formData.get("website") as string,
-            avatar_url: null,
         };
 
         // make sure update is necessary
         if (
             profile.username == update.username &&
             profile.full_name == update.full_name &&
-            profile.website == update.website &&
-            profile.avatar_url == update.avatar_url
+            profile.website == update.website
         ) {
             // update is unnecessary
             log(5, `Not updating ${session.user.id}: update is unnecessary`);

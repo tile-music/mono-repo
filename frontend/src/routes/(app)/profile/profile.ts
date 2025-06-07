@@ -22,7 +22,6 @@ export function assembleBlankProfile(id: string, email?: string) {
         username,
         full_name: null,
         website: null,
-        avatar_url: null,
         theme: "dark",
     };
 }
