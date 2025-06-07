@@ -45,7 +45,7 @@
 
 <div id="profile">
     <h1>profile</h1>
-    {#if updatedProfile} <!-- TODO: implement a static placeholder form if user is null -->
+    {#if updatedProfile}
         <Avatar url={profile?.avatar_url} size={150} />
         <form method="POST" action="?/update_profile" use:enhance={handleUpdateProfile}>
             <div>
@@ -83,8 +83,7 @@
         </form>
     {:else}
         <p id="loading-error">
-            Unable to load profile information.
-            Please try again later.
+            Loading...
         </p>
     {/if}
 </div>

@@ -1,13 +1,9 @@
 <script lang="ts">
-  import type { PageData } from "./$types";
+  import type { PageProps } from "./$types";
   import Profile from "./panel/Profile.svelte";
   import Settings from "./settings/Settings.svelte";
 
-  interface Props {
-    data: PageData;
-  }
-
-  let { data }: Props = $props();
+  let { data }: PageProps = $props();
   let { profile, email } = $derived(data);
 </script>
 
