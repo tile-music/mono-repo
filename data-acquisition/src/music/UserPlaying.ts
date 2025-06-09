@@ -4,7 +4,7 @@ import "jsr:@std/dotenv/load";
 
 import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
 import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
-import { PlayedTrack } from "./PlayedTrack.ts";
+import { Play } from "./Play.ts";
 
 import { log } from "../util/log.ts"
 
@@ -54,7 +54,7 @@ export abstract class UserPlaying {
   context!: any;
   inited!: boolean;
   postgres!: any;
-  played: PlayedTrack[] = [];
+  albums: Map<string, AlbumInfo | SpotifyAlbumInfo> = new Map();
   dbEntries: any = { p_track_info: [], p_user_id: "" };
 
 
@@ -65,9 +65,12 @@ export abstract class UserPlaying {
     this.inited = false;
   }
 
-  protected abstract makeDBEntries(): Promise<void>
-  public abstract init(): Promise<void>
-  public abstract fire(): Promise<void>
+  protected abstract makeDBEntries(): Promise<void>;
+  public abstract init(): Promise<void>;
+  public abstract fire(): Promise<void>;
+
+  protected abstract matchAlbums(): Promise<void>;
+
 
   public async putInDB(): Promise<void> {
     await this.makeDBEntries();
@@ -176,7 +179,6 @@ export class SpotifyUserPlaying extends UserPlaying {
   client!: Client;
   player!: Player;
   items!: any[];
-  albums: any[] = [];
 
   constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: any, context: any) {
     super(supabase, userId, context);
@@ -221,12 +223,12 @@ export class SpotifyUserPlaying extends UserPlaying {
       );
       const trackInfo = new SpotifyTrackInfo(
         item.track.name,
-        item.track.artists.map((artist: any) => artist.name),
+        item.track.artists.map((artist: { name: string }) => artist.name),
         item.track.externalID.isrc,
         item.track.duration,
         item.track.id
       );
-      const playedTrackInfo = new PlayedTrack(
+      const playedTrackInfo = new Play(
         SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
         trackInfo,
         album,
@@ -306,7 +308,9 @@ export class MockUserPlaying extends UserPlaying {
     super(supabase, userId, context);
     this.mockData = context;
   }
-  protected override async makeDBEntries(): Promise<void> {
+  protected override async matchAlbums(): Promise<void> {
+    
+    // make sure this works like a traditional for loop not async for each because that will result in a major race condition
     for (const track of this.mockData) {
       const album = new AlbumInfo(
         track.albumInfo.albumName,
@@ -317,20 +321,19 @@ export class MockUserPlaying extends UserPlaying {
         track.albumInfo.releaseMonth,
         track.albumInfo.releaseYear,
         1,
-        ["Test Genre"],
-
+        ["Test Genre"]
       );
+      if (this.albums.has(album.getAlbumIdentifier())) 
+    
+
       const trackInfo = new TrackInfo(
         track.trackName,
         track.trackArtists,
         track.isrc,
         track.durationMs
       );
-      const playedTrackInfo = new PlayedTrack(
+      const playedTrackInfo = new Play(
         track.timestamp,
-        trackInfo,
-        album,
-        track.popularity
       );
       this.played.push(playedTrackInfo);
     }
@@ -340,6 +343,9 @@ export class MockUserPlaying extends UserPlaying {
 
     this.dbEntries.p_user_id = this.userId;
 
+  }
+  protected override async makeDBEntries(): Promise<void> {
+    
   }
 
   public override init(): Promise<void> {

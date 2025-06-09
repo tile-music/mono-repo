@@ -1,3 +1,5 @@
+import { SpotifyTrackInfo, TrackInfo } from "./TrackInfo.ts";
+
 /**
  * Represents information about a music album.
  * 
@@ -26,21 +28,27 @@
  * @param {string} upc - The Universal Product Code of the album.
  * @param {string} ean - The European Article Number of the album.
  * @param {string} albumIsrc - The International Standard Recording Code of the album.
+ * @param {number} albumId - The id of said album in the database
+ * @param {string} primaryIdent - the primary identifier for album (differs depending on service)
  * 
  * @method createDbEntryObject
  * @description Creates an object that can be used to create a new entry in the database.
  * @returns {Object} An object containing the album information formatted for database entry.
  */
 export class AlbumInfo {
-  readonly albumName: string;
-  readonly albumType: string;
-  readonly numTracks: number;
-  readonly releaseDay: number | null;
-  readonly releaseMonth: number| null;
-  readonly releaseYear: number;
-  readonly artists: string[];
-  readonly genre: string[];
-  readonly image: string;
+  private albumName: string;
+  private albumType: string;
+  private numTracks: number;
+  private releaseDay: number | null;
+  private releaseMonth: number| null;
+  private releaseYear: number;
+  private artists: string[];
+  private genre: string[];
+  private image: string;
+  private albumId?: number;
+  protected primaryIdent: string;
+
+  protected tracks: TrackInfo[] = [];
 
   constructor(
     albumName: string,
@@ -62,7 +70,29 @@ export class AlbumInfo {
     this.numTracks = numTracks;
     this.image = image;
     this.genre = genre;
+    this.primaryIdent = `${albumName},${this.artists.join(",")}`
     //console.log(this);
+  }
+
+  public getAlbumId() {
+    if(!this.albumId) throw new Error("No AlbumID found, it may not yet have been set");
+    return this.albumId;
+  }
+  
+  public setAlbumId(albumId: number) {
+    this.albumId = albumId;
+  }
+
+  public getTracks() {
+    return this.tracks;
+  }
+
+  public addTrack(track : TrackInfo) {
+    this.tracks.push(track);
+  }
+
+  public getAlbumIdentifier() {
+    return this.primaryIdent;
   }
   /**
    *
@@ -87,6 +117,7 @@ export class AlbumInfo {
 export class SpotifyAlbumInfo extends AlbumInfo {
 
   private spotifyId: string;
+  protected override tracks: SpotifyTrackInfo[] = [];
   constructor(
     albumName: string,
     albumType: string,
@@ -101,6 +132,11 @@ export class SpotifyAlbumInfo extends AlbumInfo {
   ) {
     super(albumName, albumType, artists, image, releaseDay, releaseMonth, releaseYear, numTracks, genre);
     this.spotifyId = spotifyId;
+    this.primaryIdent = spotifyId;
+  }
+  
+  public override addTrack(track: SpotifyTrackInfo): void {
+    this.tracks.push(track);
   }
 
   public override createDbEntryObject() {
