@@ -1,4 +1,6 @@
-import { SpotifyTrackInfo, TrackInfo } from "./TrackInfo.ts";
+import { SpotifyTrackInfo, TrackInfo } from "./Track.ts";
+import { SupabaseClient } from "../../deps.ts";
+import { log } from "../util/log.ts";
 
 /**
  * Represents information about a music album.
@@ -35,18 +37,20 @@ import { SpotifyTrackInfo, TrackInfo } from "./TrackInfo.ts";
  * @description Creates an object that can be used to create a new entry in the database.
  * @returns {Object} An object containing the album information formatted for database entry.
  */
-export class AlbumInfo {
+export class Album {
   private albumName: string;
   private albumType: string;
   private numTracks: number;
   private releaseDay: number | null;
-  private releaseMonth: number| null;
+  private releaseMonth: number | null;
   private releaseYear: number;
   private artists: string[];
   private genre: string[];
   private image: string;
   private albumId?: number;
   protected primaryIdent: string;
+  protected supabase: SupabaseClient<any, "prod" | "test", any>;
+  protected query;
 
   protected tracks: TrackInfo[] = [];
 
@@ -57,9 +61,10 @@ export class AlbumInfo {
     image: string,
     releaseDay: number | undefined,
     releaseMonth: number | undefined,
-    releaseYear: number, 
+    releaseYear: number,
     numTracks: number,
     genre: string[],
+    supabase: SupabaseClient<any, "prod" | "test", any>
   ) {
     this.albumName = albumName;
     this.albumType = albumType;
@@ -70,24 +75,34 @@ export class AlbumInfo {
     this.numTracks = numTracks;
     this.image = image;
     this.genre = genre;
-    this.primaryIdent = `${albumName},${this.artists.join(",")}`
+    this.primaryIdent = `${albumName},${this.artists.join(",")}`;
+    this.supabase = supabase;
     //console.log(this);
+    this.query = this.supabase.from("albums").select("album_id")
   }
 
   public getAlbumId() {
-    if(!this.albumId) throw new Error("No AlbumID found, it may not yet have been set");
+    if (!this.albumId) throw new Error("No AlbumID found, it may not yet have been set");
     return this.albumId;
   }
-  
-  public setAlbumId(albumId: number) {
-    this.albumId = albumId;
+
+  public async getAlbumDbID() {
+    let { data, error } = await this.query.eq("album_name", this.albumName)
+      .eq("artists", this.artists)
+      .eq("release_year", this.releaseYear)
+      .eq("release_month", this.releaseMonth)
+      .eq("release_day", this.releaseDay)
+    if (!data) {
+      ({ data, error } = await this.supabase.from("albums").insert(this.createDbEntryObject()));
+    }
+    log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
   }
 
   public getTracks() {
     return this.tracks;
   }
 
-  public addTrack(track : TrackInfo) {
+  public addTrack(track: TrackInfo) {
     this.tracks.push(track);
   }
 
@@ -114,7 +129,7 @@ export class AlbumInfo {
   }
 }
 
-export class SpotifyAlbumInfo extends AlbumInfo {
+export class SpotifyAlbumInfo extends Album {
 
   private spotifyId: string;
   protected override tracks: SpotifyTrackInfo[] = [];
@@ -128,13 +143,15 @@ export class SpotifyAlbumInfo extends AlbumInfo {
     releaseYear: number,
     numTracks: number,
     genre: string[],
+    supabase: SupabaseClient<any, "prod" | "test", any>,
     spotifyId: string,
+
   ) {
-    super(albumName, albumType, artists, image, releaseDay, releaseMonth, releaseYear, numTracks, genre);
+    super(albumName, albumType, artists, image, releaseDay, releaseMonth, releaseYear, numTracks, genre, supabase);
     this.spotifyId = spotifyId;
     this.primaryIdent = spotifyId;
   }
-  
+
   public override addTrack(track: SpotifyTrackInfo): void {
     this.tracks.push(track);
   }

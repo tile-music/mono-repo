@@ -1,10 +1,10 @@
-import { AlbumInfo, SpotifyAlbumInfo } from '../../src/music/AlbumInfo.ts';
+import { Album, SpotifyAlbumInfo } from '../../src/music/Album.ts';
 import { expect } from "jsr:@std/expect";
-
-
+import {supabase} from "./supabase.ts"
+console.log(supabase)
 Deno.test('base classes', async (t) => {
   await t.step('constructor should initialize properties correctly', () => {
-    const albumInfo = new AlbumInfo(
+    const albumInfo = new Album(
       "Lenny Skinny",
       "Album",
       ["lenny skinny"],
@@ -14,7 +14,7 @@ Deno.test('base classes', async (t) => {
       2012,
       12,
       ["Rock"],
-
+      supabase
     );
 
     expect(albumInfo['albumName']).toBe("Lenny Skinny");
@@ -30,7 +30,7 @@ Deno.test('base classes', async (t) => {
   });
 
   await t.step('createDbEntryObject should return correct object', () => {
-    const albumInfo = new AlbumInfo(
+    const albumInfo = new Album(
       "New Artist",
       "Single",
       ["new artist"],
@@ -39,7 +39,8 @@ Deno.test('base classes', async (t) => {
       6,
       2021,
       5,
-      ["Pop"]
+      ["Pop"],
+      supabase
 
 
     );
@@ -70,6 +71,7 @@ Deno.test('spotify classes', async (t) => {
       2012,
       12,
       ["Rock"],
+      supabase,
 
       "spoturi1234567890"
     );
@@ -97,6 +99,7 @@ Deno.test('spotify classes', async (t) => {
       2021,
       5,
       ["Pop"],
+      supabase,
 
       "9876543210"
     );

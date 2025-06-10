@@ -1,5 +1,5 @@
 
-import { TrackInfo, SpotifyTrackInfo } from '../../src/music/TrackInfo.ts';
+import { TrackInfo, SpotifyTrackInfo } from '../../src/music/Track.ts';
 import { expect } from "jsr:@std/expect";
 /**
  * sharted by chat

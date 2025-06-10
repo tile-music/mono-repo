@@ -2,9 +2,9 @@ import { SupabaseClient, Client, Player } from "../../deps.ts";
 
 import "jsr:@std/dotenv/load";
 
-import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
-import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
-import { Play } from "./Play.ts";
+import { TrackInfo, SpotifyTrackInfo } from "./Track.ts";
+import { Album, SpotifyAlbumInfo } from "./Album.ts";
+import { Play, SpotifyPlay } from "./Play.ts";
 
 import { log } from "../util/log.ts"
 
@@ -54,7 +54,7 @@ export abstract class UserPlaying {
   context!: any;
   inited!: boolean;
   postgres!: any;
-  albums: Map<string, AlbumInfo | SpotifyAlbumInfo> = new Map();
+  albums: Map<string, Album | SpotifyAlbumInfo> = new Map();
   dbEntries: any = { p_track_info: [], p_user_id: "" };
 
 
@@ -71,6 +71,16 @@ export abstract class UserPlaying {
 
   protected abstract matchAlbums(): Promise<void>;
 
+  protected addOrGetAlbum(album: Album) {
+    const ident = album.getAlbumIdentifier()
+    if (this.albums.has(ident))
+      return this.albums.get(ident);
+    else {
+      this.albums.set(ident, album);
+      return this.albums.get(ident);
+    }
+    throw new Error("Album not present")
+  }
 
   public async putInDB(): Promise<void> {
     await this.makeDBEntries();
@@ -91,7 +101,7 @@ export abstract class UserPlaying {
       let { data: albumData, error: albumError } = await this.supabase
         .from("albums")
         .insert(entry.track_album)
-        .select("*");
+        .select("id");
 
       // check for unexpected error (ignoring duplicates)
       if (albumError && albumError?.code !== "23505") throw albumError;
@@ -110,20 +120,20 @@ export abstract class UserPlaying {
       if (!albumData) {
         // select all albums
         let query1 = this.supabase
-        .from("albums")
-        .select("*")
+          .from("albums")
+          .select("*")
 
         // album has a spotify id
         const albumSpotifyId = entry.track_album.spotify_id;
-        log(6,`spotify album id: ${albumSpotifyId}`)
+        log(6, `spotify album id: ${albumSpotifyId}`)
         if (albumSpotifyId) {
           query1 = query1.eq("spotify_id", albumSpotifyId);
           ({ data: albumData, error: albumError } = await query1);
-          log(6, `will fallback execute ${( Array.isArray(albumData) && albumData["length"] === 0)}`)
+          log(6, `will fallback execute ${(Array.isArray(albumData) && albumData["length"] === 0)}`)
         }
 
         // album has missing or incorrect spotify id, fallback to other fields
-        if(!albumSpotifyId || (Array.isArray(albumData) && albumData.length === 0)){
+        if (!albumSpotifyId || (Array.isArray(albumData) && albumData.length === 0)) {
           log(6, "executing fallback query")
           let query = this.supabase.from("albums").select("*")
 
@@ -133,7 +143,7 @@ export abstract class UserPlaying {
 
           log(6, `query ${JSON.stringify(query)}`);
           ({ data: albumData, error: albumError } = await query);
-          log(6,`album data: ${albumData}, albumError: ${albumError}` )
+          log(6, `album data: ${albumData}, albumError: ${albumError}`)
 
           //.eq("image", entry.track_album.image) // Filter by image
           //.eq("release_date", entry.track_album.release_date) // Filter by release_date
@@ -168,11 +178,11 @@ export abstract class UserPlaying {
                 ${JSON.stringify(entry)}
                 No data returned from insert or albumData is undefined or empty`);
       }
-      
+
     }
   }
 
-  
+
 }
 
 export class SpotifyUserPlaying extends UserPlaying {
@@ -180,7 +190,7 @@ export class SpotifyUserPlaying extends UserPlaying {
   player!: Player;
   items!: any[];
 
-  constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: any, context: any) {
+  constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: string, context: any) {
     super(supabase, userId, context);
   }
   public override async init(): Promise<void> {
@@ -190,7 +200,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       token: {
         clientID: Deno.env.get("SP_CID") as string,
         clientSecret: Deno.env.get("SP_SECRET") as string,
-        refreshToken: this.context.refresh_token,
+        refreshToken: this.context.refresh_toke1n,
       },
       onRefresh: () => {
         console.log(
@@ -228,10 +238,8 @@ export class SpotifyUserPlaying extends UserPlaying {
         item.track.duration,
         item.track.id
       );
-      const playedTrackInfo = new Play(
+      const playedTrackInfo = new SpotifyPlay(
         SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
-        trackInfo,
-        album,
         item.track.popularity
       );
       this.played.push(playedTrackInfo);
@@ -246,7 +254,7 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
   public override async fire(): Promise<void> {
     this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
-    
+
     try { await this.putInDB(); }
     catch (e) { log(1, `Error putting in DB: ${e}`); }
   }
@@ -308,11 +316,11 @@ export class MockUserPlaying extends UserPlaying {
     super(supabase, userId, context);
     this.mockData = context;
   }
+
   protected override async matchAlbums(): Promise<void> {
-    
     // make sure this works like a traditional for loop not async for each because that will result in a major race condition
     for (const track of this.mockData) {
-      const album = new AlbumInfo(
+      const album = this.addOrGetAlbum(new Album(
         track.albumInfo.albumName,
         "Album",
         track.albumInfo.albumArtists,
@@ -321,31 +329,27 @@ export class MockUserPlaying extends UserPlaying {
         track.albumInfo.releaseMonth,
         track.albumInfo.releaseYear,
         1,
-        ["Test Genre"]
-      );
-      if (this.albums.has(album.getAlbumIdentifier())) 
-    
+        ["Test Genre"],
+        this.supabase
+      ));
+
+      if (!album) throw new Error("Album Does Not Exist");
+
 
       const trackInfo = new TrackInfo(
         track.trackName,
         track.trackArtists,
         track.isrc,
-        track.durationMs
+        track.durationMs,
+        this.supabase,
+        new Play(
+          track.timestamp
+        )
       );
-      const playedTrackInfo = new Play(
-        track.timestamp,
-      );
-      this.played.push(playedTrackInfo);
     }
-    for (const track of this.played) {
-      await this.dbEntries.p_track_info.push(track.createDbEntryObject());
-    }
-
-    this.dbEntries.p_user_id = this.userId;
-
   }
   protected override async makeDBEntries(): Promise<void> {
-    
+
   }
 
   public override init(): Promise<void> {

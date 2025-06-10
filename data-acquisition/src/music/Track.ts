@@ -1,3 +1,6 @@
+import { Play, SpotifyPlay } from "./Play.ts"
+import { SupabaseClient } from "../../deps.ts";
+import { supabase } from "../../tests/music/supabase.ts";
 /**
  * @file TrackInfo.ts
  * @description This file contains the definition of the TrackInfo class, which represents information about a music track.
@@ -28,24 +31,27 @@ export class TrackInfo {
   readonly trackArtists: string[];
   readonly isrc: string;
   readonly durationMs: number;
+  protected play: Play;
 
   constructor(
     trackName: string,
     trackArtists: string[],
     isrc: string,
     durationMs: number,
+    supabase: SupabaseClient<any, "prod" | "test", any>,
+    play: Play
   ) {
     this.trackName = trackName;
     this.trackArtists = trackArtists;
     this.durationMs = durationMs;
     this.isrc = isrc;
+    this.play = play;
     //console.log(this);
   }
 
   /**
    * this method is used to create an object that can be used to create a new entry in the database
    * @returns an object that can be used to create a new entry in the database
-   * @todo change how indb is set because this might create a state mismatch
    */
   public createDbEntryObject() {
     return {
@@ -54,6 +60,10 @@ export class TrackInfo {
       track_artists: this.trackArtists,
       track_duration_ms: this.durationMs,
     };
+  }
+  
+  public createPlayDbEntryObject() {
+    return { ...this.play.createDbEntryObject() };
   }
 }
 
@@ -64,16 +74,17 @@ export class SpotifyTrackInfo extends TrackInfo {
     trackArtists: string[],
     isrc: string,
     durationMs: number,
+    play: SpotifyPlay,
     spotifyId: string,
   ) {
-    super(trackName, trackArtists, isrc, durationMs);
+    super(trackName, trackArtists, isrc, durationMs,supabase, play);
     this.spotifyId = spotifyId;
   }
+
   public override createDbEntryObject() {
     return {
       ...super.createDbEntryObject(),
       spotify_id: this.spotifyId,
-
     };
   }
 }

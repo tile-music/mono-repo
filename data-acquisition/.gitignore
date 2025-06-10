@@ -139,3 +139,5 @@ supabase/*
 
 
 package-lock.json
+
+playground/supabase.ipynb

@@ -1,5 +1,5 @@
-import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
-import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
+import { Album, SpotifyAlbumInfo } from "./Album.ts";
+import { TrackInfo, SpotifyTrackInfo } from "./Track.ts";
 
 /**
  * @file PlayedTrack.ts
@@ -18,7 +18,7 @@ import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
  * @constructor
  * @param {Date} playedAt - The date and time when the track was played.
  * @param {TrackInfo} trackInfo - The information about the track.
- * @param {AlbumInfo} albumInfo - The information about the album the track belongs to.
+ * @param {Album} albumInfo - The information about the album the track belongs to.
  * @param {number} popularity - The popularity score of the track.
  * 
  * @method createDbEntryObject
@@ -28,8 +28,6 @@ import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
 export class Play {
 
   private listenedAt: number;
-
-
 
   constructor(listenedAt: number) {
     this.listenedAt = listenedAt;

@@ -2,11 +2,7 @@ import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import { SpotifyUserPlaying, MockUserPlaying } from "../../src/music/UserPlaying.ts";
 import { expect } from "jsr:@std/expect";
 
-const supabase: SupabaseClient<any, "test", any>  = new SupabaseClient(
-  Deno.env.get("SB_URL_TEST") as string,
-  Deno.env.get("SERVICE") as string,
-  { db: { schema: "test" } }
-);
+
 Deno.test( "User Playing Tests ", async (t) => {
 
   console.log("test env", Deno.env.get("SB_URL_TEST"))
