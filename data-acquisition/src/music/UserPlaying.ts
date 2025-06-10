@@ -2,7 +2,7 @@ import { SupabaseClient, Client, Player } from "../../deps.ts";
 
 import "jsr:@std/dotenv/load";
 
-import { TrackInfo, SpotifyTrackInfo } from "./Track.ts";
+import { Track, SpotifyTrack } from "./Track.ts";
 import { Album, SpotifyAlbumInfo } from "./Album.ts";
 import { Play, SpotifyPlay } from "./Play.ts";
 
@@ -85,101 +85,6 @@ export abstract class UserPlaying {
   public async putInDB(): Promise<void> {
     await this.makeDBEntries();
     //console.log(this.dbEntries);
-
-    for (const entry of this.dbEntries.p_track_info) {
-      // attempt to insert track
-      let { data: trackData, error: trackError } = await this.supabase
-        .from("tracks")
-        .insert(entry.track)
-        .select("*");
-      log(6, `trackData: ${JSON.stringify(trackData)}, trackError: ${JSON.stringify(trackError)}`)
-
-      // check for unexpected error (ignoring duplicates)
-      if (trackError && trackError?.code !== "23505") throw trackError;
-
-      // attempt to insert album
-      let { data: albumData, error: albumError } = await this.supabase
-        .from("albums")
-        .insert(entry.track_album)
-        .select("id");
-
-      // check for unexpected error (ignoring duplicates)
-      if (albumError && albumError?.code !== "23505") throw albumError;
-
-      // track has been inserted already, find using isrc
-      if (!trackData) {
-        const { data: trackDataRet, error: trackErrorRet } = await this.supabase
-          .from("tracks")
-          .select("*")
-          .eq("isrc", entry.track.isrc);
-        trackData = trackDataRet;
-        trackError = trackErrorRet;
-      }
-
-      // album has been inserted already, find using spotify id and fallback if needed
-      if (!albumData) {
-        // select all albums
-        let query1 = this.supabase
-          .from("albums")
-          .select("*")
-
-        // album has a spotify id
-        const albumSpotifyId = entry.track_album.spotify_id;
-        log(6, `spotify album id: ${albumSpotifyId}`)
-        if (albumSpotifyId) {
-          query1 = query1.eq("spotify_id", albumSpotifyId);
-          ({ data: albumData, error: albumError } = await query1);
-          log(6, `will fallback execute ${(Array.isArray(albumData) && albumData["length"] === 0)}`)
-        }
-
-        // album has missing or incorrect spotify id, fallback to other fields
-        if (!albumSpotifyId || (Array.isArray(albumData) && albumData.length === 0)) {
-          log(6, "executing fallback query")
-          let query = this.supabase.from("albums").select("*")
-
-          query = query.eq("album_name", entry.track_album.album_name); // Filter by album name
-          query = query.eq("album_type", entry.track_album.album_type); // Filter by album type
-          query = query.eq("num_tracks", entry.track_album.num_tracks); // Filter by number of tracks
-
-          log(6, `query ${JSON.stringify(query)}`);
-          ({ data: albumData, error: albumError } = await query);
-          log(6, `album data: ${albumData}, albumError: ${albumError}`)
-
-          //.eq("image", entry.track_album.image) // Filter by image
-          //.eq("release_date", entry.track_album.release_date) // Filter by release_date
-        }
-
-        log(6, `Album data: ${albumData}`)
-        log(6, entry.track_album.spotify_id);
-      }
-
-      // check if we have a valid track and album
-      if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
-        // make sure the track and album are linked
-        await this.supabase.from("track_albums").insert({
-          track_id: trackData[0].track_id,
-          album_id: albumData[0].album_id,
-        });
-
-        // insert played track
-        const { data: _playedData, error: _playedError } = await this.supabase
-          .from("played_tracks")
-          .insert({
-            user_id: this.userId,
-            track_id: trackData[0].track_id,
-            album_id: albumData[0].album_id,
-            listened_at: entry.listened_at,
-            track_popularity: entry.track_popularity,
-            isrc: entry.track.isrc,
-          });
-      } else {
-        // if we still don't have a valid track or album, throw an error
-        throw new Error(`track data ${JSON.stringify(trackData)} album data: ${JSON.stringify(albumData)}, 
-                ${JSON.stringify(entry)}
-                No data returned from insert or albumData is undefined or empty`);
-      }
-
-    }
   }
 
 
@@ -231,7 +136,7 @@ export class SpotifyUserPlaying extends UserPlaying {
         item.track.album.genres,
         item.track.album.id
       );
-      const trackInfo = new SpotifyTrackInfo(
+      const trackInfo = new SpotifyTrack(
         item.track.name,
         item.track.artists.map((artist: { name: string }) => artist.name),
         item.track.externalID.isrc,
@@ -336,7 +241,7 @@ export class MockUserPlaying extends UserPlaying {
       if (!album) throw new Error("Album Does Not Exist");
 
 
-      const trackInfo = new TrackInfo(
+      const trackInfo = new Track(
         track.trackName,
         track.trackArtists,
         track.isrc,

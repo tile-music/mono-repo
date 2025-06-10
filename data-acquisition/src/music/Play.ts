@@ -1,5 +1,5 @@
 import { Album, SpotifyAlbumInfo } from "./Album.ts";
-import { TrackInfo, SpotifyTrackInfo } from "./Track.ts";
+import { Track, SpotifyTrack } from "./Track.ts";
 
 /**
  * @file PlayedTrack.ts
@@ -17,7 +17,7 @@ import { TrackInfo, SpotifyTrackInfo } from "./Track.ts";
  * 
  * @constructor
  * @param {Date} playedAt - The date and time when the track was played.
- * @param {TrackInfo} trackInfo - The information about the track.
+ * @param {Track} trackInfo - The information about the track.
  * @param {Album} albumInfo - The information about the album the track belongs to.
  * @param {number} popularity - The popularity score of the track.
  * 

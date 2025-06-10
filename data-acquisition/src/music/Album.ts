@@ -1,6 +1,7 @@
-import { SpotifyTrackInfo, TrackInfo } from "./Track.ts";
+import { SpotifyTrack, Track } from "./Track.ts";
 import { SupabaseClient } from "../../deps.ts";
 import { log } from "../util/log.ts";
+import { json } from "node:stream/consumers";
 
 /**
  * Represents information about a music album.
@@ -52,7 +53,7 @@ export class Album {
   protected supabase: SupabaseClient<any, "prod" | "test", any>;
   protected query;
 
-  protected tracks: TrackInfo[] = [];
+  protected tracks: Track[] = [];
 
   constructor(
     albumName: string,
@@ -81,28 +82,46 @@ export class Album {
     this.query = this.supabase.from("albums").select("album_id")
   }
 
-  public getAlbumId() {
-    if (!this.albumId) throw new Error("No AlbumID found, it may not yet have been set");
-    return this.albumId;
-  }
-
-  public async getAlbumDbID() {
-    let { data, error } = await this.query.eq("album_name", this.albumName)
-      .eq("artists", this.artists)
+  protected queryHelper() {
+    return this.query
+      .eq("album_name", this.albumName)
       .eq("release_year", this.releaseYear)
       .eq("release_month", this.releaseMonth)
       .eq("release_day", this.releaseDay)
-    if (!data) {
+  }
+
+  /**
+   * Retrieves the database ID for the current album instance.
+   * 
+   * This method queries the database for an album entry matching the current
+   * album's name and release date (year, month, day). If no matching entry is found,
+   * it attempts to insert a new album record. If the operation fails or returns no data,
+   * an error is thrown. If multiple matching entries are found, a warning is logged.
+   * 
+   * @returns {Promise<number>} The album's database ID.
+   * @throws {Error} If the album cannot be inserted or retrieved from the database.
+   * @todo find some intelligent way to fall back to a worse query, which should never happen in reality
+   */
+  public async getAlbumDbID() : Promise<number> {
+    if (this.albumId) return this.albumId;
+    let { data, error } = await this.queryHelper()
+    log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
+    if (error) {
       ({ data, error } = await this.supabase.from("albums").insert(this.createDbEntryObject()));
     }
-    log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
+    if (error || data === null) throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())}`)
+    if (data.length > 1) log(3, `multiple matching entries for base album class, 
+      Album: ${JSON.stringify(this.createDbEntryObject())} 
+      Data: ${JSON.stringify(data)}`)
+    this.albumId = data[0].album_id;
+    return data[0].album_id;
   }
 
   public getTracks() {
     return this.tracks;
   }
 
-  public addTrack(track: TrackInfo) {
+  public addTrack(track: Track) {
     this.tracks.push(track);
   }
 
@@ -132,7 +151,7 @@ export class Album {
 export class SpotifyAlbumInfo extends Album {
 
   private spotifyId: string;
-  protected override tracks: SpotifyTrackInfo[] = [];
+  protected override tracks: SpotifyTrack[] = [];
   constructor(
     albumName: string,
     albumType: string,
@@ -152,8 +171,11 @@ export class SpotifyAlbumInfo extends Album {
     this.primaryIdent = spotifyId;
   }
 
-  public override addTrack(track: SpotifyTrackInfo): void {
+  public override addTrack(track: SpotifyTrack): void {
     this.tracks.push(track);
+  }
+  protected override queryHelper() {
+    return this.query.eq("spotify_id", this.spotifyId)
   }
 
   public override createDbEntryObject() {
