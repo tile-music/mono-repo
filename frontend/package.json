@@ -38,7 +38,6 @@
         "@testing-library/user-event": "^14.6.1",
         "@vitejs/plugin-basic-ssl": "^1.1.0",
         "dotenv": "^16.4.5",
-        "html-to-image": "^1.11.11",
         "import": "^0.0.6",
         "svelte-intersection-observer": "^1.0.0"
     }
