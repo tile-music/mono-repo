@@ -3,10 +3,10 @@
   import type { DisplayDataRequest } from "$shared/Request";
   import type { AggregatedSongs } from './arrangement.svelte';
   import { arrangement, arr_types } from './arrangement.svelte';
+  import Export from './Export.svelte';
 
-  let { refresh, exportDisplay, songs }: {
+  let { refresh, songs }: {
     refresh: (f: DisplayDataRequest) => void,
-    exportDisplay: () => void,
     songs: AggregatedSongs
   } = $props();
 
@@ -249,7 +249,7 @@
         id="regenerate"
         class="art-display-button">regenerate</button
       >
-      <button onclick={exportDisplay} class="art-display-button">export</button>
+      <Export {songs} />
     </div>
   </div>
 {/if}

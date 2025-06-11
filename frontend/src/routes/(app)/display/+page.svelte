@@ -2,7 +2,6 @@
   // library imports
   import { onMount } from "svelte";
   import { deserialize } from "$app/forms";
-  import { toPng } from "html-to-image";
 
   // component imports
   import Square from "./Square.svelte";
@@ -39,26 +38,6 @@
       ? { height: 100, width: (displayAspectRatio / containerAspectRatio) * 100 }
       : { width: 100, height: (containerAspectRatio / displayAspectRatio) * 100 };
   });
-
-  async function captureDiv() {
-    if(artDisplayRef) {
-      try {
-        artDisplayRef.style.transform = "scale(.95)";
-        
-        const dataUrl = await toPng(iFrameRef/* , {filter: (element) => element.tagName == "button"} */);
-        // Create a link and trigger download
-        const link = document.createElement("a");
-        link.href = dataUrl;
-        link.download = "art-display";
-        link.click();
-        artDisplayRef.style.transform = "scale(1)";
-      } catch (error) {
-        console.error("Failed to capture div as image:", error);
-      }
-    } else {
-      alert("No display to capture!")
-    }
-  }
 
   let refreshStatus:
     | { status: "refreshing" }
@@ -118,8 +97,7 @@
 </script>
 
 <div id="container">
-  <Customize {refresh} {songs}
-  exportDisplay={captureDiv} />
+  <Customize {refresh} {songs} />
   <div
     id="display-container"
     bind:clientWidth={displayContainerSize.width}
@@ -129,7 +107,6 @@
     {#if arrangement.squares.list.length == 0 && refreshStatus.status == "idle"}
       <div
         id="placeholder-display"
-        class="capture-area"
       >
         <h1>No listening data!</h1>
         <p>
@@ -142,7 +119,6 @@
       {#if profile} <Header {profile}/> {/if}
       <div
         id="display"
-        class="capture-area"
         bind:this={artDisplayRef}
         style="{`width: ${displaySize.width}%; height: ${displaySize.height}%`}"
       >
@@ -163,14 +139,12 @@
     {:else if refreshStatus.status == "refreshing"}
       <div
         id="placeholder-display"
-        class="capture-area"
       >
         <h1>loading...</h1>
       </div>
     {:else}
       <div
         id="placeholder-display"
-        class="capture-area"
       >
         <h1>Error!</h1>
         <p>{refreshStatus.error}</p>
