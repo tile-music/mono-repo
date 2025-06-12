@@ -152,6 +152,9 @@ export class SpotifyAlbumInfo extends Album {
 
   private spotifyId: string;
   protected override tracks: SpotifyTrack[] = [];
+  static fromSpotifyData(){
+
+  }
   constructor(
     albumName: string,
     albumType: string,

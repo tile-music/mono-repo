@@ -28,13 +28,19 @@ import { Track, SpotifyTrack } from "./Track.ts";
 export class Play {
 
   private listenedAt: number;
+  private trackId: number;
+  private albumId: number;
 
-  constructor(listenedAt: number) {
+  constructor(albumId: number, trackId: number, listenedAt: number) {
     this.listenedAt = listenedAt;
+    this.trackId = trackId;
+    this.albumId = albumId;
   }
 
   public createDbEntryObject() {
     return {
+      track_id: this.trackId,
+      album_id: this.albumId,
       listened_at: this.listenedAt,
     };
   }
@@ -42,8 +48,8 @@ export class Play {
 
 export class SpotifyPlay extends Play {
   private trackPopularity: number;
-  constructor(listenedAt: number, trackPopularity: number) {
-    super(listenedAt)
+  constructor(albumId: number, trackId: number, listenedAt: number, trackPopularity: number) {
+    super(albumId, trackId, listenedAt)
     this.trackPopularity = trackPopularity;
   }
   public override createDbEntryObject() {

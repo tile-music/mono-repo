@@ -1,7 +1,7 @@
 import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import { SpotifyUserPlaying, MockUserPlaying } from "../../src/music/UserPlaying.ts";
 import { expect } from "jsr:@std/expect";
-
+import { supabase } from "./supabase.ts";
 
 Deno.test( "User Playing Tests ", async (t) => {
 
@@ -114,7 +114,7 @@ Deno.test( "User Playing Tests ", async (t) => {
 
     await t.step("MockUserPlaying get Musicbrainz releases", () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
-      
+
     })
   });
   await t.step("Spotify User Playing tests", async (t)=>{

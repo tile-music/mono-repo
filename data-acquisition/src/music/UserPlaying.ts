@@ -54,7 +54,7 @@ export abstract class UserPlaying {
   context!: any;
   inited!: boolean;
   postgres!: any;
-  albums: Map<string, Album | SpotifyAlbumInfo> = new Map();
+  protected albums: Map<string, Album> = new Map();
   dbEntries: any = { p_track_info: [], p_user_id: "" };
 
 
@@ -79,7 +79,6 @@ export abstract class UserPlaying {
       this.albums.set(ident, album);
       return this.albums.get(ident);
     }
-    throw new Error("Album not present")
   }
 
   public async putInDB(): Promise<void> {
@@ -120,8 +119,8 @@ export class SpotifyUserPlaying extends UserPlaying {
   protected override async makeDBEntries(): Promise<void> {
     //await this.getAlbumPopularity();
     for (const [_, item] of this.items.entries()) {
-      const releaseDateRaw: any = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
-      const releaseDatePrecisionRaw: any = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
+      const releaseDateRaw: number = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
+      const releaseDatePrecisionRaw: number = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
 
       const releaseDateParsed: ReleaseDate = SpotifyUserPlaying.parseSpotifyDate(releaseDateRaw, releaseDatePrecisionRaw);
       const album = new SpotifyAlbumInfo(
@@ -134,20 +133,22 @@ export class SpotifyUserPlaying extends UserPlaying {
         releaseDateParsed.year,
         item.track.album.totalTracks as number,
         item.track.album.genres,
-        item.track.album.id
+        this.supabase,
+        item.track.album.id)
+      const playedTrackInfo = new SpotifyPlay(
+        SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
+        item.track.popularity
       );
       const trackInfo = new SpotifyTrack(
         item.track.name,
         item.track.artists.map((artist: { name: string }) => artist.name),
         item.track.externalID.isrc,
         item.track.duration,
-        item.track.id
+        playedTrackInfo,
+        item.track.id,
       );
-      const playedTrackInfo = new SpotifyPlay(
-        SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
-        item.track.popularity
-      );
-      this.played.push(playedTrackInfo);
+      
+      this.addOrGetAlbum(album)
       //console.log(playedTrackInfo);
     }
     for (const [_, track] of this.played.entries()) {

@@ -1,7 +1,11 @@
 import { Album, SpotifyAlbumInfo } from '../../src/music/Album.ts';
 import { expect } from "jsr:@std/expect";
-import {supabase} from "./supabase.ts"
-
+import { supabase } from "./supabase.ts"
+const albumHelper = async (id: number) => {
+  const { data: _data, error } = await supabase.from("albums").select("*").eq("album_id", id)
+  if (error) throw new Error()
+}
+/* @ibixler add worst case tests as well */
 Deno.test('base classes', async (t) => {
   const album = new Album(
     "Lenny Skinny",
@@ -34,7 +38,7 @@ Deno.test('base classes', async (t) => {
     expect(dbEntry).toStrictEqual({
       album_name: "Lenny Skinny",
       album_type: "Album",
-      release_day:30,
+      release_day: 30,
       release_month: 12,
       release_year: 2012,
       num_tracks: 12,
@@ -44,10 +48,11 @@ Deno.test('base classes', async (t) => {
     });
   });
   await t.step('getAlbumDbId should either get an existing album or insert it and get the id', async () => {
-    await album.getAlbumDbID()
+    const id = await album.getAlbumDbID();
+    await albumHelper(id);
   })
 });
-Deno.test('spotify classes', async (t) => {
+Deno.test('spotify class', async (t) => {
   await t.step('constructor should initialize properties correctly', () => {
     const albumInfo = new SpotifyAlbumInfo(
       "Lenny Skinny",
@@ -88,7 +93,6 @@ Deno.test('spotify classes', async (t) => {
       5,
       ["Pop"],
       supabase,
-
       "9876543210"
     );
 
