@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { filters, filtersContext, timeFrameToText, generalOptions } from "./filters.svelte";
+    import { filters, filtersContext, generalOptions, getHeadingText } from "./filters.svelte";
     import type { Profile } from "$shared/Profile";
 
     interface Props {
@@ -10,20 +10,14 @@
         profile
     }: Props = $props();
 
-    // https://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
-    function toTitleCase(str: string) {
-        return str.replace(
-            /\w\S*/g,
-            text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
-        );
-    }
-
-    let nameText = $derived(
-        (generalOptions.headerOptions.nameSource == "name" ?
-            profile.full_name : profile.username) + "'s"
+    let headingText = $derived(
+        getHeadingText(
+            profile,
+            generalOptions.headerOptions,
+            filters,
+            filtersContext
+        )
     );
-    let headingText = $derived(toTitleCase(`${nameText} top ${filters.aggregate + "s"} ` +
-                     timeFrameToText(filtersContext.timeFrame, filtersContext.dateStrings)));
 </script>
 
 {#if generalOptions.headerOptions.showHeader}
