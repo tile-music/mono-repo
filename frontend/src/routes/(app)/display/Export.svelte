@@ -1,9 +1,15 @@
 <script lang="ts">
     import { arrangement } from "./arrangement.svelte";
-    import { filters } from "./filters.svelte";
-    import type { AggregatedSongs, Squares, SquareInfo } from "./arrangement.svelte";
+    import { filters, generalOptions, filtersContext } from "./filters.svelte";
+    import type { AggregatedSongs, SquareInfo } from "./arrangement.svelte";
+    import { getHeadingText } from "./filters.svelte";
+    import type { Profile } from "$shared/Profile";
 
-    let { songs }: { songs: AggregatedSongs } = $props();
+    let { songs, profile }: {
+        songs: AggregatedSongs;
+        profile: Profile | null;
+    } = $props();
+
     let canvas: HTMLCanvasElement;
     let exportImage: HTMLImageElement | null = $state(null);
     let status: "idle" | "exporting" | "error" | "done" = $state("idle");
@@ -18,10 +24,12 @@
     // Poster and layout config
     const POSTER_WIDTH = 18 * 300;
     const POSTER_HEIGHT = 24 * 300;
-    const MARGIN = 100;
-    const HEADER_HEIGHT = 300;
+    const MARGIN = 200;
+    const HEADER_HEIGHT = 500;
     const FOOTER_HEIGHT = 200;
     const IMAGE_MARGIN = 30;
+    const HEADER_FONT_SIZE = 200;
+    const FOOTER_FONT_SIZE = 100;
 
     async function exportCanvas() {
         status = "exporting";
@@ -72,6 +80,21 @@
             return;
         }
 
+        // draw header
+        if (generalOptions.headerOptions.showHeader) {
+            if (!profile) {
+                handleExportError("profile is not defined");
+                return;
+            }
+
+            context.fillStyle = "white";
+            context.font = `${HEADER_FONT_SIZE}px Mattone`;
+            context.fillText(
+                getHeadingText(profile, generalOptions.headerOptions, filters, filtersContext),
+                MARGIN, MARGIN + HEADER_FONT_SIZE
+            );
+        }
+
         // draw squares
         for (let i = 0; i < arrangement.squares.list.length; i++) {
             const square = arrangement.squares.list[i];
@@ -86,6 +109,15 @@
                 squareCoords.size - IMAGE_MARGIN, squareCoords.size - IMAGE_MARGIN
             );
         }
+
+        // draw footer
+        context.fillStyle = "white";
+        context.font = `${FOOTER_FONT_SIZE}px Archivo`;
+        context.textAlign = "right";
+        context.fillText(
+            `tile.music`,
+            POSTER_WIDTH - MARGIN, POSTER_HEIGHT - MARGIN
+        );
 
         // display the rendered canvas as an image
         if (!exportImage) {

@@ -97,7 +97,7 @@
 </script>
 
 <div id="container">
-  <Customize {refresh} {songs} />
+  <Customize {refresh} {songs} {profile} />
   <div
     id="display-container"
     bind:clientWidth={displayContainerSize.width}

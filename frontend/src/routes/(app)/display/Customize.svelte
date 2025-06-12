@@ -4,10 +4,12 @@
   import type { AggregatedSongs } from './arrangement.svelte';
   import { arrangement, arr_types } from './arrangement.svelte';
   import Export from './Export.svelte';
+    import type { Profile } from '$shared/Profile';
 
-  let { refresh, songs }: {
+  let { refresh, songs, profile }: {
     refresh: (f: DisplayDataRequest) => void,
-    songs: AggregatedSongs
+    songs: AggregatedSongs,
+    profile: Profile | null
   } = $props();
 
   // store local copy of filters to compare when changed
@@ -249,7 +251,7 @@
         id="regenerate"
         class="art-display-button">regenerate</button
       >
-      <Export {songs} />
+      <Export {songs} {profile} />
     </div>
   </div>
 {/if}
