@@ -161,7 +161,7 @@ export class SpotifyAlbumInfo extends Album {
     artists: string[],
     image: string,
     releaseDay: number | undefined,
-    releaseMonth: number | undefined,
+    releaseMonth: number | undefined, 
     releaseYear: number,
     numTracks: number,
     genre: string[],

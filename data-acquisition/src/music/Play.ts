@@ -1,3 +1,4 @@
+import { json } from "node:stream/consumers";
 import { Album, SpotifyAlbumInfo } from "./Album.ts";
 import { Track, SpotifyTrack } from "./Track.ts";
 
@@ -28,16 +29,20 @@ import { Track, SpotifyTrack } from "./Track.ts";
 export class Play {
 
   private listenedAt: number;
-  private trackId: number;
-  private albumId: number;
+  private trackId?: number;
+  private albumId?: number;
 
-  constructor(albumId: number, trackId: number, listenedAt: number) {
+  constructor(listenedAt: number) {
     this.listenedAt = listenedAt;
+  }
+
+  public setAlbumAndTrackId(albumId: number, trackId: number) {
     this.trackId = trackId;
     this.albumId = albumId;
   }
 
   public createDbEntryObject() {
+    if(!this.trackId || !this.albumId) throw new Error(`album or track id not defined on Play:${JSON.stringify(this)}`)
     return {
       track_id: this.trackId,
       album_id: this.albumId,
@@ -48,8 +53,8 @@ export class Play {
 
 export class SpotifyPlay extends Play {
   private trackPopularity: number;
-  constructor(albumId: number, trackId: number, listenedAt: number, trackPopularity: number) {
-    super(albumId, trackId, listenedAt)
+  constructor(listenedAt: number, trackPopularity: number) {
+    super(listenedAt)
     this.trackPopularity = trackPopularity;
   }
   public override createDbEntryObject() {

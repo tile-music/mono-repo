@@ -247,10 +247,7 @@ export class MockUserPlaying extends UserPlaying {
         track.trackArtists,
         track.isrc,
         track.durationMs,
-        this.supabase,
-        new Play(
-          track.timestamp
-        )
+        this.supabase
       );
     }
   }

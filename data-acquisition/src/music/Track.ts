@@ -43,7 +43,6 @@ export class Track {
     isrc: string,
     durationMs: number,
     supabase: SupabaseClient<any, "prod" | "test", any>,
-    play: Play
   ) {
     this.trackName = trackName;
     this.trackArtists = trackArtists;
@@ -75,11 +74,11 @@ export class Track {
   public async getTrackDbID() : Promise<number> {
     if (this.trackId) return this.trackId;
     let { data, error } = await this.queryHelper()
-    log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
-    if (error) {
+    
+    if (error?.code === "2305") {
       ({ data, error } = await this.supabase.from("albums").insert(this.createDbEntryObject()));
     }
-    if (error || data === null) throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())}`)
+    if (error || data === null) {log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)}
     if (data.length > 1) log(3, `multiple matching entries for base album class, 
       Album: ${JSON.stringify(this.createDbEntryObject())} 
       Data: ${JSON.stringify(data)}`)
@@ -112,10 +111,10 @@ export class SpotifyTrack extends Track {
     trackArtists: string[],
     isrc: string,
     durationMs: number,
-    play: SpotifyPlay,
     spotifyId: string,
   ) {
-    super(trackName, trackArtists, isrc, durationMs,supabase, play);
+    super(trackName, trackArtists, isrc, durationMs,supabase);
+
     this.spotifyId = spotifyId;
   }
 
