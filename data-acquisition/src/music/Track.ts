@@ -1,7 +1,9 @@
-import { Play, SpotifyPlay } from "./Play.ts"
+import { Play } from "./Play.ts"
 import { SupabaseClient } from "../../deps.ts";
 import { supabase } from "../../tests/music/supabase.ts";
-import {log} from "../util/log.ts"
+import { Fireable } from "./Fireable.ts"
+import { log } from "../util/log.ts"
+import { PK_VIOLATION } from "../util/dbCodes.ts";
 /**
  * @file TrackInfo.ts
  * @description This file contains the definition of the TrackInfo class, which represents information about a music track.
@@ -27,7 +29,7 @@ import {log} from "../util/log.ts"
  * @returns {Object} An object that can be used to create a new entry in the database.
  * @todo Change how `indb` is set because this might create a state mismatch.
  */
-export class Track {
+export class Track implements Fireable {
   readonly trackName: string;
   readonly trackArtists: string[];
   readonly isrc: string;
@@ -35,6 +37,7 @@ export class Track {
   protected play: Play;
   protected query;
   protected trackId?: number;
+  protected albumId?: number;
   protected supabase;
 
   constructor(
@@ -42,6 +45,7 @@ export class Track {
     trackArtists: string[],
     isrc: string,
     durationMs: number,
+    play: Play,
     supabase: SupabaseClient<any, "prod" | "test", any>,
   ) {
     this.trackName = trackName;
@@ -52,6 +56,10 @@ export class Track {
     this.supabase = supabase;
     this.query = supabase.from("tracks").select("track_id")
     //console.log(this);
+  }
+
+  public setAlbumId(albumId: number) {
+    this.albumId = albumId;
   }
 
   protected queryHelper() {
@@ -71,16 +79,17 @@ export class Track {
    * @throws {Error} If the album cannot be inserted or retrieved from the database.
    * @todo find some intelligent way to fall back to a worse query, which should never happen in reality
    */
-  public async getTrackDbID() : Promise<number> {
+  public async getTrackDbID(): Promise<number> {
     if (this.trackId) return this.trackId;
     let { data, error } = await this.queryHelper()
-    
-    if (error?.code === "2305") {
-      ({ data, error } = await this.supabase.from("albums").insert(this.createDbEntryObject()));
+
+    if (!data?.length) {
+      ({ data, error } = await this.supabase.from("tracks").insert(this.createDbEntryObject()));
     }
-    if (error || data === null) {log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)}
+
+    if (error && error?.code !== PK_VIOLATION || data === null) throw new Error(`data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
     if (data.length > 1) log(3, `multiple matching entries for base album class, 
-      Album: ${JSON.stringify(this.createDbEntryObject())} 
+      Track: ${JSON.stringify(this.createDbEntryObject())} 
       Data: ${JSON.stringify(data)}`)
     this.trackId = data[0].track_id;
     return data[0].track_id;
@@ -91,16 +100,24 @@ export class Track {
    * @returns an object that can be used to create a new entry in the database
    */
   public createDbEntryObject() {
+    if (!this.albumId) throw new Error("albumid is not defined")
     return {
+      album_id: this.albumId,
       isrc: this.isrc,
       track_name: this.trackName,
       track_artists: this.trackArtists,
       track_duration_ms: this.durationMs,
     };
   }
-  
+
   public createPlayDbEntryObject() {
     return { ...this.play.createDbEntryObject() };
+  }
+  public async fire(): Promise<void> {
+    const trackId = await this.getTrackDbID();
+    if(!this.albumId) throw new Error("album id is undefined, this should never happen")
+    this.play.setAlbumAndTrackId(this.albumId, trackId)
+    await this.play.fire()
   }
 }
 
@@ -112,8 +129,10 @@ export class SpotifyTrack extends Track {
     isrc: string,
     durationMs: number,
     spotifyId: string,
+    play: Play,
+    supabase: SupabaseClient<any, "prod" | "test", any>
   ) {
-    super(trackName, trackArtists, isrc, durationMs,supabase);
+    super(trackName, trackArtists, isrc, durationMs, play, supabase);
 
     this.spotifyId = spotifyId;
   }

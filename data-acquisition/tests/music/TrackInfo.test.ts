@@ -1,5 +1,5 @@
 
-import { TrackInfo, SpotifyTrackInfo } from '../../src/music/Track.ts';
+import {  Track, SpotifyTrack} from '../../src/music/Track.ts';
 import { expect } from "jsr:@std/expect";
 /**
  * sharted by chat
@@ -12,9 +12,9 @@ Deno.test('TrackInfo classes', async (t) => {
       const isrc = 'US1234567890';
       const durationMs = 300000;
 
-      const trackInfo = new TrackInfo(trackName, trackArtists, isrc, durationMs);
+      const trackInfo = new Track(trackName, trackArtists, isrc, durationMs);
 
-      expect(trackInfo).toBeInstanceOf(TrackInfo);
+      expect(trackInfo).toBeInstanceOf(Track);
       expect(trackInfo['trackName']).toBe(trackName);
       expect(trackInfo['trackArtists']).toBe(trackArtists);
       expect(trackInfo['isrc']).toBe(isrc);
@@ -27,7 +27,7 @@ Deno.test('TrackInfo classes', async (t) => {
       const isrc = 'US1234567890';
       const durationMs = 300000;
 
-      const trackInfo = new TrackInfo(trackName, trackArtists, isrc, durationMs);
+      const trackInfo = new Track(trackName, trackArtists, isrc, durationMs);
       const dbEntry = trackInfo.createDbEntryObject();
 
       expect(dbEntry).toEqual({
@@ -46,8 +46,8 @@ Deno.test('TrackInfo classes', async (t) => {
       const durationMs = 300000;
       const spotifyId = '1234567890';
 
-      const trackInfo = new TrackInfo(trackName, trackArtists, isrc, durationMs);
-      const spotifyTrackInfo = new SpotifyTrackInfo(trackName, trackArtists, isrc, durationMs, spotifyId);
+      const trackInfo = new Track(trackName, trackArtists, isrc, durationMs);
+      const spotifyTrackInfo = new SpotifyTrack(trackName, trackArtists, isrc, durationMs, spotifyId);
 
       expect(spotifyTrackInfo).toBeInstanceOf(SpotifyTrackInfo);
       expect(spotifyTrackInfo['trackName']).toBe(trackName);
@@ -65,8 +65,8 @@ Deno.test('TrackInfo classes', async (t) => {
       const popularity = 50;
       const spotifyId = '1234567890';
 
-      const trackInfo = new TrackInfo(trackName, trackArtists, isrc, durationMs);
-      const spotifyTrackInfo = new SpotifyTrackInfo(trackName, trackArtists, isrc, durationMs, spotifyId);
+      const trackInfo = new Track(trackName, trackArtists, isrc, durationMs);
+      const spotifyTrackInfo = new SpotifyTrack(trackName, trackArtists, isrc, durationMs, spotifyId);
       const dbEntry = spotifyTrackInfo.createDbEntryObject();
 
       expect(dbEntry).toEqual({

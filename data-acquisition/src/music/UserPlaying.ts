@@ -3,7 +3,7 @@ import { SupabaseClient, Client, Player } from "../../deps.ts";
 import "jsr:@std/dotenv/load";
 
 import { Track, SpotifyTrack } from "./Track.ts";
-import { Album, SpotifyAlbumInfo } from "./Album.ts";
+import { Album, SpotifyAlbum } from "./Album.ts";
 import { Play, SpotifyPlay } from "./Play.ts";
 
 import { log } from "../util/log.ts"
@@ -65,9 +65,15 @@ export abstract class UserPlaying {
     this.inited = false;
   }
 
-  protected abstract makeDBEntries(): Promise<void>;
+
   public abstract init(): Promise<void>;
-  public abstract fire(): Promise<void>;
+  public async fire(): Promise<void> {
+    try { 
+      await this.matchAlbums();
+      this.albums.entries().forEach(e => e[1].fire())
+    }
+    catch (e) { log(1, `Error putting in DB: ${e}`); }
+  };
 
   protected abstract matchAlbums(): Promise<void>;
 
@@ -80,13 +86,6 @@ export abstract class UserPlaying {
       return this.albums.get(ident);
     }
   }
-
-  public async putInDB(): Promise<void> {
-    await this.makeDBEntries();
-    //console.log(this.dbEntries);
-  }
-
-
 }
 
 export class SpotifyUserPlaying extends UserPlaying {
@@ -116,14 +115,14 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
 
 
-  protected override async makeDBEntries(): Promise<void> {
+  protected override async matchAlbums(): Promise<void> {
     //await this.getAlbumPopularity();
     for (const [_, item] of this.items.entries()) {
-      const releaseDateRaw: number = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
-      const releaseDatePrecisionRaw: number = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
+      const releaseDateRaw = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
+      const releaseDatePrecisionRaw = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
 
       const releaseDateParsed: ReleaseDate = SpotifyUserPlaying.parseSpotifyDate(releaseDateRaw, releaseDatePrecisionRaw);
-      const album = new SpotifyAlbumInfo(
+      const album = this.addOrGetAlbum(new SpotifyAlbum(
         item.track.album.name,
         item.track.album.albumType,
         item.track.album.artists.map((artist: any) => artist.name),
@@ -134,35 +133,37 @@ export class SpotifyUserPlaying extends UserPlaying {
         item.track.album.totalTracks as number,
         item.track.album.genres,
         this.supabase,
-        item.track.album.id)
-      const playedTrackInfo = new SpotifyPlay(
-        SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
-        item.track.popularity
-      );
-      const trackInfo = new SpotifyTrack(
+        item.track.album.id))
+      if (!album) throw new Error("album is not defined!")
+
+      album.addTrack(new SpotifyTrack(
         item.track.name,
         item.track.artists.map((artist: { name: string }) => artist.name),
         item.track.externalID.isrc,
         item.track.duration,
-        playedTrackInfo,
         item.track.id,
-      );
-      
-      this.addOrGetAlbum(album)
+        new SpotifyPlay(
+          SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
+          item.track.popularity,
+          this.supabase,
+          this.userId,
+          item.track.externalID.isrc
+        ),
+        this.supabase
+      ));
       //console.log(playedTrackInfo);
     }
-    for (const [_, track] of this.played.entries()) {
+    /* for (const [_, track] of this.played.entries()) {
       await this.dbEntries.p_track_info.push(track.createDbEntryObject());
     }
     this.dbEntries.p_user_id = this.userId;
-
+ */
 
   }
   public override async fire(): Promise<void> {
+    await this.init()
     this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
-
-    try { await this.putInDB(); }
-    catch (e) { log(1, `Error putting in DB: ${e}`); }
+    super.fire()
   }
   public static parseSpotifyDate(date: string, datePrecision: "year" | "month" | "day"): ReleaseDate {
     if (!date) {
@@ -240,27 +241,20 @@ export class MockUserPlaying extends UserPlaying {
       ));
 
       if (!album) throw new Error("Album Does Not Exist");
-
-
-      const trackInfo = new Track(
+      album.addTrack(new Track(
         track.trackName,
         track.trackArtists,
         track.isrc,
         track.durationMs,
+        new Play(track.timestamp, this.supabase, this.userId, track.isrc),
         this.supabase
-      );
+      ))
     }
-  }
-  protected override async makeDBEntries(): Promise<void> {
-
   }
 
   public override init(): Promise<void> {
     this.inited = true;
     console.log("Mock init");
     return Promise.resolve();
-  }
-  public override async fire(): Promise<void> {
-    await this.putInDB();
   }
 }

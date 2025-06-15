@@ -1,0 +1,1 @@
+export const PK_VIOLATION = "23505"

@@ -2,6 +2,9 @@ import { SpotifyTrack, Track } from "./Track.ts";
 import { SupabaseClient } from "../../deps.ts";
 import { log } from "../util/log.ts";
 import { json } from "node:stream/consumers";
+import { PK_VIOLATION } from "../util/dbCodes.ts";
+import { Fireable } from "./Fireable.ts";
+import { get } from "node:http";
 
 /**
  * Represents information about a music album.
@@ -38,7 +41,7 @@ import { json } from "node:stream/consumers";
  * @description Creates an object that can be used to create a new entry in the database.
  * @returns {Object} An object containing the album information formatted for database entry.
  */
-export class Album {
+export class Album implements Fireable{
   private albumName: string;
   private albumType: string;
   private numTracks: number;
@@ -83,11 +86,11 @@ export class Album {
   }
 
   protected queryHelper() {
+    this.query = this.query.eq("album_name", this.albumName)
+    if(this.releaseYear) this.query = this.query.eq("release_year", this.releaseYear ?? null)
+    if(this.releaseDay) this.query = this.query.eq("release_day", this.releaseDay ?? null)
+    if(this.releaseMonth) this.query = this.query.eq("release_month", this.releaseMonth ?? null)
     return this.query
-      .eq("album_name", this.albumName)
-      .eq("release_year", this.releaseYear)
-      .eq("release_month", this.releaseMonth)
-      .eq("release_day", this.releaseDay)
   }
 
   /**
@@ -104,12 +107,13 @@ export class Album {
    */
   public async getAlbumDbID() : Promise<number> {
     if (this.albumId) return this.albumId;
+    log(6, `${JSON.stringify(this.queryHelper())}`)
     let { data, error } = await this.queryHelper()
-    log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
-    if (error) {
+    if (!data?.length) {
       ({ data, error } = await this.supabase.from("albums").insert(this.createDbEntryObject()));
     }
-    if (error || data === null) throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())}`)
+    log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
+    if (error && error?.code !== PK_VIOLATION || data === null ) throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
     if (data.length > 1) log(3, `multiple matching entries for base album class, 
       Album: ${JSON.stringify(this.createDbEntryObject())} 
       Data: ${JSON.stringify(data)}`)
@@ -123,8 +127,9 @@ export class Album {
 
   public addTrack(track: Track) {
     this.tracks.push(track);
+    return track;
   }
-
+  
   public getAlbumIdentifier() {
     return this.primaryIdent;
   }
@@ -146,15 +151,19 @@ export class Album {
       image: this.image,
     };
   }
+  public async fire(): Promise<void> {
+    const albumId = await this.getAlbumDbID()
+    this.tracks.forEach((t) => {
+      t.setAlbumId(albumId);
+      t.fire();
+    })
+  }
 }
 
-export class SpotifyAlbumInfo extends Album {
+export class SpotifyAlbum extends Album {
 
   private spotifyId: string;
   protected override tracks: SpotifyTrack[] = [];
-  static fromSpotifyData(){
-
-  }
   constructor(
     albumName: string,
     albumType: string,
@@ -174,9 +183,6 @@ export class SpotifyAlbumInfo extends Album {
     this.primaryIdent = spotifyId;
   }
 
-  public override addTrack(track: SpotifyTrack): void {
-    this.tracks.push(track);
-  }
   protected override queryHelper() {
     return this.query.eq("spotify_id", this.spotifyId)
   }
