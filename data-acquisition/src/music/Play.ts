@@ -1,8 +1,7 @@
-import { json } from "node:stream/consumers";
-import { Album, SpotifyAlbum } from "./Album.ts";
-import { Track, SpotifyTrack } from "./Track.ts";
 import { SupabaseClient } from "../../deps.ts";
-import { Fireable } from "./Fireable.ts";
+import { Fireable } from "../util/Fireable.ts";
+import { log } from "../util/log.ts";
+import { PK_VIOLATION } from "../util/dbCodes.ts";
 
 /**
  * @file PlayedTrack.ts
@@ -64,7 +63,8 @@ export class Play implements Fireable {
 
   public async fire(): Promise<void> {
     const {data: _data, error} = await this.supabase.from("played_tracks").insert(this.createDbEntryObject());
-    if(error) throw new Error(`play failed to insert Play: ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
+    if(error?.code===PK_VIOLATION) log(6, "Play already inserted")
+    else if(error) throw new Error(`play failed to insert Play: ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
   }
 }
 

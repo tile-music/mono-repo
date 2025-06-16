@@ -69,13 +69,13 @@ export abstract class UserPlaying {
   public abstract init(): Promise<void>;
   public async fire(): Promise<void> {
     try { 
-      await this.matchAlbums();
-      this.albums.entries().forEach(e => e[1].fire())
+      this.matchAlbums();
+      await Promise.all(Array.from(this.albums.values()).map(async album => await album.fire()));
     }
     catch (e) { log(1, `Error putting in DB: ${e}`); }
   };
 
-  protected abstract matchAlbums(): Promise<void>;
+  protected abstract matchAlbums(): void;
 
   protected addOrGetAlbum(album: Album) {
     const ident = album.getAlbumIdentifier()
@@ -103,7 +103,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       token: {
         clientID: Deno.env.get("SP_CID") as string,
         clientSecret: Deno.env.get("SP_SECRET") as string,
-        refreshToken: this.context.refresh_toke1n,
+        refreshToken: this.context.refresh_token,
       },
       onRefresh: () => {
         console.log(
@@ -115,7 +115,7 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
 
 
-  protected override async matchAlbums(): Promise<void> {
+  protected override matchAlbums(): void {
     //await this.getAlbumPopularity();
     for (const [_, item] of this.items.entries()) {
       const releaseDateRaw = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
@@ -151,19 +151,13 @@ export class SpotifyUserPlaying extends UserPlaying {
         ),
         this.supabase
       ));
-      //console.log(playedTrackInfo);
     }
-    /* for (const [_, track] of this.played.entries()) {
-      await this.dbEntries.p_track_info.push(track.createDbEntryObject());
-    }
-    this.dbEntries.p_user_id = this.userId;
- */
 
   }
   public override async fire(): Promise<void> {
     await this.init()
     this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
-    super.fire()
+    await super.fire()
   }
   public static parseSpotifyDate(date: string, datePrecision: "year" | "month" | "day"): ReleaseDate {
     if (!date) {

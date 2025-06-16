@@ -1,9 +1,9 @@
 import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
-import { SpotifyUserPlaying, MockUserPlaying } from "../../src/music/UserPlaying.ts";
+import { SpotifyUserPlaying, MockUserPlaying } from "../../../src/music/UserPlaying.ts";
 import { expect } from "jsr:@std/expect";
-import { supabase } from "./supabase.ts";
+import { supabase } from "../supabase.ts";
 
-Deno.test( "User Playing Tests ", async (t) => {
+Deno.test("User Playing Tests ", async (t) => {
 
   console.log("test env", Deno.env.get("SB_URL_TEST"))
   const testData1 = [
@@ -62,7 +62,7 @@ Deno.test( "User Playing Tests ", async (t) => {
     popularity: 100 - (i % 10),
     timestamp: 125666778 + i * 1000,
   }));
-  
+
   const { data, error } = await supabase.auth.signUp({
     email: "test1@example.com",
     password: "password",
@@ -72,7 +72,7 @@ Deno.test( "User Playing Tests ", async (t) => {
 
   const userId = data.user?.id || "";
 
-  await t.step("Mock user playing tests", async (t)=> {
+  await t.step("Mock user playing tests", async (t) => {
     await t.step("MockUserPlaying init method", async () => {
       const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
       await expect(mockUserPlaying.init()).resolves.not.toThrow();
@@ -88,7 +88,7 @@ Deno.test( "User Playing Tests ", async (t) => {
             .select()
             .eq("user_id", userId)
             .then(({ data, error }: { data: any; error: any }) => {
-              //console.log(data);
+              console.log("data!!!!", data);
               expect(data).toHaveLength(2);
             })
         );
@@ -112,13 +112,9 @@ Deno.test( "User Playing Tests ", async (t) => {
         );
     });
 
-    await t.step("MockUserPlaying get Musicbrainz releases", () => {
-      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
-
-    })
   });
-  await t.step("Spotify User Playing tests", async (t)=>{
-    const context  = { refresh_token: Deno.env.get("SP_REFRESH") };
+  await t.step("Spotify User Playing tests", async (t) => {
+    const context = { refresh_token: Deno.env.get("SP_REFRESH") };
     await t.step("SpotifyUserPlaying Parse Spotify Date Function", async () => {
       expect(SpotifyUserPlaying.parseSpotifyDate("1999-12-22", "day")).toStrictEqual({ year: 1999, month: 12, day: 22 });
       expect(SpotifyUserPlaying.parseSpotifyDate("1999-12", "month")).toStrictEqual({ year: 1999, month: 12 });
@@ -160,7 +156,7 @@ Deno.test( "User Playing Tests ", async (t) => {
           expect(newData.length).toBeLessThanOrEqual(data.length);
         });
     });
-    await t.step("test using real spotify data", async() => {
+    await t.step("test using real spotify data", async () => {
       const spotifyUserPlaying = new SpotifyUserPlaying(
         supabase,
         userId,
@@ -170,21 +166,18 @@ Deno.test( "User Playing Tests ", async (t) => {
       await expect(spotifyUserPlaying.fire()).resolves.not.toThrow().then(async () => {
         const { data, error } = await supabase
           .from("played_tracks")
-          .select(`listened_at, albums(spotify_id),
-                    tracks(spotify_id)`)
+          .select(`listened_at, 
+                    tracks(spotify_id, 
+                    albums(spotify_id))`)
           .eq("user_id", userId);
         if (error) throw error;
         expect(data).toBeDefined();
         //console.log(data)
         for (const entry of data) {
-          expect(entry.albums.spotify_id).toBeDefined();
+          expect(entry.tracks.spotify_id).toBeDefined();
         }
       });
     })
   })
-
-
-
   await supabase.auth.admin.deleteUser(userId);
-
 });

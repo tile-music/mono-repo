@@ -1,9 +1,10 @@
 import { Play } from "./Play.ts"
 import { SupabaseClient } from "../../deps.ts";
 import { supabase } from "../../tests/music/supabase.ts";
-import { Fireable } from "./Fireable.ts"
+import { Fireable } from "../util/Fireable.ts"
 import { log } from "../util/log.ts"
 import { PK_VIOLATION } from "../util/dbCodes.ts";
+import { json } from "node:stream/consumers";
 /**
  * @file TrackInfo.ts
  * @description This file contains the definition of the TrackInfo class, which represents information about a music track.
@@ -47,6 +48,7 @@ export class Track implements Fireable {
     durationMs: number,
     play: Play,
     supabase: SupabaseClient<any, "prod" | "test", any>,
+    albumId?: number
   ) {
     this.trackName = trackName;
     this.trackArtists = trackArtists;
@@ -55,6 +57,7 @@ export class Track implements Fireable {
     this.play = play;
     this.supabase = supabase;
     this.query = supabase.from("tracks").select("track_id")
+    this.albumId = albumId
     //console.log(this);
   }
 
@@ -82,11 +85,10 @@ export class Track implements Fireable {
   public async getTrackDbID(): Promise<number> {
     if (this.trackId) return this.trackId;
     let { data, error } = await this.queryHelper()
-
+    log(6, `data: ${JSON.stringify(data)}, error:: ${JSON.stringify(error)}`)
     if (!data?.length) {
-      ({ data, error } = await this.supabase.from("tracks").insert(this.createDbEntryObject()));
+      ({ data, error } = await this.supabase.from("tracks").insert(this.createDbEntryObject()).select());
     }
-
     if (error && error?.code !== PK_VIOLATION || data === null) throw new Error(`data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
     if (data.length > 1) log(3, `multiple matching entries for base album class, 
       Track: ${JSON.stringify(this.createDbEntryObject())} 
@@ -115,7 +117,7 @@ export class Track implements Fireable {
   }
   public async fire(): Promise<void> {
     const trackId = await this.getTrackDbID();
-    if(!this.albumId) throw new Error("album id is undefined, this should never happen")
+    if (!this.albumId) throw new Error("album id is undefined, this should never happen")
     this.play.setAlbumAndTrackId(this.albumId, trackId)
     await this.play.fire()
   }
@@ -130,11 +132,15 @@ export class SpotifyTrack extends Track {
     durationMs: number,
     spotifyId: string,
     play: Play,
-    supabase: SupabaseClient<any, "prod" | "test", any>
+    supabase: SupabaseClient<any, "prod" | "test", any>,
+    albumId?: number
   ) {
-    super(trackName, trackArtists, isrc, durationMs, play, supabase);
-
+    super(trackName, trackArtists, isrc, durationMs, play, supabase, albumId);
     this.spotifyId = spotifyId;
+  }
+  protected override queryHelper() {
+    return this.query
+      .eq("spotify_id", this.spotifyId)
   }
 
   public override createDbEntryObject() {

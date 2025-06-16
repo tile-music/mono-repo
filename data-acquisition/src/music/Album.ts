@@ -3,7 +3,7 @@ import { SupabaseClient } from "../../deps.ts";
 import { log } from "../util/log.ts";
 import { json } from "node:stream/consumers";
 import { PK_VIOLATION } from "../util/dbCodes.ts";
-import { Fireable } from "./Fireable.ts";
+import { Fireable } from "../util/Fireable.ts";
 import { get } from "node:http";
 
 /**
@@ -56,6 +56,7 @@ export class Album implements Fireable{
   protected supabase: SupabaseClient<any, "prod" | "test", any>;
   protected query;
 
+
   protected tracks: Track[] = [];
 
   constructor(
@@ -68,7 +69,9 @@ export class Album implements Fireable{
     releaseYear: number,
     numTracks: number,
     genre: string[],
-    supabase: SupabaseClient<any, "prod" | "test", any>
+    supabase: SupabaseClient<any, "prod" | "test", any>,
+    albumId?: number,
+    
   ) {
     this.albumName = albumName;
     this.albumType = albumType;
@@ -82,7 +85,8 @@ export class Album implements Fireable{
     this.primaryIdent = `${albumName},${this.artists.join(",")}`;
     this.supabase = supabase;
     //console.log(this);
-    this.query = this.supabase.from("albums").select("album_id")
+    this.query = this.supabase.from("albums").select("album_id");
+    this.albumId = albumId;
   }
 
   protected queryHelper() {
@@ -133,13 +137,16 @@ export class Album implements Fireable{
   public getAlbumIdentifier() {
     return this.primaryIdent;
   }
+  
   /**
    *
    * @returns an object that can be used to create a new entry in the database
    */
 
   public createDbEntryObject() {
+
     return {
+      ...(this.albumId && {album_id: this.albumId}),
       album_name: this.albumName,
       album_type: this.albumType,
       release_day: this.releaseDay,
@@ -153,9 +160,9 @@ export class Album implements Fireable{
   }
   public async fire(): Promise<void> {
     const albumId = await this.getAlbumDbID()
-    this.tracks.forEach((t) => {
+    await this.tracks.forEach(async (t) => {
       t.setAlbumId(albumId);
-      t.fire();
+      await t.fire();
     })
   }
 }
@@ -176,9 +183,10 @@ export class SpotifyAlbum extends Album {
     genre: string[],
     supabase: SupabaseClient<any, "prod" | "test", any>,
     spotifyId: string,
+    albumId?: number
 
   ) {
-    super(albumName, albumType, artists, image, releaseDay, releaseMonth, releaseYear, numTracks, genre, supabase);
+    super(albumName, albumType, artists, image, releaseDay, releaseMonth, releaseYear, numTracks, genre, supabase, albumId);
     this.spotifyId = spotifyId;
     this.primaryIdent = spotifyId;
   }

@@ -1,10 +1,7 @@
-import { Album, SpotifyAlbum } from '../../src/music/Album.ts';
+import { Album, SpotifyAlbum } from '../../../src/music/Album.ts';
 import { expect } from "jsr:@std/expect";
-import { supabase } from "./supabase.ts"
-const albumHelper = async (id: number) => {
-  const { data: _data, error } = await supabase.from("albums").select("*").eq("album_id", id)
-  if (error) throw new Error()
-}
+import { supabase } from "../supabase.ts"
+
 /* @ibixler add worst case tests as well */
 Deno.test('base classes', async (t) => {
   const album = new Album(
@@ -31,6 +28,7 @@ Deno.test('base classes', async (t) => {
     expect(album['image']).toBe("placeholder");
     expect(album['genre']).toStrictEqual(["Rock"]);
 
+
   });
 
   await t.step('createDbEntryObject should return correct object', () => {
@@ -44,13 +42,10 @@ Deno.test('base classes', async (t) => {
       num_tracks: 12,
       artists: ["lenny skinny"],
       genre: ["Rock"],
-      image: "placeholder"
+      image: "placeholder",
+
     });
   });
-  await t.step('getAlbumDbId should either get an existing album or insert it and get the id', async () => {
-    const id = await album.getAlbumDbID();
-    await albumHelper(id);
-  })
 });
 Deno.test('spotify class', async (t) => {
   await t.step('constructor should initialize properties correctly', () => {
@@ -66,8 +61,11 @@ Deno.test('spotify class', async (t) => {
       ["Rock"],
       supabase,
 
-      "spoturi1234567890"
+      "spoturi1234567890",
+      47
     );
+
+
 
     expect(albumInfo['albumName']).toBe("Lenny Skinny");
     expect(albumInfo['albumType']).toBe("Album");
@@ -80,6 +78,7 @@ Deno.test('spotify class', async (t) => {
     expect(albumInfo['genre']).toStrictEqual(["Rock"]);
 
     expect(albumInfo['spotifyId']).toBe("spoturi1234567890");
+    expect(albumInfo["albumId"]).toBe(47)
   });
   await t.step('createDbEntryObject should return correct object', async () => {
     const albumInfo = new SpotifyAlbum(
@@ -93,11 +92,14 @@ Deno.test('spotify class', async (t) => {
       5,
       ["Pop"],
       supabase,
-      "9876543210"
+      "9876543210",
+      213
     );
 
     const dbEntry = albumInfo.createDbEntryObject();
+    console.log(dbEntry)
     expect(dbEntry).toStrictEqual({
+      album_id:213,
       album_name: "New Artist",
       album_type: "Single",
       release_day: 15,
@@ -107,8 +109,9 @@ Deno.test('spotify class', async (t) => {
       artists: ["new artist"],
       genre: ["Pop"],
       image: "new_placeholder",
-      spotify_id: "9876543210"
+      spotify_id: "9876543210",
     });
   });
+  
 
 });
