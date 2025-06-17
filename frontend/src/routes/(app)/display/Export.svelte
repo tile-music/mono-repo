@@ -15,7 +15,7 @@
     let status: "idle" | "configuring" | "exporting" | "error" | "done" = $state("idle");
     let exportError: string | null = $state(null);
     let orientation: "portrait" | "landscape" | "square" = $state("portrait");
-    $inspect(orientation);
+    let colors: "print-friendly" | "theme" = $state("print-friendly");
 
     function handleExportError(error: string) {
         console.error(error);
@@ -63,10 +63,16 @@
             return;
         }
 
+        // prepare colors
+        const backgroundColor = colors === "print-friendly" ? "#ffffff"
+            : getComputedStyle(document.documentElement).getPropertyValue('--background').trim();
+        const textColor = colors === "print-friendly" ? "#000000"
+            : getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+
         // prepare canvas
         canvas.width = posterWidth;
         canvas.height = posterHeight;
-        context.fillStyle = "black";
+        context.fillStyle = backgroundColor;
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         // load images
@@ -134,7 +140,7 @@
             }
 
 
-            context.fillStyle = "white";
+            context.fillStyle = textColor;
             context.font = `${HEADER_FONT_SIZE}px Mattone`;
             context.fillText(
                 getHeadingText(profile, generalOptions.headerOptions, filters, filtersContext),
@@ -159,7 +165,7 @@
         }
 
         // draw footer
-        context.fillStyle = "white";
+        context.fillStyle = textColor;
         context.font = `${FOOTER_FONT_SIZE}px Archivo`;
         context.textAlign = "right";
         context.fillText(
@@ -236,6 +242,22 @@
                         <option value="landscape">landscape</option>
                         <option value="square">square</option>
                     </select>
+                </div>
+                <div class="input-group">
+                    <label for="printFriendlyColors">print friendly colors</label>
+                    <input
+                        type="radio" name="colors"
+                        id="printFriendlyColors" value="print-friendly"
+                        bind:group={colors}
+                    >
+                </div>
+                <div class="input-group">
+                    <label for="themeColors">theme colors</label>
+                    <input
+                        type="radio" name="colors"
+                        id="themeColors" value="theme"
+                        bind:group={colors}
+                    >
                 </div>
                 <button
                     class="art-display-button"
