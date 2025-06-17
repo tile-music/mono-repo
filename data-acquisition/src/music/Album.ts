@@ -113,8 +113,10 @@ export class Album implements Fireable{
     if (this.albumId) return this.albumId;
     log(6, `${JSON.stringify(this.queryHelper())}`)
     let { data, error } = await this.queryHelper()
-    if (!data?.length) {
-      ({ data, error } = await this.supabase.from("albums").insert(this.createDbEntryObject()));
+
+    log(6, `BEFORE ATTEMT TO INSERT data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
+    if (data?.length === 0 || !data) {
+      ({ data, error } = await this.supabase.from("albums").insert(this.createDbEntryObject()).select());
     }
     log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
     if (error && error?.code !== PK_VIOLATION || data === null ) throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
@@ -160,10 +162,10 @@ export class Album implements Fireable{
   }
   public async fire(): Promise<void> {
     const albumId = await this.getAlbumDbID()
-    await this.tracks.forEach(async (t) => {
+    await Promise.all(this.tracks.map(async (t) => {
       t.setAlbumId(albumId);
       await t.fire();
-    })
+    }))
   }
 }
 

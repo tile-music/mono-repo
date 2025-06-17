@@ -1,1 +1,1 @@
-export const PK_VIOLATION = "23505"
+export const PK_VIOLATION = "23505";

@@ -1,6 +1,5 @@
 import { SupabaseClient, Client, Player } from "../../deps.ts";
 
-import "jsr:@std/dotenv/load";
 
 import { Track, SpotifyTrack } from "./Track.ts";
 import { Album, SpotifyAlbum } from "./Album.ts";
@@ -9,6 +8,7 @@ import { Play, SpotifyPlay } from "./Play.ts";
 import { log } from "../util/log.ts"
 
 import { MusicBrainzApi } from "../../deps.ts";
+import { Fireable } from "../util/Fireable.ts";
 
 
 export type ReleaseDate = { year: number, month?: number, day?: number }
@@ -48,7 +48,7 @@ export type ReleaseDate = { year: number, month?: number, day?: number }
  * @method findMBID - Attempts to find MusicBrainz IDs (MBIDs) for played tracks and albums.
  * @returns Promise<void>
  */
-export abstract class UserPlaying {
+export abstract class UserPlaying implements Fireable {
   userId!: string;
   supabase!: SupabaseClient<any, "test" | "prod", any>;
   context!: any;
@@ -72,13 +72,13 @@ export abstract class UserPlaying {
       this.matchAlbums();
       await Promise.all(Array.from(this.albums.values()).map(async album => await album.fire()));
     }
-    catch (e) { log(1, `Error putting in DB: ${e}`); }
+    catch (e) { log(0, `Error putting in DB: ${e}`); }
   };
 
   protected abstract matchAlbums(): void;
 
   protected addOrGetAlbum(album: Album) {
-    const ident = album.getAlbumIdentifier()
+    const ident = album.getAlbumIdentifier();
     if (this.albums.has(ident))
       return this.albums.get(ident);
     else {
@@ -125,7 +125,7 @@ export class SpotifyUserPlaying extends UserPlaying {
       const album = this.addOrGetAlbum(new SpotifyAlbum(
         item.track.album.name,
         item.track.album.albumType,
-        item.track.album.artists.map((artist: any) => artist.name),
+        item.track.album.artists.map((artist: {name: string}) => artist.name),
         item.track.album.images[0].url,
         releaseDateParsed.day,
         releaseDateParsed.month,
@@ -134,7 +134,10 @@ export class SpotifyUserPlaying extends UserPlaying {
         item.track.album.genres,
         this.supabase,
         item.track.album.id))
-      if (!album) throw new Error("album is not defined!")
+      if (!album) {
+        log(0, `album is undefined ${{...item}}`)
+        continue;
+      }
 
       album.addTrack(new SpotifyTrack(
         item.track.name,
@@ -218,7 +221,7 @@ export class MockUserPlaying extends UserPlaying {
     this.mockData = context;
   }
 
-  protected override async matchAlbums(): Promise<void> {
+  protected override  matchAlbums(): void {
     // make sure this works like a traditional for loop not async for each because that will result in a major race condition
     for (const track of this.mockData) {
       const album = this.addOrGetAlbum(new Album(

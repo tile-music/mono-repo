@@ -22,8 +22,7 @@ export type SpotifyUpdateData = {
 
 export const selectString = `
 play_id, listened_at, track_id, album_id, track_popularity, album_popularity,
-albums (spotify_id, ean, upc),
-tracks (spotify_id)`;
+tracks (spotify_id), albums (spotify_id, ean, upc)`;
 
 /** doing it this way because the js api wrapper does not provide popularity */
 /**

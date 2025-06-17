@@ -1,10 +1,10 @@
 import { Play } from "./Play.ts"
 import { SupabaseClient } from "../../deps.ts";
-import { supabase } from "../../tests/music/supabase.ts";
+
 import { Fireable } from "../util/Fireable.ts"
 import { log } from "../util/log.ts"
 import { PK_VIOLATION } from "../util/dbCodes.ts";
-import { json } from "node:stream/consumers";
+
 /**
  * @file TrackInfo.ts
  * @description This file contains the definition of the TrackInfo class, which represents information about a music track.
@@ -84,15 +84,15 @@ export class Track implements Fireable {
    */
   public async getTrackDbID(): Promise<number> {
     if (this.trackId) return this.trackId;
-    let { data, error } = await this.queryHelper()
-    log(6, `data: ${JSON.stringify(data)}, error:: ${JSON.stringify(error)}`)
-    if (!data?.length) {
+    let { data, error } = await this.queryHelper();
+    log(6, `data: ${JSON.stringify(data)}, error:: ${JSON.stringify(error)}`);
+    if (data?.length === 0 || !data) {
       ({ data, error } = await this.supabase.from("tracks").insert(this.createDbEntryObject()).select());
     }
-    if (error && error?.code !== PK_VIOLATION || data === null) throw new Error(`data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
-    if (data.length > 1) log(3, `multiple matching entries for base album class, 
+    if (error && error?.code !== PK_VIOLATION || data === null) throw new Error(`data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`);
+    if (data?.length > 1) log(3, `multiple matching entries for base album class, 
       Track: ${JSON.stringify(this.createDbEntryObject())} 
-      Data: ${JSON.stringify(data)}`)
+      Data: ${JSON.stringify(data)}`);
     this.trackId = data[0].track_id;
     return data[0].track_id;
   }
