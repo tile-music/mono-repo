@@ -8,6 +8,13 @@ export { Client, Player } from "npm:spotify-api.js";
 
 export { MusicBrainzApi, CoverArtArchiveApi } from 'npm:musicbrainz-api';
 
+const config = {
+  appName: 'tile.music',
+  appVersion: "0.0.0",
+  appContactInfo: "ivybixler@gmail.com", 
+};
+
+
 
 // Supabase client
 export { SupabaseClient } from "jsr:@supabase/supabase-js@2";

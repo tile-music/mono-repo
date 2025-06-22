@@ -3,8 +3,9 @@ import { SupabaseClient } from "../../deps.ts";
 import { log } from "../util/log.ts";
 import { json } from "node:stream/consumers";
 import { PK_VIOLATION } from "../util/dbCodes.ts";
-import { Fireable } from "../util/Fireable.ts";
+import { Fireable } from "../util/helperInterfaces.ts";
 import { get } from "node:http";
+import { MusicBrainzApi } from "../../deps.ts";
 
 /**
  * Represents information about a music album.
@@ -138,6 +139,10 @@ export class Album implements Fireable{
   
   public getAlbumIdentifier() {
     return this.primaryIdent;
+  }
+
+  public async musicbrainzLookup() : Promise<void> {
+
   }
   
   /**

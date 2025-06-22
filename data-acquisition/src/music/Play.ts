@@ -1,5 +1,5 @@
 import { SupabaseClient } from "../../deps.ts";
-import { Fireable } from "../util/Fireable.ts";
+import { Fireable } from "../util/helperInterfaces.ts";
 import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/dbCodes.ts";
 

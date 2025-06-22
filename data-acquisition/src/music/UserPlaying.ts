@@ -8,7 +8,7 @@ import { Play, SpotifyPlay } from "./Play.ts";
 import { log } from "../util/log.ts"
 
 import { MusicBrainzApi } from "../../deps.ts";
-import { Fireable } from "../util/Fireable.ts";
+import { Fireable } from "../util/helperInterfaces.ts";
 
 
 export type ReleaseDate = { year: number, month?: number, day?: number }
