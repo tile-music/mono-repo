@@ -10,15 +10,16 @@ export class MusicBrainzTrack extends MusicBrainz implements Fireable<MusicBrain
     super(supabase)
     this.track = track;
   };
+  
   async _init(): Promise<void> {
     
   };
+
   override async fetchMbidFromDatabase(): Promise<UUID|false> {
   }
   
   async fire(): Promise<void> {
     await this.fetchMbidFromDatabase()
-
 
   };
   validate() : asserts this is MusicBrainzTrack {

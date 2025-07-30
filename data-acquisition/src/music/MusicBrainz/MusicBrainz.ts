@@ -11,6 +11,7 @@ export const mbConfig = {
 export abstract class MusicBrainz {
   protected musicbrainz: MusicBrainzApi;
   protected supabase: SupabaseClient;
+
   constructor(supabase: SupabaseClient){
     this.supabase = supabase;
     this.musicbrainz = new MusicBrainzApi(mbConfig);

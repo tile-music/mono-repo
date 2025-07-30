@@ -18,11 +18,10 @@ export class MusicBrainzAlbum extends MusicBrainz implements Fireable<MusicBrain
 
   override async fetchMbidFromDatabase(): Promise<undefined> {
     const resp = await this.supabase.from("album_mbids").select("*").eq("album_id", await this.album.getAlbumDbID());
-
   }
 
   async performMbLookup(): Promise<IReleaseGroupList> {
-    const makeArtistQueryString = (arr: string[]) => arr.map((t) => `artist:"${t}" AND`).toString().replace(",", " ");
+    const makeArtistQueryString = (arr: string[]) => arr.map((t) => `artist:"${t}" AND`).join(" ");
     const queryStringHelper = (artists: string[], title: string) => `query=${makeArtistQueryString(artists)} releasegroup:"${title}"`;
     const query = queryStringHelper(this.album.getArtists(), this.album.getTitle());
 
