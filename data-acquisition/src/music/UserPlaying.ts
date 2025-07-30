@@ -8,7 +8,7 @@ import { Play, SpotifyPlay } from "./Play.ts";
 import { log } from "../util/log.ts"
 
 import { MusicBrainzApi } from "../../deps.ts";
-import { Fireable } from "../util/helperInterfaces.ts";
+import { Fireable } from "./Fireable.ts";
 
 
 export type ReleaseDate = { year: number, month?: number, day?: number }
@@ -48,7 +48,7 @@ export type ReleaseDate = { year: number, month?: number, day?: number }
  * @method findMBID - Attempts to find MusicBrainz IDs (MBIDs) for played tracks and albums.
  * @returns Promise<void>
  */
-export abstract class UserPlaying implements Fireable {
+export abstract class UserPlaying implements Fireable<UserPlaying> {
   userId!: string;
   supabase!: SupabaseClient<any, "test" | "prod", any>;
   context!: any;
@@ -67,13 +67,6 @@ export abstract class UserPlaying implements Fireable {
 
 
   public abstract init(): Promise<void>;
-  public async fire(): Promise<void> {
-    try { 
-      this.matchAlbums();
-      await Promise.all(Array.from(this.albums.values()).map(async album => await album.fire()));
-    }
-    catch (e) { log(0, `Error putting in DB: ${e}`); }
-  };
 
   protected abstract matchAlbums(): void;
 
@@ -86,6 +79,19 @@ export abstract class UserPlaying implements Fireable {
       return this.albums.get(ident);
     }
   }
+
+  public async fire(): Promise<void> {
+    try { 
+      this.matchAlbums();
+      await Promise.all(Array.from(this.albums.values()).map(async album => await album.fire()));
+    }
+    catch (e) { log(0, `Error putting in DB: ${e}`); }
+  };
+
+  validate(): asserts this is UserPlaying {
+    
+  }
+
 }
 
 export class SpotifyUserPlaying extends UserPlaying {

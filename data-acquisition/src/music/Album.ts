@@ -1,11 +1,10 @@
 import { SpotifyTrack, Track } from "./Track.ts";
 import { SupabaseClient } from "../../deps.ts";
 import { log } from "../util/log.ts";
-import { json } from "node:stream/consumers";
+
 import { PK_VIOLATION } from "../util/dbCodes.ts";
-import { Fireable } from "../util/helperInterfaces.ts";
-import { get } from "node:http";
-import { MusicBrainzApi } from "../../deps.ts";
+import { Fireable } from "./Fireable.ts";
+
 
 /**
  * Represents information about a music album.
@@ -42,8 +41,8 @@ import { MusicBrainzApi } from "../../deps.ts";
  * @description Creates an object that can be used to create a new entry in the database.
  * @returns {Object} An object containing the album information formatted for database entry.
  */
-export class Album implements Fireable{
-  private albumName: string;
+export class Album implements Fireable<Album> {
+  private title: string;
   private albumType: string;
   private numTracks: number;
   private releaseDay: number | null;
@@ -61,7 +60,7 @@ export class Album implements Fireable{
   protected tracks: Track[] = [];
 
   constructor(
-    albumName: string,
+    title: string,
     albumType: string,
     artists: string[],
     image: string,
@@ -72,9 +71,9 @@ export class Album implements Fireable{
     genre: string[],
     supabase: SupabaseClient<any, "prod" | "test", any>,
     albumId?: number,
-    
+
   ) {
-    this.albumName = albumName;
+    this.title = title;
     this.albumType = albumType;
     this.artists = artists;
     this.releaseDay = releaseDay ? releaseDay : null;
@@ -83,7 +82,7 @@ export class Album implements Fireable{
     this.numTracks = numTracks;
     this.image = image;
     this.genre = genre;
-    this.primaryIdent = `${albumName},${this.artists.join(",")}`;
+    this.primaryIdent = `${title},${this.artists.join(",")}`;
     this.supabase = supabase;
     //console.log(this);
     this.query = this.supabase.from("albums").select("album_id");
@@ -91,10 +90,10 @@ export class Album implements Fireable{
   }
 
   protected queryHelper() {
-    this.query = this.query.eq("album_name", this.albumName)
-    if(this.releaseYear) this.query = this.query.eq("release_year", this.releaseYear ?? null)
-    if(this.releaseDay) this.query = this.query.eq("release_day", this.releaseDay ?? null)
-    if(this.releaseMonth) this.query = this.query.eq("release_month", this.releaseMonth ?? null)
+    this.query = this.query.eq("album_name", this.title)
+    if (this.releaseYear) this.query = this.query.eq("release_year", this.releaseYear ?? null)
+    if (this.releaseDay) this.query = this.query.eq("release_day", this.releaseDay ?? null)
+    if (this.releaseMonth) this.query = this.query.eq("release_month", this.releaseMonth ?? null)
     return this.query
   }
 
@@ -110,7 +109,7 @@ export class Album implements Fireable{
    * @throws {Error} If the album cannot be inserted or retrieved from the database.
    * @todo find some intelligent way to fall back to a worse query, which should never happen in reality
    */
-  public async getAlbumDbID() : Promise<number> {
+  public async getAlbumDbID(): Promise<number> {
     if (this.albumId) return this.albumId;
     log(6, `${JSON.stringify(this.queryHelper())}`)
     let { data, error } = await this.queryHelper()
@@ -120,7 +119,7 @@ export class Album implements Fireable{
       ({ data, error } = await this.supabase.from("albums").insert(this.createDbEntryObject()).select());
     }
     log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
-    if (error && error?.code !== PK_VIOLATION || data === null ) throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
+    if (error && error?.code !== PK_VIOLATION || data === null) throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
     if (data.length > 1) log(3, `multiple matching entries for base album class, 
       Album: ${JSON.stringify(this.createDbEntryObject())} 
       Data: ${JSON.stringify(data)}`)
@@ -136,15 +135,15 @@ export class Album implements Fireable{
     this.tracks.push(track);
     return track;
   }
-  
+
   public getAlbumIdentifier() {
     return this.primaryIdent;
   }
 
-  public async musicbrainzLookup() : Promise<void> {
+  public async musicbrainzLookup(): Promise<void> {
 
   }
-  
+
   /**
    *
    * @returns an object that can be used to create a new entry in the database
@@ -153,8 +152,8 @@ export class Album implements Fireable{
   public createDbEntryObject() {
 
     return {
-      ...(this.albumId && {album_id: this.albumId}),
-      album_name: this.albumName,
+      ...(this.albumId && { album_id: this.albumId }),
+      album_name: this.title,
       album_type: this.albumType,
       release_day: this.releaseDay,
       release_month: this.releaseMonth,
@@ -172,6 +171,16 @@ export class Album implements Fireable{
       await t.fire();
     }))
   }
+  public getTitle(): string {
+    return this.title;
+  }
+  public getArtists(): string[] {
+    return this.artists;
+  }
+  validate(): asserts this is Album {
+
+  }
+  
 }
 
 export class SpotifyAlbum extends Album {
@@ -184,7 +193,7 @@ export class SpotifyAlbum extends Album {
     artists: string[],
     image: string,
     releaseDay: number | undefined,
-    releaseMonth: number | undefined, 
+    releaseMonth: number | undefined,
     releaseYear: number,
     numTracks: number,
     genre: string[],
@@ -207,6 +216,9 @@ export class SpotifyAlbum extends Album {
       ...super.createDbEntryObject(),
       spotify_id: this.spotifyId
     };
+  }
+  override validate(): asserts this is SpotifyAlbum {
+    super.validate();
   }
 
 }

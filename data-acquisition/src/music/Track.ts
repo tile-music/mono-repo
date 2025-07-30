@@ -1,7 +1,7 @@
 import { Play } from "./Play.ts"
 import { SupabaseClient } from "../../deps.ts";
 
-import { Fireable } from "../util/helperInterfaces.ts"
+import { Fireable } from "./Fireable.ts"
 import { log } from "../util/log.ts"
 import { PK_VIOLATION } from "../util/dbCodes.ts";
 
@@ -30,7 +30,7 @@ import { PK_VIOLATION } from "../util/dbCodes.ts";
  * @returns {Object} An object that can be used to create a new entry in the database.
  * @todo Change how `indb` is set because this might create a state mismatch.
  */
-export class Track implements Fireable {
+export class Track implements Fireable<Track> {
   readonly trackName: string;
   readonly trackArtists: string[];
   readonly isrc: string;
@@ -118,9 +118,13 @@ export class Track implements Fireable {
   public async fire(): Promise<void> {
     const trackId = await this.getTrackDbID();
     if (!this.albumId) throw new Error("album id is undefined, this should never happen")
-    this.play.setAlbumAndTrackId(this.albumId, trackId)
+    this.play.setAlbumAndTrackId(trackId)
     await this.play.fire()
   }
+  validate(): asserts this is Track {
+
+  }
+  
 }
 
 export class SpotifyTrack extends Track {
@@ -148,5 +152,8 @@ export class SpotifyTrack extends Track {
       ...super.createDbEntryObject(),
       spotify_id: this.spotifyId,
     };
+  }
+  override validate(): asserts this is SpotifyTrack {
+    super.validate()
   }
 }
