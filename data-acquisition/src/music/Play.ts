@@ -46,12 +46,11 @@ export class Play implements Fireable<Play> {
 
   }
 
-   public setAlbumAndTrackId(trackId: number,) {
+  public setTrackId(trackId: number) {
     this.trackId = trackId;
-
   }
 
-  
+
 
   public createDbEntryObject() {
     if (!this.trackId) throw new Error(`track id not defined on Play:${JSON.stringify(this)}`)
@@ -69,12 +68,12 @@ export class Play implements Fireable<Play> {
     else if (error) throw new Error(`play failed to insert Play: ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
   }
 
-  static fromTestData(data: unknown, supabase: SupabaseClient) : Play {
+  static fromTestData(data: unknown, supabase: SupabaseClient): Play {
     throw new Error("fromTestData is not used or implemented in the Play Class");
   }
 
   validate(): asserts this is Play {
-    
+
   }
 }
 

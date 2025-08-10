@@ -18,7 +18,7 @@ Deno.test('base classes', async (t) => {
   );
   await t.step('constructor should initialize properties correctly', () => {
 
-    expect(album['albumName']).toBe("Lenny Skinny");
+    expect(album['title']).toBe("Lenny Skinny");
     expect(album['albumType']).toBe("Album");
     expect(album['artists']).toStrictEqual(["lenny skinny"]);
     expect(album['releaseDay']).toStrictEqual(30);
@@ -67,7 +67,7 @@ Deno.test('spotify class', async (t) => {
 
 
 
-    expect(albumInfo['albumName']).toBe("Lenny Skinny");
+    expect(albumInfo['title']).toBe("Lenny Skinny");
     expect(albumInfo['albumType']).toBe("Album");
     expect(albumInfo['artists']).toStrictEqual(["lenny skinny"]);
     expect(albumInfo['releaseDay']).toStrictEqual(30);

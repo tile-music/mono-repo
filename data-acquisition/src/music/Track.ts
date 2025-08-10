@@ -112,13 +112,15 @@ export class Track implements Fireable<Track> {
     };
   }
 
+  
+
   public createPlayDbEntryObject() {
     return { ...this.play.createDbEntryObject() };
   }
   public async fire(): Promise<void> {
     const trackId = await this.getTrackDbID();
     if (!this.albumId) throw new Error("album id is undefined, this should never happen")
-    this.play.setAlbumAndTrackId(trackId)
+    this.play.setTrackId(trackId)
     await this.play.fire()
   }
   validate(): asserts this is Track {

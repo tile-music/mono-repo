@@ -2,49 +2,10 @@ import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import { SpotifyUserPlaying, MockUserPlaying } from "../../../src/music/UserPlaying.ts";
 import { expect } from "jsr:@std/expect";
 import { supabase } from "../supabase.ts";
-
+import { testData0 } from "./TestData.ts";
 Deno.test("User Playing Tests ", async (t) => {
 
-  console.log("test env", Deno.env.get("SB_URL_TEST"))
-  const testData1 = [
-    {
-      trackName: "Test Track",
-      trackArtists: ["Test Artist"],
-      albumInfo: {
-        albumName: "Test Album",
-        albumArtists: ["Test Album Artist"],
-        albumImage: "Test Image",
-        albumReleaseDay: 1,
-        albumReleaseMonth: 2,
-        albumReleaseYear: 2021,
-      },
-      image: "Test Image",
-      isrc: "USRC17607830",
-      durationMs: 1000,
-      progressMs: 500,
-      popularity: 100,
-      timestamp: 1256667799,
-    },
-    {
-      trackName: "Test Track 2",
-      trackArtists: ["Test Artist 2"],
-      albumInfo: {
-        albumName: "Test Album 2",
-        albumArtists: ["Test Album Artist 2"],
-        albumImage: "Test Image 2",
-        albumReleaseDay: 1,
-        albumReleaseMonth: 2,
-        albumReleaseYear: 2023,
-      },
-      image: "Test Image 2",
-      isrc: "USRC17607839",
-      durationMs: 2000,
-      progressMs: 1000,
-      popularity: 95,
-      timestamp: 13888088,
-    },
-  ];
-  const testData2 = Array.from({ length: 20 }, (_, i) => ({
+  const testData1 = Array.from({ length: 20 }, (_, i) => ({
     trackName: `Test Track ${i % 10}`,
     trackArtists: [`Test Artist ${i % 5}`],
     albumInfo: {
@@ -74,11 +35,11 @@ Deno.test("User Playing Tests ", async (t) => {
 
   await t.step("Mock user playing tests", async (t) => {
     await t.step("MockUserPlaying init method", async () => {
-      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData0);
       await expect(mockUserPlaying.init()).resolves.not.toThrow();
     });
     await t.step("MockUserPlaying fire method", async () => {
-      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData0);
       await mockUserPlaying.init();
       await expect(mockUserPlaying.fire())
         .resolves.not.toThrow()
@@ -88,19 +49,18 @@ Deno.test("User Playing Tests ", async (t) => {
             .select()
             .eq("user_id", userId)
             .then(({ data, error }: { data: any; error: any }) => {
-              console.log("data!!!!", data);
               expect(data).toHaveLength(2);
             })
         );
     });
     await t.step("MockUserPlaying init method using test data 2", async () => {
-      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
       await expect(mockUserPlaying.init()).resolves.not.toThrow();
     });
 
     await t.step("MockUserPlaying fire method using test data 2", async () => {
-      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData2);
-      console.log(testData2)
+      const mockUserPlaying = new MockUserPlaying(supabase, userId, testData1);
+      console.log(testData1)
       await mockUserPlaying.init();
       await expect(mockUserPlaying.fire())
         .resolves.not.toThrow()
