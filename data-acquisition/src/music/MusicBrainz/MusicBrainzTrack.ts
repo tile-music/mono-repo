@@ -5,7 +5,7 @@ import { MusicBrainz } from "./MusicBrainz.ts";
 import { Track } from "../Track.ts";
 
 import { MusicBrainzAlbum } from "./MusicBrainzAlbum.ts";
-export class MusicBrainzTrack extends MusicBrainz implements Fireable<MusicBrainzTrack> {
+export class MusicBrainzTrack extends MusicBrainz implements Fireable {
   mbAlbum: MusicBrainzAlbum;
   track: Track;
   constructor(track: Track, mbAlbum: MusicBrainzAlbum, supabase: SupabaseClient) {
@@ -17,10 +17,12 @@ export class MusicBrainzTrack extends MusicBrainz implements Fireable<MusicBrain
   async _init(): Promise<void> {
     
   };
-7
+
   override async fetchMbidFromDatabase(): Promise<undefined>  {
     const trackId = await this.track.getTrackDbID();
-    const {data, error} = await this.supabase.from("track_mbids").select("*").eq("track_id", trackId);
+    const {data, error} = await this.supabase.from("track_mbids")
+      .select("*")
+      .eq("track_id", trackId);
     if(error) throw new Error(`${error}`); 
   }
 
@@ -29,9 +31,7 @@ export class MusicBrainzTrack extends MusicBrainz implements Fireable<MusicBrain
   }
   
   override async fire(): Promise<void> {
-    await super.fire();
+;
     await this.fetchMbidFromDatabase()
-  }
-  override validate() : asserts this is MusicBrainzTrack {
   }
 }

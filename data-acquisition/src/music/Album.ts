@@ -2,8 +2,9 @@ import { SpotifyTrack, Track } from "./Track.ts";
 import { SupabaseClient } from "../../deps.ts";
 import { log } from "../util/log.ts";
 
-import { PK_VIOLATION } from "../util/dbCodes.ts";
+import { PK_VIOLATION } from "../util/constants.ts";
 import { Fireable } from "./Fireable.ts";
+import { SpotifyPlay } from "./Play.ts";
 
 
 /**
@@ -41,7 +42,7 @@ import { Fireable } from "./Fireable.ts";
  * @description Creates an object that can be used to create a new entry in the database.
  * @returns {Object} An object containing the album information formatted for database entry.
  */
-export class Album implements Fireable<Album> {
+export class Album implements Fireable {
   private title: string;
   private albumType: string;
   private numTracks: number;
@@ -71,7 +72,6 @@ export class Album implements Fireable<Album> {
     genre: string[],
     supabase: SupabaseClient<any, "prod" | "test", any>,
     albumId?: number,
-
   ) {
     this.title = title;
     this.albumType = albumType;
@@ -89,11 +89,21 @@ export class Album implements Fireable<Album> {
     this.albumId = albumId;
   }
 
+  public getAlbumType() {
+    return this.albumType.toLowerCase();
+  }
+
   protected queryHelper() {
     this.query = this.query.eq("album_name", this.title)
-    if (this.releaseYear) this.query = this.query.eq("release_year", this.releaseYear ?? null)
-    if (this.releaseDay) this.query = this.query.eq("release_day", this.releaseDay ?? null)
-    if (this.releaseMonth) this.query = this.query.eq("release_month", this.releaseMonth ?? null)
+    if (this.releaseYear) {
+      this.query = this.query.eq("release_year", this.releaseYear ?? null)
+    }
+    if (this.releaseDay) {
+      this.query = this.query.eq("release_day", this.releaseDay ?? null)
+    }
+    if (this.releaseMonth) {
+      this.query = this.query.eq("release_month", this.releaseMonth ?? null)
+    }
     return this.query
   }
 
@@ -177,10 +187,6 @@ export class Album implements Fireable<Album> {
   public getArtists(): string[] {
     return this.artists;
   }
-  validate(): asserts this is Album {
-
-  }
-  
 }
 
 export class SpotifyAlbum extends Album {
@@ -200,9 +206,10 @@ export class SpotifyAlbum extends Album {
     supabase: SupabaseClient<any, "prod" | "test", any>,
     spotifyId: string,
     albumId?: number
-
   ) {
-    super(albumName, albumType, artists, image, releaseDay, releaseMonth, releaseYear, numTracks, genre, supabase, albumId);
+    super(albumName, albumType, artists,
+      image, releaseDay, releaseMonth, releaseYear,
+      numTracks, genre, supabase, albumId);
     this.spotifyId = spotifyId;
     this.primaryIdent = spotifyId;
   }
@@ -211,14 +218,48 @@ export class SpotifyAlbum extends Album {
     return this.query.eq("spotify_id", this.spotifyId)
   }
 
+  static fromTestData(
+    data: TestData,
+    supabase: SupabaseClient<any, "prod" | "test", any>,
+    userId: string,
+  ): SpotifyAlbum {
+    const ret = new SpotifyAlbum(
+      data.albumInfo.albumName, "album", data.albumInfo.albumArtists,
+      data.albumInfo.albumImage, data.albumInfo.albumReleaseDay,
+      data.albumInfo.albumReleaseMonth, data.albumInfo.albumReleaseYear,
+      0, [], supabase, data.spotifyId
+    );
+    ret.addTrack(new SpotifyTrack(data.trackName, data.trackArtists,
+      data.isrc, data.durationMs, data.spotifyId,
+      new SpotifyPlay(data.timestamp, data.popularity,
+        supabase, userId, data.isrc), supabase));
+    return ret
+  }
+
   public override createDbEntryObject() {
     return {
       ...super.createDbEntryObject(),
       spotify_id: this.spotifyId
     };
   }
-  override validate(): asserts this is SpotifyAlbum {
-    super.validate();
-  }
-
 }
+
+export type TestData = {
+  trackName: string;
+  trackArtists: string[];
+  albumInfo: {
+    albumName: string;
+    albumArtists: string[];
+    albumImage: string;
+    albumReleaseDay: number;
+    albumReleaseMonth: number;
+    albumReleaseYear: number;
+    spotifyId: string;
+  };
+  image: string;
+  isrc: string;
+  durationMs: number;
+  popularity: number;
+  timestamp: number;
+  spotifyId: string;
+};

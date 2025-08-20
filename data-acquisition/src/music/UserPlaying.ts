@@ -48,7 +48,7 @@ export type ReleaseDate = { year: number, month?: number, day?: number }
  * @method findMBID - Attempts to find MusicBrainz IDs (MBIDs) for played tracks and albums.
  * @returns Promise<void>
  */
-export abstract class UserPlaying implements Fireable<UserPlaying> {
+export abstract class UserPlaying implements Fireable {
   userId!: string;
   supabase!: SupabaseClient<any, "test" | "prod", any>;
   context!: any;

@@ -1,7 +1,7 @@
 import { SupabaseClient } from "../../deps.ts";
 import { Fireable } from "./Fireable.ts";
 import { log } from "../util/log.ts";
-import { PK_VIOLATION } from "../util/dbCodes.ts";
+import { PK_VIOLATION } from "../util/constants.ts";
 
 /**
  * @file PlayedTrack.ts
@@ -27,7 +27,7 @@ import { PK_VIOLATION } from "../util/dbCodes.ts";
  * @description Creates an object suitable for database entry, containing the track's popularity, the time it was listened to, and nested objects for track and album information.
  * @returns {Object} An object representing the database entry for the played track.
  */
-export class Play implements Fireable<Play> {
+export class Play implements Fireable {
 
   private listenedAt: number;
   private trackId?: number;
@@ -67,14 +67,6 @@ export class Play implements Fireable<Play> {
     if (error?.code === PK_VIOLATION) log(6, "Play already inserted")
     else if (error) throw new Error(`play failed to insert Play: ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
   }
-
-  static fromTestData(data: unknown, supabase: SupabaseClient): Play {
-    throw new Error("fromTestData is not used or implemented in the Play Class");
-  }
-
-  validate(): asserts this is Play {
-
-  }
 }
 
 export class SpotifyPlay extends Play {
@@ -88,8 +80,5 @@ export class SpotifyPlay extends Play {
       ...super.createDbEntryObject(),
       track_popularity: this.trackPopularity
     }
-  }
-  override validate(): asserts this is SpotifyPlay {
-    super.validate()
   }
 }

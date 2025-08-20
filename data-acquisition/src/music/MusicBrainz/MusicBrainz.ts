@@ -1,35 +1,34 @@
 import { Fireable } from "../Fireable.ts";
 import { MusicBrainzApi, SupabaseClient } from "../../../deps.ts";
-import { type UUID } from "@std/uuid";
+
 
 export const mbConfig = {
   appName: 'tile.music',
   appVersion: "0.0.0",
   appContactInfo: "ivybixler@gmail.com",
+  disableRateLimiting: true,
 };
 
-export abstract class MusicBrainz implements Fireable<MusicBrainz> {
+export type MBError = {
+  "error": "Not Found",
+  "help": "For usage, please see: https://musicbrainz.org/development/mmd"
+};
+
+export abstract class MusicBrainz implements Fireable {
   protected musicbrainz: MusicBrainzApi;
-  protected supabase: SupabaseClient;
+  protected supabase: SupabaseClient<any, "test" | "prod", any>;
 
-  hasFired : boolean = false;
+  hasFired: boolean = false;
 
-  constructor(supabase: SupabaseClient){
+  constructor(supabase: SupabaseClient<any, "test" | "prod", any>) {
     this.supabase = supabase;
     this.musicbrainz = new MusicBrainzApi(mbConfig);
   }
-  abstract fetchMbidFromDatabase() : Promise<UUID|false>;
-  abstract performMbLookup(): Promise<undefined>;
-  getHasFired() : boolean {
+  abstract fetchMbidFromDatabase(): Promise<any>;
+  abstract performMbLookup(): Promise<any>;
+  getHasFired(): boolean {
     return this.hasFired;
   }
 
-  fire(): Promise<void> {
-    this.hasFired = true;
-    return Promise.resolve();
-  }
-
-  validate(): asserts this is MusicBrainz {
-    
-  }
+  abstract fire(): Promise<void>;
 }

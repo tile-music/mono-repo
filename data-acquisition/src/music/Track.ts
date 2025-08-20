@@ -3,7 +3,7 @@ import { SupabaseClient } from "../../deps.ts";
 
 import { Fireable } from "./Fireable.ts"
 import { log } from "../util/log.ts"
-import { PK_VIOLATION } from "../util/dbCodes.ts";
+import { PK_VIOLATION } from "../util/constants.ts";
 
 /**
  * @file TrackInfo.ts
@@ -30,7 +30,7 @@ import { PK_VIOLATION } from "../util/dbCodes.ts";
  * @returns {Object} An object that can be used to create a new entry in the database.
  * @todo Change how `indb` is set because this might create a state mismatch.
  */
-export class Track implements Fireable<Track> {
+export class Track implements Fireable {
   readonly trackName: string;
   readonly trackArtists: string[];
   readonly isrc: string;
@@ -85,7 +85,7 @@ export class Track implements Fireable<Track> {
   public async getTrackDbID(): Promise<number> {
     if (this.trackId) return this.trackId;
     let { data, error } = await this.queryHelper();
-    log(6, `data: ${JSON.stringify(data)}, error:: ${JSON.stringify(error)}`);
+    log(6, `before insert attempt data: ${JSON.stringify(data)}, error:: ${JSON.stringify(error)}`);
     if (data?.length === 0 || !data) {
       ({ data, error } = await this.supabase.from("tracks").insert(this.createDbEntryObject()).select());
     }
