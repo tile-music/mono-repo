@@ -1,5 +1,5 @@
 import { SupabaseClient } from "../../deps.ts";
-import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./makeQueue.ts";
+import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./queue.ts";
 
 import "jsr:@std/dotenv/load";
 

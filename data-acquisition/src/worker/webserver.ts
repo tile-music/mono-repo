@@ -1,4 +1,4 @@
-import { makeDataAcqQueue } from "./makeQueue.ts";
+import { makeDataAcqQueue } from "./queue.ts";
 import { log } from "../util/log.ts";
 import "jsr:@std/dotenv/load";
 

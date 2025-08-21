@@ -1,8 +1,8 @@
 import { QueueEvents, fork, process } from "../deps.ts"
 
 import { makeDataAcqJobs, makeSpotifyAlbumPopularityJobs } from './worker/serviceAdapter.ts';
-import { connection } from './worker/redis.ts';
-import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from './worker/makeQueue.ts';
+import { connection } from './worker/queue.ts';
+import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from './worker/queue.ts';
 
 // Create a Queue instance
 const queue = makeDataAcqQueue();

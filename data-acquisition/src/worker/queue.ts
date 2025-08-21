@@ -1,6 +1,10 @@
 import { Queue } from '../../deps.ts';
 
-import { connection } from './redis.ts';
+export const connection = {
+  host: "redis",
+  port: 6379,
+};
+
 /**
  * Creates and returns a new Queue instance configured for cron jobs.
  *

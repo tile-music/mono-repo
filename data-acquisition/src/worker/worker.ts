@@ -1,6 +1,6 @@
 import { Worker, SupabaseClient, process } from '../../deps.ts';
 import { SpotifyUserPlaying } from '../music/UserPlaying.ts';
-import { connection } from './redis.ts';
+import { connection } from './queue.ts';
 
 import "jsr:@std/dotenv/load";
 

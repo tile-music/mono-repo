@@ -1,6 +1,6 @@
 import { Worker, process } from '../../deps.ts';
 import { updateSpotifyAlbumPopularity } from '../util/updateSpotifyInfo.ts';
-import { connection } from './redis.ts';
+import { connection } from './queue.ts';
 
 const worker = new Worker('spotifyAlbumPopularity', async () => {
   try {
