@@ -1,10 +1,9 @@
 import { SupabaseClient } from "../../deps.ts";
 import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./queue.ts";
+import { log } from "../util/log.ts";
 
 import "jsr:@std/dotenv/load";
 
-/**
- */
 /**
  * Asynchronously creates and schedules jobs for Spotify credentials.
  *
@@ -21,7 +20,7 @@ import "jsr:@std/dotenv/load";
 */
 export async function makeDataAcqJobs() {
   const queue = makeDataAcqQueue();
-  console.log("makeJobs");
+  log(5, "Starting makeDataAcqJobs");
   const supabase = new SupabaseClient(
     Deno.env.get("SB_URL")!,
     Deno.env.get("SERVICE")!,
@@ -31,10 +30,11 @@ export async function makeDataAcqJobs() {
     .from("spotify_credentials")
     .select("*")
     .then((items) => {
-      console.log(items);
+      log(6, `Found ${items.data?.length || 0} Spotify credentials: ${JSON.stringify(items)}`);
       items.data?.forEach(async (element) => {
+        // add single-shot job
         await queue.add(
-          "spotify" + element,
+          "spotify" + element.id,
           {
             data: {
               userId: element.id,
@@ -45,8 +45,10 @@ export async function makeDataAcqJobs() {
             jobId: "spotify" + element.id,
           }
         );
+
+        // add recurring job
         await queue.add(
-          "spotify" + element,
+          "spotify" + element.id,
           {
             data: {
               userId: element.id,
@@ -58,13 +60,25 @@ export async function makeDataAcqJobs() {
             jobId: "spotify" + element.id,
           }
         );
+        log(5, `Added Spotify jobs for user ${element.id}`);
       });
     })
 }
-/** if you'd like to update sooner you could get rid of the second 0 and even the first */
+
+/**
+ * Asynchronously creates and schedules jobs for Spotify album popularity updates.
+ *
+ * This function initializes a job queue and adds two jobs:
+ * 1. A recurring job that runs daily at midnight to update Spotify album popularity.
+ * 2. A single-shot job to initialize the Spotify album popularity data.
+ *
+ * @async
+ * @function makeSpotifyAlbumPopularityJobs
+ * @returns {Promise<void>} A promise that resolves when the jobs have been added to the queue.
+ */
 export async function makeSpotifyAlbumPopularityJobs() {
   const queue = makeSpotifyAlbumPopularityQueue();
-  console.log("makeJobs for SpotifyAlbumPopularity");
+  log(5, "Starting makeSpotifyAlbumPopularityJobs");
   await queue.add(
     'spotifyAlbumPopularityCronJob',
     { string: "update" },
@@ -72,11 +86,12 @@ export async function makeSpotifyAlbumPopularityJobs() {
       repeat: { pattern: "0 0 * * *" },
     }
   );
-  console.log("added job for SpotifyAlbumPopularity update");
+  log(5, "Added recurring job for SpotifyAlbumPopularity update");
   await queue.add(
     'spotifyAlbumPopularitySingleShot',
     { string:  "initialize" },
     { removeOnComplete: true, 
       removeOnFail: true }
   );
+  log(5, "Added single-shot job for SpotifyAlbumPopularity initialization");
 }
