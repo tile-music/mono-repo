@@ -1,6 +1,6 @@
 import { TestData } from "../../../src/music/Album.ts";
 
-export const testData0 : TestData[] = [
+export const testData0: TestData[] = [
   {
     trackName: "Lotion",
     trackArtists: ["Deftones"],
@@ -11,7 +11,8 @@ export const testData0 : TestData[] = [
       albumReleaseDay: 27,
       albumReleaseMonth: 10,
       albumReleaseYear: 1997,
-      spotifyId: "7o4UsmV37Sg5It2Eb7vHzu?si=heh4F3-iQtmkPRcQFFyn9g"
+      spotifyId: "7o4UsmV37Sg5It2Eb7vHzu?si=heh4F3-iQtmkPRcQFFyn9g",
+      numTracks: 10,
     },
     image: "https://i.scdn.co/image/ab67616d0000b2730b1129853982ea17845d4eb6",
     isrc: "USMV29700148",
@@ -31,12 +32,73 @@ export const testData0 : TestData[] = [
       albumReleaseMonth: 11,
       albumReleaseYear: 2010,
       spotifyId: "0pGumY11G8OGH05ti6jh23?si=zLwe0vOdQvevQudlLa5wrA",
+      numTracks: 12,
     },
     image: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
     isrc: "USRC11000889",
     durationMs: 219973,
     popularity: 80,
-    timestamp: 1754322618, 
+    timestamp: 1754322618,
     spotifyId: "3pYDZTJM2tVBUhIRifWVzI?si=171d0d0ed6b549cb",
+  },
+  {
+    trackName: "360",
+    trackArtists: ["charli xcx"],
+    albumInfo: {
+      albumName: "Brat and it’s the same but there’s three more songs so it’s not",
+      albumArtists: ["charli xcx"],
+      albumImage: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
+      albumReleaseDay: 19,
+      albumReleaseMonth: 11,
+      albumReleaseYear: 2010,
+      spotifyId: "0pGumY11G8OGH05ti6jh23?si=zLwe0vOdQvevQudlLa5wrA",
+      numTracks: 18
+    },
+    image: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
+    isrc: "USRC11000889",
+    durationMs: 219973,
+    popularity: 80,
+    timestamp: 1754322618,
+    spotifyId: "3pYDZTJM2tVBUhIRifWVzI",
+  },
+  {
+    trackName: "360",
+    trackArtists: ["charli xcx"],
+    albumInfo: {
+      albumName: "Brat and it’s completely",
+      albumArtists: ["charli xcx"],
+      albumImage: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
+      albumReleaseDay: 19,
+      albumReleaseMonth: 11,
+      albumReleaseYear: 2010,
+      spotifyId: "0pGumY11G8OGH05ti6jh23",
+      numTracks: 35,
+    },
+    image: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
+    isrc: "USRC11000889",
+    durationMs: 219973,
+    popularity: 80,
+    timestamp: 1754322618,
+    spotifyId: "3pYDZTJM2tVBUhIRifWVzI",
+  },
+  {
+    trackName: "Tous les mêmes",
+    trackArtists: ["charli xcx"],
+    albumInfo: {
+      albumName: "Racine carrée",
+      albumArtists: ["Stromae"],
+      albumImage: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
+      albumReleaseDay: 1,
+      albumReleaseMonth: 1,
+      albumReleaseYear: 2013,
+      spotifyId: "6uyslsVGFsHKzdGUosFwBM",
+      numTracks: 13,
+    },
+    image: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
+    isrc: "USRC11000889",
+    durationMs: 210933,
+    popularity: 80,
+    timestamp: 1754322618,
+    spotifyId: "1GC1MIaRMW3kfVK9VyD5Ii",
   }
 ];

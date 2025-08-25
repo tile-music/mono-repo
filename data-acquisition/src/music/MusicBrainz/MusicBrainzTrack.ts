@@ -8,6 +8,7 @@ import { MusicBrainzAlbum } from "./MusicBrainzAlbum.ts";
 export class MusicBrainzTrack extends MusicBrainz implements Fireable {
   mbAlbum: MusicBrainzAlbum;
   track: Track;
+  /* REMEMEMBER THAT THE MUSICBRAINZ LOOKUP PASSED TO THIS CLASS MUST BE A RECORDING */
   constructor(track: Track, mbAlbum: MusicBrainzAlbum, supabase: SupabaseClient) {
     super(supabase);
     this.mbAlbum = mbAlbum;
@@ -31,7 +32,6 @@ export class MusicBrainzTrack extends MusicBrainz implements Fireable {
   }
   
   override async fire(): Promise<void> {
-;
     await this.fetchMbidFromDatabase()
   }
 }

@@ -5,6 +5,7 @@ import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/constants.ts";
 import { Fireable } from "./Fireable.ts";
 import { SpotifyPlay } from "./Play.ts";
+import { MusicBrainzAlbum, SpotifyMusicBrainzAlbum } from "./MusicBrainz/MusicBrainzAlbum.ts";
 
 
 /**
@@ -93,6 +94,10 @@ export class Album implements Fireable {
     return this.albumType.toLowerCase();
   }
 
+  public getNumTracks() {
+    return this.numTracks;
+  }
+
   protected queryHelper() {
     this.query = this.query.eq("album_name", this.title)
     if (this.releaseYear) {
@@ -137,6 +142,11 @@ export class Album implements Fireable {
     return data[0].album_id;
   }
 
+  public getAlbumId() {
+    if (this.albumId) return this.albumId;
+    else throw new Error("album id has not been fetched from database")
+  }
+
   public getTracks() {
     return this.tracks;
   }
@@ -175,11 +185,18 @@ export class Album implements Fireable {
     };
   }
   public async fire(): Promise<void> {
+
     const albumId = await this.getAlbumDbID()
     await Promise.all(this.tracks.map(async (t) => {
       t.setAlbumId(albumId);
       await t.fire();
     }))
+    await this.mbFire();
+    
+  }
+  protected async mbFire() {
+    const mbAlbum = new MusicBrainzAlbum(this, this.supabase);
+    await mbAlbum.fire();
   }
   public getTitle(): string {
     return this.title;
@@ -226,14 +243,17 @@ export class SpotifyAlbum extends Album {
     const ret = new SpotifyAlbum(
       data.albumInfo.albumName, "album", data.albumInfo.albumArtists,
       data.albumInfo.albumImage, data.albumInfo.albumReleaseDay,
-      data.albumInfo.albumReleaseMonth, data.albumInfo.albumReleaseYear,
-      0, [], supabase, data.spotifyId
+      data.albumInfo.albumReleaseMonth, data.albumInfo.albumReleaseYear, data.albumInfo.numTracks, [], supabase, data.albumInfo.spotifyId
     );
     ret.addTrack(new SpotifyTrack(data.trackName, data.trackArtists,
       data.isrc, data.durationMs, data.spotifyId,
       new SpotifyPlay(data.timestamp, data.popularity,
         supabase, userId, data.isrc), supabase));
     return ret
+  }
+  override async mbFire() {
+    const mbAlbum = new SpotifyMusicBrainzAlbum(this, this.supabase);
+    await mbAlbum.fire();
   }
 
   public override createDbEntryObject() {
@@ -255,6 +275,7 @@ export type TestData = {
     albumReleaseMonth: number;
     albumReleaseYear: number;
     spotifyId: string;
+    numTracks: number;
   };
   image: string;
   isrc: string;
