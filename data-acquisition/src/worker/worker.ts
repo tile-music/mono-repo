@@ -1,6 +1,7 @@
 import { Worker, SupabaseClient, process } from '../../deps.ts';
 import { SpotifyUserPlaying } from '../music/UserPlaying.ts';
 import { connection } from './queue.ts';
+import { log } from "../util/log.ts";
 
 import "jsr:@std/dotenv/load";
 
@@ -46,23 +47,19 @@ const worker = new Worker(
 
     await spotifyFire(userId, refreshToken, SB_SCHEMA); 
 
-    console.log(
-      `Processing job ${job.id} at ${new Date()} for user ${userId}`
-    );
-
-    // Proceed with further actions using spotifyUserPlaying
+    log(5, `Processed job ${job.id} for user ${userId}`);
   },
   { connection }
 );
 
 process.on('unhandledRejection', (err) => {
-  console.error(err);
+  log(2, `Unhandled Rejection: ${err}`);
 })
 
 // Graceful shutdown handling
 process.on('SIGINT', async () => {
   await worker.close();
-  console.log('Worker and queue closed');
+  log(4, 'Worker and queue closed');
   process.exit(0);
 });
 
