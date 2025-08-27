@@ -2,18 +2,14 @@ import { Fireable } from "../Fireable.ts";
 import { MusicBrainz } from "./MusicBrainz.ts"
 import { Album } from "../Album.ts";
 import { SupabaseClient } from "../../../deps.ts";
-import { IReleaseGroupList, IRelationList, IReleaseList, IUrl, IRelease, IReleaseGroup, IReleaseGroupMatch, IReleaseMatch } from "npm:musicbrainz-api";
+import { IReleaseMatch } from "npm:musicbrainz-api";
 import { ONE_WEEK, SP_ALBUM_URL } from "../../util/constants.ts";
 
-import { type MBError } from "./MusicBrainz.ts";
+
 
 import { log } from "../../util/log.ts";
-import { release } from "node:os";
-import { json } from "node:stream/consumers";
-import { throws } from "node:assert";
-import { timeStamp } from "node:console";
 
-type IMusicBrainzResult = IReleaseList | IUrl;
+
 export class MusicBrainzAlbum extends MusicBrainz implements Fireable {
 
   album: Album;
@@ -36,16 +32,26 @@ export class MusicBrainzAlbum extends MusicBrainz implements Fireable {
 
   override async performMbLookup() {
     log(6, "fallback mb lookup executing")
+    const splitSongTitle = (title: string) => {
+      const match = title.match(/^([^({\[]+)([({\[].*)?$/);
+
+      return {
+        title: match?.[1]?.trim() ?? title,
+        extras: match?.[2]?.trim() ?? null,
+      };
+    };
+    const title = splitSongTitle(this.album.getTitle()).title;
     const makeArtistQueryString = (arr: string[]) => arr.map((t) => `artist:"${t}" AND`).join(" ");
-    const queryStringHelper = (artists: string[], title: string) => `query=${makeArtistQueryString(artists)}s release:"${title}" AND format:"digital media" AND primarytype:"${this.album.getAlbumType()}"`;
-    const query = queryStringHelper(this.album.getArtists(), this.album.getTitle());
+    const queryStringHelper = (artists: string[], title: string) =>
+      `query=${makeArtistQueryString(artists)}s release:"${title}" AND primarytype:"${this.album.getAlbumType()}"`;
+    const query = queryStringHelper(this.album.getArtists(), title);
     const releases = await this.musicbrainz.search("release", { query });
     if (releases === undefined) {
       return;
     }
     if ("releases" in releases) {
-      //const filteredResult = releases.releases.filter((v) => v["track-count"] === this.album.getNumTracks());
-      const filteredResult = releases.releases
+      const filteredResult = releases.releases.filter((v) => v["track-count"] === this.album.getNumTracks());
+      //const filteredResult = releases.releases
       this.result = filteredResult;
     }
   }
@@ -67,7 +73,7 @@ export class MusicBrainzAlbum extends MusicBrainz implements Fireable {
         if ("updated_at" in d
           && ((new Date().valueOf() - ONE_WEEK) > data.updated_at))
           log(0, "refresh album cache now!")
-
+        else log(6, `data, no need to refresh atm ${JSON.stringify(d)}`)
       })
     } else {
       await this.performMbLookup();
@@ -100,6 +106,7 @@ export class SpotifyMusicBrainzAlbum extends MusicBrainzAlbum {
   override async performMbLookup() {
     const resource = SP_ALBUM_URL + this.album.getAlbumIdentifier();
     log(6, resource);
+    console.log("hello!!!!!!!")
     const result = await this.musicbrainz.browse("url", { resource: resource }, ["release-rels"]);
     if ("relations" in result) log(6, `mbspotify id ${JSON.stringify(result.relations, null, 2)}`);
     console.log("lookup completed");
@@ -109,6 +116,13 @@ export class SpotifyMusicBrainzAlbum extends MusicBrainzAlbum {
         if ("release" in t) this.result.push(t.release as IReleaseMatch)
       })
     }
-    else if ("error" in result) await super.performMbLookup();
+    else {
+      log(6, "CANT FIND ALBUM FALLING BACK")
+      await super.performMbLookup();
+    }
+    /* else if ("error" in result) {
+      log(6, "CANT FIND ALBUM FALLING BACK")
+      await super.performMbLookup();
+    } */
   }
 }

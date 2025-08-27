@@ -5,6 +5,7 @@ export const testData0: TestData[] = [
     trackName: "Lotion",
     trackArtists: ["Deftones"],
     albumInfo: {
+      albumType: "album",
       albumName: "Around the Fur",
       albumArtists: ["Deftones"],
       albumImage: "https://i.scdn.co/image/ab67616d0000b2730b1129853982ea17845d4eb6",
@@ -25,6 +26,7 @@ export const testData0: TestData[] = [
     trackName: "Blow",
     trackArtists: ["Kesha"],
     albumInfo: {
+      albumType:"album",
       albumName: "Cannibal (Expanded Edition)",
       albumArtists: ["Kesha"],
       albumImage: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
@@ -45,6 +47,7 @@ export const testData0: TestData[] = [
     trackName: "360",
     trackArtists: ["charli xcx"],
     albumInfo: {
+      albumType:"album",
       albumName: "Brat and it’s the same but there’s three more songs so it’s not",
       albumArtists: ["charli xcx"],
       albumImage: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
@@ -62,29 +65,10 @@ export const testData0: TestData[] = [
     spotifyId: "3pYDZTJM2tVBUhIRifWVzI",
   },
   {
-    trackName: "360",
-    trackArtists: ["charli xcx"],
-    albumInfo: {
-      albumName: "Brat and it’s completely",
-      albumArtists: ["charli xcx"],
-      albumImage: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
-      albumReleaseDay: 19,
-      albumReleaseMonth: 11,
-      albumReleaseYear: 2010,
-      spotifyId: "0pGumY11G8OGH05ti6jh23",
-      numTracks: 35,
-    },
-    image: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
-    isrc: "USRC11000889",
-    durationMs: 219973,
-    popularity: 80,
-    timestamp: 1754322618,
-    spotifyId: "3pYDZTJM2tVBUhIRifWVzI",
-  },
-  {
     trackName: "Tous les mêmes",
-    trackArtists: ["charli xcx"],
+    trackArtists: ["Stromae"],
     albumInfo: {
+      albumType: "album",
       albumName: "Racine carrée",
       albumArtists: ["Stromae"],
       albumImage: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
@@ -100,5 +84,47 @@ export const testData0: TestData[] = [
     popularity: 80,
     timestamp: 1754322618,
     spotifyId: "1GC1MIaRMW3kfVK9VyD5Ii",
+  },
+  {
+    trackName: "Persuasive (with SZA)",
+    trackArtists: ["Doechii", "SZA"],
+    albumInfo: {
+      albumType: "single",
+      albumName: "Persuasive (with SZA)",
+      albumArtists: ["Doechii", "SZA"],
+      albumImage: "https://i.scdn.co/image/ab67616d0000b273f831100cdd02b4a705042dfc",
+      albumReleaseDay: 22,
+      albumReleaseMonth: 7,
+      albumReleaseYear: 2022,
+      spotifyId: "7LYy99hyg4eHQeYkKPuS6R",
+      numTracks: 2,
+    },
+    image: "https://i.scdn.co/image/ab67616d0000b273f831100cdd02b4a705042dfc",
+    isrc: "USUG12201429",
+    durationMs: 2756000,
+    popularity: 50,
+    timestamp: 52511521,
+    spotifyId: "67v2UHujFruxWrDmjPYxD6",
+  },
+  {
+    trackName: "Pretty",
+    trackArtists: ["Coco & Clair Clair"],
+    albumInfo: {
+      albumType: "single",
+      albumName: "Pretty",
+      albumArtists: ["Coco & Clair Clair"],
+      albumImage: "https://i.scdn.co/image/ab67616d0000b27347a44ff90da00b83f0cc398",
+      albumReleaseDay: 15,
+      albumReleaseMonth: 11,
+      albumReleaseYear: 2017,
+      spotifyId: "", // No Spotify ID provided
+      numTracks: 1,
+    },
+    image: "https://i.scdn.co/image/ab67616d0000b27347a44ff90da00b83f0cc398",
+    isrc: "USUG12201429", // No ISRC provided
+    durationMs: 180000, // Example duration
+    popularity: 60, // Example popularity
+    timestamp: 1754322650, // Example timestamp
+    spotifyId: "3SwkEbseZlPzgN5PIJqYV4", // No Spotify ID provided
   }
 ];

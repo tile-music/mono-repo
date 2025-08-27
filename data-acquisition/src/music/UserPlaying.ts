@@ -164,9 +164,9 @@ export class SpotifyUserPlaying extends UserPlaying {
 
   }
   public override async fire(): Promise<void> {
-    await this.init()
+    await this.init();
     this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
-    await super.fire()
+    await super.fire();
   }
   public static parseSpotifyDate(date: string, datePrecision: "year" | "month" | "day"): ReleaseDate {
     if (!date) {

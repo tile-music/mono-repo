@@ -241,7 +241,7 @@ export class SpotifyAlbum extends Album {
     userId: string,
   ): SpotifyAlbum {
     const ret = new SpotifyAlbum(
-      data.albumInfo.albumName, "album", data.albumInfo.albumArtists,
+      data.albumInfo.albumName, data.albumInfo.albumType, data.albumInfo.albumArtists,
       data.albumInfo.albumImage, data.albumInfo.albumReleaseDay,
       data.albumInfo.albumReleaseMonth, data.albumInfo.albumReleaseYear, data.albumInfo.numTracks, [], supabase, data.albumInfo.spotifyId
     );
@@ -268,6 +268,7 @@ export type TestData = {
   trackName: string;
   trackArtists: string[];
   albumInfo: {
+    albumType: string;
     albumName: string;
     albumArtists: string[];
     albumImage: string;

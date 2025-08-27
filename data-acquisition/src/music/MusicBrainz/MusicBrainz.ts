@@ -2,7 +2,7 @@ import { Fireable } from "../Fireable.ts";
 import { MusicBrainzApi, SupabaseClient } from "../../../deps.ts";
 import { IRelease, IReleaseList, IReleaseMatch } from "npm:musicbrainz-api";
 import { MusicBrainzLookupType  } from "../../util/constants.ts";
-
+import { Database } from "../../../../lib/schema.ts";
 
 export const mbConfig = {
   appName: 'tile.music',
@@ -18,7 +18,7 @@ export type MBError = {
 
 export abstract class MusicBrainz implements Fireable {
   protected musicbrainz: MusicBrainzApi;
-  protected supabase: SupabaseClient<any, "test" | "prod", any>;
+  protected supabase: SupabaseClient<Database, "test" | "prod", Database["prod" | "test"]>;
   hasFired: boolean = false;
   id: string | null = null; 
 
