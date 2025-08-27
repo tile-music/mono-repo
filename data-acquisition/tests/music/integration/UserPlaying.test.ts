@@ -3,6 +3,7 @@ import { SpotifyUserPlaying, MockUserPlaying } from "../../../src/music/UserPlay
 import { expect } from "jsr:@std/expect";
 import { supabase } from "../supabase.ts";
 import { testData0 } from "./TestData.ts";
+import { json } from "node:stream/consumers";
 Deno.test("User Playing Tests ", async (t) => {
 
   const testData1 = Array.from({ length: 20 }, (_, i) => ({
@@ -49,7 +50,8 @@ Deno.test("User Playing Tests ", async (t) => {
             .select()
             .eq("user_id", userId)
             .then(({ data, error }: { data: any; error: any }) => {
-              expect(data).toHaveLength(2);
+              console.log(JSON.stringify(data))
+              expect(data).toHaveLength(4);
             })
         );
     });

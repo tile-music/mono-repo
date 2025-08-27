@@ -34,18 +34,19 @@ export class MusicBrainzAlbum extends MusicBrainz implements Fireable {
     log(6, "fallback mb lookup executing")
     const splitSongTitle = (title: string) => {
       const match = title.match(/^([^({\[]+)([({\[].*)?$/);
-
       return {
         title: match?.[1]?.trim() ?? title,
         extras: match?.[2]?.trim() ?? null,
       };
     };
+
     const title = splitSongTitle(this.album.getTitle()).title;
     const makeArtistQueryString = (arr: string[]) => arr.map((t) => `artist:"${t}" AND`).join(" ");
     const queryStringHelper = (artists: string[], title: string) =>
-      `query=${makeArtistQueryString(artists)}s release:"${title}" AND primarytype:"${this.album.getAlbumType()}"`;
+      `query=${makeArtistQueryString(artists)} release:"${title}" AND primarytype:"${this.album.getAlbumType()}"`;
+    
     const query = queryStringHelper(this.album.getArtists(), title);
-    const releases = await this.musicbrainz.search("release", { query });
+    const releases = await this.musicbrainz.search("release", { query:query });
     if (releases === undefined) {
       return;
     }

@@ -123,10 +123,6 @@ export class Track implements Fireable {
     this.play.setTrackId(trackId)
     await this.play.fire()
   }
-  validate(): asserts this is Track {
-
-  }
-  
 }
 
 export class SpotifyTrack extends Track {
@@ -154,8 +150,5 @@ export class SpotifyTrack extends Track {
       ...super.createDbEntryObject(),
       spotify_id: this.spotifyId,
     };
-  }
-  override validate(): asserts this is SpotifyTrack {
-    super.validate()
   }
 }

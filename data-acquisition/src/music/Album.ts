@@ -100,7 +100,7 @@ export class Album implements Fireable {
 
   protected queryHelper() {
     this.query = this.query.eq("album_name", this.title)
-    if (this.releaseYear) {
+    if (this.releaseYear) { 
       this.query = this.query.eq("release_year", this.releaseYear ?? null)
     }
     if (this.releaseDay) {
@@ -234,6 +234,7 @@ export class SpotifyAlbum extends Album {
   protected override queryHelper() {
     return this.query.eq("spotify_id", this.spotifyId)
   }
+
 
   static fromTestData(
     data: TestData,

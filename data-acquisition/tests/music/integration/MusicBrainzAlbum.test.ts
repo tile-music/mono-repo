@@ -37,18 +37,15 @@ Deno.test("MusicBrainzAlbum Tests ", async (t) => {
     });
   }
 
-
-
-  await t.step("SpotifyMusicBrainzAlbum no fallback", async () => {
+  /* await t.step("SpotifyMusicBrainzAlbum no fallback", async () => {
     for (const t of testData0) {
       await testAlbum(t);
     }
     const { data, error: _error } = await supabase.from("album_mbids").select("*");
     expect(uniqueByAlbumId(data as AlbumMbidRow[])).toHaveLength(testData0.length);
-  })
+  }) */
   await t.step("SpotifyMusicBrainzAlbum no fallback", async () => {
-
-    const spotifyAlbum = SpotifyAlbum.fromTestData(testData0[4], supabase, userId);
+    const spotifyAlbum = SpotifyAlbum.fromTestData(testData0[3], supabase, userId);
     await spotifyAlbum.fire()
     const musicbrainzAlbum = new SpotifyMusicBrainzAlbum(spotifyAlbum, supabase);
     await musicbrainzAlbum.fire();

@@ -50,8 +50,6 @@ export class Play implements Fireable {
     this.trackId = trackId;
   }
 
-
-
   public createDbEntryObject() {
     if (!this.trackId) throw new Error(`track id not defined on Play:${JSON.stringify(this)}`)
     return {
@@ -63,15 +61,20 @@ export class Play implements Fireable {
   }
 
   public async fire(): Promise<void> {
-    const { data: _data, error } = await this.supabase.from("played_tracks").insert(this.createDbEntryObject());
-    if (error?.code === PK_VIOLATION) log(6, "Play already inserted")
-    else if (error) throw new Error(`play failed to insert Play: ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
+    const { data: _data, error } = await this.supabase.from("played_tracks")
+      .insert(this.createDbEntryObject());
+    if (error?.code === PK_VIOLATION)
+      log(6, "Play already inserted")
+    else if (error)
+      throw new Error(`play failed to insert Play: ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
   }
 }
 
 export class SpotifyPlay extends Play {
   private trackPopularity: number;
-  constructor(listenedAt: number, trackPopularity: number, supabase: SupabaseClient<any, "prod" | "test", any>, userId: string, isrc?: string) {
+  constructor(listenedAt: number, trackPopularity:
+    number, supabase: SupabaseClient<any, "prod" | "test", any>,
+    userId: string, isrc?: string) {
     super(listenedAt, supabase, userId, isrc)
     this.trackPopularity = trackPopularity;
   }
