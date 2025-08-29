@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   prod: {
     Tables: {
+      album_art: {
+        Row: {
+          "1200": string | null
+          "250": string | null
+          "500": string | null
+          large: string | null
+          mbid: string
+          small: string | null
+          source: string
+          type: string
+        }
+        Insert: {
+          "1200"?: string | null
+          "250"?: string | null
+          "500"?: string | null
+          large?: string | null
+          mbid: string
+          small?: string | null
+          source: string
+          type: string
+        }
+        Update: {
+          "1200"?: string | null
+          "250"?: string | null
+          "500"?: string | null
+          large?: string | null
+          mbid?: string
+          small?: string | null
+          source?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mbid_ref"
+            columns: ["mbid"]
+            isOneToOne: false
+            referencedRelation: "album_mbids"
+            referencedColumns: ["mbid"]
+          },
+        ]
+      }
       album_mbids: {
         Row: {
           album_id: number
@@ -280,6 +321,47 @@ export type Database = {
   }
   test: {
     Tables: {
+      album_art: {
+        Row: {
+          "1200": string | null
+          "250": string | null
+          "500": string | null
+          large: string | null
+          mbid: string
+          small: string | null
+          source: string
+          type: string
+        }
+        Insert: {
+          "1200"?: string | null
+          "250"?: string | null
+          "500"?: string | null
+          large?: string | null
+          mbid: string
+          small?: string | null
+          source: string
+          type: string
+        }
+        Update: {
+          "1200"?: string | null
+          "250"?: string | null
+          "500"?: string | null
+          large?: string | null
+          mbid?: string
+          small?: string | null
+          source?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mbid_ref"
+            columns: ["mbid"]
+            isOneToOne: false
+            referencedRelation: "album_mbids"
+            referencedColumns: ["mbid"]
+          },
+        ]
+      }
       album_mbids: {
         Row: {
           album_id: number

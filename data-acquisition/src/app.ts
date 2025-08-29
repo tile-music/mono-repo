@@ -1,6 +1,6 @@
 import { QueueEvents, fork, process } from "../deps.ts"
 
-import { makeDataAcqJobs, makeSpotifyAlbumPopularityJobs } from './worker/serviceAdapter.ts';
+import { makeDataAcqJobs } from './worker/serviceAdapter.ts';
 import { connection } from './worker/redis.ts';
 import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from './worker/makeQueue.ts';
 
@@ -31,8 +31,6 @@ process.on('SIGINT', async () => {
   console.log('Worker and queue closed');
   process.exit(0);
 });
-console.log("Starting Spotify Album Popularity Worker");
-fork(import.meta.dirname + "/worker/spotifyPopularityUpdateWorker.ts");
 console.log("Starting Webserver");
 fork(import.meta.dirname + "/worker/webserver.ts");
 
@@ -42,7 +40,5 @@ for (let i = 0; i < Math.floor(navigator.hardwareConcurrency / 2) ; i++ ){
 }
 async function main(){
   await makeDataAcqJobs();
-  await makeSpotifyAlbumPopularityJobs();
-
 }
 main();

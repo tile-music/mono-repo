@@ -28,28 +28,32 @@ Deno.test("MusicBrainzAlbum Tests ", async (t) => {
   // const albumMbids: Database["test"]["Tables"]["album_mbids"][] = [];
   function uniqueByAlbumId(data: AlbumMbidRow[]) {
     const seen = new Set<number>();
-    return data.filter(item => {
-      if (seen.has(item.album_id)) {
+    return data.filter(i => {
+      if (seen.has(i.album_id)) {
         return false;
       }
-      seen.add(item.album_id);
+      seen.add(i.album_id);
       return true;
     });
   }
 
-  /* await t.step("SpotifyMusicBrainzAlbum no fallback", async () => {
-    for (const t of testData0) {
+  await t.step("SpotifyMusicBrainzAlbum no fallback", async () => {
+     for (const t of testData0) {
       await testAlbum(t);
     }
-    const { data, error: _error } = await supabase.from("album_mbids").select("*");
+    const { data, error: _error } = await supabase.from("album_mbids").select("album_id, mbid, albums!inner(album_name) ");
+    console.log(data);
+    console.log(uniqueByAlbumId(data as AlbumMbidRow[]));
     expect(uniqueByAlbumId(data as AlbumMbidRow[])).toHaveLength(testData0.length);
-  }) */
-  await t.step("SpotifyMusicBrainzAlbum no fallback", async () => {
-    const spotifyAlbum = SpotifyAlbum.fromTestData(testData0[3], supabase, userId);
+  })
+  /* await t.step("SpotifyMusicBrainzAlbum no fallback", async () => {
+    testData0.forEach(t => console.log(t.albumInfo.albumName))
+    console.log(testData0[1])
+    const spotifyAlbum = SpotifyAlbum.fromTestData(testData0[1], supabase, userId);
     await spotifyAlbum.fire()
     const musicbrainzAlbum = new SpotifyMusicBrainzAlbum(spotifyAlbum, supabase);
     await musicbrainzAlbum.fire();
-  })
+  }) */
 
   await supabase.auth.admin.deleteUser(userId);
 })

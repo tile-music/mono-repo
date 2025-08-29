@@ -6,6 +6,7 @@ import { PK_VIOLATION } from "../util/constants.ts";
 import { Fireable } from "./Fireable.ts";
 import { SpotifyPlay } from "./Play.ts";
 import { MusicBrainzAlbum, SpotifyMusicBrainzAlbum } from "./MusicBrainz/MusicBrainzAlbum.ts";
+import { Database } from "../../../lib/schema.ts";
 
 
 /**
@@ -55,8 +56,10 @@ export class Album implements Fireable {
   private image: string;
   private albumId?: number;
   protected primaryIdent: string;
-  protected supabase: SupabaseClient<any, "prod" | "test", any>;
+  protected supabase: SupabaseClient<Database, "prod" | "test", Database["prod" | "test"]>;
   protected query;
+
+  protected musicBrainzAlbum;
 
 
   protected tracks: Track[] = [];
@@ -88,6 +91,7 @@ export class Album implements Fireable {
     //console.log(this);
     this.query = this.supabase.from("albums").select("album_id");
     this.albumId = albumId;
+    this.musicBrainzAlbum =  new MusicBrainzAlbum(this, this.supabase)
   }
 
   public getAlbumType() {
@@ -191,12 +195,8 @@ export class Album implements Fireable {
       t.setAlbumId(albumId);
       await t.fire();
     }))
-    await this.mbFire();
+    await this.musicBrainzAlbum.fire();
     
-  }
-  protected async mbFire() {
-    const mbAlbum = new MusicBrainzAlbum(this, this.supabase);
-    await mbAlbum.fire();
   }
   public getTitle(): string {
     return this.title;
@@ -229,6 +229,7 @@ export class SpotifyAlbum extends Album {
       numTracks, genre, supabase, albumId);
     this.spotifyId = spotifyId;
     this.primaryIdent = spotifyId;
+    this.musicBrainzAlbum = new SpotifyMusicBrainzAlbum(this, supabase);
   }
 
   protected override queryHelper() {
@@ -251,10 +252,6 @@ export class SpotifyAlbum extends Album {
       new SpotifyPlay(data.timestamp, data.popularity,
         supabase, userId, data.isrc), supabase));
     return ret
-  }
-  override async mbFire() {
-    const mbAlbum = new SpotifyMusicBrainzAlbum(this, this.supabase);
-    await mbAlbum.fire();
   }
 
   public override createDbEntryObject() {

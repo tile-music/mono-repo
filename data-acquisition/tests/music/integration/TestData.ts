@@ -26,7 +26,7 @@ export const testData0: TestData[] = [
     trackName: "Blow",
     trackArtists: ["Kesha"],
     albumInfo: {
-      albumType:"album",
+      albumType: "album",
       albumName: "Cannibal (Expanded Edition)",
       albumArtists: ["Kesha"],
       albumImage: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
@@ -47,14 +47,14 @@ export const testData0: TestData[] = [
     trackName: "360",
     trackArtists: ["charli xcx"],
     albumInfo: {
-      albumType:"album",
-      albumName: "Brat and it’s the same but there’s",
+      albumType: "album",
+      albumName: "Brat and it’s the same but there’s ",
       albumArtists: ["charli xcx"],
       albumImage: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
       albumReleaseDay: 19,
       albumReleaseMonth: 11,
       albumReleaseYear: 2010,
-      spotifyId: "0pGumY11G8OGH05ti6jh23",
+      spotifyId: "316O0Xetgx2NJLRgJBw4uq",
       numTracks: 18
     },
     image: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
@@ -62,7 +62,7 @@ export const testData0: TestData[] = [
     durationMs: 219973,
     popularity: 80,
     timestamp: 1754322618,
-    spotifyId: "3pYDZTJM2tVBUhIRifWVzI",
+    spotifyId: "5wmv111MUsMc9yLb4gKwa6",
   },
   {
     trackName: "Tous les mêmes",
@@ -117,7 +117,7 @@ export const testData0: TestData[] = [
       albumReleaseDay: 15,
       albumReleaseMonth: 11,
       albumReleaseYear: 2017,
-      spotifyId: "", // No Spotify ID provided
+      spotifyId: "3SwkEbseZlPzgN5PIJqYV4", // No Spotify ID provided
       numTracks: 1,
     },
     image: "https://i.scdn.co/image/ab67616d0000b27347a44ff90da00b83f0cc398",
@@ -125,6 +125,6 @@ export const testData0: TestData[] = [
     durationMs: 180000, // Example duration
     popularity: 60, // Example popularity
     timestamp: 1754322650, // Example timestamp
-    spotifyId: "3SwkEbseZlPzgN5PIJqYV4", // No Spotify ID provided
+    spotifyId: "3L545updZMVxAsaYV6K8Z9", // No Spotify ID provided
   }
 ];
