@@ -14,7 +14,7 @@
         color="var(--text)" 
         class="nav-logo"
     />
-    <button class="art-display-button">get started</button>
+    <a href="/register" class="art-display-button">get started</a>
 </nav>
 {@render children?.()}
 
@@ -39,6 +39,13 @@
         height: 40px;
         background: linear-gradient(to bottom, var(--background, #ffffff), transparent);
         pointer-events: none;
+    }
+
+    .art-display-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
     }
 
     :global(.nav-logo) {

@@ -1,13 +1,6 @@
 <script lang="ts">
     import type { SquareInfo } from "../(app)/display/arrangement.svelte";
-
-    import album0 from "./albums/album-0.jpg";
-    import album1 from "./albums/album-1.jpg";
-    import album2 from "./albums/album-2.jpg";
-    import album3 from "./albums/album-3.jpg";
-    import album4 from "./albums/album-4.jpg";
-
-    const albums = [album0, album1, album2, album3, album4];
+    import MusicNote from "$lib/components/MusicNote.svelte";
     
     type Example = {
         descriptor: string;
@@ -56,6 +49,16 @@
 
         return () => clearInterval(interval);
     });
+
+    function generateSquareStyle(square: SquareInfo) {
+        return `
+            left: ${square.x * 100}%;
+            top: ${square.y * 100}%;
+            width: ${square.size * 100}%;
+            height: ${square.size * 100}%;
+            transform: rotate(${square.rotation || 0}deg);
+        `;
+    }
 </script>
 
 <div id="content">
@@ -66,38 +69,33 @@
         </div>
         <div id="squares">
             {#each examples[selectedExample].squares as square, i}
-                <img
-                    class="square"
-                    style="left: {square.x * 100}%; top: {square.y * 100}%; width: {square.size * 100}%; height: {square.size * 100}%; transform: rotate({square.rotation || 0}deg);"
-                    src={albums[i % albums.length]}
-                    alt={`Example album cover ${i + 1}`}
-                />
+                <div style={generateSquareStyle(square)} class="square-container">
+                    <div class="square">
+                        <MusicNote
+                            size="50%" 
+                            color="var(--text)" 
+                            class="note"
+                        />
+                    </div>
+                </div>
             {/each}
         </div>
     </section>
     <section>
-        <h2>Mix and match streaming platforms and sources for a complete listening history.</h2>
-        <ul id="roulette">
-            <li>Spotify</li>
-            <li>Apple Music</li>
-            <li>Last.fm</li>
-            <li>Physical media</li>
-    </section>
-    <section>
-        <h2>Theme your cover art just how you like it.</h2>
-        <div id="themes"></div>
-    </section>
-    <section>
         <h1>Convinced?</h1>
+        <div id="calls-to-action">
+            <a href="/register" class="art-display-button">get started</a>
+            <a href="/login">Already have an account?</a>
+        </div>
     </section>
-
+    <div class="divider"></div>
+    <section id="footer">
+        <h2>tile.music</h2>
+        <p id="attributions">Created by <a href="https://www.linkedin.com/in/sam-randa">Sam Randa</a> and <a href="https://www.linkedin.com/in/ivy-bixler-65a57b297/">Ivy Bixler</a></p>
+    </section>
 </div>
 
 <style>
-    #content {
-        padding: 1rem;
-    }
-
     #tagline {
         display: flex;
         flex-direction: column;
@@ -125,25 +123,67 @@
         max-width: 600px;
     }
 
-    .square {
+    .square-container {
         position: absolute;
-        background-color: white;
         transition:
             left 1s cubic-bezier(.1,.4,.3,1),
             top 1s cubic-bezier(.1,.4,.3,1),
             width 1s cubic-bezier(.1,.4,.3,1),
             height 1s cubic-bezier(.1,.4,.3,1),
             transform 1s cubic-bezier(.1,.4,.3,1);
+    }
+
+    .square {
+        background-color: var(--midground);
         box-sizing: border-box;
-        border: 2px solid var(--background);
+        border-radius: 8px;
+        border: 2px solid var(--text);
+        box-shadow: inset 0 0 12px 0 var(--background);
+        position: absolute;
+        inset: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    #roulette {
-        list-style-type: none;
-        padding: 0;
+    .art-display-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
     }
 
-    #roulette li {
-        margin-bottom: 0.5rem;
+    #calls-to-action {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 4rem;
+    }
+
+    .divider {
+        height: 1px;
+        width: 100%;
+        background-color: var(--midground);
+    }
+
+    #footer {
+        padding: 3rem 6rem 6rem 6rem;
+        text-align: center;
+        flex-direction: row;
+
+    }
+
+    #footer h2 {
+        margin-right: auto;
+    }
+
+    #attributions, #attributions a {
+        font-size: 0.9rem;
+        color: var(--medium);
+    }
+
+    :global(.note) {
+        filter: drop-shadow(0 0 12px var(--background));
     }
 </style>
