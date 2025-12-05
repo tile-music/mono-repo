@@ -91,6 +91,7 @@ export type Database = {
           ean: string | null
           genre: string[] | null
           image: string | null
+          num_dics: number | null
           num_tracks: number | null
           release_day: number | null
           release_month: number | null
@@ -106,6 +107,7 @@ export type Database = {
           ean?: string | null
           genre?: string[] | null
           image?: string | null
+          num_dics?: number | null
           num_tracks?: number | null
           release_day?: number | null
           release_month?: number | null
@@ -121,6 +123,7 @@ export type Database = {
           ean?: string | null
           genre?: string[] | null
           image?: string | null
+          num_dics?: number | null
           num_tracks?: number | null
           release_day?: number | null
           release_month?: number | null
@@ -169,7 +172,7 @@ export type Database = {
             foreignKeyName: "mbid_ref"
             columns: ["selected_mbid"]
             isOneToOne: false
-            referencedRelation: "track_mbids"
+            referencedRelation: "album_mbids"
             referencedColumns: ["mbid"]
           },
           {
@@ -226,30 +229,36 @@ export type Database = {
       tracks: {
         Row: {
           album_id: number | null
+          disk_num: number | null
           isrc: string
           spotify_id: string | null
           track_artists: string[] | null
           track_duration_ms: number | null
           track_id: number
           track_name: string | null
+          track_num: number | null
         }
         Insert: {
           album_id?: number | null
+          disk_num?: number | null
           isrc: string
           spotify_id?: string | null
           track_artists?: string[] | null
           track_duration_ms?: number | null
           track_id?: number
           track_name?: string | null
+          track_num?: number | null
         }
         Update: {
           album_id?: number | null
+          disk_num?: number | null
           isrc?: string
           spotify_id?: string | null
           track_artists?: string[] | null
           track_duration_ms?: number | null
           track_id?: number
           track_name?: string | null
+          track_num?: number | null
         }
         Relationships: [
           {
@@ -403,6 +412,7 @@ export type Database = {
           ean: string | null
           genre: string[] | null
           image: string | null
+          num_dics: number | null
           num_tracks: number | null
           release_day: number | null
           release_month: number | null
@@ -418,6 +428,7 @@ export type Database = {
           ean?: string | null
           genre?: string[] | null
           image?: string | null
+          num_dics?: number | null
           num_tracks?: number | null
           release_day?: number | null
           release_month?: number | null
@@ -433,6 +444,7 @@ export type Database = {
           ean?: string | null
           genre?: string[] | null
           image?: string | null
+          num_dics?: number | null
           num_tracks?: number | null
           release_day?: number | null
           release_month?: number | null
@@ -531,30 +543,36 @@ export type Database = {
       tracks: {
         Row: {
           album_id: number | null
+          disk_num: number | null
           isrc: string
           spotify_id: string | null
           track_artists: string[] | null
           track_duration_ms: number | null
           track_id: number
           track_name: string | null
+          track_num: number | null
         }
         Insert: {
           album_id?: number | null
+          disk_num?: number | null
           isrc: string
           spotify_id?: string | null
           track_artists?: string[] | null
           track_duration_ms?: number | null
           track_id?: number
           track_name?: string | null
+          track_num?: number | null
         }
         Update: {
           album_id?: number | null
+          disk_num?: number | null
           isrc?: string
           spotify_id?: string | null
           track_artists?: string[] | null
           track_duration_ms?: number | null
           track_id?: number
           track_name?: string | null
+          track_num?: number | null
         }
         Relationships: [
           {

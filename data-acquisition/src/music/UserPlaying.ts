@@ -88,9 +88,9 @@ export abstract class UserPlaying implements Fireable {
     catch (e) { log(0, `Error putting in DB: ${e}`); }
   };
 
-  validate(): asserts this is UserPlaying {
+  /* validate(): asserts this is UserPlaying {
     
-  }
+  } */
 
 }
 
@@ -158,7 +158,8 @@ export class SpotifyUserPlaying extends UserPlaying {
           this.userId,
           item.track.externalID.isrc
         ),
-        this.supabase
+        this.supabase,
+        item.track.trackNumber
       ));
     }
 
@@ -240,7 +241,8 @@ export class MockUserPlaying extends UserPlaying {
         track.albumInfo.releaseYear,
         1,
         ["Test Genre"],
-        this.supabase
+        this.supabase,
+        1,
       ));
 
       if (!album) throw new Error("Album Does Not Exist");
@@ -250,7 +252,8 @@ export class MockUserPlaying extends UserPlaying {
         track.isrc,
         track.durationMs,
         new Play(track.timestamp, this.supabase, this.userId, track.isrc),
-        this.supabase
+        this.supabase,
+        2,
       ))
     }
   }

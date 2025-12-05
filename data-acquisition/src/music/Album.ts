@@ -48,6 +48,7 @@ export class Album implements Fireable {
   private title: string;
   private albumType: string;
   private numTracks: number;
+  /* private numDiscs: number; */
   private releaseDay: number | null;
   private releaseMonth: number | null;
   private releaseYear: number;
@@ -59,7 +60,6 @@ export class Album implements Fireable {
   protected supabase: SupabaseClient<Database, "prod" | "test", Database["prod" | "test"]>;
   protected query;
 
-  protected musicBrainzAlbum;
 
 
   protected tracks: Track[] = [];
@@ -75,6 +75,7 @@ export class Album implements Fireable {
     numTracks: number,
     genre: string[],
     supabase: SupabaseClient<any, "prod" | "test", any>,
+    /* numDiscs: number, */
     albumId?: number,
   ) {
     this.title = title;
@@ -91,7 +92,7 @@ export class Album implements Fireable {
     //console.log(this);
     this.query = this.supabase.from("albums").select("album_id");
     this.albumId = albumId;
-    this.musicBrainzAlbum =  new MusicBrainzAlbum(this, this.supabase)
+    /* this.numDiscs = numDiscs; */
   }
 
   public getAlbumType() {
@@ -104,7 +105,7 @@ export class Album implements Fireable {
 
   protected queryHelper() {
     this.query = this.query.eq("album_name", this.title)
-    if (this.releaseYear) { 
+    if (this.releaseYear) {
       this.query = this.query.eq("release_year", this.releaseYear ?? null)
     }
     if (this.releaseDay) {
@@ -138,7 +139,8 @@ export class Album implements Fireable {
       ({ data, error } = await this.supabase.from("albums").insert(this.createDbEntryObject()).select());
     }
     log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
-    if (error && error?.code !== PK_VIOLATION || data === null) throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
+    if (error && error?.code !== PK_VIOLATION || data === null)
+      throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
     if (data.length > 1) log(3, `multiple matching entries for base album class, 
       Album: ${JSON.stringify(this.createDbEntryObject())} 
       Data: ${JSON.stringify(data)}`)
@@ -164,8 +166,10 @@ export class Album implements Fireable {
     return this.primaryIdent;
   }
 
-  public async musicbrainzLookup(): Promise<void> {
-
+  protected async mbFire() {
+    log(6, "mbfire called")
+    const mb = new MusicBrainzAlbum(this, this.supabase)
+    await mb.fire()
   }
 
   /**
@@ -186,6 +190,7 @@ export class Album implements Fireable {
       artists: this.artists,
       genre: this.genre,
       image: this.image,
+      /* num_discs: this.numDiscs */
     };
   }
   public async fire(): Promise<void> {
@@ -195,8 +200,9 @@ export class Album implements Fireable {
       t.setAlbumId(albumId);
       await t.fire();
     }))
-    await this.musicBrainzAlbum.fire();
-    
+    log(6, `musicbrainz fire for album ${this.title}`)
+    await this.mbFire()
+
   }
   public getTitle(): string {
     return this.title;
@@ -222,6 +228,7 @@ export class SpotifyAlbum extends Album {
     genre: string[],
     supabase: SupabaseClient<any, "prod" | "test", any>,
     spotifyId: string,
+    /* numDiscs: number, */
     albumId?: number
   ) {
     super(albumName, albumType, artists,
@@ -229,7 +236,6 @@ export class SpotifyAlbum extends Album {
       numTracks, genre, supabase, albumId);
     this.spotifyId = spotifyId;
     this.primaryIdent = spotifyId;
-    this.musicBrainzAlbum = new SpotifyMusicBrainzAlbum(this, supabase);
   }
 
   protected override queryHelper() {
@@ -243,15 +249,23 @@ export class SpotifyAlbum extends Album {
     userId: string,
   ): SpotifyAlbum {
     const ret = new SpotifyAlbum(
-      data.albumInfo.albumName, data.albumInfo.albumType, data.albumInfo.albumArtists,
-      data.albumInfo.albumImage, data.albumInfo.albumReleaseDay,
-      data.albumInfo.albumReleaseMonth, data.albumInfo.albumReleaseYear, data.albumInfo.numTracks, [], supabase, data.albumInfo.spotifyId
+      data.albumInfo.albumName, data.albumInfo.albumType,
+      data.albumInfo.albumArtists, data.albumInfo.albumImage,
+      data.albumInfo.albumReleaseDay, data.albumInfo.albumReleaseMonth,
+      data.albumInfo.albumReleaseYear, data.albumInfo.numTracks, [], supabase,
+      data.albumInfo.spotifyId,
+      /* data.albumInfo.numDiscs, */
     );
     ret.addTrack(new SpotifyTrack(data.trackName, data.trackArtists,
       data.isrc, data.durationMs, data.spotifyId,
       new SpotifyPlay(data.timestamp, data.popularity,
-        supabase, userId, data.isrc), supabase));
+        supabase, userId, data.isrc), supabase, data.trackNum, data.discNum));
     return ret
+  }
+
+  protected override async mbFire() {
+    const mb = new SpotifyMusicBrainzAlbum(this, this.supabase);
+    await mb.fire();
   }
 
   public override createDbEntryObject() {
@@ -275,6 +289,7 @@ export type TestData = {
     albumReleaseYear: number;
     spotifyId: string;
     numTracks: number;
+    /*     numDiscs: number; */
   };
   image: string;
   isrc: string;
@@ -282,4 +297,5 @@ export type TestData = {
   popularity: number;
   timestamp: number;
   spotifyId: string;
+  trackNum: number;
 };

@@ -5,6 +5,9 @@ import { Fireable } from "./Fireable.ts"
 import { log } from "../util/log.ts"
 import { PK_VIOLATION } from "../util/constants.ts";
 
+import { type IReleaseMatch } from "../../deps.ts";
+import { release } from "node:os";
+import { Database } from "../../../lib/schema.ts";
 /**
  * @file TrackInfo.ts
  * @description This file contains the definition of the TrackInfo class, which represents information about a music track.
@@ -37,6 +40,8 @@ export class Track implements Fireable {
   readonly durationMs: number;
   protected play: Play;
   protected query;
+  protected trackNum: number;
+  /* protected discNum: number; */
   protected trackId?: number;
   protected albumId?: number;
   protected supabase;
@@ -48,6 +53,8 @@ export class Track implements Fireable {
     durationMs: number,
     play: Play,
     supabase: SupabaseClient<any, "prod" | "test", any>,
+    trackNum: number,
+    /* discNum: number, */
     albumId?: number
   ) {
     this.trackName = trackName;
@@ -56,9 +63,10 @@ export class Track implements Fireable {
     this.isrc = isrc;
     this.play = play;
     this.supabase = supabase;
-    this.query = supabase.from("tracks").select("track_id")
-    this.albumId = albumId
-    //console.log(this);
+    this.query = supabase.from("tracks").select("track_id");
+    this.albumId = albumId;
+    this.trackNum = trackNum;
+    /* this.discNum = discNum; */
   }
 
   public setAlbumId(albumId: number) {
@@ -89,7 +97,8 @@ export class Track implements Fireable {
     if (data?.length === 0 || !data) {
       ({ data, error } = await this.supabase.from("tracks").insert(this.createDbEntryObject()).select());
     }
-    if (error && error?.code !== PK_VIOLATION || data === null) throw new Error(`data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`);
+    if (error && error?.code !== PK_VIOLATION || data === null) 
+      throw new Error(`data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`);
     if (data?.length > 1) log(3, `multiple matching entries for base album class, 
       Track: ${JSON.stringify(this.createDbEntryObject())} 
       Data: ${JSON.stringify(data)}`);
@@ -109,19 +118,26 @@ export class Track implements Fireable {
       track_name: this.trackName,
       track_artists: this.trackArtists,
       track_duration_ms: this.durationMs,
+      track_num: this.trackNum,
+      /* disc_num: this.discNum, */
     };
   }
 
-  
+  public matchMusicBrainz(releases: IReleaseMatch[]) {
+    releases.forEach(release => {
+      log(6, `release in track ${JSON.stringify(release)}`)
+    })
+  }
 
   public createPlayDbEntryObject() {
     return { ...this.play.createDbEntryObject() };
   }
   public async fire(): Promise<void> {
     const trackId = await this.getTrackDbID();
-    if (!this.albumId) throw new Error("album id is undefined, this should never happen")
-    this.play.setTrackId(trackId)
-    await this.play.fire()
+    if (!this.albumId) throw new Error("album id is undefined, this should never happen");
+    this.play.setTrackId(trackId);
+    this.play.setAlbumId(this.albumId);
+    await this.play.fire();
   }
 }
 
@@ -134,10 +150,14 @@ export class SpotifyTrack extends Track {
     durationMs: number,
     spotifyId: string,
     play: Play,
-    supabase: SupabaseClient<any, "prod" | "test", any>,
+    supabase:
+      SupabaseClient<Database, "prod" | "test", Database["test" | "prod"]>,
+    trackNum: number,
+/*     discNum: number, */
     albumId?: number
   ) {
-    super(trackName, trackArtists, isrc, durationMs, play, supabase, albumId);
+    super(trackName, trackArtists, isrc, durationMs, 
+      play, supabase, trackNum,/*  discNum,  */albumId);
     this.spotifyId = spotifyId;
   }
   protected override queryHelper() {

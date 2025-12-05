@@ -14,6 +14,7 @@ export const testData0: TestData[] = [
       albumReleaseYear: 1997,
       spotifyId: "7o4UsmV37Sg5It2Eb7vHzu",
       numTracks: 10,
+      /* numDiscs: 1, */
     },
     image: "https://i.scdn.co/image/ab67616d0000b2730b1129853982ea17845d4eb6",
     isrc: "USMV29700148",
@@ -21,6 +22,8 @@ export const testData0: TestData[] = [
     popularity: 63,
     timestamp: 1754322638, // Set to actual playback timestamp if available
     spotifyId: "7iiULg8Kmbnh1vWbh9rnBA",
+    trackNum: 7,
+    /* discNum: 1, */
   },
   {
     trackName: "Blow",
@@ -35,6 +38,7 @@ export const testData0: TestData[] = [
       albumReleaseYear: 2010,
       spotifyId: "0pGumY11G8OGH05ti6jh23",
       numTracks: 12,
+      /* numDiscs: 1, */
     },
     image: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
     isrc: "USRC11000889",
@@ -42,6 +46,8 @@ export const testData0: TestData[] = [
     popularity: 80,
     timestamp: 1754322618,
     spotifyId: "3pYDZTJM2tVBUhIRifWVzI",
+    trackNum: 4,
+    /* diskNum: 1 */
   },
   {
     trackName: "360",
@@ -63,6 +69,8 @@ export const testData0: TestData[] = [
     popularity: 80,
     timestamp: 1754322618,
     spotifyId: "5wmv111MUsMc9yLb4gKwa6",
+    trackNum: 1,
+    /* diskNum: 2, */
   },
   {
     trackName: "Tous les mêmes",
@@ -76,14 +84,17 @@ export const testData0: TestData[] = [
       albumReleaseMonth: 1,
       albumReleaseYear: 2013,
       spotifyId: "6uyslsVGFsHKzdGUosFwBM",
-      numTracks: 13,
-    },
+      numTracks: 13
+      /* ,
+      numDiscs: 1,*/
+    }, 
     image: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
     isrc: "USRC11000889",
     durationMs: 210933,
     popularity: 80,
     timestamp: 1754322618,
     spotifyId: "1GC1MIaRMW3kfVK9VyD5Ii",
+    trackNum:2,
   },
   {
     trackName: "Persuasive (with SZA)",
@@ -105,6 +116,8 @@ export const testData0: TestData[] = [
     popularity: 50,
     timestamp: 52511521,
     spotifyId: "67v2UHujFruxWrDmjPYxD6",
+    trackNum: 1,
+
   },
   {
     trackName: "Pretty",
@@ -126,5 +139,7 @@ export const testData0: TestData[] = [
     popularity: 60, // Example popularity
     timestamp: 1754322650, // Example timestamp
     spotifyId: "3L545updZMVxAsaYV6K8Z9", // No Spotify ID provided
+    trackNum: 1,
+   /*  diskNum: 1, */
   }
 ];

@@ -7,9 +7,11 @@ import { log } from "../../util/log.ts";
 import { ICoversInfo, IImage } from "npm:musicbrainz-api";
 import { Database } from "../../../../lib/schema.ts";
 
-type CoverArtExtension = { mbid: string, 
+type CoverArtExtension = { 
+  mbid: string, 
   type: "front" | "back", 
-  source: string}
+  source: string
+};
 
 export class CoverArt implements Fireable {
   supabase: SupabaseClient<Database, "prod" | "test", Database["prod" | "test"]>;
@@ -25,7 +27,7 @@ export class CoverArt implements Fireable {
   async fire(): Promise<void> {
     for (const r of this.mbAlbum.getResults()) {
       const result: ICoversInfo = await this.coverArt.getReleaseCovers(r.id);
-      log(6, ` album art !!!${JSON.stringify(result, null, 2)}`)
+      log(6, ` album art !!!${JSON.stringify(result, null, 2)}`);
       result.images.forEach(e =>
         this.covers.push(
           {

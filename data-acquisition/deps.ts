@@ -6,7 +6,7 @@ export { Client, Player } from "npm:spotify-api.js";
 
 // Musicbrainz Client
 
-export { MusicBrainzApi, CoverArtArchiveApi } from 'npm:musicbrainz-api';
+export { MusicBrainzApi, CoverArtArchiveApi, type IReleaseMatch, } from 'npm:musicbrainz-api';
 
 const config = {
   appName: 'tile.music',

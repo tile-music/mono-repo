@@ -4,18 +4,21 @@ import { Fireable } from "../Fireable.ts";
 import { MusicBrainz } from "./MusicBrainz.ts";
 import { Track } from "../Track.ts";
 
-import { MusicBrainzAlbum } from "./MusicBrainzAlbum.ts";
 
 import { Database } from "../../../../lib/schema.ts";
+import { IReleaseList } from "npm:musicbrainz-api";
+
+type MBData = {
+  mbid: string;
+
+}
 export class MusicBrainzTrack extends MusicBrainz implements Fireable {
-  mbAlbum: MusicBrainzAlbum;
   track: Track;
   /* REMEMEMBER THAT THE MUSICBRAINZ LOOKUP PASSED TO THIS CLASS MUST BE A RECORDING */
-  constructor(track: Track, 
-    mbAlbum: MusicBrainzAlbum, 
+  constructor(track: Track,
+    release: IReleaseList, 
     supabase: SupabaseClient<Database, "prod" | "test", Database["prod" | "test"]>) {
     super(supabase);
-    this.mbAlbum = mbAlbum;
     this.track = track;
   };
 
@@ -34,6 +37,8 @@ export class MusicBrainzTrack extends MusicBrainz implements Fireable {
   override async performMbLookup(): Promise<undefined> {
 
   }
+  
+  
 
   override async fire(): Promise<void> {
     await this.fetchMbidFromDatabase()
