@@ -99,7 +99,8 @@ export class Play implements Fireable {
   public async fire(): Promise<void> {
     await this.pickMBID();
     const { data: _data, error } = await this.supabase
-    .from(this.selectedMbid ? "played_tracks" : "unmatched_played_tracks")
+    //.from(this.selectedMbid ? "played_tracks" : "unmatched_played_tracks")
+    .from( "played_tracks")
       .insert(this.createDbEntryObject());
     if (error?.code === PK_VIOLATION)
       log(6, "Play already inserted")
