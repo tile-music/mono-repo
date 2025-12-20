@@ -1,4 +1,5 @@
 // IMPORTS
+import { createContext } from "svelte";
 import { CloudCluster } from "./(arrangements)/CloudCluster";
 import { Grid } from "./(arrangements)/Grid";
 import { GridCluster } from "./(arrangements)/GridCluster";
@@ -11,26 +12,25 @@ export const arr_types = {
     grid_cluster: GridCluster,
 } as const;
 
-// STATE
-export let arrangement: {
+// CONTEXTS
+export let [getArrangement, setArrangement] =
+    createContext<ArrangementContext>();
+export let [getSongs, setSongs] = createContext<AggregatedSongs>();
+
+// TYPES AND FUNCTIONS
+
+/**
+ * Represents all of the variables and functions needed
+ * to generate and manipulate arrangements
+ */
+export type ArrangementContext = {
     type: keyof typeof arr_types;
     options: ArrangementOptions;
     state: Record<string, boolean | number | string>;
     squares: Squares;
-    change: (songs: AggregatedSongs) => void;
-    generate: (songs: AggregatedSongs) => void;
-} = $state({
-    type: "cloud_cluster",
-    options: { ...CloudCluster.options },
-    state: { ...CloudCluster.state },
-    squares: { list: [], width: 0, height: 0 },
-    change,
-    generate,
-});
-
-export let songs: AggregatedSongs = $state([]);
-
-// TYPES AND FUNCTIONS
+    change: (arrangement: ArrangementContext, songs: AggregatedSongs) => void;
+    generate: (arrangement: ArrangementContext, songs: AggregatedSongs) => void;
+};
 
 /**
  * Represents the properties of an individual square,
@@ -58,7 +58,7 @@ export type Squares = {
     list: SquareInfo[];
     width: number;
     height: number;
-}
+};
 
 /**
  * Represents the options an arrangement can have, which will
@@ -131,19 +131,34 @@ export type Arrangement<Options extends ArrangementOptions> = {
 };
 
 /**
+ * Initializes an arrangement context with default values
+ * @returns An arrangement context
+ */
+export function initArrangementContext(): ArrangementContext {
+    return {
+        type: "cloud_cluster",
+        options: { ...CloudCluster.options },
+        state: { ...CloudCluster.state },
+        squares: { list: [], width: 0, height: 0 },
+        change,
+        generate,
+    };
+}
+
+/**
  * Swaps the current arrangement, regenerating options
  */
-function change(songs: AggregatedSongs) {
+function change(arrangement: ArrangementContext, songs: AggregatedSongs) {
     arrangement.options = { ...arr_types[arrangement.type].options };
     arrangement.state = { ...arr_types[arrangement.type].state };
-    generate(songs);
+    generate(arrangement, songs);
 }
 
 /**
  * Generates a square arrangement using the current generator
  * and options.
  */
-function generate(songs: AggregatedSongs) {
+function generate(arrangement: ArrangementContext, songs: AggregatedSongs) {
     for (const key in arrangement.options) {
         const option = arrangement.options[key];
         if (option.type == "number") {

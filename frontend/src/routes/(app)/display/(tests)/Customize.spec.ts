@@ -3,8 +3,10 @@ import Customize from "../Customize.svelte";
 import userEvent from "@testing-library/user-event";
 
 import { filters } from "../filters.svelte";
-import { arrangement } from "../arrangement.svelte";
+import { getArrangement } from "../arrangement";
 import type { DisplayDataRequest } from "$shared/Request";
+
+const arrangement = getArrangement();
 
 const fieldLabels = [
     "music type",

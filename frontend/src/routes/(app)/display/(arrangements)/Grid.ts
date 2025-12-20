@@ -2,7 +2,7 @@ import type {
     Arrangement,
     ArrangementState,
     AggregatedSongs,
-} from "../arrangement.svelte";
+} from "../arrangement";
 
 const options = {
     width: { type: "number", label: "width", min: 1, max: 25 },
@@ -33,10 +33,10 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
         y += 1 / row_width;
         if (s.size_modifier == "linear") row_width++;
     }
-    
+
     // fix number of squares to the number of songs
     squares.length = Math.min(songs.length, squares.length);
-    return { list: squares, width: 1, height: y};
+    return { list: squares, width: 1, height: y };
 }
 
 export const Grid: Arrangement<typeof options> = {
