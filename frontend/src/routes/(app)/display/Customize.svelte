@@ -1,10 +1,14 @@
 <script lang="ts">
-    import { filters, filtersContext, generalOptions } from "./filters.svelte";
+    import { getDisplayState } from "./displayState";
     import type { DisplayDataRequest } from "$shared/Request";
     import type { AggregatedSongs } from "./arrangement";
     import { getArrangement, arr_types } from "./arrangement";
 
     const arrangement = getArrangement();
+    const displayState = getDisplayState();
+    const context = $derived(displayState.context);
+    const generalOptions = $derived(displayState.options);
+    const filters = $derived(displayState.filters);
 
     let {
         refresh,
@@ -31,20 +35,18 @@
         const endDate = new Date();
 
         // wipe dateStrings if needed
-        if (filtersContext.timeFrame != "custom") {
-            filtersContext.dateStrings.start = null;
-            filtersContext.dateStrings.end = null;
+        if (context.timeFrame != "custom") {
+            context.dateStrings.start = null;
+            context.dateStrings.end = null;
         }
 
         // make sure dateStrings sare null if no date is entered
-        if (filtersContext.dateStrings.start == "")
-            filtersContext.dateStrings.start = null;
-        if (filtersContext.dateStrings.end == "")
-            filtersContext.dateStrings.end = null;
+        if (context.dateStrings.start == "") context.dateStrings.start = null;
+        if (context.dateStrings.end == "") context.dateStrings.end = null;
 
         // translate chosen time frame to timestamps
-        if (filtersContext.timeFrame != "all-time") {
-            switch (filtersContext.timeFrame) {
+        if (context.timeFrame != "all-time") {
+            switch (context.timeFrame) {
                 case "this-week":
                     startDate.setDate(endDate.getDate() - 7);
                     break;
@@ -60,32 +62,22 @@
                 case "custom":
                     // if neither date is a valid date, panic
                     if (
-                        !(
-                            filtersContext.dateStrings.start?.split("-")
-                                .length == 3
-                        ) &&
-                        !(
-                            filtersContext.dateStrings.end?.split("-").length ==
-                            3
-                        )
+                        !(context.dateStrings.start?.split("-").length == 3) &&
+                        !(context.dateStrings.end?.split("-").length == 3)
                     )
                         return;
 
                     startDate.setTime(0);
 
                     // translate value from date picker to timestamps
-                    filtersContext.dateStrings.start
+                    context.dateStrings.start
                         ? startDate.setTime(
-                              new Date(
-                                  filtersContext.dateStrings.start,
-                              ).valueOf(),
+                              new Date(context.dateStrings.start).valueOf(),
                           )
                         : null;
-                    filtersContext.dateStrings.end
+                    context.dateStrings.end
                         ? endDate.setTime(
-                              new Date(
-                                  filtersContext.dateStrings.end,
-                              ).valueOf(),
+                              new Date(context.dateStrings.end).valueOf(),
                           )
                         : null;
                     break;
@@ -146,7 +138,7 @@
                 <label for="time-frame">time frame</label>
                 <select
                     id="time-frame"
-                    bind:value={filtersContext.timeFrame}
+                    bind:value={context.timeFrame}
                     onchange={updateFilters}
                 >
                     <option value="this-week">this week</option>
@@ -157,14 +149,14 @@
                     <option value="custom">custom</option>
                 </select>
             </div>
-            {#if filtersContext.timeFrame == "custom"}
+            {#if context.timeFrame == "custom"}
                 <div class="labeled-input" aria-label="custom-date">
                     <label for="start-date">start date</label>
                     <input
                         id="start-date"
                         type="date"
                         name="start-date"
-                        bind:value={filtersContext.dateStrings.start}
+                        bind:value={context.dateStrings.start}
                         onblur={updateFilters}
                     />
                 </div>
@@ -174,7 +166,7 @@
                         id="end-date"
                         type="date"
                         name="end-date"
-                        bind:value={filtersContext.dateStrings.end}
+                        bind:value={context.dateStrings.end}
                         onblur={updateFilters}
                     />
                 </div>

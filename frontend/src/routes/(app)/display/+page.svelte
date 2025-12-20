@@ -13,13 +13,16 @@
     // type & state imports
     import type { DisplayDataRequest } from "$shared/Request";
     import type { AlbumInfo } from "$shared/Song";
-    import { filters } from "./filters.svelte";
+    import { setDisplayState, initializeDisplayState } from "./displayState";
     import { setArrangement, initArrangementContext } from "./arrangement";
     import type { AggregatedSongs } from "./arrangement";
 
     // initialize arrangement context
     const arrangement = $state(initArrangementContext());
     setArrangement(arrangement);
+    const displayState = $state(initializeDisplayState());
+    setDisplayState(displayState);
+    const filters = $derived(displayState.filters);
 
     let songs: AggregatedSongs = $state([]);
 

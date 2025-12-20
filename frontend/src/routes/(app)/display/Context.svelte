@@ -4,8 +4,12 @@
         ContextDataRequest,
         ContextDataResponse,
     } from "$shared/Request";
-    import { filters, filtersContext, timeFrameToText } from "./filters.svelte";
+    import { getDisplayState, timeFrameToText } from "./displayState";
     import { deserialize } from "$app/forms";
+
+    const displayState = getDisplayState();
+    const context = $derived(displayState.context);
+    const filters = $derived(displayState.filters);
 
     interface Props {
         // props
@@ -134,10 +138,7 @@
     let altText = $derived(`Album art for ${album.title} by ${artistsText}`);
     let rankText = $derived(
         `#${rank} most ${filters.rank_determinant == "time" ? "listened" : "played"} ` +
-            timeFrameToText(
-                filtersContext.timeFrame,
-                filtersContext.dateStrings,
-            ),
+            timeFrameToText(context.timeFrame, context.dateStrings),
     );
     let quantityText = $derived.by(() => listenedText(quantity));
 

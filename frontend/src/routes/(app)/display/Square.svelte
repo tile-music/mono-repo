@@ -1,7 +1,10 @@
 <script lang="ts">
     import type { AlbumInfo, SongInfo } from "$shared/Song";
-    import { filters, generalOptions } from "./filters.svelte";
+    import { getDisplayState } from "./displayState";
     import type { SquareInfo, Squares } from "./arrangement";
+    const displayState = getDisplayState();
+    const options = $derived(displayState.options);
+    const filters = $derived(displayState.filters);
 
     interface Props {
         square: SquareInfo;
@@ -16,7 +19,7 @@
         $props();
 
     let cellInfoClass = $derived(
-        generalOptions.showCellInfo == "on-hover" ? "show-on-hover" : "",
+        options.showCellInfo == "on-hover" ? "show-on-hover" : "",
     );
 
     let squareWidth: number = $state(0);
@@ -48,7 +51,7 @@
     tabindex={rank}
 >
     <img src={song.albums[0].image} alt="" />
-    {#if generalOptions.showCellInfo != "never"}
+    {#if options.showCellInfo != "never"}
         <div
             id="cell-info"
             class={cellInfoClass}

@@ -2,11 +2,13 @@ import { render, screen } from "@testing-library/svelte";
 import Customize from "../Customize.svelte";
 import userEvent from "@testing-library/user-event";
 
-import { filters } from "../filters.svelte";
+import { getDisplayState } from "../displayState";
 import { getArrangement } from "../arrangement";
 import type { DisplayDataRequest } from "$shared/Request";
 
 const arrangement = getArrangement();
+const displayState = getDisplayState();
+const filters = $derived(displayState.filters);
 
 const fieldLabels = [
     "music type",

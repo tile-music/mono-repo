@@ -1,24 +1,18 @@
 // IMPORTS
+import { createContext } from "svelte";
 import type { DisplayDataRequest } from "$shared/Request";
 
 // STATE
-export const filters: DisplayDataRequest = $state({
-    aggregate: "album",
-    num_cells: null,
-    date: { start: null, end: null },
-    rank_determinant: "listens",
-});
-
-export const filtersContext: FiltersContext = $state({
-    timeFrame: "all-time",
-    dateStrings: { start: null, end: null },
-});
-
-export const generalOptions: GeneralOptions = $state({
-    showCellInfo: "on-hover",
-});
+export const [getDisplayState, setDisplayState] = createContext<DisplayState>();
 
 // TYPES AND FUNCTIONS
+
+export type DisplayState = {
+    filters: DisplayDataRequest;
+    context: FiltersContext;
+    options: GeneralOptions;
+};
+
 interface FiltersContext {
     timeFrame: TimeFrame;
     dateStrings: DateStrings;
@@ -42,6 +36,24 @@ export type DateStrings = {
 };
 
 export type ShowCellInfo = "never" | "on-hover" | "always";
+
+export function initializeDisplayState(): DisplayState {
+    return {
+        filters: {
+            aggregate: "album",
+            num_cells: null,
+            date: { start: null, end: null },
+            rank_determinant: "listens",
+        },
+        context: {
+            timeFrame: "all-time",
+            dateStrings: { start: null, end: null },
+        },
+        options: {
+            showCellInfo: "on-hover",
+        },
+    };
+}
 
 export function timeFrameToText(tf: TimeFrame, ds: DateStrings) {
     switch (tf) {
