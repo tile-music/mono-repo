@@ -1,13 +1,11 @@
 include:
-  #- ./mb-docker/docker-compose.yml
-
   - ./supabase/docker/docker-compose.yml
 services:
   lib:
     build:
       context: .
       dockerfile: Dockerfile.lib
-    image: mdv-lib 
+    image: mdv-lib
   frontend:
     build:
       context: ./frontend/
