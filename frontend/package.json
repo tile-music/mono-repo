@@ -1,42 +1,45 @@
 {
-  "name": "frontend",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.47.2",
-    "@sveltejs/adapter-auto": "^3.0.0",
-    "@sveltejs/kit": "^2.5.27",
-    "@sveltejs/vite-plugin-svelte": "^4.0.4",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/svelte": "^5.2.6",
-    "@types/node": "^22.9.0",
-    "jsdom": "^25.0.1",
-    "svelte": "^5.0.0",
-    "svelte-check": "^4.0.0",
-    "typescript": "^5.5.0",
-    "vite": "^5.4.4",
-    "vite-plugin-mkcert": "^1.17.6",
-    "vitest": "^2.1.8"
-  },
-  "type": "module",
-  "dependencies": {
-    "@supabase/ssr": "^0.5.1",
-    "@supabase/supabase-js": "^2.45.4",
-    "@sveltejs/adapter-node": "^5.2.8",
-    "@testing-library/user-event": "^14.6.1",
-    "@vitejs/plugin-basic-ssl": "^1.1.0",
-    "dotenv": "^16.4.5",
-    "html-to-image": "^1.11.11",
-    "import": "^0.0.6",
-    "svelte-intersection-observer": "^1.0.0"
-  }
+    "name": "frontend",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "dev": "vite dev",
+        "build": "vite build",
+        "preview": "vite preview",
+        "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+        "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+        "test": "vitest",
+        "coverage": "vitest run --coverage",
+        "format": "prettier --write ."
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.47.2",
+        "@sveltejs/adapter-auto": "^3.0.0",
+        "@sveltejs/kit": "^2.5.27",
+        "@sveltejs/vite-plugin-svelte": "^4.0.4",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/svelte": "^5.2.6",
+        "@types/node": "^22.9.0",
+        "jsdom": "^25.0.1",
+        "prettier": "^3.5.3",
+        "prettier-plugin-svelte": "^3.3.3",
+        "svelte": "^5.0.0",
+        "svelte-check": "^4.0.0",
+        "typescript": "^5.5.0",
+        "vite": "^5.4.4",
+        "vite-plugin-mkcert": "^1.17.6",
+        "vitest": "^2.1.8"
+    },
+    "type": "module",
+    "dependencies": {
+        "@supabase/ssr": "^0.5.1",
+        "@supabase/supabase-js": "^2.45.4",
+        "@sveltejs/adapter-node": "^5.2.8",
+        "@testing-library/user-event": "^14.6.1",
+        "@vitejs/plugin-basic-ssl": "^1.1.0",
+        "dotenv": "^16.4.5",
+        "html-to-image": "^1.11.11",
+        "import": "^0.0.6",
+        "svelte-intersection-observer": "^1.0.0"
+    }
 }

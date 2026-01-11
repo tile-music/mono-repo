@@ -2,7 +2,7 @@
     import type {
         AlbumInfo,
         ListeningDataSongInfo,
-    } from "../../../../../lib/Song";
+    } from "$shared/Song";
     import arrow from "$lib/assets/icons/down-arrow-56.svg";
     import Song from "./Song.svelte";
     import { filterColumnList } from "./filters.svelte";

@@ -1,0 +1,187 @@
+// IMPORTS
+import { createContext } from "svelte";
+import { CloudCluster } from "./(arrangements)/CloudCluster";
+import { Grid } from "./(arrangements)/Grid";
+import { GridCluster } from "./(arrangements)/GridCluster";
+import type { SongInfo } from "$shared/Song";
+
+// ARRANGEMENTS
+export const arr_types = {
+    grid: Grid,
+    cloud_cluster: CloudCluster,
+    grid_cluster: GridCluster,
+} as const;
+
+// CONTEXTS
+export let [getArrangement, setArrangement] =
+    createContext<ArrangementContext>();
+export let [getSongs, setSongs] = createContext<AggregatedSongs>();
+
+// TYPES AND FUNCTIONS
+
+/**
+ * Represents all of the variables and functions needed
+ * to generate and manipulate arrangements
+ */
+export type ArrangementContext = {
+    type: keyof typeof arr_types;
+    options: ArrangementOptions;
+    state: Record<string, boolean | number | string>;
+    squares: Squares;
+    change: (arrangement: ArrangementContext, songs: AggregatedSongs) => void;
+    generate: (arrangement: ArrangementContext, songs: AggregatedSongs) => void;
+};
+
+/**
+ * Represents the properties of an individual square,
+ * including the x and y position of its top left corner,
+ * scale, and an optional rotation.
+ *
+ * All values are from 0 to 1 relative to the top left
+ * corner of a square container, except rotation, which
+ * is represented in degrees
+ */
+export type SquareInfo = {
+    x: number; // top left corner x position, 0 to 1
+    y: number; // top left corner y position, 0 to 1
+    size: number; // square size, 0 to 1
+    rotation?: number; // optional square rotation, in degrees
+};
+
+/**
+ * Represents the properties of a square arrangement,
+ * including a list of square info objects, and the
+ * width and height of the square container. May
+ * contain other contextual information in the future.
+ */
+export type Squares = {
+    list: SquareInfo[];
+    width: number;
+    height: number;
+};
+
+/**
+ * Represents the options an arrangement can have, which will
+ * be rendered as input elements in the frontend. Includes
+ * number, checkbox, and select inputs.
+ */
+type ArrangementOptions = Record<
+    string,
+    | {
+          type: "number";
+          label: string;
+          min?: number;
+          max?: number;
+          step?: number;
+      }
+    | {
+          type: "checkbox";
+          label: string;
+      }
+    | {
+          type: "select";
+          label: string;
+          values: readonly string[];
+      }
+>;
+
+/**
+ * Represents the state of an arrangement's options. Maps
+ * each option into a key value pair, with number inputs
+ * having number types, checkbox inputs having boolean types,
+ * and select inputs having string union types. Instantiate
+ * using the intended default values for each option.
+ */
+export type ArrangementState<T extends ArrangementOptions> = {
+    [P in keyof T]: [T[P]] extends [{ type: "number" }]
+        ? number
+        : [T[P]] extends [{ type: "checkbox" }]
+          ? boolean
+          : [T[P]] extends [{ type: "select" }]
+            ? T[P]["values"][number]
+            : never;
+};
+
+/**
+ * Represents the songs being passed to the generator function.
+ * Includes a list of song info objects, as well as the total
+ * number of times each song appeared.
+ */
+export type AggregatedSongs = { song: SongInfo; quantity: number }[];
+
+/**
+ * A generator function capable of taking in an
+ * arrangement's options, in addition to a max number of squares,
+ * and outputting a list of square positions, sizes, and optional
+ * rotations.
+ */
+type Generate<Options extends ArrangementOptions> = (
+    songs: AggregatedSongs,
+    s: ArrangementState<Options>,
+) => Squares;
+
+/**
+ * A full arrangement, complete with options and their default values
+ * as well as a generator function.
+ */
+export type Arrangement<Options extends ArrangementOptions> = {
+    options: Options;
+    state: ArrangementState<Options>;
+    generate: Generate<Options>;
+};
+
+/**
+ * Initializes an arrangement context with default values
+ * @returns An arrangement context
+ */
+export function initArrangementContext(): ArrangementContext {
+    return {
+        type: "cloud_cluster",
+        options: { ...CloudCluster.options },
+        state: { ...CloudCluster.state },
+        squares: { list: [], width: 0, height: 0 },
+        change,
+        generate,
+    };
+}
+
+/**
+ * Swaps the current arrangement, regenerating options
+ */
+function change(arrangement: ArrangementContext, songs: AggregatedSongs) {
+    arrangement.options = { ...arr_types[arrangement.type].options };
+    arrangement.state = { ...arr_types[arrangement.type].state };
+    generate(arrangement, songs);
+}
+
+/**
+ * Generates a square arrangement using the current generator
+ * and options.
+ */
+function generate(arrangement: ArrangementContext, songs: AggregatedSongs) {
+    for (const key in arrangement.options) {
+        const option = arrangement.options[key];
+        if (option.type == "number") {
+            if (typeof arrangement.state[key] == "number") {
+                if (option.max)
+                    arrangement.state[key] = Math.min(
+                        arrangement.state[key],
+                        option.max,
+                    );
+                if (option.min)
+                    arrangement.state[key] = Math.max(
+                        arrangement.state[key],
+                        option.min,
+                    );
+            } else {
+                const default_state = arr_types[arrangement.type].state;
+                arrangement.state[key] =
+                    default_state[key as keyof typeof default_state];
+            }
+        }
+    }
+
+    // super type unsafe, but i simply cannot figure out another way
+    const type = arr_types[arrangement.type] as unknown as Arrangement<{}>;
+    arrangement.squares = type.generate(songs, arrangement.state);
+}

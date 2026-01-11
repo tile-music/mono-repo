@@ -1,152 +1,174 @@
-import type { PageServerLoad } from './$types'
-import type { Actions } from './$types'
-import { fail } from '@sveltejs/kit';
-import { assembleBlankProfile } from './profile';
+import type { PageServerLoad } from "./$types";
+import type { Actions } from "./$types";
+import { fail, error } from "@sveltejs/kit";
+import { assembleBlankProfile } from "./profile";
+import { log } from "$lib/log"
+import type { Profile } from "$shared/Profile";
 
-export const load: PageServerLoad = async ({cookies, locals: { supabase, session } }) => {
-    if (session == null) throw Error("User does not have session.");
-
-    // fetch profile data
-    let { data: user, error } = await supabase
-    .from('profiles')
-    .select(`updated_at, username, full_name, website, avatar_url, theme`)
-    .eq('id', session.user.id)
-    .single()
-    if (error && error.code == 'PGRST116') {
-        user = {
-            updated_at: null,
-            username: null,
-            full_name: null,
-            website: null,
-            avatar_url: null,
-            theme: "dark"
-        }
-    } else if (error) throw error;
-
-    const email = session.user.email ?? null;
-
-    // set theme
-    if (user && user.theme) {
-        cookies.set("theme", user.theme, {
-            path: '/',
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
-        });
+export const load: PageServerLoad = async ({
+    locals: { supabase, session, profile },
+}) => {
+    if (!session) {
+        log(3, "User does not have session in protected route.");
+        throw error(401, "Not authenticated");
     }
 
-    // return the retrieved user, or the blank user if no profile was found
-    return { user, email }; 
+    const email = session.user.email;
+    if (!email) {
+        log(3, "User does not have email in session.");
+        throw error(401, "Not authenticated");
+    }
+
+    if (!profile) {
+        log(3, "User does not have profile in protected route.");
+
+        // Insert blank profile
+        const blankProfile = assembleBlankProfile(session.user.id, email);
+        const { data: newProfile, error: insertError } = await supabase
+            .from("profiles")
+            .insert(blankProfile)
+            .select();
+
+        if (insertError || !newProfile || !newProfile[0]) {
+            log(2, "Error inserting blank profile: " +
+                (insertError ? insertError.message : "profile was created but not returned"));
+            throw error(500, "Server error while creating profile");
+        }
+
+        profile = newProfile[0];
+    }
+
+    return { email, profile };
 };
 
 export const actions: Actions = {
-    update_profile: async ({ request, locals: { supabase, session } }) => {
-        if (session == null) return fail(401, { not_authenticated: true});
+    update_profile: async ({ request, locals: { supabase, session, profile } }) => {
+        if (session == null || profile == null) {
+            log(3, "User does not have session or profile in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
 
         // assemble update object
-        const formData = await request.formData()
+        const formData = await request.formData();
         const update = {
             id: session?.user.id,
             updated_at: new Date(),
-            username: formData.get('username') as string,
-            full_name: formData.get('full name') as string,
-            website: formData.get('website') as string,
+            username: formData.get("username") as string,
+            full_name: formData.get("full name") as string,
+            website: formData.get("website") as string,
             avatar_url: null,
-        }
-
-        // get profile data
-        let { data: user, error: get_error } = await supabase
-        .from('profiles')
-        .select(`updated_at, username, full_name, website, avatar_url`)
-        .eq('id', session.user.id)
-        .single()
-        if (get_error || !user) throw get_error;
+        };
 
         // make sure update is necessary
-        if (user.username == update.username
-            && user.full_name == update.full_name
-            && user.website == update.website
-            && user.avatar_url == update.avatar_url) {
+        if (
+            profile.username == update.username &&
+            profile.full_name == update.full_name &&
+            profile.website == update.website &&
+            profile.avatar_url == update.avatar_url
+        ) {
             // update is unnecessary
-            return fail(400, { update_unnecessary: true});
-        }
-  
-        // attempt to perform update
-        const { error: update_error } = await supabase.from('profiles').upsert(update)
-        if (update_error) {
-            console.log(update_error);
-            if (update_error.code === '23514') return fail(400, { username_too_short: true });
-            else return fail(500, { server_error: true });
+            log(5, `Not updating ${session.user.id}: update is unnecessary`);
+            return fail(400, { update_unnecessary: true });
         }
 
-        return { success: true }
+        // attempt to perform update
+        const { error: update_error } = await supabase
+            .from("profiles")
+            .upsert(update);
+        if (update_error) {
+            if (update_error.code === "23514") {
+                log(5, `Not updating ${session.user.id}: username too short`);
+                return fail(400, { username_too_short: true });
+            } else {
+                log(2, "Error updating user: " + update_error);
+                return fail(500, { server_error: true });
+            }
+        }
+
+        return { success: true };
     },
 
-    update_theme: async ({ cookies, request, locals: { supabase, session } }) => {
-        if (session == null) return fail(401, { not_authenticated: true});
+    update_theme: async ({
+        request,
+        locals: { supabase, session, profile },
+    }) => {
+        if (session == null) {
+            log(3, "User does not have session in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
 
         // assemble update object
-        const theme = await request.json()
+        const theme = await request.json();
         const update = {
             id: session?.user.id,
             updated_at: new Date(),
-            theme: theme
-        }
-
-        // get profile data
-        let { data: user, error: get_error } = await supabase
-        .from('profiles')
-        .select(`theme`)
-        .eq('id', session.user.id)
-        .single()
-        if (get_error || !user) throw get_error;
+            theme: theme,
+        };
 
         // make sure update is necessary
-        if (user.theme == update.theme) {
+        if (profile && profile.theme == update.theme) {
             // update is unnecessary
-            return fail(400, { update_unnecessary: true});
+            log(5, `Not updating ${session.user.id} theme: update is unnecessary`);
+            return fail(400, { update_unnecessary: true });
         }
-  
+
         // attempt to perform update
-        const { error: update_error } = await supabase.from('profiles').upsert(update)
+        const { error: update_error } = await supabase
+            .from("profiles")
+            .upsert(update);
         if (update_error) {
-            console.log(update_error);
-            if (update_error.code === '23514') return fail(400, { username_too_short: true });
-            else return fail(500, { server_error: true });
+            log(2, "Error updating profile theme: " + update_error);
+            return fail(500, { server_error: true });
         }
 
-        cookies.set("theme", theme, {
-            path: '/',
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
-        });
-
-        return { success: true }
+        return { success: true };
     },
 
-    reset_profile: async ({ request, locals: { supabase, session } }) => {
-        if (session == null) return fail(401, { not_authenticated: true});
+    reset_profile: async ({ locals: { supabase, session } }) => {
+        if (session == null) {
+            log(3, "User does not have session in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
 
-        const blankProfile = assembleBlankProfile(session.user.id, session.user.email);
-        const { error } = await supabase.from('profiles').upsert(blankProfile);
+        // replace profile with blank profile, retaining user id and email
+        const blankProfile = assembleBlankProfile(
+            session.user.id,
+            session.user.email,
+        );
+        const { error } = await supabase.from("profiles").upsert(blankProfile);
         if (error) {
-            console.error(error); // log unexpected error
+            log(2, "Error resetting profile: " + error);
             return fail(500, { server_error: true });
         }
 
         return { success: true, user: JSON.stringify(blankProfile) };
     },
 
-    reset_listening_data: async ({ request, locals: { supabase, session } }) => {
-        if (session == null) return fail(401, { not_authenticated: true});
+    reset_listening_data: async ({
+        locals: { supabase, session },
+    }) => {
+        if (session == null) {
+            log(3, "User does not have session in protected route.");
+            return fail(401, { not_authenticated: true });
+        }
 
         // attempt to reset listening data
         const headers = {
             headers: {
-                Authorization: `Bearer ${session.access_token}`
-            }
+                Authorization: `Bearer ${session.access_token}`,
+            },
         };
-        const { data } = await supabase.functions.invoke("reset-listening-data", headers);
+        const { data, error } = await supabase.functions.invoke(
+            "reset-listening-data",
+            headers,
+        );
+        if (error) {
+            log(2, "Error resetting listening data: " + error);
+            return fail(500, { server_error: true });
+        }
 
         // handle errors
         const response = JSON.parse(data);
         return response;
     },
-}
+};
