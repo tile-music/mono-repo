@@ -1,9 +1,7 @@
 // src/routes/+page.server.ts
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "@sveltejs/kit";
-import pkg from "@supabase/supabase-js";
-
-const { SupabaseClient } = pkg;
+import { SupabaseClient } from "@supabase/supabase-js";
 
 import {
     PUBLIC_SUPABASE_URL,
@@ -33,7 +31,6 @@ const headers = { "Content-Type": "application/json" };
  */
 export const POST: RequestHandler = async ({
     locals: { supabase, session },
-    request,
 }) => {
     if (session !== null) {
         // create a supabase client
