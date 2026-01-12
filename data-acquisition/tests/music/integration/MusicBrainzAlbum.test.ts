@@ -31,12 +31,7 @@ Deno.test("MusicBrainzAlbum Tests ", async (t) => {
         );
         await musicbrainzAlbum.fire();
     };
-    type AlbumMbidRow = Database[
-        | "test"
-        | "prod"]["Tables"]["album_mbids"]["Row"];
-    // Example: specify the type for album_mbids, assuming it's an array of rows
-    // Remove or update this line if not needed
-    // const albumMbids: Database["test"]["Tables"]["album_mbids"][] = [];
+    type AlbumMbidRow = Database["prod"]["Tables"]["album_mbids"]["Row"];
     function uniqueByAlbumId(data: AlbumMbidRow[]) {
         const seen = new Set<number>();
         return data.filter((i) => {
