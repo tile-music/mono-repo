@@ -5,6 +5,7 @@ import {
     FunctionsRelayError,
     FunctionsFetchError,
 } from "@supabase/supabase-js";
+import { getContextData } from "$lib/server/functions";
 
 export const actions: Actions = {
     refresh: async ({ request, locals: { supabase, session } }) => {
@@ -34,31 +35,13 @@ export const actions: Actions = {
         // parse and return list of songs
         return { songs: JSON.parse(data) };
     },
-    context: async ({ request, locals: { supabase, session } }) => {
-        if (session == null) return error(401, "Not authenticated");
+    context: async ({ request, locals: { supabase, user } }) => {
+        if (user == null) return error(401, "Not authenticated");
 
         const body = await request.json();
 
-        // send request
-        const { data, error: functionError } = await supabase.functions.invoke(
-            "get-context-data",
-            {
-                headers: { Authorization: `Bearer ${session.access_token}` },
-                body,
-            },
-        );
-
-        // handle edge function errors
-        if (functionError) {
-            if (functionError instanceof FunctionsHttpError)
-                return error(400, await functionError.context.text());
-            else if (functionError instanceof FunctionsRelayError)
-                return error(500, "Relay error");
-            else if (functionError instanceof FunctionsFetchError)
-                return error(500, "Fetch error");
-        }
-
-        // parse and return list of songs
-        return JSON.parse(data);
+        const result = await getContextData(user, body);
+        if ("error" in result) return error(result.status, result.error);
+        return result.body;
     },
 };

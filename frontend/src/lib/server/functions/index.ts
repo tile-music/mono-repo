@@ -1,3 +1,4 @@
 import checkSpotifyLogin from "./checkSpotifyLogin";
+import getContextData from "./getContextData";
 
-export { checkSpotifyLogin };
+export { checkSpotifyLogin, getContextData };
