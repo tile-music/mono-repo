@@ -3,6 +3,7 @@ import type { Actions } from "./$types";
 import { fail, error } from "@sveltejs/kit";
 import { assembleBlankProfile } from "./profile";
 import { log } from "$lib/log";
+import { resetListeningData } from "$lib/server/functions";
 
 export const load: PageServerLoad = async ({
     locals: { supabase, user, profile },
@@ -148,29 +149,21 @@ export const actions: Actions = {
         return { success: true, user: JSON.stringify(blankProfile) };
     },
 
-    reset_listening_data: async ({ locals: { supabase, session } }) => {
-        if (session == null) {
+    reset_listening_data: async ({ locals: { user } }) => {
+        if (user == null) {
             log(3, "User is not authenticated in protected route.");
-            return fail(401, { not_authenticated: true });
+            return fail(401, "not_authenticated");
         }
 
         // attempt to reset listening data
-        const headers = {
-            headers: {
-                Authorization: `Bearer ${session.access_token}`,
-            },
-        };
-        const { data, error } = await supabase.functions.invoke(
-            "reset-listening-data",
-            headers,
-        );
-        if (error) {
-            log(2, "Error resetting listening data: " + error);
-            return fail(500, { server_error: true });
+        const result = await resetListeningData(user);
+
+        if ("error" in result) {
+            log(2, "Error resetting listening data: " + result.error);
+            return fail(result.status, result.error);
         }
 
         // handle errors
-        const response = JSON.parse(data);
-        return response;
+        return result.body;
     },
 };
