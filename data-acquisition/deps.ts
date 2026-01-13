@@ -11,7 +11,7 @@ export { MusicBrainzApi, CoverArtArchiveApi, type IReleaseMatch, } from 'npm:mus
 const config = {
   appName: 'tile.music',
   appVersion: "0.0.0",
-  appContactInfo: "ivybixler@gmail.com", 
+  appContactInfo: "ivybixler@gmail.com",
 };
 
 
@@ -26,3 +26,4 @@ export { default as process } from "node:process";
 // Express for web server
 export { default as express } from "npm:express";
 
+export * as munite from "jsr:@tile-music/munite";

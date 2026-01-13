@@ -11,10 +11,10 @@ import { Database } from "../../../lib/schema.ts";
 
 /**
  * Represents information about a music album.
- * 
+ *
  * @class AlbumInfo
  * @classdesc This class holds various details about a music album including its name, type, release date, number of tracks, artists, genre, and identifiers.
- * 
+ *
  * @property {string} albumName - The name of the album.
  * @property {string} albumType - The type of the album (e.g., single, album, EP).
  * @property {number} numTracks - The number of tracks in the album.
@@ -25,7 +25,7 @@ import { Database } from "../../../lib/schema.ts";
  * @property {string} ean - The European Article Number of the album.
  * @property {string} albumIsrc - The International Standard Recording Code of the album.
  * @property {string} image - The URL or path to the album's cover image.
- * 
+ *
  * @constructor
  * @param {string} albumName - The name of the album.
  * @param {string} albumType - The type of the album.
@@ -39,7 +39,7 @@ import { Database } from "../../../lib/schema.ts";
  * @param {string} albumIsrc - The International Standard Recording Code of the album.
  * @param {number} albumId - The id of said album in the database
  * @param {string} primaryIdent - the primary identifier for album (differs depending on service)
- * 
+ *
  * @method createDbEntryObject
  * @description Creates an object that can be used to create a new entry in the database.
  * @returns {Object} An object containing the album information formatted for database entry.
@@ -55,7 +55,7 @@ export class Album implements Fireable {
   private artists: string[];
   private genre: string[];
   private image: string;
-  private albumId?: number;
+  private albumId?: string;
   protected primaryIdent: string;
   protected supabase: SupabaseClient<Database, "prod" | "test", Database["prod" | "test"]>;
   protected query;
@@ -76,7 +76,7 @@ export class Album implements Fireable {
     genre: string[],
     supabase: SupabaseClient<any, "prod" | "test", any>,
     /* numDiscs: number, */
-    albumId?: number,
+    albumId?: string,
   ) {
     this.title = title;
     this.albumType = albumType;
@@ -119,12 +119,12 @@ export class Album implements Fireable {
 
   /**
    * Retrieves the database ID for the current album instance.
-   * 
+   *
    * This method queries the database for an album entry matching the current
    * album's name and release date (year, month, day). If no matching entry is found,
    * it attempts to insert a new album record. If the operation fails or returns no data,
    * an error is thrown. If multiple matching entries are found, a warning is logged.
-   * 
+   *
    * @returns {Promise<number>} The album's database ID.
    * @throws {Error} If the album cannot be inserted or retrieved from the database.
    * @todo find some intelligent way to fall back to a worse query, which should never happen in reality
@@ -141,8 +141,8 @@ export class Album implements Fireable {
     log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`)
     if (error && error?.code !== PK_VIOLATION || data === null)
       throw Error(`could not insert Album ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
-    if (data.length > 1) log(3, `multiple matching entries for base album class, 
-      Album: ${JSON.stringify(this.createDbEntryObject())} 
+    if (data.length > 1) log(3, `multiple matching entries for base album class,
+      Album: ${JSON.stringify(this.createDbEntryObject())}
       Data: ${JSON.stringify(data)}`)
     this.albumId = data[0].album_id;
     return data[0].album_id;
@@ -229,7 +229,7 @@ export class SpotifyAlbum extends Album {
     supabase: SupabaseClient<any, "prod" | "test", any>,
     spotifyId: string,
     /* numDiscs: number, */
-    albumId?: number
+    albumId?: string
   ) {
     super(albumName, albumType, artists,
       image, releaseDay, releaseMonth, releaseYear,

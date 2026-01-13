@@ -13,28 +13,28 @@ import { Database } from "../../../lib/schema.ts";
 /**
  * @class PlayedTrack
  * @classdesc Represents a track that has been played, including the time it was played, track information, album information, and its popularity.
- * 
+ *
  * @property {Date} playedAt - The date and time when the track was played.
  * @property {TrackInfo} trackInfo - The information about the track.
  * @property {AlbumInfo} albumInfo - The information about the album the track belongs to.
  * @property {number} popularity - The popularity score of the track.
- * 
+ *
  * @constructor
  * @param {Date} playedAt - The date and time when the track was played.
  * @param {Track} trackInfo - The information about the track.
  * @param {Album} albumInfo - The information about the album the track belongs to.
  * @param {number} popularity - The popularity score of the track.
- * 
+ *
  * @method createDbEntryObject
  * @description Creates an object suitable for database entry, containing the track's popularity, the time it was listened to, and nested objects for track and album information.
  * @returns {Object} An object representing the database entry for the played track.
- * 
+ *
  */
 export class Play implements Fireable {
 
   private listenedAt: number;
-  private trackId?: number;
-  private albumId?: number;
+  private trackId?: string;
+  private albumId?: string;
   private selectedMbid?: string | null = null;
   private isrc?: string;
   private userId: string;
@@ -75,18 +75,18 @@ export class Play implements Fireable {
     log(6, `selected mbid:${JSON.stringify(mbid)}`)
   }
 
-  public setTrackId(trackId: number) {
+  public setTrackId(trackId: string) {
     this.trackId = trackId;
   }
 
-  public setAlbumId(albumId: number) {
+  public setAlbumId(albumId: string) {
     this.albumId = albumId;
   }
 
   public createDbEntryObject() {
-    if (!this.trackId) 
+    if (!this.trackId)
       throw new Error(`track id not defined on Play:${JSON.stringify(this)}`)
-    if (!this.albumId) 
+    if (!this.albumId)
       throw new Error(`album id not defined on Play:${JSON.stringify(this)}`)
     return {
       track_id: this.trackId,
