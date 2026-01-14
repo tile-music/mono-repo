@@ -1,6 +1,7 @@
 // IMPORTS
 import { createContext } from "svelte";
 import type { DisplayDataRequest } from "$shared/Request";
+import type { Profile } from "$shared/Profile";
 
 // STATE
 export const [getDisplayState, setDisplayState] = createContext<DisplayState>();
@@ -20,7 +21,14 @@ interface FiltersContext {
 
 interface GeneralOptions {
     showCellInfo: ShowCellInfo;
+    header: HeaderOptions;
 }
+
+export type HeaderOptions = {
+    showHeader: boolean;
+    nameSource: "name" | "username";
+    showAvatar: boolean;
+};
 
 export type TimeFrame =
     | "this-week"
@@ -51,6 +59,11 @@ export function initializeDisplayState(): DisplayState {
         },
         options: {
             showCellInfo: "on-hover",
+            header: {
+                showHeader: true,
+                nameSource: "name",
+                showAvatar: false,
+            },
         },
     };
 }
@@ -77,4 +90,33 @@ function customTimeFrameText(ds: DateStrings) {
     else if (ds.start == null || ds.start == "") return "before " + ds.end;
     else if (ds.end == null || ds.end == "") return "after " + ds.start;
     else return `between ${ds.start} and ${ds.end}`;
+}
+
+export function getHeadingText(
+    profile: Profile,
+    headerOptions: HeaderOptions,
+    filters: DisplayDataRequest,
+    filtersContext: FiltersContext,
+) {
+    // https://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
+    function toTitleCase(str: string) {
+        return str.replace(
+            /\w\S*/g,
+            (text) =>
+                text.charAt(0).toUpperCase() + text.substring(1).toLowerCase(),
+        );
+    }
+
+    const nameText =
+        (headerOptions.nameSource == "name"
+            ? profile.full_name
+            : profile.username) + "'s";
+
+    return toTitleCase(
+        `${nameText} top ${filters.aggregate + "s"} ` +
+            timeFrameToText(
+                filtersContext.timeFrame,
+                filtersContext.dateStrings,
+            ),
+    );
 }
