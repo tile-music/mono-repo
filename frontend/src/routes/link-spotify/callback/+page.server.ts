@@ -1,6 +1,6 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { SP_SECRET, SP_CID } from "$env/static/private";
+import { SP_SECRET, SP_CID, SP_REDIRECT } from "$env/static/private";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const load: PageServerLoad = async ({
@@ -9,15 +9,10 @@ export const load: PageServerLoad = async ({
 }) => {
     if (!user) throw redirect(302, "/");
 
-    console.log(url.href);
-
     const code = url.searchParams.get("code");
     if (!code) throw redirect(302, "/");
 
-    console.log(code);
-
     const spotifyCredentials = await getSpotifyCredentials(code);
-    console.log("spotifyCredentials", spotifyCredentials);
 
     if (
         !("refresh_token" in spotifyCredentials) ||
@@ -51,15 +46,14 @@ const corsHeaders = new Headers({
 async function getSpotifyCredentials(code: string): Promise<JSON> {
     const clientSecret = SP_SECRET;
     const clientId = SP_CID;
-    const redirectUrl = "/profile";
+    const redirectUrl = SP_REDIRECT;
 
     const encodedCredentials = Buffer.from(
         clientId + ":" + clientSecret,
         "utf8",
     ).toString("base64");
-    console.log(encodedCredentials);
 
-    const response = fetch("https://accounts.spotify.com/api/token", {
+    const response = await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
         body: new URLSearchParams({
             code: code,
@@ -73,14 +67,14 @@ async function getSpotifyCredentials(code: string): Promise<JSON> {
         },
     });
 
-    return (await response).json();
+    return response.json();
 }
 
 async function addSpotifyCredentialsToDataAcquisition(
     userId: string,
     token: string,
 ) {
-    const resresponse = await fetch("http://data-acquisition:3001/add-job", {
+    const response = await fetch("http://data-acquisition:3001/add-job", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -92,8 +86,6 @@ async function addSpotifyCredentialsToDataAcquisition(
             type: "spotify",
         }),
     });
-
-    console.log(await resresponse.json());
 }
 
 async function storeSpotifyCredentials(
