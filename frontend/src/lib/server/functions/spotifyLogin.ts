@@ -7,11 +7,10 @@ import { SP_CID, SP_REDIRECT } from "$env/static/private";
  * @param user - The authenticated user
  * @returns An object containing the Spotify authorization URL or an error
  */
-async function spotifyLogin(user: User, token: string) {
+async function spotifyLogin() {
     const scope = "user-read-recently-played";
     const clientId = SP_CID;
     const redirectUrl = SP_REDIRECT;
-    console.log(SP_CID, SP_REDIRECT);
 
     // validate environment variables
     if (!clientId || !redirectUrl) {
@@ -29,8 +28,6 @@ async function spotifyLogin(user: User, token: string) {
         redirect_uri: redirectUrl,
         state: "poop", // dumb for now
     });
-
-    console.log(params);
 
     const spotifyAuthUrl = `https://accounts.spotify.com/authorize?${params.toString()}`;
 

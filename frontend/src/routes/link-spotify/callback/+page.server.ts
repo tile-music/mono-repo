@@ -86,6 +86,10 @@ async function addSpotifyCredentialsToDataAcquisition(
             type: "spotify",
         }),
     });
+
+    if (!response.ok) {
+        console.log("Failed to add Spotify credentials to data acquisition");
+    }
 }
 
 async function storeSpotifyCredentials(
