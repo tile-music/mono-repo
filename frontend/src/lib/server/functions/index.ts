@@ -3,6 +3,7 @@ import getContextData from "./getContextData";
 import getDisplayData from "./getDisplayData";
 import getListeningData from "./getListeningData";
 import resetListeningData from "./resetListeningData";
+import spotifyLogin from "./spotifyLogin";
 
 export {
     checkSpotifyLogin,
@@ -10,4 +11,5 @@ export {
     getDisplayData,
     getListeningData,
     resetListeningData,
+    spotifyLogin,
 };
