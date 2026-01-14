@@ -27,7 +27,7 @@ async function spotifyLogin(user: User, token: string) {
         client_id: clientId,
         scope: scope,
         redirect_uri: redirectUrl,
-        state: token, // use user ID as state for OAuth verification
+        state: "poop", // dumb for now
     });
 
     console.log(params);
