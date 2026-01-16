@@ -43,7 +43,7 @@ async function getListeningData(user: User, body: unknown) {
             `
       listened_at,
       track-sec:tracks ( isrc, track_name, track_artists, track_duration_ms, spotify_id,
-      albums ( album_name, num_tracks, release_day,release_month,release_year, artists, image, spotify_id, upc, spotify_id))
+      albums ( album_name, num_tracks, release_day,release_month,release_year, artists, image, upc, spotify_id))
     `,
         )
         .eq("user_id", user.id)
@@ -53,7 +53,12 @@ async function getListeningData(user: User, body: unknown) {
         query = query.order(sortColObj.column, sortColObjHelper(sortColObj));
 
     const { data: dbData, error } = await query;
-    if (error) throw error;
+    if (error) {
+        return {
+            status: 400,
+            error: error.message,
+        };
+    }
 
     const songs: SongInfo[] = [];
 

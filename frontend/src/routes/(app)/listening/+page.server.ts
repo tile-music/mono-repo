@@ -9,7 +9,10 @@ export const actions: Actions = {
         const body = await request.json();
         const result = await getListeningData(user, body);
 
-        if ("error" in result) return error(result.status, JSON.stringify(result.error, null, 2));
+        if ("error" in result) {
+            console.log(result.error);
+            return error(result.status, JSON.stringify(result.error, null, 2));
+        }
 
         // parse and return list of songs
         return { songs: result.body };
