@@ -26,8 +26,10 @@ export const load: PageServerLoad = async ({
         const blankProfile = assembleBlankProfile(user.id, email);
         const { data: newProfile, error: insertError } = await supabase
             .from("profiles")
-            .insert(blankProfile)
-            .select();
+              .upsert(blankProfile, {
+                onConflict: "id",
+              })
+              .select();
 
         if (insertError || !newProfile || !newProfile[0]) {
             log(
@@ -85,13 +87,14 @@ export const actions: Actions = {
         // attempt to perform update
         const { error: update_error } = await supabase
             .from("profiles")
-            .upsert(update);
+            .update(update)
+            .eq("id", user.id)
         if (update_error) {
             if (update_error.code === "23514") {
                 log(5, `Not updating ${user.id}: username too short`);
                 return fail(400, { username_too_short: true });
             } else {
-                log(2, "Error updating user: " + update_error);
+                log(2, "Error updating user: " + JSON.stringify(update_error));
                 return fail(500, { server_error: true });
             }
         }
@@ -123,7 +126,8 @@ export const actions: Actions = {
         // attempt to perform update
         const { error: update_error } = await supabase
             .from("profiles")
-            .upsert(update);
+            .update(update)
+            .eq("id", user.id)
         if (update_error) {
             log(2, "Error updating profile theme: " + update_error);
             return fail(500, { server_error: true });
@@ -140,7 +144,11 @@ export const actions: Actions = {
 
         // replace profile with blank profile, retaining user id and email
         const blankProfile = assembleBlankProfile(user.id, user.email);
-        const { error } = await supabase.from("profiles").upsert(blankProfile);
+        const { error } = await supabase
+            .from("profiles")
+            .update(blankProfile)
+            .eq("id", user.id)
+            .select();
         if (error) {
             log(2, "Error resetting profile: " + error);
             return fail(500, { server_error: true });

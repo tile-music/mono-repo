@@ -5,18 +5,27 @@
     import type { SubmitFunction } from "@sveltejs/kit";
     import type { Profile } from "$shared/Profile";
     import { onMount } from 'svelte';
-  
+
     interface Props {
         profile?: Profile;
     }
+
+    let isLoading = $state(true);
+    let loadError = $state(false);
 
     let { profile }: Props = $props();
     let updatedProfile = $state<Profile | null>(null);
 
     onMount(() => {
-        if (profile) updatedProfile = { ...profile }
+        if (profile) {
+                updatedProfile = { ...profile };
+                loadError = false;
+        } else {
+            loadError = true;
+        }
+        isLoading = false;
     });
-  
+
     let updateProfileStatus = $state("");
     const handleUpdateProfile: SubmitFunction = () => {
         return async ({ result }) => {
@@ -46,7 +55,14 @@
 
 <div id="profile">
     <h1>profile</h1>
-    {#if updatedProfile} <!-- TODO: implement a static placeholder form if user is null -->
+    {#if isLoading}
+        <p id="loading">Loading profile…</p>
+    {:else if loadError}
+        <p id="loading-error">
+            Unable to load profile information.
+            Please try again later.
+        </p>
+    {:else if updatedProfile} <!-- TODO: implement a static placeholder form if user is null -->
         <Avatar url={sampleAvatar} size={150} />
         <form method="POST" action="?/update_profile" use:enhance={handleUpdateProfile}>
             <div>
@@ -82,11 +98,6 @@
             <p>{updateProfileStatus}</p>
             <input type="submit" value="save profile" />
         </form>
-    {:else}
-        <p id="loading-error">
-            Unable to load profile information.
-            Please try again later.
-        </p>
     {/if}
 </div>
 
@@ -131,7 +142,7 @@
         min-height: 40px;
         text-align: center;
     }
-    
+
     #profile input[type="text"] {
         border: none;
         border-bottom: 2px solid var(--medium);
@@ -139,7 +150,7 @@
         background-color: transparent;
     }
 
-    #loading-error {
+    #loading-error #loading {
         margin: 200px auto;
         width: 60%;
         line-height: 1.5;
