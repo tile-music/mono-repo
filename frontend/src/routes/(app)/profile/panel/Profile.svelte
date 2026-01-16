@@ -150,7 +150,7 @@
         background-color: transparent;
     }
 
-    #loading-error #loading {
+    #loading-error, #loading {
         margin: 200px auto;
         width: 60%;
         line-height: 1.5;
