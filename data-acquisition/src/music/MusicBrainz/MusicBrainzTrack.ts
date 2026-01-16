@@ -19,7 +19,7 @@ export class MusicBrainzTrack extends MusicBrainz implements Fireable {
         supabase: SupabaseClient<
             Database,
             "prod" | "test",
-            Database["prod" | "test"]
+            Database["prod"]
         >,
     ) {
         super(supabase);
