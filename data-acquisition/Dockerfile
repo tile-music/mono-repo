@@ -6,6 +6,7 @@ WORKDIR /app/data-acq
 COPY . .
 COPY .env .
 COPY deps.ts .
+COPY import_map.json .
 
 # Cache dependencies
 RUN deno cache deps.ts
@@ -20,4 +21,4 @@ EXPOSE 3001
 
 FROM build AS prod
 
-CMD ["deno", "run", "--allow-env", "--allow-read", "--allow-ffi", "--allow-net", "--allow-run", "src/app.ts"]
+CMD ["deno", "run", "--allow-env", "--import-map=import_map.json", "--allow-read", "--allow-ffi", "--allow-net", "--allow-run", "src/app.ts"]

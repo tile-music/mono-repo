@@ -1,4 +1,4 @@
 export const connection = {
-    host: "redis",
+    host: "localhost",
     port: 6379,
 };

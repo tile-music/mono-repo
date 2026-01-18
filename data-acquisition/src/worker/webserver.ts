@@ -15,6 +15,7 @@ async function removeJob(jobId: string) {
             throw new Error(
                 "Failed to remove job from queue something is blocking it or one of its dependencies",
             );
+        failCount += 1;
     }
 }
 

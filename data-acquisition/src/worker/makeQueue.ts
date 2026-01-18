@@ -1,6 +1,6 @@
-import { Queue } from '../../deps.ts';
+import { Queue } from "../../deps.ts";
 
-import { connection } from './redis.ts';
+import { connection } from "./redis.ts";
 /**
  * Creates and returns a new Queue instance configured for cron jobs.
  *
@@ -10,28 +10,28 @@ import { connection } from './redis.ts';
  *
  * @returns {Queue} A new Queue instance configured with the specified options.
  */
-export function makeDataAcqQueue(){
-  return new Queue('my-cron-jobs', {
-    connection,
-    defaultJobOptions: {
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 1000,
-      },
-    },
-  });
+export function makeDataAcqQueue() {
+    return new Queue("my-cron-jobs", {
+        connection,
+        defaultJobOptions: {
+            attempts: 3,
+            backoff: {
+                type: "exponential",
+                delay: 1000,
+            },
+        },
+    });
 }
 
-export function makeSpotifyAlbumPopularityQueue(){
-  return new Queue('spotifyAlbumPopularity', {
-    connection,
-    defaultJobOptions: {
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 1000,
-      },
-    },
-  });
+export function makeSpotifyAlbumPopularityQueue() {
+    return new Queue("spotifyAlbumPopularity", {
+        connection,
+        defaultJobOptions: {
+            attempts: 3,
+            backoff: {
+                type: "exponential",
+                delay: 1000,
+            },
+        },
+    });
 }

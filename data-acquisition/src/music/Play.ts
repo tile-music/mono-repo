@@ -31,97 +31,123 @@ import { Database } from "../../../lib/schema.ts";
  *
  */
 export class Play implements Fireable {
+    private listenedAt: number;
+    private trackId?: string;
+    private albumId?: string;
+    private selectedMbid?: string | null = null;
+    private isrc?: string;
+    private userId: string;
 
-  private listenedAt: number;
-  private trackId?: string;
-  private albumId?: string;
-  private selectedMbid?: string | null = null;
-  private isrc?: string;
-  private userId: string;
+    protected supabase: SupabaseClient<
+        Database,
+        "prod" | "test",
+        Database["prod" | "test"]
+    >;
 
-  protected supabase:
-    SupabaseClient<Database, "prod" | "test", Database["prod" | "test"]>;
-
-  constructor(listenedAt: number,
-    supabase: SupabaseClient<Database, "prod" | "test", Database["prod" | "test"]>,
-    userId: string,
-    isrc?: string) {
-    this.listenedAt = listenedAt;
-    this.supabase = supabase;
-    this.isrc = isrc;
-    this.userId = userId;
-  }
-
-  private async pickMBID() {
-    if (!this.trackId) throw new Error(`track id not defined on Play:${JSON.stringify(this)}`)
-    if (!this.albumId) throw new Error(`album id not defined on Play:${JSON.stringify(this)}`)
-    const mbid = await this.supabase
-      .from("played_tracks")
-      .select("selected_mbid, tracks(album_id)")
-      .eq("track_id", this.trackId)
-      .eq("user_id", this.userId)
-
-    const mbids = mbid.data?.filter((v) =>
-      v.selected_mbid !== null);
-    if (Array.isArray(mbids) && mbids.length > 1) this.selectedMbid = mbids[0].selected_mbid;
-    else {
-      const newMbids = await this.supabase
-        .from("album_mbids")
-        .select("mbid")
-        .eq("album_id", this.albumId)
-      log(6, `mbids: ${JSON.stringify(newMbids)}`)
-      this.selectedMbid = newMbids.data?.[0]?.mbid ?? null;
+    constructor(
+        listenedAt: number,
+        supabase: SupabaseClient<
+            Database,
+            "prod" | "test",
+            Database["prod" | "test"]
+        >,
+        userId: string,
+        isrc?: string,
+    ) {
+        this.listenedAt = listenedAt;
+        this.supabase = supabase;
+        this.isrc = isrc;
+        this.userId = userId;
     }
-    log(6, `selected mbid:${JSON.stringify(mbid)}`)
-  }
 
-  public setTrackId(trackId: string) {
-    this.trackId = trackId;
-  }
+    private async pickMBID() {
+        if (!this.trackId)
+            throw new Error(
+                `track id not defined on Play:${JSON.stringify(this)}`,
+            );
+        if (!this.albumId)
+            throw new Error(
+                `album id not defined on Play:${JSON.stringify(this)}`,
+            );
+        const mbid = await this.supabase
+            .from("played_tracks")
+            .select("selected_mbid, tracks(album_id)")
+            .eq("track_id", this.trackId)
+            .eq("user_id", this.userId);
 
-  public setAlbumId(albumId: string) {
-    this.albumId = albumId;
-  }
+        const mbids = mbid.data?.filter((v) => v.selected_mbid !== null);
+        if (Array.isArray(mbids) && mbids.length > 1)
+            this.selectedMbid = mbids[0].selected_mbid;
+        else {
+            const newMbids = await this.supabase
+                .from("album_mbids")
+                .select("mbid")
+                .eq("album_id", this.albumId);
+            log(6, `mbids: ${JSON.stringify(newMbids)}`);
+            this.selectedMbid = newMbids.data?.[0]?.mbid ?? null;
+        }
+        log(6, `selected mbid:${JSON.stringify(mbid)}`);
+    }
 
-  public createDbEntryObject() {
-    if (!this.trackId)
-      throw new Error(`track id not defined on Play:${JSON.stringify(this)}`)
-    if (!this.albumId)
-      throw new Error(`album id not defined on Play:${JSON.stringify(this)}`)
-    return {
-      track_id: this.trackId,
-      listened_at: this.listenedAt,
-      isrc: this.isrc ?? "",
-      user_id: this.userId,
-    };
-  }
+    public setTrackId(trackId: string) {
+        this.trackId = trackId;
+    }
 
-  public async fire(): Promise<void> {
-    await this.pickMBID();
-    const { data: _data, error } = await this.supabase
-    //.from(this.selectedMbid ? "played_tracks" : "unmatched_played_tracks")
-    .from( "played_tracks")
-      .insert(this.createDbEntryObject());
-    if (error?.code === PK_VIOLATION)
-      log(6, "Play already inserted")
-    else if (error)
-      throw new Error(`play failed to insert Play: ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`)
-  }
+    public setAlbumId(albumId: string) {
+        this.albumId = albumId;
+    }
+
+    public createDbEntryObject() {
+        if (!this.trackId)
+            throw new Error(
+                `track id not defined on Play:${JSON.stringify(this)}`,
+            );
+        if (!this.albumId)
+            throw new Error(
+                `album id not defined on Play:${JSON.stringify(this)}`,
+            );
+        return {
+            track_id: this.trackId,
+            listened_at: this.listenedAt,
+            isrc: this.isrc ?? "",
+            user_id: this.userId,
+        };
+    }
+
+    public async fire(): Promise<void> {
+        await this.pickMBID();
+        const { data: _data, error } = await this.supabase
+            //.from(this.selectedMbid ? "played_tracks" : "unmatched_played_tracks")
+            .from("played_tracks")
+            .insert(this.createDbEntryObject());
+        if (error?.code === PK_VIOLATION) log(6, "Play already inserted");
+        else if (error)
+            throw new Error(
+                `play failed to insert Play: ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`,
+            );
+    }
 }
 
 export class SpotifyPlay extends Play {
-  private trackPopularity: number;
-  constructor(listenedAt: number, trackPopularity:
-    number, supabase: SupabaseClient<Database, "prod" | "test", Database["prod" | "test"]>,
-    userId: string,
-    isrc?: string) {
-    super(listenedAt, supabase, userId, isrc)
-    this.trackPopularity = trackPopularity;
-  }
-  public override createDbEntryObject() {
-    return {
-      ...super.createDbEntryObject(),
-      track_popularity: this.trackPopularity
+    private trackPopularity: number;
+    constructor(
+        listenedAt: number,
+        trackPopularity: number,
+        supabase: SupabaseClient<
+            Database,
+            "prod" | "test",
+            Database["prod" | "test"]
+        >,
+        userId: string,
+        isrc?: string,
+    ) {
+        super(listenedAt, supabase, userId, isrc);
+        this.trackPopularity = trackPopularity;
     }
-  }
+    public override createDbEntryObject() {
+        return {
+            ...super.createDbEntryObject(),
+            track_popularity: this.trackPopularity,
+        };
+    }
 }

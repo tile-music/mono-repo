@@ -1,5 +1,5 @@
 import { SupabaseClient } from "../../deps.ts";
-import { makeDataAcqQueue  } from "./makeQueue.ts";
+import { makeDataAcqQueue } from "./makeQueue.ts";
 
 import "jsr:@std/dotenv/load";
 
@@ -17,49 +17,49 @@ import "jsr:@std/dotenv/load";
  * @function makeJobs
  * @returns {Promise<void>} A promise that resolves when the jobs have been added to the queue.
  * @todo: add a perameter instead of creating a new queue
- * @todo: deduplicate 
-*/
+ * @todo: deduplicate
+ */
 export async function makeDataAcqJobs() {
-  const queue = makeDataAcqQueue();
-  console.log("makeJobs");
-  const supabase = new SupabaseClient(
-    Deno.env.get("SB_URL")!,
-    Deno.env.get("SERVICE")!,
-    { db: { schema: "public" } }
-  );
-  await supabase
-    .from("spotify_credentials")
-    .select("*")
-    .then((items) => {
-      console.log(items);
-      items.data?.forEach(async (element) => {
-        await queue.add(
-          "spotify" + element,
-          {
-            data: {
-              userId: element.id,
-              refreshToken: element.refresh_token,
-            },
-          },
-          {
-            jobId: "spotify" + element.id,
-          }
-        );
-        await queue.add(
-          "spotify" + element,
-          {
-            data: {
-              userId: element.id,
-              refreshToken: element.refresh_token,
-            },
-          },
-          {
-            repeat: { pattern: "0/30 * * * *" },
-            immediateley: true,
-            jobId: "spotify" + element.id,
-          }
-        );
-      });
-    })
+    const queue = makeDataAcqQueue();
+    console.log("makeJobs");
+    const supabase = new SupabaseClient(
+        Deno.env.get("SB_URL")!,
+        Deno.env.get("SERVICE")!,
+        { db: { schema: "public" } },
+    );
+    await supabase
+        .from("spotify_credentials")
+        .select("*")
+        .then((items) => {
+            console.log(items);
+            items.data?.forEach(async (element) => {
+                await queue.add(
+                    "spotify" + element,
+                    {
+                        data: {
+                            userId: element.id,
+                            refreshToken: element.refresh_token,
+                        },
+                    },
+                    {
+                        jobId: "spotify" + element.id,
+                    },
+                );
+                await queue.add(
+                    "spotify" + element,
+                    {
+                        data: {
+                            userId: element.id,
+                            refreshToken: element.refresh_token,
+                        },
+                    },
+                    {
+                        repeat: { pattern: "0/30 * * * *" },
+                        immediateley: true,
+                        jobId: "spotify" + element.id,
+                    },
+                );
+            });
+        });
 }
 /** if you'd like to update sooner you could get rid of the second 0 and even the first */

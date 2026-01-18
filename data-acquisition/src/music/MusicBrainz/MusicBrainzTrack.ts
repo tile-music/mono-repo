@@ -16,11 +16,7 @@ export class MusicBrainzTrack extends MusicBrainz implements Fireable {
     constructor(
         track: Track,
         release: IReleaseList,
-        supabase: SupabaseClient<
-            Database,
-            "prod" | "test",
-            Database["prod"]
-        >,
+        supabase: SupabaseClient<Database, "prod" | "test", Database["prod"]>,
     ) {
         super(supabase);
         this.track = track;
