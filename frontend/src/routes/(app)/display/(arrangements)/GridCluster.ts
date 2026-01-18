@@ -3,7 +3,7 @@ import type {
     ArrangementState,
     SquareInfo,
     AggregatedSongs,
-} from "../arrangement.svelte";
+} from "../arrangement";
 
 const options = {
     grid_size: { type: "number", label: "grid size", min: 5, max: 100 },
@@ -187,14 +187,14 @@ function fitBoundaryBox(squares: SquareInfo[], gs: number) {
             x: square.x - bounds.left,
             y: square.y - bounds.top,
             size: square.size,
-        }
+        };
     });
 
     return {
         list: mapped_squares,
         width: bounds.right - bounds.left,
         height: bounds.bottom - bounds.top,
-    }
+    };
 }
 
 export const GridCluster: Arrangement<typeof options> = {

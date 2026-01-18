@@ -3,7 +3,7 @@ import type {
     ArrangementState,
     AggregatedSongs,
     SquareInfo,
-} from "../arrangement.svelte";
+} from "../arrangement";
 import { generateFullArrangement } from "./pack";
 
 const options = {
@@ -33,7 +33,8 @@ function generate(songs: AggregatedSongs, s: ArrangementState<typeof options>) {
     if (songs.length == 0) return { list: [], width: 1, height: 1 };
 
     // 1 square requires no computation
-    if (songs.length == 1) return { list: [{ x: 0, y: 0, size: 1 }], width: 1, height: 1 };
+    if (songs.length == 1)
+        return { list: [{ x: 0, y: 0, size: 1 }], width: 1, height: 1 };
 
     const max = Math.min(songs.length, 14);
     const arrangement = generateFullArrangement(
@@ -80,14 +81,14 @@ function fitBoundaryBox(squares: SquareInfo[], gs: number) {
             x: square.x - bounds.left,
             y: square.y - bounds.top,
             size: square.size,
-        }
+        };
     });
 
     return {
         list: mapped_squares,
         width: bounds.right - bounds.left,
         height: bounds.bottom - bounds.top,
-    }
+    };
 }
 
 export const CloudCluster: Arrangement<typeof options> = {

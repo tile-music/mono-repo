@@ -1,3 +1,6 @@
 [submodule "supabase"]
 	path = supabase
 	url = https://github.com/tile-music/supabase.git
+[submodule "musicbrainz-docker"]
+	path = musicbrainz-docker
+	url = https://github.com/tile-music/musicbrainz-docker.git

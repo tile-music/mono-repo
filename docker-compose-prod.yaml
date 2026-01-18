@@ -1,51 +1,50 @@
 include:
-  #- ./mb-docker/docker-compose.yml
-
-  - ./supabase/docker/docker-compose.yml
+    - ./supabase/docker/docker-compose.yml
 services:
-  lib:
-    build:
-      context: .
-      dockerfile: Dockerfile.lib
-    image: mdv-lib 
-  frontend:
-    build:
-      context: ./frontend/
-      target: prod
-    volumes:
-      - MQP:/data/frontend
-    ports:
-      - "4173:4173"
-    networks:
-      - default
-    depends_on:
-      - lib
-  nginx:
-    build:
-      context: ./nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - frontend
-  redis:
-    image: "redis:alpine"
-    ports:
-      - "6379:6379"
-  data-acquisition:
-    build:
-      context: ./data-acquisition/
-      target: dev
-    volumes:
-      - MQP:/data/data-acquisition
-    ports:
-      - "3001:3001"
-    networks:
-      - default
-    depends_on:
-      - db
-      - analytics
-      - redis
-      - lib
+    lib:
+        build:
+            context: .
+            dockerfile: Dockerfile.lib
+        image: mdv-lib
+    frontend:
+        build:
+            context: ./frontend/
+            target: prod
+        volumes:
+            - MQP:/data/frontend
+        ports:
+            - "4173:4173"
+        networks:
+            - default
+        depends_on:
+            - lib
+    nginx:
+        build:
+            context: ./nginx
+        ports:
+            - "80:80"
+            - "443:443"
+        depends_on:
+            - frontend
+            - kong
+    redis:
+        image: "redis:alpine"
+        ports:
+            - "6379:6379"
+    data-acquisition:
+        build:
+            context: ./data-acquisition/
+            target: dev
+        volumes:
+            - MQP:/data/data-acquisition
+        ports:
+            - "3001:3001"
+        networks:
+            - default
+        depends_on:
+            - db
+            - analytics
+            - redis
+            - lib
 volumes:
-  MQP:
+    MQP:

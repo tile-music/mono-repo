@@ -1,7 +1,5 @@
 import { log as logBase } from "../../../lib/log.ts"
 
-import "jsr:@std/dotenv/load";
-
 const logLevel: number = Number(Deno.env.get("LOG_LEVEL")) ?? 6;
 
 const serviceName = "data acquisition";

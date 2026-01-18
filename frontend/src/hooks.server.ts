@@ -144,7 +144,11 @@ const profile: Handle = async ({ event, resolve }) => {
 
     // if there's an error fetching the profile, log it and set profile to null
     if (fetchResult.error) {
-        log(3, "Error fetching profile of authenticated user:" + fetchResult.error);
+        log(
+            3,
+            "Error fetching profile of authenticated user:" +
+            JSON.stringify(fetchResult.error, null, 2),
+        );
         event.locals.profile = null;
         return resolve(event);
     }
@@ -161,25 +165,6 @@ const userTheme: Handle = async ({ event, resolve }) => {
     return await resolve(event, {
         transformPageChunk: ({ html }) => html.replace("[theme]", theme),
     });
-};
-
-const originalConsoleWarn = console.debug;
-
-console.warn = function (...args) {
-    const shouldLog = args.every((arg) => {
-        if (typeof arg === "string") {
-            /*
-            current supabase auth implementation sucks and spits out an unnecessary warning every
-            time session data is needed on a page, even though nothing we're doing is unsafe.
-            we need to manually suppress that warning, unfortunately.
-            */
-            return !arg.includes("Using the user object");
-        }
-        return true;
-    });
-    if (shouldLog) {
-        originalConsoleWarn.apply(console, args);
-    }
 };
 
 export const handle: Handle = sequence(supabase, authGuard, profile, userTheme);

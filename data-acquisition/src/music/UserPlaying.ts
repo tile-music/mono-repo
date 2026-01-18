@@ -1,23 +1,62 @@
 import { SupabaseClient, Client, Player } from "../../deps.ts";
 
-import "jsr:@std/dotenv/load";
 
-import { TrackInfo, SpotifyTrackInfo } from "./TrackInfo.ts";
-import { AlbumInfo, SpotifyAlbumInfo } from "./AlbumInfo.ts";
-import { PlayedTrack } from "./PlayedTrack.ts";
+import { Track, SpotifyTrack } from "./Track.ts";
+import { Album, SpotifyAlbum } from "./Album.ts";
+import { Play, SpotifyPlay } from "./Play.ts";
 
 import { log } from "../util/log.ts"
 
+import { MusicBrainzApi } from "../../deps.ts";
+import { Fireable } from "./Fireable.ts";
+
+
 export type ReleaseDate = { year: number, month?: number, day?: number }
 
-export abstract class UserPlaying {
+/**
+ * Abstract class representing a user's music playback session and handling database operations.
+ * 
+ * @template SupabaseClient - The Supabase client type for database operations.
+ * @template PlayedTrack - The type representing a played track.
+ * 
+ * @property userId - The unique identifier for the user.
+ * @property supabase - The Supabase client instance for database interactions.
+ * @property context - Additional context or configuration for the user session.
+ * @property inited - Indicates whether the user session has been initialized.
+ * @property postgres - Optional property for direct Postgres access or configuration.
+ * @property played - Array of played tracks for the user.
+ * @property dbEntries - Object containing database entries to be inserted, including track info and user ID.
+ * 
+ * @constructor
+ * @param supabase - The Supabase client instance.
+ * @param userId - The unique identifier for the user.
+ * @param context - Additional context or configuration for the user session.
+ * 
+ * @method makeDBEntries - Abstract method to prepare database entries from played tracks.
+ * @returns Promise<void>
+ * 
+ * @method init - Abstract method to initialize the user session.
+ * @returns Promise<void>
+ * 
+ * @method fire - Abstract method to trigger the main logic for the user session.
+ * @returns Promise<void>
+ * 
+ * @method putInDB - Inserts played track and album information into the database, handling duplicates and linking tracks to albums.
+ * @returns Promise<void>
+ * @throws Error if track or album data cannot be found or inserted.
+ * 
+ * @method findMBID - Attempts to find MusicBrainz IDs (MBIDs) for played tracks and albums.
+ * @returns Promise<void>
+ */
+export abstract class UserPlaying implements Fireable {
   userId!: string;
   supabase!: SupabaseClient<any, "test" | "prod", any>;
   context!: any;
   inited!: boolean;
   postgres!: any;
-  played: PlayedTrack[] = [];
+  protected albums: Map<string, Album> = new Map();
   dbEntries: any = { p_track_info: [], p_user_id: "" };
+
 
   constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: string, context: any) {
     this.supabase = supabase;
@@ -26,118 +65,41 @@ export abstract class UserPlaying {
     this.inited = false;
   }
 
-  protected abstract makeDBEntries(): Promise<void>
-  public abstract init(): Promise<void>
-  public abstract fire(): Promise<void>
 
-  public async putInDB(): Promise<void> {
-    await this.makeDBEntries();
-    //console.log(this.dbEntries);
+  public abstract init(): Promise<void>;
 
-    for (const entry of this.dbEntries.p_track_info) {
-      // attempt to insert track
-      let { data: trackData, error: trackError } = await this.supabase
-        .from("tracks")
-        .insert(entry.track)
-        .select("*");
-      log(6, `trackData: ${JSON.stringify(trackData)}, trackError: ${JSON.stringify(trackError)}`)
+  protected abstract matchAlbums(): void;
 
-      // check for unexpected error (ignoring duplicates)
-      if (trackError && trackError?.code !== "23505") throw trackError;
-
-      // attempt to insert album
-      let { data: albumData, error: albumError } = await this.supabase
-        .from("albums")
-        .insert(entry.track_album)
-        .select("*");
-
-      // check for unexpected error (ignoring duplicates)
-      if (albumError && albumError?.code !== "23505") throw albumError;
-
-      // track has been inserted already, find using isrc
-      if (!trackData) {
-        const { data: trackDataRet, error: trackErrorRet } = await this.supabase
-          .from("tracks")
-          .select("*")
-          .eq("isrc", entry.track.isrc);
-        trackData = trackDataRet;
-        trackError = trackErrorRet;
-      }
-
-      // album has been inserted already, find using spotify id and fallback if needed
-      if (!albumData) {
-        // select all albums
-        let query1 = this.supabase
-        .from("albums")
-        .select("*")
-
-        // album has a spotify id
-        const albumSpotifyId = entry.track_album.spotify_id;
-        log(6,`spotify album id: ${albumSpotifyId}`)
-        if (albumSpotifyId) {
-          query1 = query1.eq("spotify_id", albumSpotifyId);
-          ({ data: albumData, error: albumError } = await query1);
-          log(6, `will fallback execute ${( Array.isArray(albumData) && albumData["length"] === 0)}`)
-        }
-
-        // album has missing or incorrect spotify id, fallback to other fields
-        if(!albumSpotifyId || (Array.isArray(albumData) && albumData.length === 0)){
-          log(6, "executing fallback query")
-          let query = this.supabase.from("albums").select("*")
-
-          query = query.eq("album_name", entry.track_album.album_name); // Filter by album name
-          query = query.eq("album_type", entry.track_album.album_type); // Filter by album type
-          query = query.eq("num_tracks", entry.track_album.num_tracks); // Filter by number of tracks
-
-          log(6, `query ${JSON.stringify(query)}`);
-          ({ data: albumData, error: albumError } = await query);
-          log(6,`album data: ${albumData}, albumError: ${albumError}` )
-
-          //.eq("image", entry.track_album.image) // Filter by image
-          //.eq("release_date", entry.track_album.release_date) // Filter by release_date
-        }
-
-        log(6, `Album data: ${albumData}`)
-        log(6, entry.track_album.spotify_id);
-      }
-
-      // check if we have a valid track and album
-      if (trackData && trackData.length > 0 && albumData && albumData.length > 0) {
-        // make sure the track and album are linked
-        await this.supabase.from("track_albums").insert({
-          track_id: trackData[0].track_id,
-          album_id: albumData[0].album_id,
-        });
-
-        // insert played track
-        const { data: _playedData, error: _playedError } = await this.supabase
-          .from("played_tracks")
-          .insert({
-            user_id: this.userId,
-            track_id: trackData[0].track_id,
-            album_id: albumData[0].album_id,
-            listened_at: entry.listened_at,
-            track_popularity: entry.track_popularity,
-            isrc: entry.track.isrc,
-          });
-      } else {
-        // if we still don't have a valid track or album, throw an error
-        throw new Error(`track data ${JSON.stringify(trackData)} album data: ${JSON.stringify(albumData)}, 
-                ${JSON.stringify(entry)}
-                No data returned from insert or albumData is undefined or empty`);
-      }
-      
+  protected addOrGetAlbum(album: Album) {
+    const ident = album.getAlbumIdentifier();
+    if (this.albums.has(ident))
+      return this.albums.get(ident);
+    else {
+      this.albums.set(ident, album);
+      return this.albums.get(ident);
     }
   }
+
+  public async fire(): Promise<void> {
+    try { 
+      this.matchAlbums();
+      await Promise.all(Array.from(this.albums.values()).map(async album => await album.fire()));
+    }
+    catch (e) { log(0, `Error putting in DB: ${e}`); }
+  };
+
+  /* validate(): asserts this is UserPlaying {
+    
+  } */
+
 }
 
 export class SpotifyUserPlaying extends UserPlaying {
   client!: Client;
   player!: Player;
   items!: any[];
-  albums: any[] = [];
 
-  constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: any, context: any) {
+  constructor(supabase: SupabaseClient<any, "test" | "prod", any>, userId: string, context: any) {
     super(supabase, userId, context);
   }
   public override async init(): Promise<void> {
@@ -159,53 +121,53 @@ export class SpotifyUserPlaying extends UserPlaying {
   }
 
 
-  protected override async makeDBEntries(): Promise<void> {
+  protected override matchAlbums(): void {
     //await this.getAlbumPopularity();
     for (const [_, item] of this.items.entries()) {
-      const releaseDateRaw: any = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
-      const releaseDatePrecisionRaw: any = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
+      const releaseDateRaw = item.track.album.release_date ? item.track.album.release_date : item.track.album.releaseDate;
+      const releaseDatePrecisionRaw = item.track.album.release_date_precision ? item.track.album.release_date_precision : item.track.album.releaseDatePrecision;
 
       const releaseDateParsed: ReleaseDate = SpotifyUserPlaying.parseSpotifyDate(releaseDateRaw, releaseDatePrecisionRaw);
-      const album = new SpotifyAlbumInfo(
+      const album = this.addOrGetAlbum(new SpotifyAlbum(
         item.track.album.name,
         item.track.album.albumType,
-        item.track.album.artists.map((artist: any) => artist.name),
+        item.track.album.artists.map((artist: {name: string}) => artist.name),
         item.track.album.images[0].url,
         releaseDateParsed.day,
         releaseDateParsed.month,
         releaseDateParsed.year,
         item.track.album.totalTracks as number,
         item.track.album.genres,
-        item.track.album.id
-      );
-      const trackInfo = new SpotifyTrackInfo(
+        this.supabase,
+        item.track.album.id))
+      if (!album) {
+        log(0, `album is undefined ${{...item}}`)
+        continue;
+      }
+
+      album.addTrack(new SpotifyTrack(
         item.track.name,
-        item.track.artists.map((artist: any) => artist.name),
+        item.track.artists.map((artist: { name: string }) => artist.name),
         item.track.externalID.isrc,
         item.track.duration,
-        item.track.id
-      );
-      const playedTrackInfo = new PlayedTrack(
-        SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
-        trackInfo,
-        album,
-        item.track.popularity
-      );
-      this.played.push(playedTrackInfo);
-      //console.log(playedTrackInfo);
+        item.track.id,
+        new SpotifyPlay(
+          SpotifyUserPlaying.parseISOToDate(item.playedAt).valueOf(),
+          item.track.popularity,
+          this.supabase,
+          this.userId,
+          item.track.externalID.isrc
+        ),
+        this.supabase,
+        item.track.trackNumber
+      ));
     }
-    for (const [_, track] of this.played.entries()) {
-      await this.dbEntries.p_track_info.push(track.createDbEntryObject());
-    }
-    this.dbEntries.p_user_id = this.userId;
-
 
   }
   public override async fire(): Promise<void> {
+    await this.init();
     this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
-    
-    try { await this.putInDB(); }
-    catch (e) { log(1, `Error putting in DB: ${e}`); }
+    await super.fire();
   }
   public static parseSpotifyDate(date: string, datePrecision: "year" | "month" | "day"): ReleaseDate {
     if (!date) {
@@ -265,9 +227,11 @@ export class MockUserPlaying extends UserPlaying {
     super(supabase, userId, context);
     this.mockData = context;
   }
-  protected override async makeDBEntries(): Promise<void> {
+
+  protected override  matchAlbums(): void {
+    // make sure this works like a traditional for loop not async for each because that will result in a major race condition
     for (const track of this.mockData) {
-      const album = new AlbumInfo(
+      const album = this.addOrGetAlbum(new Album(
         track.albumInfo.albumName,
         "Album",
         track.albumInfo.albumArtists,
@@ -277,36 +241,26 @@ export class MockUserPlaying extends UserPlaying {
         track.albumInfo.releaseYear,
         1,
         ["Test Genre"],
+        this.supabase,
+        1,
+      ));
 
-      );
-      const trackInfo = new TrackInfo(
+      if (!album) throw new Error("Album Does Not Exist");
+      album.addTrack(new Track(
         track.trackName,
         track.trackArtists,
         track.isrc,
-        track.durationMs
-      );
-      const playedTrackInfo = new PlayedTrack(
-        track.timestamp,
-        trackInfo,
-        album,
-        track.popularity
-      );
-      this.played.push(playedTrackInfo);
+        track.durationMs,
+        new Play(track.timestamp, this.supabase, this.userId, track.isrc),
+        this.supabase,
+        2,
+      ))
     }
-    for (const track of this.played) {
-      await this.dbEntries.p_track_info.push(track.createDbEntryObject());
-    }
-
-    this.dbEntries.p_user_id = this.userId;
-
   }
 
   public override init(): Promise<void> {
     this.inited = true;
     console.log("Mock init");
     return Promise.resolve();
-  }
-  public override async fire(): Promise<void> {
-    await this.putInDB();
   }
 }

@@ -15,7 +15,6 @@ declare global {
             profile: Profile | null;
         }
         interface PageData {
-            session: Session | null;
             profile: Profile | null;
         }
         // interface PageState {}

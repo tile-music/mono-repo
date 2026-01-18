@@ -4,11 +4,13 @@
 env.sh
 env.ps1
 test.env
-
+/.idea
 /scratch
 
 data-acquisition/tests/util/test-data.copy.json
 data-acquisition/package-lock.json
+data-acquisition/deno.lock
+data-acquisition/py-env
 ps-update-instructions.md
 ps-update-instructions.pdf
 prodkeys.md
@@ -16,3 +18,6 @@ data-acquisition/.env.prod
 prodkeys.txt
 
 .idea/
+data-acquisition/src/music/Album.ts
+.project
+.dbeaver/*

@@ -1,5 +1,5 @@
 import { SupabaseClient } from "../../deps.ts";
-import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from "./makeQueue.ts";
+import { makeDataAcqQueue  } from "./makeQueue.ts";
 
 import "jsr:@std/dotenv/load";
 
@@ -55,6 +55,7 @@ export async function makeDataAcqJobs() {
           },
           {
             repeat: { pattern: "0/30 * * * *" },
+            immediateley: true,
             jobId: "spotify" + element.id,
           }
         );
@@ -62,21 +63,3 @@ export async function makeDataAcqJobs() {
     })
 }
 /** if you'd like to update sooner you could get rid of the second 0 and even the first */
-export async function makeSpotifyAlbumPopularityJobs() {
-  const queue = makeSpotifyAlbumPopularityQueue();
-  console.log("makeJobs for SpotifyAlbumPopularity");
-  await queue.add(
-    'spotifyAlbumPopularityCronJob',
-    { string: "update" },
-    {
-      repeat: { pattern: "0 0 * * *" },
-    }
-  );
-  console.log("added job for SpotifyAlbumPopularity update");
-  await queue.add(
-    'spotifyAlbumPopularitySingleShot',
-    { string:  "initialize" },
-    { removeOnComplete: true, 
-      removeOnFail: true }
-  );
-}

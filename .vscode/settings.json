@@ -5,12 +5,14 @@
         "musicbrainz"
     ],
     "markdown.expand-tabs.tabWidth": 4,
-    "jest.runMode": {
+    /* "jest.runMode": {
         "type": "on-demand"
-    },
-    "deno.enablePaths": ["./data-acquisition/", "supabase/docker/volumes/functions/"],
+    }, */
+    "deno.enablePaths": ["./data-acquisition/"],
     "deno.testing.args": [
         "--allow-all",
-        "--no-check"
-    ]
+        "--no-check",
+        "--env-file=.env"
+    ],
+    "deno.enable": true
 }

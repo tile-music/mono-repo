@@ -1,8 +1,5 @@
 <script lang="ts">
-    import type {
-        AlbumInfo,
-        ListeningDataSongInfo,
-    } from "$shared/Song";
+    import type { AlbumInfo, ListeningDataSongInfo } from "$shared/Song";
     import arrow from "$lib/assets/icons/down-arrow-56.svg";
     import Song from "./Song.svelte";
     import { filterColumnList } from "./filters.svelte";
@@ -15,12 +12,6 @@
     let album: AlbumInfo = $derived(song.albums[0]);
     let dropdown = $state<HTMLImageElement>();
 
-    /**
-     * Calculates the duration of a song in minutes and seconds from milliseconds.
-     *
-     * @param {number} ms - The duration of the song in milliseconds.
-     * @returns {string} The formatted duration string in "minutes:seconds" format.
-     */
     function calculateDuration(ms: number) {
         const minutes = Math.floor(ms / 60000);
         const seconds = (ms % 60000) / 1000;
@@ -30,24 +21,34 @@
     /**
      * This function wraps the childPropagation callback which is located in listening/+page.svelte.
      * It calls the childPropagation function with the provided song and toggles the rotation of a dropdown element.
-     * 
+     *
      * @param {ListeningDataSongInfo} song - The song information to be propagated.
      */
-    function childPropogationRotation(song : ListeningDataSongInfo){
-        childPropagation(song)
-        if(dropdown){
-            console.log(dropdown.style.transform )
-            if(dropdown.style.transform === "" || dropdown.style.transform == "rotate(270deg)") dropdown.style.transform = "rotate(0deg)"
-            else dropdown.style.transform = "rotate(270deg)"
+    function childPropogationRotation(song: ListeningDataSongInfo) {
+        childPropagation(song);
+        if (dropdown) {
+            console.log(dropdown.style.transform);
+            if (
+                dropdown.style.transform === "" ||
+                dropdown.style.transform == "rotate(270deg)"
+            )
+                dropdown.style.transform = "rotate(0deg)";
+            else dropdown.style.transform = "rotate(270deg)";
         }
     }
 </script>
 
 <div class="song">
     {#if song.is_parent}
-        <p class="repetitions" onclick={() =>{ childPropogationRotation(song) }}>
-            <img src={arrow} bind:this={dropdown}  alt="show plays" />({song.size + 1})
-        </p>
+        <button
+            class="repetitions"
+            onclick={() => {
+                childPropogationRotation(song);
+            }}
+        >
+            <img src={arrow} bind:this={dropdown} alt="show plays" />({song
+                .children.length + 1})
+        </button>
     {:else}
         <p class="repetitions"></p>
     {/if}
@@ -91,9 +92,11 @@
     {/each}
 </div>
 
-{#if song.child && song.show_children}
+{#if Array.isArray(song.children) && song.children.length && song.show_children}
     <div id="children">
-        <Song song={song.child} {childPropagation} id="song" />
+        {#each song.children as child}
+            <Song song={child} {childPropagation} />
+        {/each}
     </div>
 {/if}
 
@@ -117,13 +120,17 @@
     #song {
         height: 50px;
     }
-    svg{
-        filter: var(--text)
+    svg {
+        filter: var(--text);
     }
     #vertical_line {
         background-image: linear-gradient(var(--text), var(--text));
         background-size: 2px 100%;
         background-repeat: no-repeat;
         background-position: center center;
+    }
+    .art {
+        aspect-ratio: 1;
+        object-fit: cover;
     }
 </style>

@@ -11,6 +11,7 @@ README.md
 .editorconfig
 .svelte-kit
 .vscode
+.vite
 node_modules
 build
 package
