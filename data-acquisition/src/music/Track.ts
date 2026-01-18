@@ -52,7 +52,7 @@ export class Track implements Fireable {
         isrc: string,
         durationMs: number,
         play: Play,
-        supabase: SupabaseClient<any, "prod" | "test", any>,
+        supabase: SupabaseClient<any, "prod", any>,
         trackNum: number,
         /* discNum: number, */
         albumId?: string,
@@ -69,7 +69,7 @@ export class Track implements Fireable {
         /* this.discNum = discNum; */
     }
 
-    public setAlbumId(albumId: number) {
+    public setAlbumId(albumId: string) {
         this.albumId = albumId;
     }
 
@@ -89,7 +89,7 @@ export class Track implements Fireable {
      * @throws {Error} If the album cannot be inserted or retrieved from the database.
      * @todo find some intelligent way to fall back to a worse query, which should never happen in reality
      */
-    public async getTrackDbID(): Promise<number> {
+    public async getTrackDbID(): Promise<string> {
         if (this.trackId) return this.trackId;
         let { data, error } = await this.queryHelper();
         log(
@@ -164,8 +164,8 @@ export class SpotifyTrack extends Track {
         play: Play,
         supabase: SupabaseClient<
             Database,
-            "prod" | "test",
-            Database["test" | "prod"]
+            "prod",
+            Database["prod"]
         >,
         trackNum: number,
         /*     discNum: number, */

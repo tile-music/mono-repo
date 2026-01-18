@@ -39,11 +39,11 @@ export async function spotifyFire(
 
 const worker = new Worker(
     "my-cron-jobs",
-    async (job) => {
+    async (job: Job) => {
         const { userId, refreshToken } = job.data.data;
 
         const SB_SCHEMA = Deno.env.get("SB_SCHEMA");
-        if (SB_SCHEMA !== "test" && SB_SCHEMA !== "prod")
+        if ( SB_SCHEMA !== "prod")
             throw new Error(
                 "Invalid Supabase schema. Must be 'test' or 'prod'.",
             );

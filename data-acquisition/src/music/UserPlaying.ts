@@ -100,7 +100,7 @@ export abstract class UserPlaying implements Fireable {
 export class SpotifyUserPlaying extends UserPlaying {
     client!: Client;
     player!: Player;
-    items!: any[];
+    items!: any;
 
     constructor(
         supabase: SupabaseClient<any, "test" | "prod", any>,
@@ -257,7 +257,7 @@ export class SpotifyUserPlaying extends UserPlaying {
 export class MockUserPlaying extends UserPlaying {
     mockData: any;
     constructor(
-        supabase: SupabaseClient<any, "test" | "prod", any>,
+        supabase: SupabaseClient<any, "prod", any>,
         userId: any,
         context: any,
     ) {

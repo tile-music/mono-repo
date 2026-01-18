@@ -16,8 +16,8 @@ type CoverArtExtension = {
 export class CoverArt implements Fireable {
     supabase: SupabaseClient<
         Database,
-        "prod" | "test",
-        Database["prod" | "test"]
+        "prod",
+        Database["prod"]
     >;
     mbAlbum: MusicBrainzAlbum;
     coverArt: CoverArtArchiveApi = new CoverArtArchiveApi();
@@ -27,8 +27,8 @@ export class CoverArt implements Fireable {
         mbAlbum: MusicBrainzAlbum,
         supabase: SupabaseClient<
             Database,
-            "prod" | "test",
-            Database["prod" | "test"]
+            "prod",
+            Database["prod"]
         >,
     ) {
         this.mbAlbum = mbAlbum;

@@ -5,10 +5,7 @@ import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/constants.ts";
 import { Fireable } from "./Fireable.ts";
 import { SpotifyPlay } from "./Play.ts";
-import {
-    MusicBrainzAlbum,
-    SpotifyMusicBrainzAlbum,
-} from "./MusicBrainz/MusicBrainzAlbum.ts";
+
 import { Database } from "../../../lib/schema.ts";
 
 /**
@@ -61,8 +58,8 @@ export class Album implements Fireable {
     protected primaryIdent: string;
     protected supabase: SupabaseClient<
         Database,
-        "prod" | "test",
-        Database["prod" | "test"]
+        "prod",
+        Database["prod"]
     >;
     protected query;
 
@@ -78,7 +75,7 @@ export class Album implements Fireable {
         releaseYear: number,
         numTracks: number,
         genre: string[],
-        supabase: SupabaseClient<any, "prod" | "test", any>,
+        supabase: SupabaseClient<any, "prod", any>,
         /* numDiscs: number, */
         albumId?: string,
     ) {
@@ -139,7 +136,7 @@ export class Album implements Fireable {
      * @throws {Error} If the album cannot be inserted or retrieved from the database.
      * @todo find some intelligent way to fall back to a worse query, which should never happen in reality
      */
-    public async getAlbumDbID(): Promise<number> {
+    public async getAlbumDbID(): Promise<string> {
         if (this.albumId) return this.albumId;
         log(6, `${JSON.stringify(this.queryHelper())}`);
         let { data, error } = await this.queryHelper();
@@ -188,11 +185,11 @@ export class Album implements Fireable {
         return this.primaryIdent;
     }
 
-    protected async mbFire() {
-        log(6, "mbfire called");
-        const mb = new MusicBrainzAlbum(this, this.supabase);
-        await mb.fire();
-    }
+    // protected async mbFire() {
+    //     log(6, "mbfire called");
+    //     const mb = new MusicBrainzAlbum(this, this.supabase);
+    //     await mb.fire();
+    // }
 
     /**
      *
@@ -246,7 +243,7 @@ export class SpotifyAlbum extends Album {
         releaseYear: number,
         numTracks: number,
         genre: string[],
-        supabase: SupabaseClient<any, "prod" | "test", any>,
+        supabase: SupabaseClient<any, "prod", any>,
         spotifyId: string,
         /* numDiscs: number, */
         albumId?: string,
@@ -274,7 +271,7 @@ export class SpotifyAlbum extends Album {
 
     static fromTestData(
         data: TestData,
-        supabase: SupabaseClient<any, "prod" | "test", any>,
+        supabase: SupabaseClient<any, "prod", any>,
         userId: string,
     ): SpotifyAlbum {
         const ret = new SpotifyAlbum(

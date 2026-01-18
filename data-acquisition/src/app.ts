@@ -16,15 +16,21 @@ async function reset() {
 }
 reset();
 
+type FailedReason = {
+    jobId: string;
+    failedReason: string;
+};
 // Create a QueueScheduler to manage job scheduling
-const queueEvents = new QueueEvents("my-cron-jobs", { connection });
-queueEvents.on("failed", ({ jobId, failedReason }) => {
+const queueEvents: QueueEvents = new QueueEvents("my-cron-jobs", {
+    connection,
+});
+queueEvents.on("failed", ({ jobId: jobId, failedReason }: FailedReason) => {
     console.error(`Job ${jobId} failed with error ${failedReason}`);
 });
 
 const queueEvents2 = new QueueEvents("spotifyAlbumPopularity", { connection });
 
-queueEvents2.on("failed", ({ jobId, failedReason }) => {
+queueEvents2.on("failed", ({ jobId, failedReason }: FailedReason) => {
     console.error(`Job ${jobId} failed with error ${failedReason}`);
 });
 // Graceful shutdown handling

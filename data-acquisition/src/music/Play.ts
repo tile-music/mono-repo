@@ -40,16 +40,16 @@ export class Play implements Fireable {
 
     protected supabase: SupabaseClient<
         Database,
-        "prod" | "test",
-        Database["prod" | "test"]
+        "prod",
+        Database["prod"]
     >;
 
     constructor(
         listenedAt: number,
         supabase: SupabaseClient<
             Database,
-            "prod" | "test",
-            Database["prod" | "test"]
+            "prod",
+            Database["prod"]
         >,
         userId: string,
         isrc?: string,
@@ -135,8 +135,8 @@ export class SpotifyPlay extends Play {
         trackPopularity: number,
         supabase: SupabaseClient<
             Database,
-            "prod" | "test",
-            Database["prod" | "test"]
+            "prod",
+            Database["prod"]
         >,
         userId: string,
         isrc?: string,
