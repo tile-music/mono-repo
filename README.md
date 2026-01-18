@@ -23,14 +23,6 @@ next restart it
 `docker compose up data-acquisition`
 handily tab completion works because the folder is in the current path and docker is smart enough to just drop the /
 
-You may also run docker compose with the watch argument, which will restart after the code changes. This only works for data acquistion and frontend for now
+## License
 
-`docker compose up --watch`
-
-its also possible to do it on an individual container like so
-
-`docker compose up frontend --watch`
-
-this is actually probably a better way to deal with it because then it gives some options at the bottom. like, view in docker desktop and disable watch, very nice
-
-please note that using watch seems to increase cpu usage noticeably on my machine i saw (including my whole system with the containers running, about 12-17% cpu usage up to as high as 50%
+This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](https://www.gnu.org/licenses/gpl-3.0.en.html).
