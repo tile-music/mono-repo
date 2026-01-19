@@ -5,47 +5,14 @@ import { assembleBlankProfile } from "./profile";
 import { log } from "$lib/log";
 import { resetListeningData } from "$lib/server/functions";
 
-export const load: PageServerLoad = async ({
-    locals: { supabase, user, profile },
-}) => {
-    if (!user) {
-        log(3, "User is not authenticated in protected route.");
-        throw error(401, "Not authenticated");
-    }
-
-    const email = user.email;
+export const load: PageServerLoad = async ({ locals: { user } }) => {
+    const email = user?.email;
     if (!email) {
-        log(3, "User does not have email in session.");
+        log(3, "User does not have email.");
         throw error(401, "Not authenticated");
     }
 
-    if (!profile) {
-        log(3, "User does not have profile in protected route.");
-
-        // Insert blank profile
-        const blankProfile = assembleBlankProfile(user.id, email);
-        const { data: newProfile, error: insertError } = await supabase
-            .from("profiles")
-              .upsert(blankProfile, {
-                onConflict: "id",
-              })
-              .select();
-
-        if (insertError || !newProfile || !newProfile[0]) {
-            log(
-                2,
-                "Error inserting blank profile: " +
-                    (insertError
-                        ? insertError.message
-                        : "profile was created but not returned"),
-            );
-            throw error(500, "Server error while creating profile");
-        }
-
-        profile = newProfile[0];
-    }
-
-    return { email, profile };
+    return { email, title: "Profile" };
 };
 
 export const actions: Actions = {
@@ -88,7 +55,7 @@ export const actions: Actions = {
         const { error: update_error } = await supabase
             .from("profiles")
             .update(update)
-            .eq("id", user.id)
+            .eq("id", user.id);
         if (update_error) {
             if (update_error.code === "23514") {
                 log(5, `Not updating ${user.id}: username too short`);
@@ -127,7 +94,7 @@ export const actions: Actions = {
         const { error: update_error } = await supabase
             .from("profiles")
             .update(update)
-            .eq("id", user.id)
+            .eq("id", user.id);
         if (update_error) {
             log(2, "Error updating profile theme: " + update_error);
             return fail(500, { server_error: true });
