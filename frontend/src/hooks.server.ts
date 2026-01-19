@@ -147,7 +147,7 @@ const profile: Handle = async ({ event, resolve }) => {
         log(
             3,
             "Error fetching profile of authenticated user:" +
-            JSON.stringify(fetchResult.error, null, 2),
+                JSON.stringify(fetchResult.error, null, 2),
         );
         event.locals.profile = null;
         return resolve(event);

@@ -14,9 +14,7 @@ declare global {
             user: User | null;
             profile: Profile | null;
         }
-        interface PageData {
-            profile: Profile | null;
-        }
+        // interface PageData {}
         // interface PageState {}
         // interface Platform {}
     }
