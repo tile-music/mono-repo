@@ -2,6 +2,7 @@
     export type ValidatedInputProps = InputProps & {
         error?: string;
         customError?: string;
+        floating?: boolean;
     };
 </script>
 
@@ -14,6 +15,7 @@
         input = $bindable(),
         error = $bindable(),
         customError,
+        floating = false,
         ...props
     }: ValidatedInputProps = $props();
 
@@ -144,7 +146,7 @@
     };
 </script>
 
-<div>
+<div data-error-variant={floating ? "floating" : "inline"}>
     <Input
         bind:input
         {...props}
@@ -161,19 +163,32 @@
 
 <style>
     div {
-        position: relative;
+        &[data-error-variant="floating"] {
+            position: relative;
 
-        .error {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            transform: translateY(calc(100% + 2px));
-            background: var(--bg-subtle);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            padding: 0.2em 0.5em;
-            z-index: 2;
-            text-align: center;
+            .error {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                transform: translateY(calc(100% + 2px));
+                background: var(--bg-subtle);
+                border: 1px solid var(--border);
+                border-radius: 5px;
+                padding: 0.2em 0.5em;
+                z-index: 2;
+                text-align: center;
+            }
+        }
+
+        &[data-error-variant="inline"] {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25em;
+
+            .error {
+                width: 100%;
+                color: var(--warning-subtle);
+            }
         }
     }
 </style>

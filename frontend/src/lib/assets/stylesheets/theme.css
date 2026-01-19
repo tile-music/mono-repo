@@ -9,14 +9,7 @@
 
     --accent: #e7762f; /* primary action / focus */
     --accent-subtle: #b85f29; /* hover / subtle accents */
-}
 
-.theme-default-dark {
-    --bg: #090808;
-    --bg-subtle: #242222;
-    --fg: #e5dfd0;
-    --fg-subtle: #b6b0a3;
-    --border: #5c5853;
-    --accent: #e7762f;
-    --accent-subtle: #b85f29;
+    --warning: #eb433d;
+    --warning-subtle: #ed6d68;
 }

@@ -1,96 +1,74 @@
+type FormValidation = {
+    valid: boolean;
+    data: {
+        email?: string;
+        password?: string;
+        confirm?: string;
+    };
+    failures: {
+        email: string;
+        password: string;
+        confirm: string;
+        general: string;
+    };
+};
+
 export function validateAccountForm(
     type: "login" | "register",
     formData: FormData,
 ): FormValidation {
-    const failures: Failures = {
-        missingEmail: false,
-        missingPassword: false,
-        passwordMismatch: false,
-        invalidEmail: false,
-        invalidPassword: {
-            tooShort: false,
-            tooLong: false,
-            noNumbers: false,
-        },
-        alreadyTaken: false,
+    const data = {
+        email: formData.get("email")?.toString(),
+        password: formData.get("password")?.toString(),
+        confirm: formData.get("confirm")?.toString(),
     };
 
-    const email = formData.get("email")?.toString();
-    if (!email || email.length === 0) failures.missingEmail = true;
-    else failures.invalidEmail = !validateWellFormedEmail(email);
+    const failures = {
+        email: "",
+        password: "",
+        confirm: "",
+        general: "",
+    };
 
-    const password = formData.get("password")?.toString();
-    if (!password || password.length === 0) failures.missingPassword = true;
-    else failures.invalidPassword = validateWellFormedPassword(password);
+    const email = data.email;
+    if (!email || email.length === 0) failures.email = "Email is required";
+    else failures.email = validateWellFormedEmail(email);
+
+    const password = data.password;
+    if (!password || password.length === 0)
+        failures.password = "Password is required";
+    else failures.password = validateWellFormedPassword(password);
 
     if (type === "register") {
-        const confirm = formData.get("confirm_password")?.toString();
-        if (!confirm || password !== confirm) failures.passwordMismatch = true;
+        const confirm = data.confirm;
+        if (!confirm || password !== confirm)
+            failures.confirm = "Password does not match";
     }
 
-    const missingAttribute = failures.missingEmail || failures.missingPassword;
-    const invalidPassword =
-        failures.invalidPassword.tooLong ||
-        failures.invalidPassword.tooShort ||
-        failures.invalidPassword.noNumbers;
-    const malformedCredentials =
-        failures.passwordMismatch || failures.invalidEmail || invalidPassword;
-    if (missingAttribute || (type === "register" && malformedCredentials))
-        return { valid: false, failures };
+    const valid =
+        failures.email === "" &&
+        failures.password === "" &&
+        failures.confirm === "" &&
+        failures.general === "";
 
     return {
-        valid: true,
-        failures: failures,
-        data: { email: email!, password: password! },
+        valid,
+        data,
+        failures,
     };
 }
 
 function validateWellFormedEmail(email: string) {
     const regex = /(.+)@(.+){2,}\.(.+){2,}/;
-    return regex.test(email);
+    return regex.test(email) ? "" : "Email is not well-formed";
 }
 
-function validateWellFormedPassword(password: string): InvalidPassword {
-    const invalidPassword: InvalidPassword = {
-        tooShort: false,
-        tooLong: false,
-        noNumbers: false,
-    };
+function validateWellFormedPassword(password: string): string {
+    if (password.length < 8) return "Password is too short";
+    if (password.length > 32) return "Password is too long";
 
-    if (password.length < 8) invalidPassword.tooShort = true;
-    if (password.length > 64) invalidPassword.tooLong = true;
+    if (!/\d/.test(password))
+        return "Password must contain at least one number";
 
-    const regex = /\d/;
-    invalidPassword.noNumbers = !regex.test(password);
-
-    return invalidPassword;
+    return "";
 }
-
-type FormValidation =
-    | {
-          valid: true;
-          failures: Failures;
-          data: {
-              email: string;
-              password: string;
-          };
-      }
-    | {
-          valid: false;
-          failures: Failures;
-      };
-
-export type Failures = {
-    missingEmail: boolean;
-    missingPassword: boolean;
-    passwordMismatch: boolean;
-    invalidEmail: boolean;
-    invalidPassword: InvalidPassword;
-    alreadyTaken: boolean;
-};
-
-type InvalidPassword = {
-    tooShort: boolean;
-    tooLong: boolean;
-    noNumbers: boolean;
-};

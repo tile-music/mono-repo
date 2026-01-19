@@ -50,8 +50,7 @@
         display: flex;
         position: absolute;
         right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
+        top: 8px;
         border: none;
         background: none;
         width: 20px;

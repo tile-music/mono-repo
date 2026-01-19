@@ -44,7 +44,7 @@
         }
 
         &:user-invalid {
-            border-color: red;
+            border-color: var(--warning);
         }
     }
 
