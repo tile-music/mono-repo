@@ -7,7 +7,7 @@
         size: number | string;
     }
 
-    const { profile, size } = $props();
+    const { profile, size }: Props = $props();
     const sizeString = $derived(typeof size === "number" ? size + "px" : size);
 
     function initials(name: string) {
@@ -18,8 +18,11 @@
 </script>
 
 <div class="icon" style:--size={sizeString}>
-    {#if profile.username || profile.full_name}
-        <span>{initials(profile.full_name ?? profile.username)}</span>
+    {#if profile.username !== "" || profile.full_name !== ""}
+        {@const text = initials(
+            profile.full_name !== "" ? profile.full_name : profile.username,
+        )}
+        <span style:--length={text.length}>{text}</span>
     {:else}
         <img src={sampleAvatar} alt="Generic user icon" />
     {/if}
@@ -36,6 +39,8 @@
         align-items: center;
         width: var(--size);
         height: var(--size);
+        overflow: clip;
+        flex-shrink: 0;
 
         img {
             width: 100%;
@@ -44,7 +49,8 @@
         }
 
         span {
-            font-size: calc(var(--size) * 0.4);
+            font-size: calc(var(--size) * 0.4 * pow(0.85, var(--length)));
+            font-family: "Mattone";
         }
     }
 </style>

@@ -10,6 +10,38 @@
     --accent: #e7762f; /* primary action / focus */
     --accent-subtle: #b85f29; /* hover / subtle accents */
 
+    --warning: #eb433d; /* error outlines */
+    --warning-subtle: #ed6d68; /* error messages */
+}
+
+.theme-dark {
+    --bg: #090808;
+    --bg-subtle: #242222;
+
+    --fg: #e5dfd0;
+    --fg-subtle: #a19b8f;
+
+    --border: #5c5853;
+
+    --accent: #e7762f;
+    --accent-subtle: #b85f29;
+
+    --warning: #eb433d;
+    --warning-subtle: #ed6d68;
+}
+
+.theme-light {
+    --bg: #f5f5f5;
+    --bg-subtle: #e0e0e0;
+
+    --fg: #202020;
+    --fg-subtle: #606060;
+
+    --border: #c0c0c0;
+
+    --accent: #e7762f;
+    --accent-subtle: #b85f29;
+
     --warning: #eb433d;
     --warning-subtle: #ed6d68;
 }

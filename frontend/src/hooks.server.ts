@@ -160,7 +160,7 @@ const profile: Handle = async ({ event, resolve }) => {
 
 const userTheme: Handle = async ({ event, resolve }) => {
     const { profile } = event.locals;
-    const theme = `theme-${profile?.theme ?? "theme-default-dark"}`;
+    const theme = `theme-${profile?.theme ?? "theme-dark"}`;
 
     return await resolve(event, {
         transformPageChunk: ({ html }) => html.replace("[theme]", theme),
