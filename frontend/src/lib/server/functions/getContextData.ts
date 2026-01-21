@@ -3,7 +3,7 @@ import type {
     ContextDataRequest,
     RankOutput,
     ContextDataResponse,
-} from "../../../../../lib/Request.ts";
+} from "$shared/Request.ts";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createSupabaseProdClient } from "../utils/supabase";
 
