@@ -1,4 +1,4 @@
-<script module>
+<script module lang="ts">
     export type InputProps = HTMLInputAttributes & {
         type: HTMLInputElement["type"];
         input?: HTMLInputElement;

@@ -77,7 +77,7 @@
         gap: 1em;
         justify-content: flex-start;
         align-items: center;
-        padding: 1em;
+        padding: 1em 1em 0 1em;
         position: relative;
 
         h1 {
