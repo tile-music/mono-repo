@@ -115,7 +115,7 @@ export class Play implements Fireable {
     }
 
     public async fire(): Promise<void> {
-        await this.pickMBID();
+        //await this.pickMBID();
         const { data: _data, error } = await this.supabase
             //.from(this.selectedMbid ? "played_tracks" : "unmatched_played_tracks")
             .from("played_tracks")

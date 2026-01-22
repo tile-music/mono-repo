@@ -75,7 +75,7 @@ export class Album implements Fireable {
         releaseYear: number,
         numTracks: number,
         genre: string[],
-        supabase: SupabaseClient<any, "prod", any>,
+        supabase: SupabaseClient<Database, "prod", Database["prod"]>,
         /* numDiscs: number, */
         albumId?: string,
     ) {
@@ -220,7 +220,7 @@ export class Album implements Fireable {
             }),
         );
         log(6, `musicbrainz fire for album ${this.title}`);
-        await this.mbFire();
+        //await this.mbFire();
     }
     public getTitle(): string {
         return this.title;
@@ -304,16 +304,16 @@ export class SpotifyAlbum extends Album {
                 ),
                 supabase,
                 data.trackNum,
-                data.discNum,
+                //data.discNum,
             ),
         );
         return ret;
     }
 
-    protected override async mbFire() {
-        const mb = new SpotifyMusicBrainzAlbum(this, this.supabase);
-        await mb.fire();
-    }
+    // protected override async mbFire() {
+    //     const mb = new SpotifyMusicBrainzAlbum(this, this.supabase);
+    //     await mb.fire();
+    // }
 
     public override createDbEntryObject() {
         return {

@@ -15,7 +15,7 @@ Deno.test('TrackInfo classes', async (t) => {
       const isrc = 'US1234567890';
       const durationMs = 300000;
 
-      const trackInfo = new Track(trackName, trackArtists, isrc, durationMs, new Play(4235236236234531512612, supabase, "blah"), supabase);
+      const trackInfo = new Track(trackName, trackArtists, isrc, durationMs, new Play(4235236236234531512612, supabase, "blah"), supabase, 98);
 
       expect(trackInfo).toBeInstanceOf(Track);
       expect(trackInfo['trackName']).toBe(trackName);
@@ -50,7 +50,7 @@ Deno.test('TrackInfo classes', async (t) => {
       const durationMs = 300000;
       const spotifyId = '1234567890';
 
-      const spotifyTrackInfo = new SpotifyTrack(trackName, trackArtists, isrc, durationMs, spotifyId,  new Play(4235236236234531512612, supabase, "blah"), supabase);
+      const spotifyTrackInfo = new SpotifyTrack(trackName, trackArtists, isrc, durationMs, spotifyId,  new Play(4235236236234531512612, supabase, "blah"), supabase, 99);
 
       expect(spotifyTrackInfo).toBeInstanceOf(SpotifyTrack);
       expect(spotifyTrackInfo['trackName']).toBe(trackName);

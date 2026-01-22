@@ -3,6 +3,7 @@ import { makeDataAcqQueue } from "./makeQueue.ts";
 
 import { log } from "../../../lib/log.ts";
 import "jsr:@std/dotenv/load";
+import { z } from "@zod";
 
 const queue = makeDataAcqQueue();
 // Create an instance of Express
@@ -18,6 +19,18 @@ async function removeJob(jobId: string) {
         failCount += 1;
     }
 }
+
+
+const addJobSchema = z.object({
+  userId: z.string().min(1, "userId cannot be empty"),
+  refreshToken: z.string().min(1, "refreshToken cannot be empty"),
+  type: z.literal("spotify"),
+});
+
+const removeJobSchema = z.object({
+  userId: z.string().min(1, "userId cannot be empty"),
+  type: z.literal("spotify"),
+});
 
 /**
  * Extracts the `userId`, `refreshToken`, and `type` properties from the request body.

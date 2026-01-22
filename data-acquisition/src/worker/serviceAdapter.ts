@@ -30,7 +30,7 @@ export async function makeDataAcqJobs() {
     await supabase
         .from("spotify_credentials")
         .select("*")
-        .then((items: ) => {
+        .then((items) => {
             console.log(items);
             items.data?.forEach(async (element) => {
                 await queue.add(

@@ -12,22 +12,17 @@ export type Database = {
       albums: {
         Row: {
           album_id: string
-          album_name: string | null
-          album_type: string | null
-          artists: string[] | null
+          album_name: string
+          album_type: string
+          artists: string[]
           ean: string | null
-          external_id: string | null
+          external_id: string
           genre: string[] | null
           image: string | null
-          image_1200: string | null
-          image_250: string | null
-          image_500: string | null
           image_large: string | null
           image_small: string | null
-          image_source: string | null
-          image_type: string | null
           num_dics: number | null
-          num_tracks: number | null
+          num_tracks: number
           release_day: number | null
           release_month: number | null
           release_year: number | null
@@ -35,22 +30,17 @@ export type Database = {
         }
         Insert: {
           album_id?: string
-          album_name?: string | null
-          album_type?: string | null
-          artists?: string[] | null
+          album_name: string
+          album_type: string
+          artists: string[]
           ean?: string | null
-          external_id?: string | null
+          external_id: string
           genre?: string[] | null
           image?: string | null
-          image_1200?: string | null
-          image_250?: string | null
-          image_500?: string | null
           image_large?: string | null
           image_small?: string | null
-          image_source?: string | null
-          image_type?: string | null
           num_dics?: number | null
-          num_tracks?: number | null
+          num_tracks: number
           release_day?: number | null
           release_month?: number | null
           release_year?: number | null
@@ -58,22 +48,17 @@ export type Database = {
         }
         Update: {
           album_id?: string
-          album_name?: string | null
-          album_type?: string | null
-          artists?: string[] | null
+          album_name?: string
+          album_type?: string
+          artists?: string[]
           ean?: string | null
-          external_id?: string | null
+          external_id?: string
           genre?: string[] | null
           image?: string | null
-          image_1200?: string | null
-          image_250?: string | null
-          image_500?: string | null
           image_large?: string | null
           image_small?: string | null
-          image_source?: string | null
-          image_type?: string | null
           num_dics?: number | null
-          num_tracks?: number | null
+          num_tracks?: number
           release_day?: number | null
           release_month?: number | null
           release_year?: number | null
@@ -130,22 +115,17 @@ export type Database = {
       }
       mb_release_groups: {
         Row: {
-          album_name: string | null
-          album_type: string | null
-          artists: string[] | null
+          album_name: string
+          album_type: string
+          artists: string[]
           created_at: number
           genre: string[] | null
           image: string | null
-          image_1200: string | null
-          image_250: string | null
-          image_500: string | null
           image_large: string | null
           image_small: string | null
-          image_source: string | null
-          image_type: string | null
           mbid: string
           num_dics: number | null
-          num_tracks: number | null
+          num_tracks: number
           primary_type: string | null
           release_day: number | null
           release_month: number | null
@@ -154,22 +134,17 @@ export type Database = {
           updated_at: number
         }
         Insert: {
-          album_name?: string | null
-          album_type?: string | null
-          artists?: string[] | null
+          album_name: string
+          album_type: string
+          artists: string[]
           created_at: number
           genre?: string[] | null
           image?: string | null
-          image_1200?: string | null
-          image_250?: string | null
-          image_500?: string | null
           image_large?: string | null
           image_small?: string | null
-          image_source?: string | null
-          image_type?: string | null
           mbid: string
           num_dics?: number | null
-          num_tracks?: number | null
+          num_tracks: number
           primary_type?: string | null
           release_day?: number | null
           release_month?: number | null
@@ -178,22 +153,17 @@ export type Database = {
           updated_at: number
         }
         Update: {
-          album_name?: string | null
-          album_type?: string | null
-          artists?: string[] | null
+          album_name?: string
+          album_type?: string
+          artists?: string[]
           created_at?: number
           genre?: string[] | null
           image?: string | null
-          image_1200?: string | null
-          image_250?: string | null
-          image_500?: string | null
           image_large?: string | null
           image_small?: string | null
-          image_source?: string | null
-          image_type?: string | null
           mbid?: string
           num_dics?: number | null
-          num_tracks?: number | null
+          num_tracks?: number
           primary_type?: string | null
           release_day?: number | null
           release_month?: number | null
@@ -205,23 +175,18 @@ export type Database = {
       }
       mb_releases: {
         Row: {
-          album_name: string | null
-          album_type: string | null
-          artists: string[] | null
+          album_name: string
+          album_type: string
+          artists: string[]
           created_at: number
           ean: string | null
           genre: string[] | null
           image: string | null
-          image_1200: string | null
-          image_250: string | null
-          image_500: string | null
           image_large: string | null
           image_small: string | null
-          image_source: string | null
-          image_type: string | null
           mbid: string
           num_dics: number | null
-          num_tracks: number | null
+          num_tracks: number
           release_day: number | null
           release_group_mbid: string | null
           release_month: number | null
@@ -231,23 +196,18 @@ export type Database = {
           updated_at: number
         }
         Insert: {
-          album_name?: string | null
-          album_type?: string | null
-          artists?: string[] | null
+          album_name: string
+          album_type: string
+          artists: string[]
           created_at: number
           ean?: string | null
           genre?: string[] | null
           image?: string | null
-          image_1200?: string | null
-          image_250?: string | null
-          image_500?: string | null
           image_large?: string | null
           image_small?: string | null
-          image_source?: string | null
-          image_type?: string | null
           mbid: string
           num_dics?: number | null
-          num_tracks?: number | null
+          num_tracks: number
           release_day?: number | null
           release_group_mbid?: string | null
           release_month?: number | null
@@ -257,23 +217,18 @@ export type Database = {
           updated_at: number
         }
         Update: {
-          album_name?: string | null
-          album_type?: string | null
-          artists?: string[] | null
+          album_name?: string
+          album_type?: string
+          artists?: string[]
           created_at?: number
           ean?: string | null
           genre?: string[] | null
           image?: string | null
-          image_1200?: string | null
-          image_250?: string | null
-          image_500?: string | null
           image_large?: string | null
           image_small?: string | null
-          image_source?: string | null
-          image_type?: string | null
           mbid?: string
           num_dics?: number | null
-          num_tracks?: number | null
+          num_tracks?: number
           release_day?: number | null
           release_group_mbid?: string | null
           release_month?: number | null
