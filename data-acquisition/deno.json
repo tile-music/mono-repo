@@ -1,7 +1,16 @@
 {
-  "nodeModulesDir": "auto",
-  "imports": {
-    "@std/testing": "jsr:@std/testing@^1.0.12"
-  }
-  
+    "nodeModulesDir": "auto",
+    "imports": {
+        "@std/testing": "jsr:@std/testing@^1.0.12",
+        "@zod": "npm:zod",
+        "_shared/": "../lib/",
+        "@bull": "npm:bullmq",
+        "@spofity":"npm:spotify-api.js",
+        "@musicbrainz": "npm:musicbrainz-api",
+        "@supabase": "jsr:@supabase/supabase-js@2",
+        "@node-fork": "node:child_process",
+        "@node-process": "node:process",
+        "@express": "npm:express",
+        "@munite": "jsr:@tile-music/munite"
+    }
 }

@@ -4,15 +4,12 @@ import { makeDataAcqJobs } from "./worker/serviceAdapter.ts";
 import { connection } from "./worker/redis.ts";
 import {
     makeDataAcqQueue,
-    makeSpotifyAlbumPopularityQueue,
 } from "./worker/makeQueue.ts";
 
 // Create a Queue instance
 const queue = makeDataAcqQueue();
-const queue2 = makeSpotifyAlbumPopularityQueue();
 async function reset() {
     await queue.obliterate({ force: true });
-    await queue2.obliterate({ force: true });
 }
 reset();
 
@@ -36,7 +33,6 @@ queueEvents2.on("failed", ({ jobId, failedReason }: FailedReason) => {
 // Graceful shutdown handling
 process.on("SIGINT", async () => {
     await queue.close();
-    await queue2.close();
     console.log("Worker and queue closed");
     process.exit(0);
 });

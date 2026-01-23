@@ -3,7 +3,7 @@ import { Fireable } from "./Fireable.ts";
 import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/constants.ts";
 
-import { Database } from "../../../lib/schema.ts";
+import { Database } from "_shared/schema.ts";
 
 /**
  * @file PlayedTrack.ts
@@ -75,17 +75,17 @@ export class Play implements Fireable {
             .eq("track_id", this.trackId)
             .eq("user_id", this.userId);
 
-        const mbids = mbid.data?.filter((v) => v.selected_mbid !== null);
-        if (Array.isArray(mbids) && mbids.length > 1)
-            this.selectedMbid = mbids[0].selected_mbid;
-        else {
-            const newMbids = await this.supabase
-                .from("album_mbids")
-                .select("mbid")
-                .eq("album_id", this.albumId);
-            log(6, `mbids: ${JSON.stringify(newMbids)}`);
-            this.selectedMbid = newMbids.data?.[0]?.mbid ?? null;
-        }
+        // const mbids = mbid.data?.filter((v) => v.selected_mbid !== null);
+        // if (Array.isArray(mbids) && mbids.length > 1)
+        //     this.selectedMbid = mbids[0].selected_mbid;
+        // else {
+        //     const newMbids = await this.supabase
+        //         .from("album_mbids")
+        //         .select("mbid")
+        //         .eq("album_id", this.albumId);
+        //     log(6, `mbids: ${JSON.stringify(newMbids)}`);
+        //     this.selectedMbid = newMbids.data?.[0]?.mbid ?? null;
+        // }
         log(6, `selected mbid:${JSON.stringify(mbid)}`);
     }
 

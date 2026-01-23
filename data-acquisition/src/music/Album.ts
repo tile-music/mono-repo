@@ -207,7 +207,7 @@ export class Album implements Fireable {
             num_tracks: this.numTracks,
             artists: this.artists,
             genre: this.genre,
-            image: this.image,
+            image_large: this.image,
             /* num_discs: this.numDiscs */
         };
     }
@@ -266,7 +266,7 @@ export class SpotifyAlbum extends Album {
     }
 
     protected override queryHelper() {
-        return this.query.eq("spotify_id", this.spotifyId);
+        return this.query.eq("external_id", this.spotifyId);
     }
 
     static fromTestData(
@@ -318,7 +318,7 @@ export class SpotifyAlbum extends Album {
     public override createDbEntryObject() {
         return {
             ...super.createDbEntryObject(),
-            spotify_id: this.spotifyId,
+            external_id: this.spotifyId,
         };
     }
 }
@@ -331,8 +331,7 @@ export type TestData = {
         albumName: string;
         albumArtists: string[];
         albumImage: string;
-        albumReleaseDay: number;
-        albumReleaseMonth: number;
+        d        albumReleaseMonth: number;
         albumReleaseYear: number;
         spotifyId: string;
         numTracks: number;
