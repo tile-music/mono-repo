@@ -9,9 +9,9 @@
         <img src={sample_collage} alt="A sample album art collage." />
     </div>
     <div class="middle">
-        <h1>one last thing...</h1>
+        <h1>One last thing...</h1>
         <LinkSpotify></LinkSpotify>
-        <DeleteUser><a href="/">cancel & delete account</a></DeleteUser>
+        <DeleteUser><a href="/">Cancel & delete account</a></DeleteUser>
     </div>
     <div class="right">
         <img src={sample_collage} alt="A second sample album art collage." />

@@ -101,7 +101,7 @@
                     <label for="email">Email:</label>
                     <Input type="email" name="email" id="email" required />
                 </Field>
-                <Button type="submit">sign up</Button>
+                <Button type="submit">Sign up</Button>
             </form>
             <p>We'll only email you once the app is ready — no spam, ever.</p>
         </div>
