@@ -271,28 +271,28 @@
     }}
     disabled={status !== "idle"}
 >
-    export
+    Export
 </Button>
 {#if status !== "idle"}
     <div id="popup-container">
         <div id="popup">
-            <h1>export display</h1>
+            <h1>Export display</h1>
             {#if status === "configuring"}
                 <Field row>
-                    <label for="orientation">orientation</label>
+                    <label for="orientation">Orientation</label>
                     <Select
                         name="orientation"
                         id="orientation"
                         bind:value={orientation}
                     >
-                        <option value="portrait">portrait</option>
-                        <option value="landscape">landscape</option>
-                        <option value="square">square</option>
+                        <option value="portrait">Portrait</option>
+                        <option value="landscape">Landscape</option>
+                        <option value="square">Square</option>
                     </Select>
                 </Field>
                 <Field row>
                     <label for="printFriendlyColors"
-                        >print friendly colors</label
+                        >Print friendly colors</label
                     >
                     <Input
                         type="radio"
@@ -303,7 +303,7 @@
                     />
                 </Field>
                 <Field row>
-                    <label for="themeColors">theme colors</label>
+                    <label for="themeColors">Theme colors</label>
                     <Input
                         type="radio"
                         name="colors"
@@ -312,13 +312,13 @@
                         bind:group={colors}
                     />
                 </Field>
-                <Button onclick={exportCanvas}>export</Button>
+                <Button onclick={exportCanvas}>Export</Button>
             {:else if status === "exporting"}
-                <p>exporting...</p>
+                <p>Exporting...</p>
             {:else if status === "error"}
-                <p class="error">error: {exportError}</p>
+                <p class="error">Error: {exportError}</p>
             {:else if status === "done"}
-                <p>export complete!</p>
+                <p>Export complete!</p>
             {/if}
             <img
                 bind:this={exportImage}
@@ -334,7 +334,7 @@
                     exportError = null;
                 }}
             >
-                close
+                Close
             </Button>
         </div>
     </div>
@@ -363,6 +363,7 @@
         align-items: center;
         padding: 20px;
         gap: 20px;
+        border-radius: 5px;
     }
 
     p {
