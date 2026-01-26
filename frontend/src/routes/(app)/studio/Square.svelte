@@ -100,25 +100,24 @@
 
     #cell-info {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 90%;
-        height: 90%;
+        inset: 0;
         display: flex;
         flex-direction: column;
-        /*background: linear-gradient(
+        background: linear-gradient(
             180deg,
-            var(--bg) 0%,
-            rgba(0, 0, 0, 0) 30%,
-            rgba(0, 0, 0, 0) 70%,
-            var(--bg) 100%
-        );*/
+            color(from var(--bg) srgb r g b / 0.5) 0%,
+            rgba(0, 0, 0, 0) 50%
+        );
         padding: 5%;
-    }
 
-    #cell-info > * {
-        color: var(--gradient-text);
-        line-height: 1.15;
+        p {
+            margin: 0;
+        }
+
+        & > * {
+            color: var(--fg);
+            line-height: 1.15;
+        }
     }
 
     #rank {
