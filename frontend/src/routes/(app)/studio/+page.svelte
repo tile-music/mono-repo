@@ -131,9 +131,9 @@
             <div id="placeholder-display">
                 <h1>No listening data!</h1>
                 <p>
-                    To generate a display, <a href="/link-spotify"
-                        >link your Spotify account</a
-                    > and listen to some music!
+                    To generate a display,
+                    <a href="/link-spotify"> link your Spotify account </a>
+                    and listen to some music!
                 </p>
             </div>
         {:else if refreshStatus.status == "idle"}
@@ -183,6 +183,14 @@
         height: 100%;
         display: flex;
         position: relative;
+
+        @media (max-width: 700px) {
+            flex-direction: column;
+
+            #display-container {
+                min-height: 100vh;
+            }
+        }
     }
 
     #display-container {
@@ -200,6 +208,7 @@
 
     #display {
         position: relative;
+        flex-shrink: 0;
     }
 
     #placeholder-display {
@@ -212,5 +221,11 @@
     #placeholder-display p {
         width: 20em;
         text-align: center;
+    }
+
+    :global {
+        #popover {
+            z-index: 2;
+        }
     }
 </style>

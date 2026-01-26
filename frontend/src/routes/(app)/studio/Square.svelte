@@ -91,7 +91,7 @@
     }
 
     #square:hover {
-        z-index: 10;
+        z-index: 2;
         transform: scale(1.3);
         transition:
             transform ease-out 0.2s,
@@ -106,13 +106,13 @@
         height: 90%;
         display: flex;
         flex-direction: column;
-        background: linear-gradient(
+        /*background: linear-gradient(
             180deg,
-            var(--gradient-background) 0%,
+            var(--bg) 0%,
             rgba(0, 0, 0, 0) 30%,
             rgba(0, 0, 0, 0) 70%,
-            var(--gradient-background) 100%
-        );
+            var(--bg) 100%
+        );*/
         padding: 5%;
     }
 
@@ -131,12 +131,10 @@
 
     img {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        width: calc(100% - 4px);
-        height: calc(100% - 4px);
-        outline: 2px solid var(--background);
-        border: 1px solid var(--background);
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        inset: 0;
         object-fit: cover;
     }
 </style>

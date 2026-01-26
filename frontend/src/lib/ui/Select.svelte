@@ -7,10 +7,15 @@
         variant?: "outline" | "inline";
     };
 
-    const { children, variant = "outline", ...props }: Props = $props();
+    let {
+        children,
+        variant = "outline",
+        value = $bindable(),
+        ...props
+    }: Props = $props();
 </script>
 
-<select data-variant={variant} {...props}>
+<select data-variant={variant} {...props} bind:value>
     {@render children?.()}
 </select>
 
@@ -18,6 +23,7 @@
     select {
         background: none;
         color: var(--fg);
+        border: none;
 
         &[data-variant="outline"] {
             border: 1px solid var(--border);

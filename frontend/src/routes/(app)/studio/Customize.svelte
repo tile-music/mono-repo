@@ -3,6 +3,7 @@
     import type { DisplayDataRequest } from "$shared/Request";
     import type { AggregatedSongs } from "./arrangement";
     import { getArrangement, arr_types } from "./arrangement";
+    import { Button, Field, Select, Input } from "$lib/ui";
 
     const arrangement = getArrangement();
     const displayState = getDisplayState();
@@ -103,43 +104,49 @@
 
 {#if hidden}
     <div id="open-menu-header">
-        <button
+        <Button
             onclick={() => {
                 hidden = false;
             }}
             id="open-menu"
-            class="art-display-menu-button">customize</button
+            class="art-display-menu-button"
         >
+            customize
+        </Button>
     </div>
 {:else}
     <div id="customize">
         <div id="close-menu-header">
             <h1>customize</h1>
-            <button
+            <Button
                 onclick={() => {
                     hidden = true;
                 }}
                 id="close-menu"
-                class="art-display-menu-button">close</button
+                class="art-display-menu-button"
             >
+                close
+            </Button>
         </div>
         <div id="options">
             <div class="input-section">
                 <h2>basic information</h2>
-                <div class="labeled-input">
+                <Field row>
                     <label for="music-type">music type</label>
-                    <select
+                    <Select
+                        variant="inline"
                         id="music-type"
                         bind:value={localFilters.aggregate}
                         onchange={updateFilters}
                     >
                         <option value="song">song</option>
                         <option value="album">album</option>
-                    </select>
-                </div>
-                <div class="labeled-input">
+                    </Select>
+                </Field>
+                <Field row>
                     <label for="time-frame">time frame</label>
-                    <select
+                    <Select
+                        variant="inline"
                         id="time-frame"
                         bind:value={context.timeFrame}
                         onchange={updateFilters}
@@ -150,107 +157,116 @@
                         <option value="this-year">this year</option>
                         <option value="all-time">all time</option>
                         <option value="custom">custom</option>
-                    </select>
-                </div>
+                    </Select>
+                </Field>
                 {#if context.timeFrame == "custom"}
-                    <div class="labeled-input" aria-label="custom-date">
+                    <Field row>
                         <label for="start-date">start date</label>
-                        <input
+                        <Input
+                            variant="inline"
                             id="start-date"
                             type="date"
                             name="start-date"
                             bind:value={context.dateStrings.start}
                             onblur={updateFilters}
                         />
-                    </div>
-                    <div class="labeled-input" aria-label="custom-date">
+                    </Field>
+                    <Field row>
                         <label for="end-date">end date</label>
-                        <input
+                        <Input
+                            variant="inline"
                             id="end-date"
                             type="date"
                             name="end-date"
                             bind:value={context.dateStrings.end}
                             onblur={updateFilters}
                         />
-                    </div>
+                    </Field>
                 {/if}
             </div>
             <div class="input-section">
                 <h2>display size</h2>
-                <div class="labeled-input">
+                <Field row>
                     <label for="num-cells">number of cells</label>
-                    <input
+                    <Input
+                        variant="inline"
                         id="num-cells"
                         type="number"
                         name="num-cells"
                         min="1"
                         bind:value={localFilters.num_cells}
-                        bind:this={numCells}
+                        bind:input={numCells}
                         onchange={() => numCells?.focus()}
                         onblur={updateFilters}
                         placeholder="max"
                     />
-                </div>
-                <div class="labeled-input">
+                </Field>
+                <Field row>
                     <label for="rank-determinant">rank determinant</label>
-                    <select
+                    <Select
+                        variant="inline"
                         id="rank-determinant"
                         bind:value={localFilters.rank_determinant}
                         onchange={updateFilters}
                     >
                         <option value="listens">listens</option>
                         <option value="time">time</option>
-                    </select>
-                </div>
+                    </Select>
+                </Field>
             </div>
             <div class="input-section">
                 <h2>display style</h2>
-                <div class="labeled-input">
+                <Field row>
                     <label for="show-cell-info">include cell info</label>
-                    <select
+                    <Select
+                        variant="inline"
                         id="show-cell-info"
                         bind:value={options.showCellInfo}
                     >
                         <option value="always">always</option>
                         <option value="on-hover">on hover</option>
                         <option value="never">never</option>
-                    </select>
-                </div>
+                    </Select>
+                </Field>
             </div>
             <div class="input-section">
                 <h2>header options</h2>
-                <div class="labeled-input">
+                <Field row>
                     <label for="show-header">show header</label>
-                    <input
+                    <Input
+                        variant="inline"
                         type="checkbox"
                         id="show-header"
                         bind:checked={options.header.showHeader}
                     />
-                </div>
-                <div class="labeled-input">
+                </Field>
+                <Field row>
                     <label for="name-source">name source</label>
-                    <select
+                    <Select
+                        variant="inline"
                         id="name-source"
                         bind:value={options.header.nameSource}
                     >
                         <option value="name">full name</option>
                         <option value="username">username</option>
-                    </select>
-                </div>
-                <div class="labeled-input">
+                    </Select>
+                </Field>
+                <Field row>
                     <label for="show-avatar">show avatar</label>
-                    <input
+                    <Input
+                        variant="inline"
                         type="checkbox"
                         id="show-avatar"
                         bind:checked={options.header.showAvatar}
                     />
-                </div>
+                </Field>
             </div>
             <div class="input-section">
                 <h2>arrangement options</h2>
-                <div class="labeled-input">
+                <Field row>
                     <label for="arr-type">arrangement type</label>
-                    <select
+                    <Select
+                        variant="inline"
                         name="arr-type"
                         id="arr-type"
                         bind:value={arrangement.type}
@@ -261,13 +277,14 @@
                                 >{arr_type.replaceAll("_", " ")}</option
                             >
                         {/each}
-                    </select>
-                </div>
+                    </Select>
+                </Field>
                 {#each Object.entries(arrangement.options) as [name, option]}
-                    <div class="labeled-input">
+                    <Field row>
                         <label for={name}>{option.label}</label>
                         {#if option.type == "number"}
-                            <input
+                            <Input
+                                variant="inline"
                                 type="number"
                                 {name}
                                 id={name}
@@ -279,7 +296,8 @@
                                     arrangement.generate(arrangement, songs)}
                             />
                         {:else if option.type == "checkbox"}
-                            <input
+                            <Input
+                                variant="inline"
                                 type="checkbox"
                                 {name}
                                 id={name}
@@ -290,7 +308,8 @@
                                     arrangement.generate(arrangement, songs)}
                             />
                         {:else if option.type == "select"}
-                            <select
+                            <Select
+                                variant="inline"
                                 id={name}
                                 bind:value={arrangement.state[name]}
                                 onchange={() =>
@@ -299,24 +318,31 @@
                                 {#each option.values as value}
                                     <option {value}>{value}</option>
                                 {/each}
-                            </select>
+                            </Select>
                         {/if}
-                    </div>
+                    </Field>
                 {/each}
             </div>
         </div>
         <div id="lower-btns">
-            <button
+            <Button
                 onclick={() => arrangement.generate(arrangement, songs)}
                 id="regenerate"
-                class="art-display-button">regenerate</button
+                class="art-display-button"
             >
+                regenerate
+            </Button>
             <Export {songs} {profile} />
         </div>
     </div>
 {/if}
 
 <style>
+    h1,
+    h2 {
+        margin: 0;
+    }
+
     #lower-btns {
         display: flex;
         gap: 20px;
@@ -338,12 +364,10 @@
     }
 
     #customize {
-        width: 30%;
-        min-width: 300px;
         height: 100%;
         display: flex;
         flex-direction: column;
-        gap: 30px;
+        gap: 1rem;
     }
 
     #options {
@@ -351,50 +375,18 @@
         flex-direction: column;
         gap: 30px;
         overflow: auto;
+        padding-right: 1rem;
     }
 
     .input-section {
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 2rem;
+        width: 20em;
     }
 
-    .labeled-input {
-        display: flex;
-        align-items: center;
-    }
-
-    .labeled-input label {
-        width: 150px;
-    }
-
-    select,
-    input[type="number"],
-    input[type="date"] {
-        background-color: var(--background);
-        border: 0;
-        border-bottom: 2px solid var(--medium);
-        font-family: "Archivo", sans-serif;
-        font-size: 15px;
-        padding: 2px; /* compensate for border */
-        color: var(--text);
-    }
-
-    select {
-        width: 100px;
-        -webkit-appearance: none;
-        appearance: none;
-    }
-
-    input[type="number"] {
-        width: 60px;
-    }
-
-    select:hover,
-    select:focus,
-    input:hover,
-    input:focus {
-        outline: none;
-        background-color: var(--midground);
+    label {
+        width: 10em;
+        flex-shrink: 0;
     }
 </style>

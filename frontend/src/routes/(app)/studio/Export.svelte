@@ -2,6 +2,7 @@
     import type { AggregatedSongs, SquareInfo } from "./arrangement";
     import { getHeadingText } from "./displayState";
     import type { Profile } from "$shared/Profile";
+    import { Button, Field, Input, Select } from "$lib/ui";
 
     import { getDisplayState } from "./displayState";
     import { getArrangement } from "./arrangement";
@@ -263,21 +264,23 @@
     }
 </script>
 
-<button
+<Button
     class="art-display-button"
     onclick={() => {
         status = "configuring";
     }}
-    disabled={status !== "idle"}>export</button
+    disabled={status !== "idle"}
 >
+    export
+</Button>
 {#if status !== "idle"}
     <div id="popup-container">
         <div id="popup">
             <h1>export display</h1>
             {#if status === "configuring"}
-                <div class="input-group">
+                <Field row>
                     <label for="orientation">orientation</label>
-                    <select
+                    <Select
                         name="orientation"
                         id="orientation"
                         bind:value={orientation}
@@ -285,33 +288,31 @@
                         <option value="portrait">portrait</option>
                         <option value="landscape">landscape</option>
                         <option value="square">square</option>
-                    </select>
-                </div>
-                <div class="input-group">
+                    </Select>
+                </Field>
+                <Field row>
                     <label for="printFriendlyColors"
                         >print friendly colors</label
                     >
-                    <input
+                    <Input
                         type="radio"
                         name="colors"
                         id="printFriendlyColors"
                         value="print-friendly"
                         bind:group={colors}
                     />
-                </div>
-                <div class="input-group">
+                </Field>
+                <Field row>
                     <label for="themeColors">theme colors</label>
-                    <input
+                    <Input
                         type="radio"
                         name="colors"
                         id="themeColors"
                         value="theme"
                         bind:group={colors}
                     />
-                </div>
-                <button class="art-display-button" onclick={exportCanvas}
-                    >export</button
-                >
+                </Field>
+                <Button onclick={exportCanvas}>export</Button>
             {:else if status === "exporting"}
                 <p>exporting...</p>
             {:else if status === "error"}
@@ -325,19 +326,26 @@
                 src=""
                 alt=""
             />
-            <button
+            <Button
+                variant="link"
                 id="close"
                 onclick={() => {
                     status = "idle";
                     exportError = null;
-                }}>close</button
+                }}
             >
+                close
+            </Button>
         </div>
     </div>
 {/if}
 <canvas bind:this={canvas}></canvas>
 
 <style>
+    h1 {
+        margin: 0;
+    }
+
     #popup-container {
         z-index: 2;
         display: flex;
@@ -349,7 +357,7 @@
     }
 
     #popup {
-        background-color: var(--midground);
+        background-color: var(--bg-subtle);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -363,29 +371,5 @@
 
     canvas {
         display: none;
-    }
-
-    #close {
-        color: var(--accent);
-        text-decoration: underline;
-        background-color: transparent;
-        border: none;
-        cursor: pointer;
-    }
-
-    select {
-        background-color: var(--midground);
-        border: 0;
-        border-bottom: 2px solid var(--medium);
-        font-family: "Archivo", sans-serif;
-        font-size: 15px;
-        padding: 2px; /* compensate for border */
-        color: var(--text);
-    }
-
-    .input-group {
-        display: flex;
-        gap: 20px;
-        align-items: center;
     }
 </style>

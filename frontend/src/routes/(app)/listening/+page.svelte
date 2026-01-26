@@ -33,6 +33,7 @@
                 }
             } else {
                 status = "error";
+                console.log(form?.failures);
             }
         };
     };
@@ -57,7 +58,7 @@
                     songs = [];
                 }}
             >
-                <option id="newest" value="newest">Newest</option>
+                <option id="newest" value="newest" selected>Newest</option>
                 <option id="oldest" value="oldest">Oldest</option>
             </Select>
         </label>
@@ -83,6 +84,7 @@
         name="offset"
         bind:this={offsetElement}
         autocomplete="off"
+        value={0}
     />
     <input type="hidden" name="limit" bind:value={limit} autocomplete="off" />
 </form>

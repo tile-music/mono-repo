@@ -44,4 +44,8 @@
         border-radius: 50%;
         object-fit: cover;
     }
+
+    h1 {
+        margin: 0;
+    }
 </style>

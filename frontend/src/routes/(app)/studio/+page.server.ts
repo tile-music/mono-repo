@@ -1,6 +1,10 @@
-import type { Actions } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import { getContextData, getDisplayData } from "$lib/server/functions";
+
+export const load: PageServerLoad = async () => {
+    return { title: "Studio" };
+};
 
 export const actions: Actions = {
     refresh: async ({ request, locals: { user } }) => {

@@ -6,6 +6,7 @@
     } from "$shared/Request";
     import { getDisplayState, timeFrameToText } from "./displayState";
     import { deserialize } from "$app/forms";
+    import { Button } from "$lib/ui";
 
     const displayState = getDisplayState();
     const context = $derived(displayState.context);
@@ -173,24 +174,24 @@
     <div id="metadata">
         <img src={album.image} alt={altText} />
         <div id="album-info">
-            <h1 id="name" style={`font-size: ${title_size}px;`}>
+            <h1 id="name" style:font-size="{title_size}px">
                 {album.title}
             </h1>
-            <h2 id="artists">{artistsText}</h2>
+            <h2 id="artists" style:font-size="{title_size}px">{artistsText}</h2>
             <p id="year">
                 {album.release_year == null
                     ? "unknown release year"
                     : album.release_year}
             </p>
-            <p id="rank">{rankText} ({quantityText})</p>
         </div>
     </div>
+    <p id="rank">{rankText} ({quantityText})</p>
     <table id="tracklist">
         <tbody>
             <tr id="headers">
-                <th class="title"><h2>tracklist</h2></th>
-                <th class="length"><h2>length</h2></th>
-                <th class="listened"><h2>listened</h2></th>
+                <th class="title">tracklist</th>
+                <th class="length">length</th>
+                <th class="listened">listened</th>
             </tr>
             {#await contextDataResponse}
                 <tr><td><p>waiting...</p></td></tr>
@@ -209,14 +210,14 @@
                     </tr>
                 {/each}
                 {#if album.tracks !== response.songs.length}
-                    <tr
-                        ><td
-                            ><em
-                                >+ {album.tracks - response.songs.length} unplayed
-                                songs</em
-                            ></td
-                        ></tr
-                    >
+                    <tr>
+                        <td>
+                            <em>
+                                + {album.tracks - response.songs.length} unplayed
+                                songs
+                            </em>
+                        </td>
+                    </tr>
                 {/if}
                 <!-- {:catch error}
                 <tr><td>Error: {() => {console.log(error); return error.toString()}}</td></tr> -->
@@ -232,18 +233,22 @@
         object-fit: cover;
     }
 
+    p {
+        margin: 0;
+    }
+
     #context-menu {
         position: absolute;
-        width: min(400px, 100%);
-        max-width: fit-content;
-        height: min(600px, 100%);
-        max-height: fit-content;
+        max-width: min(400px, 100%);
+        width: fit-content;
+        max-height: min(600px, 100%);
+        height: fit-content;
         padding: 7px 15px 15px 15px;
-        background-color: var(--midground);
+        background-color: var(--bg-subtle);
         display: flex;
         flex-direction: column;
-        overflow: scroll;
         z-index: 10;
+        gap: 0.5rem;
     }
 
     #context-menu.hidden {
@@ -257,7 +262,7 @@
     #handle {
         width: 100px;
         height: 6px;
-        background-color: var(--medium);
+        background-color: var(--border);
         margin: 0 auto 7px auto;
         border-radius: 5px;
         pointer-events: none;
@@ -270,14 +275,29 @@
     }
 
     #context-menu img {
-        width: 40%;
+        height: 8rem;
         aspect-ratio: 1/1;
+        flex-shrink: 0;
     }
 
     #album-info {
         display: flex;
         flex-direction: column;
         gap: 5px;
+
+        p {
+            margin: 0;
+        }
+
+        h1,
+        h2 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            line-clamp: 2;
+            -webkit-line-clamp: 2;
+            margin: 0;
+            overflow: hidden;
+        }
     }
 
     #artists {
@@ -289,6 +309,13 @@
         table-layout: fixed;
         border-collapse: separate;
         border-spacing: 0 10px;
+        overflow: auto;
+        display: block;
+    }
+
+    th {
+        font-size: 1rem;
+        margin: 0;
     }
 
     th.title {
