@@ -1,20 +1,17 @@
 <script lang="ts">
     import Logo from "$lib/components/Logo.svelte";
-    
+    import { Anchor } from "$lib/ui";
+
     interface Props {
-        children?: import('svelte').Snippet;
+        children?: import("svelte").Snippet;
     }
 
     let { children }: Props = $props();
 </script>
 
 <nav>
-    <Logo 
-        size="200px" 
-        color="var(--text)" 
-        class="nav-logo"
-    />
-    <a href="/register" class="art-display-button">get started</a>
+    <Logo size="200px" color="var(--fg)" class="nav-logo" />
+    <Anchor href="/register" variant="strong">get started</Anchor>
 </nav>
 {@render children?.()}
 
@@ -26,29 +23,28 @@
         align-items: center;
         position: sticky;
         top: 0;
-        background-color: var(--background);
+        background-color: var(--bg);
         z-index: 1;
     }
 
     nav::after {
-        content: '';
+        content: "";
         position: absolute;
         bottom: -40px;
         left: 0;
         right: 0;
         height: 40px;
-        background: linear-gradient(to bottom, var(--background, #ffffff), transparent);
+        background: linear-gradient(to bottom, var(--bg, #ffffff), transparent);
         pointer-events: none;
     }
 
-    .art-display-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-    }
+    :global {
+        body {
+            height: unset;
+        }
 
-    :global(.nav-logo) {
-        margin-right: auto;
+        .nav-logo {
+            margin-right: auto;
+        }
     }
 </style>
