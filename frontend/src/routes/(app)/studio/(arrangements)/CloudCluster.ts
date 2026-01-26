@@ -9,14 +9,14 @@ import { generateFullArrangement } from "./pack";
 const options = {
     offset_min: {
         type: "number",
-        label: "min offset",
+        label: "Min offset",
         min: 0.0,
         max: 0.3,
         step: 0.05,
     },
     offset_max: {
         type: "number",
-        label: "max offset",
+        label: "Max offset",
         min: 0.0,
         max: 0.3,
         step: 0.05,

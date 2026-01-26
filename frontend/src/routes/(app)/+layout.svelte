@@ -98,7 +98,7 @@
             background-color: var(--bg-subtle);
             border: 1px solid var(--border);
             border-radius: 5px;
-            bottom: 0;
+            bottom: -0.5rem;
             transform: translateY(100%);
             display: none;
             padding: 0.5em;
@@ -140,5 +140,11 @@
         margin: 1em;
         flex-grow: 1;
         min-height: 0;
+    }
+
+    :global {
+        body {
+            height: 100%;
+        }
     }
 </style>

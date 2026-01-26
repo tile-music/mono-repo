@@ -95,7 +95,7 @@
             live.
         </p>
         <div id="mailing-list">
-            <h2>get notified</h2>
+            <h2>Get notified</h2>
             <form action="https://formspree.io/f/xpwyljbd" method="POST">
                 <Field row>
                     <label for="email">Email:</label>
@@ -118,13 +118,12 @@
         <h2>tile.music</h2>
         <div id="footer-content">
             <p id="attributions">
-                Created by <a href="https://www.linkedin.com/in/sam-randa"
-                    >Sam Randa</a
-                >
+                Created by
+                <a href="https://www.linkedin.com/in/sam-randa">Sam Randa</a>
                 and
-                <a href="https://www.linkedin.com/in/ivy-bixler-65a57b297/"
-                    >Ivy Bixler</a
-                >
+                <a href="https://www.linkedin.com/in/ivy-bixler-65a57b297/">
+                    Ivy Bixler
+                </a>
             </p>
             <div id="resources">
                 <a href="https://github.com/tile-music/mono-repo">Code</a>
@@ -188,13 +187,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-
-    .art-display-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
     }
 
     #mailing-list {

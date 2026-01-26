@@ -144,11 +144,12 @@
     let quantityText = $derived.by(() => listenedText(quantity));
 
     // grab new context menu data every time the selected album changes
-    let contextDataResponse: Promise<ContextDataResponse> = $state(
+    let contextDataResponse: Promise<ContextDataResponse> = $derived(
         fetchContextMenuData(album.image),
     );
+
     $effect(() => {
-        contextDataResponse = fetchContextMenuData(album.image);
+        contextDataResponse;
         hidden = false;
         setTimeout(() => (canClose = true), CLOSE_BUFFER_MS);
     });
@@ -189,12 +190,12 @@
     <table id="tracklist">
         <tbody>
             <tr id="headers">
-                <th class="title">tracklist</th>
-                <th class="length">length</th>
-                <th class="listened">listened</th>
+                <th class="title">Tracklist</th>
+                <th class="length">Length</th>
+                <th class="listened">Listened</th>
             </tr>
             {#await contextDataResponse}
-                <tr><td><p>waiting...</p></td></tr>
+                <tr><td><p>Waiting...</p></td></tr>
                 {#each { length: album.tracks - 1 } as _}
                     <tr><td>...</td></tr>
                     <!-- placeholder songs to avoid jarring menu resize-->

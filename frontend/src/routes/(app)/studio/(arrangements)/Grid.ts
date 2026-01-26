@@ -9,7 +9,7 @@ const options = {
     height: { type: "number", label: "height", min: 1, max: 25 },
     size_modifier: {
         type: "select",
-        label: "size modifier",
+        label: "Size modifier",
         values: ["none", "linear"],
     },
 } as const;

@@ -111,13 +111,13 @@
             id="open-menu"
             class="art-display-menu-button"
         >
-            customize
+            Customize
         </Button>
     </div>
 {:else}
     <div id="customize">
         <div id="close-menu-header">
-            <h1>customize</h1>
+            <h1>Customize</h1>
             <Button
                 onclick={() => {
                     hidden = true;
@@ -125,43 +125,43 @@
                 id="close-menu"
                 class="art-display-menu-button"
             >
-                close
+                Close
             </Button>
         </div>
         <div id="options">
             <div class="input-section">
-                <h2>basic information</h2>
+                <h2>Basic information</h2>
                 <Field row>
-                    <label for="music-type">music type</label>
+                    <label for="music-type">Music type</label>
                     <Select
                         variant="inline"
                         id="music-type"
                         bind:value={localFilters.aggregate}
                         onchange={updateFilters}
                     >
-                        <option value="song">song</option>
-                        <option value="album">album</option>
+                        <option value="song">Song</option>
+                        <option value="album">Album</option>
                     </Select>
                 </Field>
                 <Field row>
-                    <label for="time-frame">time frame</label>
+                    <label for="time-frame">Time frame</label>
                     <Select
                         variant="inline"
                         id="time-frame"
                         bind:value={context.timeFrame}
                         onchange={updateFilters}
                     >
-                        <option value="this-week">this week</option>
-                        <option value="this-month">this month</option>
-                        <option value="year-to-date">year to date</option>
-                        <option value="this-year">this year</option>
-                        <option value="all-time">all time</option>
-                        <option value="custom">custom</option>
+                        <option value="this-week">This week</option>
+                        <option value="this-month">This month</option>
+                        <option value="year-to-date">Year to date</option>
+                        <option value="this-year">This year</option>
+                        <option value="all-time">All time</option>
+                        <option value="custom">Custom</option>
                     </Select>
                 </Field>
                 {#if context.timeFrame == "custom"}
                     <Field row>
-                        <label for="start-date">start date</label>
+                        <label for="start-date">Start date</label>
                         <Input
                             variant="inline"
                             id="start-date"
@@ -172,7 +172,7 @@
                         />
                     </Field>
                     <Field row>
-                        <label for="end-date">end date</label>
+                        <label for="end-date">End date</label>
                         <Input
                             variant="inline"
                             id="end-date"
@@ -185,9 +185,9 @@
                 {/if}
             </div>
             <div class="input-section">
-                <h2>display size</h2>
+                <h2>Display size</h2>
                 <Field row>
-                    <label for="num-cells">number of cells</label>
+                    <label for="num-cells">Number of cells</label>
                     <Input
                         variant="inline"
                         id="num-cells"
@@ -202,37 +202,37 @@
                     />
                 </Field>
                 <Field row>
-                    <label for="rank-determinant">rank determinant</label>
+                    <label for="rank-determinant">Rank determinant</label>
                     <Select
                         variant="inline"
                         id="rank-determinant"
                         bind:value={localFilters.rank_determinant}
                         onchange={updateFilters}
                     >
-                        <option value="listens">listens</option>
-                        <option value="time">time</option>
+                        <option value="listens">Listens</option>
+                        <option value="time">Time</option>
                     </Select>
                 </Field>
             </div>
             <div class="input-section">
-                <h2>display style</h2>
+                <h2>Display style</h2>
                 <Field row>
-                    <label for="show-cell-info">include cell info</label>
+                    <label for="show-cell-info">Include cell info</label>
                     <Select
                         variant="inline"
                         id="show-cell-info"
                         bind:value={options.showCellInfo}
                     >
-                        <option value="always">always</option>
-                        <option value="on-hover">on hover</option>
-                        <option value="never">never</option>
+                        <option value="always">Always</option>
+                        <option value="on-hover">On hover</option>
+                        <option value="never">Never</option>
                     </Select>
                 </Field>
             </div>
             <div class="input-section">
-                <h2>header options</h2>
+                <h2>Header options</h2>
                 <Field row>
-                    <label for="show-header">show header</label>
+                    <label for="show-header">Show header</label>
                     <Input
                         variant="inline"
                         type="checkbox"
@@ -241,18 +241,18 @@
                     />
                 </Field>
                 <Field row>
-                    <label for="name-source">name source</label>
+                    <label for="name-source">Name source</label>
                     <Select
                         variant="inline"
                         id="name-source"
                         bind:value={options.header.nameSource}
                     >
-                        <option value="name">full name</option>
-                        <option value="username">username</option>
+                        <option value="name">Full name</option>
+                        <option value="username">Username</option>
                     </Select>
                 </Field>
                 <Field row>
-                    <label for="show-avatar">show avatar</label>
+                    <label for="show-avatar">Show avatar</label>
                     <Input
                         variant="inline"
                         type="checkbox"
@@ -262,9 +262,9 @@
                 </Field>
             </div>
             <div class="input-section">
-                <h2>arrangement options</h2>
+                <h2>Arrangement options</h2>
                 <Field row>
-                    <label for="arr-type">arrangement type</label>
+                    <label for="arr-type">Arrangement type</label>
                     <Select
                         variant="inline"
                         name="arr-type"
@@ -330,7 +330,7 @@
                 id="regenerate"
                 class="art-display-button"
             >
-                regenerate
+                Regenerate
             </Button>
             <Export {songs} {profile} />
         </div>

@@ -166,7 +166,7 @@
             {/if}
         {:else if refreshStatus.status == "refreshing"}
             <div id="placeholder-display">
-                <h1>loading...</h1>
+                <h1>Loading...</h1>
             </div>
         {:else}
             <div id="placeholder-display">

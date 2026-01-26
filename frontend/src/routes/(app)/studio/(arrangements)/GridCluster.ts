@@ -6,9 +6,9 @@ import type {
 } from "../arrangement";
 
 const options = {
-    grid_size: { type: "number", label: "grid size", min: 5, max: 100 },
-    min_size: { type: "number", label: "min size", min: 1, max: 25 },
-    max_size: { type: "number", label: "max size", min: 1, max: 25 },
+    grid_size: { type: "number", label: "Grid size", min: 5, max: 100 },
+    min_size: { type: "number", label: "Min size", min: 1, max: 25 },
+    max_size: { type: "number", label: "Max size", min: 1, max: 25 },
 } as const;
 
 const state: ArrangementState<typeof options> = {

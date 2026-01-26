@@ -11,7 +11,7 @@
 
 <nav>
     <Logo size="200px" color="var(--fg)" class="nav-logo" />
-    <Anchor href="/register" variant="strong">get started</Anchor>
+    <Anchor href="/register" variant="strong">Get started</Anchor>
 </nav>
 {@render children?.()}
 
