@@ -5,3 +5,7 @@
 </script>
 
 <AccountForm {form} type={"register"} />
+
+<svelte:head>
+    <title>tile.music | Register</title>
+</svelte:head>

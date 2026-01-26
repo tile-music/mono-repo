@@ -15,6 +15,10 @@
 </nav>
 {@render children?.()}
 
+<svelte:head>
+    <title>tile.music</title>
+</svelte:head>
+
 <style>
     nav {
         padding: 2rem 2rem 0 2rem;

@@ -65,6 +65,10 @@
 
 <svelte:document onclick={handleClick} />
 
+<svelte:head>
+    <title>{title ? "tile.music | " + title : "tile.music"}</title>
+</svelte:head>
+
 <style>
     #container {
         height: 100%;

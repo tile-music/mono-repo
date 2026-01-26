@@ -18,6 +18,10 @@
     </div>
 </div>
 
+<svelte:head>
+    <title>tile.music | Link Spotify</title>
+</svelte:head>
+
 <style>
     .content {
         width: 100%;
