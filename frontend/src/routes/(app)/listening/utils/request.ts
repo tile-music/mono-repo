@@ -2,7 +2,8 @@
  * Represents a listening data request, containing properties for pagination.
  */
 export type ListeningDataRequest = {
-    start_time_s: number;
+    date: string; // YYYY-MM-DD
+    order: "newest" | "oldest";
     offset: number;
     limit: number;
 };
@@ -25,62 +26,25 @@ export function validateListeningDataRequest(
         return Number.isFinite(num) ? num : NaN;
     };
 
-    // Helper to parse epoch seconds
-    const parseEpochSeconds = (value: FormDataEntryValue | null) => {
-        if (value === null) return NaN;
-        const num =
-            typeof value === "string"
-                ? Number.parseFloat(value)
-                : Number(value);
-        return Number.isFinite(num) ? num : NaN;
-    };
-
     // Extract form values
-    const startTimeRaw = form.get("start_time_s");
-    const startDateRaw = form.get("start_date");
+    const order = form.get("order");
+    const dateRaw = form.get("date");
     const offsetRaw = form.get("offset");
     const limitRaw = form.get("limit");
 
-    // Resolve start_time_s: prefer explicit start_time_s, else allow start_date (YYYY-MM-DD)
-    let start_time_s: number;
+    // Resolve order
+    if (order === null) throw { order: "Order is required." };
+    if (order !== "newest" && order !== "oldest")
+        throw { order: "Order must be 'newest' or 'oldest'." };
 
-    if (startTimeRaw !== null && String(startTimeRaw).trim() !== "") {
-        const parsedStart = parseEpochSeconds(startTimeRaw);
-        if (!Number.isFinite(parsedStart) || Number.isNaN(parsedStart)) {
-            throw {
-                start_time_s:
-                    "Start time must be a valid number in epoch seconds.",
-            };
-        }
-        if (parsedStart < 0) {
-            throw {
-                start_time_s: "Start time must be greater than or equal to 0.",
-            };
-        }
-        // Accept fractional seconds but normalize to integer seconds
-        start_time_s = Math.floor(parsedStart);
-    } else if (startDateRaw !== null && String(startDateRaw).trim() !== "") {
-        const dateStr = String(startDateRaw).trim();
-
-        // Basic YYYY-MM-DD validation
-        const yyyyMmDd = /^(\d{4})-(\d{2})-(\d{2})$/;
-        const match = dateStr.match(yyyyMmDd);
-        if (!match) {
-            throw { start_date: "Invalid date format. Expected YYYY-MM-DD." };
-        }
-
-        // Date parsing: "YYYY-MM-DD" is interpreted as UTC by Date.parse in JS
-        const ms = Date.parse(dateStr);
-        if (!Number.isFinite(ms)) {
-            throw { start_date: "Invalid date value." };
-        }
-
-        start_time_s = Math.floor(ms / 1000);
-        if (start_time_s < 0) {
-            throw { start_date: "Date must be on or after 1970-01-01." };
-        }
-    } else {
-        throw { general: "Provide either start time or start date." };
+    // Resolve date
+    let date =
+        order === "newest"
+            ? new Date().toISOString().slice(0, 10)
+            : "1970-01-01";
+    const datePattern = /^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/;
+    if (typeof dateRaw === "string" && datePattern.test(dateRaw)) {
+        date = dateRaw;
     }
 
     // Resolve offset with default 0
@@ -116,7 +80,8 @@ export function validateListeningDataRequest(
     }
 
     return {
-        start_time_s,
+        order,
+        date,
         offset,
         limit,
     };

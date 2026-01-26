@@ -48,6 +48,7 @@ export async function queryListeningData(
     request: ListeningDataRequest,
 ): Promise<SongInfo[]> {
     const supabase = createSupabaseProdClient();
+
     let query = supabase
         .from("played_tracks")
         .select(
@@ -57,8 +58,17 @@ export async function queryListeningData(
             albums ( album_name, num_tracks, release_day,release_month,release_year, artists, image, upc, spotify_id))
             `,
         )
-        .eq("user_id", userId)
-        .order("listened_at", { ascending: false })
+        .eq("user_id", userId);
+
+    const date_ms = new Date(request.date).getTime();
+    if (request.order === "oldest") {
+        query = query.gt("listened_at", date_ms);
+    } else {
+        query = query.lt("listened_at", date_ms + 86400000); // 1 day
+    }
+
+    query = query
+        .order("listened_at", { ascending: request.order === "oldest" })
         .range(request.offset, request.offset + request.limit - 1);
 
     const { data: rawData, error } = await query;

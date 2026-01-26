@@ -1,13 +1,12 @@
 <script lang="ts">
     import type { PageProps, SubmitFunction } from "./$types";
     import Song from "./Song.svelte";
-    import { Field, ValidatedInput, Button } from "$lib/ui";
+    import { Field, ValidatedInput, Select } from "$lib/ui";
     import { enhance } from "$app/forms";
     import IntersectionObserver from "$lib/components/IntersectionObserver.svelte";
 
     const { data, form }: PageProps = $props();
 
-    let offset = $state(0);
     let limit = $state(50);
 
     let songs = $derived(data.songs);
@@ -16,9 +15,7 @@
     );
 
     let formElement: HTMLFormElement;
-    function submitForm() {
-        formElement.requestSubmit();
-    }
+    let offsetElement: HTMLInputElement;
 
     const handleSubmit: SubmitFunction = () => {
         status = "loading";
@@ -39,27 +36,55 @@
             }
         };
     };
+
+    function changeOffset(offset: number) {
+        if (offsetElement) {
+            offsetElement.value = offset.toString();
+            formElement.requestSubmit();
+        }
+    }
 </script>
 
 <form method="POST" bind:this={formElement} use:enhance={handleSubmit}>
     <Field>
-        <label>
-            <span>Start Date</span>
-            <ValidatedInput
-                type="date"
-                name="start_date"
-                id="start_date"
-                value={new Date().toISOString().split("T")[0]}
+        <label id="order-group">
+            <span>Order:</span>
+            <Select
+                name="order"
+                id="order"
                 onchange={() => {
-                    offset = 0;
+                    changeOffset(0);
                     songs = [];
-                    submitForm();
                 }}
+            >
+                <option id="newest" value="newest">Newest</option>
+                <option id="oldest" value="oldest">Oldest</option>
+            </Select>
+        </label>
+    </Field>
+    <Field>
+        <label id="date-group">
+            <span id="until">Until:</span>
+            <span id="since">Since:</span>
+            <ValidatedInput
+                id="date"
+                type="date"
+                name="date"
+                onchange={() => {
+                    changeOffset(0);
+                    songs = [];
+                }}
+                autocomplete="off"
             />
         </label>
     </Field>
-    <input type="hidden" name="offset" bind:value={offset} />
-    <input type="hidden" name="limit" bind:value={limit} />
+    <input
+        type="hidden"
+        name="offset"
+        bind:this={offsetElement}
+        autocomplete="off"
+    />
+    <input type="hidden" name="limit" bind:value={limit} autocomplete="off" />
 </form>
 <section>
     {#each songs as song}
@@ -69,19 +94,40 @@
         <div id="observer">
             <IntersectionObserver
                 onIntersect={() => {
-                    offset += limit;
-                    submitForm();
+                    changeOffset(parseInt(offsetElement.value) + limit);
                 }}
             />
         </div>
     {:else if status === "loading"}
         <p>Loading more songs...</p>
     {:else if status === "exhausted"}
-        <p>You've reached the beginning of your listening history!</p>
+        <p>You've reached the end of your listening history!</p>
     {/if}
 </section>
 
 <style>
+    form {
+        display: flex;
+        gap: 1em;
+        margin-bottom: 1em;
+
+        label {
+            display: flex;
+            gap: 0.5em;
+            align-items: center;
+        }
+
+        &:has(#newest:checked) #date-group {
+            #until {
+                display: inline;
+            }
+
+            #since {
+                display: none;
+            }
+        }
+    }
+
     section {
         padding-bottom: 1rem;
     }
@@ -89,5 +135,15 @@
     #observer {
         position: relative;
         top: -200px;
+    }
+
+    #date-group {
+        #until {
+            display: none;
+        }
+
+        #since {
+            display: inline;
+        }
     }
 </style>

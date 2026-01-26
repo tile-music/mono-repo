@@ -19,10 +19,14 @@ export const load: PageServerLoad = async ({ locals: { user, profile } }) => {
     let error: string | null = null;
 
     try {
+        const currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() + 1);
+
         songs = await queryListeningData(user.id, {
+            order: "newest",
+            date: currentDate.toISOString().split("T")[0],
             offset: 0,
             limit: 50,
-            start_time_s: Math.floor(Date.now() / 1000),
         });
 
         status = "success";
