@@ -25,7 +25,9 @@
     } = $props();
 
     // store local copy of filters to compare when changed
-    const localFilters: DisplayDataRequest = $state({ ...filters });
+    const localFilters: DisplayDataRequest = $derived(
+        structuredClone($state.snapshot(filters)),
+    );
 
     // handles hide/show functionality
     let hidden = $state(false);
