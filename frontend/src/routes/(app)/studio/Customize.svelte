@@ -404,7 +404,7 @@
             color: var(--fg);
         }
 
-        :global(#export svg) {
+        #export :global(svg) {
             transform: rotate(-90deg);
         }
 
