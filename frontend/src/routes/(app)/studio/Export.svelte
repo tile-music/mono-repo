@@ -16,15 +16,15 @@
     let {
         songs,
         profile,
+        status = $bindable(),
     }: {
         songs: AggregatedSongs;
         profile: Profile | null;
+        status: "idle" | "configuring" | "exporting" | "error" | "done";
     } = $props();
 
     let canvas: HTMLCanvasElement;
     let exportImage: HTMLImageElement | null = $state(null);
-    let status: "idle" | "configuring" | "exporting" | "error" | "done" =
-        $state("idle");
     let exportError: string | null = $state(null);
     let orientation: "portrait" | "landscape" | "square" = $state("portrait");
     let colors: "print-friendly" | "theme" = $state("print-friendly");
@@ -264,81 +264,64 @@
     }
 </script>
 
-<Button
-    class="art-display-button"
-    onclick={() => {
-        status = "configuring";
-    }}
-    disabled={status !== "idle"}
->
-    Export
-</Button>
-{#if status !== "idle"}
-    <div id="popup-container">
-        <div id="popup">
-            <h1>Export display</h1>
-            {#if status === "configuring"}
-                <Field row>
-                    <label for="orientation">Orientation</label>
-                    <Select
-                        name="orientation"
-                        id="orientation"
-                        bind:value={orientation}
-                    >
-                        <option value="portrait">Portrait</option>
-                        <option value="landscape">Landscape</option>
-                        <option value="square">Square</option>
-                    </Select>
-                </Field>
-                <Field row>
-                    <label for="printFriendlyColors"
-                        >Print friendly colors</label
-                    >
-                    <Input
-                        type="radio"
-                        name="colors"
-                        id="printFriendlyColors"
-                        value="print-friendly"
-                        bind:group={colors}
-                    />
-                </Field>
-                <Field row>
-                    <label for="themeColors">Theme colors</label>
-                    <Input
-                        type="radio"
-                        name="colors"
-                        id="themeColors"
-                        value="theme"
-                        bind:group={colors}
-                    />
-                </Field>
-                <Button onclick={exportCanvas}>Export</Button>
-            {:else if status === "exporting"}
-                <p>Exporting...</p>
-            {:else if status === "error"}
-                <p class="error">Error: {exportError}</p>
-            {:else if status === "done"}
-                <p>Export complete!</p>
-            {/if}
-            <img
-                bind:this={exportImage}
-                hidden={status !== "done"}
-                src=""
-                alt=""
-            />
-            <Button
-                variant="link"
-                id="close"
-                onclick={() => {
-                    status = "idle";
-                    exportError = null;
-                }}
-            >
-                Close
-            </Button>
-        </div>
+<div id="popup-container" class:visible={status !== "idle"}>
+    <div id="popup">
+        <h1>Export display</h1>
+        {#if status === "configuring"}
+            <Field row>
+                <label for="orientation">Orientation</label>
+                <Select
+                    name="orientation"
+                    id="orientation"
+                    bind:value={orientation}
+                >
+                    <option value="portrait">Portrait</option>
+                    <option value="landscape">Landscape</option>
+                    <option value="square">Square</option>
+                </Select>
+            </Field>
+            <Field row>
+                <label for="printFriendlyColors">Print friendly colors</label>
+                <Input
+                    type="radio"
+                    name="colors"
+                    id="printFriendlyColors"
+                    value="print-friendly"
+                    bind:group={colors}
+                />
+            </Field>
+            <Field row>
+                <label for="themeColors">Theme colors</label>
+                <Input
+                    type="radio"
+                    name="colors"
+                    id="themeColors"
+                    value="theme"
+                    bind:group={colors}
+                />
+            </Field>
+            <Button onclick={exportCanvas}>Export</Button>
+        {:else if status === "exporting"}
+            <p>Exporting...</p>
+        {:else if status === "error"}
+            <p class="error">Error: {exportError}</p>
+        {:else if status === "done"}
+            <p>Export complete!</p>
+        {/if}
+        <img bind:this={exportImage} hidden={status !== "done"} src="" alt="" />
+        <Button
+            variant="link"
+            id="close"
+            onclick={() => {
+                status = "idle";
+                exportError = null;
+            }}
+        >
+            Close
+        </Button>
     </div>
-{/if}
+</div>
+
 <canvas bind:this={canvas}></canvas>
 
 <style>
@@ -348,12 +331,16 @@
 
     #popup-container {
         z-index: 2;
-        display: flex;
+        display: none;
         position: absolute;
         inset: 0;
         justify-content: center;
         align-items: center;
         background-color: rgba(0, 0, 0, 0.5);
+
+        &.visible {
+            display: flex;
+        }
     }
 
     #popup {

@@ -28,6 +28,7 @@
 <div id="container">
     <nav>
         <a href="/studio"><Logo badge size="50px" /></a>
+        <div class="divider"></div>
         <h1>{title ?? "Default title"}</h1>
         <button
             onclick={(e) => {
@@ -94,6 +95,12 @@
             margin: 0;
             margin-left: auto;
             padding: 0;
+        }
+
+        .divider {
+            height: 60%;
+            width: 1px;
+            background-color: var(--border);
         }
 
         #popover {

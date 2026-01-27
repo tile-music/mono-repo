@@ -183,14 +183,6 @@
         height: 100%;
         display: flex;
         position: relative;
-
-        @media (max-width: 700px) {
-            flex-direction: column;
-
-            #display-container {
-                min-height: 100vh;
-            }
-        }
     }
 
     #display-container {
