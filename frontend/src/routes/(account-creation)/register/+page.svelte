@@ -1,5 +1,11 @@
-<script>
-    import AccountForm from '../AccountForm.svelte';
+<script lang="ts">
+    import AccountForm from "../AccountForm.svelte";
+    import type { ActionData } from "./$types";
+    let { form }: { form: ActionData } = $props();
 </script>
 
-<AccountForm type={"register"} />
+<AccountForm {form} type={"register"} />
+
+<svelte:head>
+    <title>tile.music | Register</title>
+</svelte:head>

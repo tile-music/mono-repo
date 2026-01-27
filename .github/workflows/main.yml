@@ -2,60 +2,61 @@
 # NOTE: Apparently GH provides its own runners? That's kinda cool!
 name: Test
 on:
-  pull_request:
-    branches:
-    - main
-  push:
-    branches:
-    - main
-    # We can add more branches/regexes here if we want our dev branches to have constant testing too
+    pull_request:
+        branches:
+            - main
+    push:
+        branches:
+            - main
+        # We can add more branches/regexes here if we want our dev branches to have constant testing too
 
 jobs:
-  test:
-    name: Run development tests
-    # runs-on: [self-hosted, linux]
-    runs-on: ubuntu-latest
+    test:
+        name: Run development tests
+        # runs-on: [self-hosted, linux]
+        runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4 # This is very cool we do not need to manually checkout
-      with:
-        submodules: recursive
-    - name: Install Deno
-      uses: denoland/setup-deno@v2
-      with:
-        deno-version: v2.x
-    - name: Setup env
-      env: 
-        ENV_SH_CONTENT: ${{ secrets.ENV_SH }}
-        FRONTEND_SUPABASE: ${{ secrets.FRONTEND_SERVICE_KEY }}
-      run: |
-        echo "$ENV_SH_CONTENT" > env.sh
-        chmod +x env.sh
-        ./env.sh
-        echo "$FRONTEND_SUPABASE" >> frontend/.env.local
-      shell: bash
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4 # This is very cool we do not need to manually checkout
+              with:
+                  submodules: recursive
+            - name: Install Deno
+              uses: denoland/setup-deno@v2
+              with:
+                  deno-version: v2.x
+            - name: Setup env
+              env:
+                  ENV_SH_CONTENT: ${{ secrets.ENV_SH }}
+                  FRONTEND_SUPABASE: ${{ secrets.FRONTEND_SERVICE_KEY }}
+              run: |
+                  echo "$ENV_SH_CONTENT" > env.sh
+                  chmod +x env.sh
+                  ./env.sh
+                  echo "$FRONTEND_SUPABASE" >> frontend/.env.local
+              shell: bash
 
-    - name: Build, run docker images
-      run: |
-        docker compose build
-        docker compose up -d
+            - name: Build, run docker images
+              run: |
+                  docker compose build lib-node lib-deno
+                  docker compose build
+                  docker compose up -d
 
-    - name: Run frontend tests
-      working-directory: frontend/
-      run: |
-        npm i
-        npm i -g vitest
-        npm run build
-        npm run test
+            - name: Run frontend tests
+              working-directory: frontend/
+              run: |
+                  npm i
+                  npm i -g vitest
+                  npm run build
+                  npm run test
 
-    - name: Run dataaq tests
-      working-directory: data-acquisition/
-      run: |
-        deno test --no-check --allow-all
+            - name: Run dataaq tests
+              working-directory: data-acquisition/
+              run: |
+                  deno test --no-check --allow-all
 
-    - name: Celebrate
-      run: echo "Hurray! Nothing broke before this! At least I hope..."
+            - name: Celebrate
+              run: echo "Hurray! Nothing broke before this! At least I hope..."
 
-    - name: down
-      run: docker compose down 
+            - name: down
+              run: docker compose down

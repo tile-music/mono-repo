@@ -9,7 +9,7 @@
  * @returns A new profile object that can displayed or used in database inserts
  */
 export function assembleBlankProfile(id: string, email?: string) {
-    let username = null;
+    let username = "";
     if (email) {
         const domain = email.split("@")[0];
         if (domain.length >= 3) username = domain;
@@ -20,9 +20,9 @@ export function assembleBlankProfile(id: string, email?: string) {
         id: id,
         updated_at: new Date(),
         username,
-        full_name: null,
-        website: null,
-        avatar_url: null,
+        full_name: "",
+        website: "",
+        avatar_url: "",
         theme: "dark",
     };
 }

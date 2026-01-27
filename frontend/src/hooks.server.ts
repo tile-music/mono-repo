@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { log } from "$lib/log";
@@ -8,6 +8,12 @@ import {
     PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
 import type { Profile } from "$shared/Profile";
+
+type SupabaseCookie = {
+    name: string;
+    value: string;
+    options: CookieOptions;
+};
 
 const supabase: Handle = async ({ event, resolve }) => {
     /**
@@ -20,13 +26,15 @@ const supabase: Handle = async ({ event, resolve }) => {
         PUBLIC_SUPABASE_ANON_KEY,
         {
             cookies: {
-                getAll: () => event.cookies.getAll(),
+                getAll() {
+                    return event.cookies.getAll();
+                },
                 /**
                  * SvelteKit's cookies API requires `path` to be explicitly set in
                  * the cookie options. Setting `path` to `/` replicates previous/
                  * standard behavior.
                  */
-                setAll: (cookiesToSet) => {
+                setAll(cookiesToSet: SupabaseCookie[]) {
                     cookiesToSet.forEach(({ name, value, options }) => {
                         event.cookies.set(name, value, {
                             ...options,
@@ -147,7 +155,7 @@ const profile: Handle = async ({ event, resolve }) => {
         log(
             3,
             "Error fetching profile of authenticated user:" +
-            JSON.stringify(fetchResult.error, null, 2),
+                JSON.stringify(fetchResult.error, null, 2),
         );
         event.locals.profile = null;
         return resolve(event);
@@ -160,7 +168,7 @@ const profile: Handle = async ({ event, resolve }) => {
 
 const userTheme: Handle = async ({ event, resolve }) => {
     const { profile } = event.locals;
-    const theme = `theme-${profile?.theme ?? "theme-default-dark"}`;
+    const theme = `theme-${profile?.theme ?? "theme-dark"}`;
 
     return await resolve(event, {
         transformPageChunk: ({ html }) => html.replace("[theme]", theme),

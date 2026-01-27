@@ -1,187 +1,151 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
-    import { deserialize } from "$app/forms";
-
-    import Customize from "./Customize.svelte";
+    import type { PageProps, SubmitFunction } from "./$types";
     import Song from "./Song.svelte";
+    import { Field, ValidatedInput, Select } from "$lib/ui";
+    import { enhance } from "$app/forms";
+    import IntersectionObserver from "$lib/components/IntersectionObserver.svelte";
 
-    import type {
-        AlbumInfo,
-        ListeningDataSongInfo,
-        SongInfo,
-    } from "$shared/Song";
-    import { onMount } from "svelte";
-    import type { ListeningDataRequest } from "$shared/Request";
+    const { data, form }: PageProps = $props();
 
-    import { listeningDataFilter } from "./filters.svelte";
+    let limit = $state(50);
 
-    import IntersectionObserver from "svelte-intersection-observer";
+    let songs = $derived(data.songs);
+    let status: "success" | "error" | "loading" | "exhausted" = $derived(
+        data.status,
+    );
 
-    interface Props {
-        data: PageData;
-    }
-    let allSongsLoaded = $state(false);
-    let unProcessedSongs: ListeningDataSongInfo[] = $state([]);
-    let songs: ListeningDataSongInfo[] = $state([]);
-    let scrollContainer = $state<HTMLElement>();
-    let element = $state<HTMLElement>();
-    let intersecting = $state(false);
-    let firstLoadSuccess: boolean = $state(false);
-    let refreshStatus:
-        | { status: "refreshing" }
-        | { status: "idle" }
-        | { status: "loading-more" }
-        | { status: "error"; error: string } = $state({ status: "refreshing" });
-    const listeningDataRequest: ListeningDataRequest =
-        $derived<ListeningDataRequest>({
-            ...listeningDataFilter,
-            limit: 100,
-            offset: 0,
-        });
-    const childPropagation = (song: ListeningDataSongInfo) => {
-        song.show_children = !song.show_children;
-        //if (song.child) childPropagation(song.child);
-    };
+    let formElement: HTMLFormElement;
+    let offsetElement: HTMLInputElement;
 
-    /**
-     * @todo: add validation
-     *
-     * source for one artist matches: https://stackoverflow.com/questions/16312528/check-if-an-array-contains-any-element-of-another-array-in-javascript
-     */
-    const processSongs = (newSongs: ListeningDataSongInfo[]) => {
-        for (let i = 0; i < newSongs.length; i++) {
-            const curr = newSongs[i];
-            const prev = i ? newSongs[i - 1] : songs[-1];
-            // Check previous song only if it's in the new batch
-            if (i > 0) {
-                const oneArtistMatches = () =>
-                    curr.artists.some((a) => prev.artists.includes(a));
-                const match = () =>
-                    prev.title === curr.title &&
-                    prev.albums[0].title === curr.albums[0].title &&
-                    oneArtistMatches();
-                if (match()) {
-                    prev.children.push(curr);
-                    //console.log(JSON.stringify(prev));
-                    newSongs.splice(i, 1);
-                    i -= 1;
-                    continue;
+    const handleSubmit: SubmitFunction = () => {
+        status = "loading";
+
+        return async ({ update }) => {
+            await update({ reset: false, invalidateAll: false });
+
+            if (form?.success) {
+                if (form.songs.length == 0) {
+                    status = "exhausted";
+                } else {
+                    songs = [...songs, ...form.songs];
+                    // debounce timeout
+                    setTimeout(() => (status = "success"), 500);
                 }
+            } else {
+                status = "error";
+                console.log(form?.failures);
             }
-            songs.push(curr);
-        }
+        };
     };
 
-    async function loadData(refresh: boolean) {
-        if (refresh) {
-            listeningDataRequest.offset = 0;
-            songs = [];
-            allSongsLoaded = false;
-        } else
-            listeningDataRequest.offset =
-                listeningDataRequest.limit + listeningDataRequest.offset;
-        console.log("fetching data");
-        refreshStatus = refresh
-            ? { status: "refreshing" }
-            : { status: "loading-more" };
-        const res = await fetch("?/loaddata", {
-            method: "POST",
-            body: JSON.stringify(listeningDataRequest),
-        });
-
-        const response = deserialize(await res.text());
-        console.log(response);
-        if (response.type === "success") {
-            firstLoadSuccess = true;
-            const newSongs = response.data!.songs as typeof unProcessedSongs;
-            if (newSongs.length) {
-                if (refresh)
-                    unProcessedSongs = response.data!
-                        .songs as typeof unProcessedSongs;
-                else unProcessedSongs.push(...newSongs);
-                refreshStatus = { status: "idle" };
-                processSongs(newSongs);
-            }
-        } else if (response.type === "error") {
-            refreshStatus = { status: "error", error: response.error.message };
-            console.log(response.error);
-            if (response.error.message === `"no songs returned"`) {
-                allSongsLoaded = true;
-            }
+    function changeOffset(offset: number) {
+        if (offsetElement) {
+            offsetElement.value = offset.toString();
+            formElement.requestSubmit();
         }
     }
-
-    onMount(async () => {
-        await loadData(true);
-    });
 </script>
 
-<div id="container">
-    <h1>Listening Data</h1>
-    <header class:intersecting></header>
-    <div id="scroll-container">
-        {#if songs}
-            <Customize {loadData} />
-            <div id="songs" bind:this={scrollContainer}>
-                {#each songs as song}
-                    <Song {song} {childPropagation} />
-                {/each}
-                <IntersectionObserver
-                    {element}
-                    on:intersect={async () =>
-                        allSongsLoaded ? () => "" : await loadData(false)}
-                    threshold={0.1}
-                >
-                    <div bind:this={element} id="load-more"></div>
-                    {#if refreshStatus.status == "loading-more"}
-                        <p>loading</p>
-                    {/if}
-                    {#if allSongsLoaded}
-                        <p>no more songs to load</p>
-                    {/if}
-                </IntersectionObserver>
-            </div>
-        {:else if refreshStatus.status == "refreshing" && firstLoadSuccess === false}
-            <p>loading...</p>
-        {:else if refreshStatus.status == "error"}
-            <h2>Error:</h2>
-            <p>{refreshStatus.error}</p>
-        {:else if firstLoadSuccess === false}
-            <p>No listening data yet!</p>
-        {/if}
-    </div>
-</div>
+<form method="POST" bind:this={formElement} use:enhance={handleSubmit}>
+    <Field>
+        <label id="order-group">
+            <span>Order:</span>
+            <Select
+                name="order"
+                id="order"
+                onchange={() => {
+                    changeOffset(0);
+                    songs = [];
+                }}
+            >
+                <option id="newest" value="newest" selected>Newest</option>
+                <option id="oldest" value="oldest">Oldest</option>
+            </Select>
+        </label>
+    </Field>
+    <Field>
+        <label id="date-group">
+            <span id="until">Until:</span>
+            <span id="since">Since:</span>
+            <ValidatedInput
+                id="date"
+                type="date"
+                name="date"
+                onchange={() => {
+                    changeOffset(0);
+                    songs = [];
+                }}
+                autocomplete="off"
+            />
+        </label>
+    </Field>
+    <input
+        type="hidden"
+        name="offset"
+        bind:this={offsetElement}
+        autocomplete="off"
+        value={0}
+    />
+    <input type="hidden" name="limit" bind:value={limit} autocomplete="off" />
+</form>
+<section>
+    {#each songs as song}
+        <Song {song} />
+    {/each}
+    {#if status === "success"}
+        <div id="observer">
+            <IntersectionObserver
+                onIntersect={() => {
+                    changeOffset(parseInt(offsetElement.value) + limit);
+                }}
+            />
+        </div>
+    {:else if status === "loading"}
+        <p>Loading more songs...</p>
+    {:else if status === "exhausted"}
+        <p>You've reached the end of your listening history!</p>
+    {/if}
+</section>
 
 <style>
-    #container {
+    form {
         display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-
-    #load-more {
-        height: -1000px;
-        width: 100%;
-    }
-
-    #scroll-container {
-        overflow-x: scroll;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    h1 {
+        gap: 1em;
         margin-bottom: 1em;
+
+        label {
+            display: flex;
+            gap: 0.5em;
+            align-items: center;
+        }
+
+        &:has(#newest:checked) #date-group {
+            #until {
+                display: inline;
+            }
+
+            #since {
+                display: none;
+            }
+        }
     }
 
-    #songs {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        align-items: flex-start;
-        margin-bottom: 20px;
-        overflow-y: scroll;
-        width: fit-content;
+    section {
+        padding-bottom: 1rem;
+    }
+
+    #observer {
+        position: relative;
+        top: -200px;
+    }
+
+    #date-group {
+        #until {
+            display: none;
+        }
+
+        #since {
+            display: inline;
+        }
     }
 </style>

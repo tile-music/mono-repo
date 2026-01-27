@@ -1,136 +1,159 @@
 <script lang="ts">
-    import type { AlbumInfo, ListeningDataSongInfo } from "$shared/Song";
-    import arrow from "$lib/assets/icons/down-arrow-56.svg";
-    import Song from "./Song.svelte";
-    import { filterColumnList } from "./filters.svelte";
+    import type { SongInfo } from "$shared/Song";
+
     interface Props {
-        song: ListeningDataSongInfo;
-        childPropagation: (song: ListeningDataSongInfo) => void;
+        song: SongInfo;
     }
 
-    let { song, childPropagation }: Props = $props();
-    let album: AlbumInfo = $derived(song.albums[0]);
-    let dropdown = $state<HTMLImageElement>();
+    const { song }: Props = $props();
 
-    function calculateDuration(ms: number) {
-        const minutes = Math.floor(ms / 60000);
-        const seconds = (ms % 60000) / 1000;
-        return minutes + ":" + (seconds < 9.5 ? "0" : "") + seconds.toFixed(0);
-    }
+    const primaryAlbum = $derived(song.albums[0]);
 
-    /**
-     * This function wraps the childPropagation callback which is located in listening/+page.svelte.
-     * It calls the childPropagation function with the provided song and toggles the rotation of a dropdown element.
-     *
-     * @param {ListeningDataSongInfo} song - The song information to be propagated.
-     */
-    function childPropogationRotation(song: ListeningDataSongInfo) {
-        childPropagation(song);
-        if (dropdown) {
-            console.log(dropdown.style.transform);
-            if (
-                dropdown.style.transform === "" ||
-                dropdown.style.transform == "rotate(270deg)"
-            )
-                dropdown.style.transform = "rotate(0deg)";
-            else dropdown.style.transform = "rotate(270deg)";
+    function durationLabel(ms: number) {
+        const s = Math.round(ms / 1000);
+        const m = s / 60;
+        const h = m / 60;
+
+        const seconds = Math.floor(s % 60);
+        const minutes = Math.floor(m % 60);
+        const hours = Math.floor(h);
+
+        if (hours > 0) {
+            return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+        } else {
+            return `${minutes}:${seconds.toString().padStart(2, "0")}`;
         }
+    }
+
+    function listenedLabel(tms: number) {
+        const now = Date.now();
+        const ms_since = now - tms;
+
+        function plural(n: number) {
+            return n === 1 ? "" : "s";
+        }
+
+        const s_since = ms_since / 1000;
+        if (s_since < 60) {
+            const s_since_fl = Math.floor(s_since);
+            return `${s_since_fl} second${plural(s_since_fl)} ago`;
+        }
+
+        const m_since = s_since / 60;
+        if (m_since < 60) {
+            const m_since_fl = Math.floor(m_since);
+            return `${m_since_fl} minute${plural(m_since_fl)} ago`;
+        }
+
+        const h_since = m_since / 60;
+        if (h_since < 24) {
+            const h_since_fl = Math.floor(h_since);
+            return `${h_since_fl} hour${plural(h_since_fl)} ago`;
+        }
+
+        // minimal date/time, e.g. 19 Jan 8:21PM
+        return new Date(tms).toLocaleString(undefined, {
+            day: "numeric",
+            month: "short",
+            hour: "numeric",
+            minute: "2-digit",
+        });
     }
 </script>
 
 <div class="song">
-    {#if song.is_parent}
-        <button
-            class="repetitions"
-            onclick={() => {
-                childPropogationRotation(song);
-            }}
+    <img
+        class="art"
+        src={primaryAlbum.image}
+        alt="The album art for {primaryAlbum.title}"
+    />
+    <div class="basic-information">
+        <span class="title">
+            <div class="wrappable"><strong>{song.title}</strong></div>
+        </span>
+        <span class="artists"
+            ><div class="wrappable">{song.artists.join(", ")}</div></span
         >
-            <img src={arrow} bind:this={dropdown} alt="show plays" />({song
-                .children.length + 1})
-        </button>
-    {:else}
-        <p class="repetitions"></p>
-    {/if}
-
-    {#if !song.is_child}
-        <img
-            class="art"
-            src={album.image}
-            alt={`The album art for ${album.title} by ${album.artists.join(", ")}.`}
-        />
-    {:else}
-        <div class="art" id="vertical_line"></div>
-    {/if}
-
-    {#each filterColumnList() as column}
-        {#if column === "duration"}
-            <p class={column}>{calculateDuration(song[column])}</p>
-        {:else if column === "album"}
-            <p class={column}>{album.title}</p>
-        {:else if column === "artist"}
-            <p class={column}>{album.artists.join(", ")}</p>
-        {:else if column === "listened_at"}
-            <p class={column}>{new Date(song[column]).toLocaleString()}</p>
-        {:else if column === "upc"}
-            <p class={column}>{album.upc}</p>
-        {:else if column === "spotify_album_id"}
-            <p class={column}>
-                <a href="https://open.spotify.com/album/{album.spotify_id}"
-                    >link</a
-                >
-            </p>
-        {:else if column === "spotify_track_id"}
-            <p class={column}>
-                <a href="https://open.spotify.com/track/{song.spotify_id}"
-                    >link</a
-                >
-            </p>
-        {:else}
-            <p class={column}>{song[column]}</p>
-        {/if}
-    {/each}
+    </div>
+    <span class="album"><div class="wrappable">{primaryAlbum.title}</div></span>
+    <span class="duration">{durationLabel(song.duration)}</span>
+    <span class="listened">{listenedLabel(song.listened_at)}</span>
 </div>
 
-{#if Array.isArray(song.children) && song.children.length && song.show_children}
-    <div id="children">
-        {#each song.children as child}
-            <Song song={child} {childPropagation} />
-        {/each}
-    </div>
-{/if}
-
 <style>
-    @import "./styles.css";
-    #children {
+    .song {
+        height: 4rem;
         display: flex;
-        flex-direction: column;
-        padding-right: 20px;
-    }
+        align-items: center;
+        padding: 0.5rem;
+        gap: 1rem;
+        border-bottom: 1px solid var(--bg-subtle);
 
-    .repetitions img {
-        z-index: -1;
-        height: 30px;
-        width: auto;
-        transform: rotate(270deg);
-    }
-    img {
-        color: var(--text);
-    }
-    #song {
-        height: 50px;
-    }
-    svg {
-        filter: var(--text);
-    }
-    #vertical_line {
-        background-image: linear-gradient(var(--text), var(--text));
-        background-size: 2px 100%;
-        background-repeat: no-repeat;
-        background-position: center center;
-    }
-    .art {
-        aspect-ratio: 1;
-        object-fit: cover;
+        .art {
+            aspect-ratio: 1;
+            object-fit: cover;
+            height: 100%;
+        }
+
+        .wrappable {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            width: 100%;
+            overflow: hidden;
+            overflow-wrap: break-word;
+
+            @media (max-width: 700px) {
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+            }
+        }
+
+        .basic-information {
+            display: contents;
+
+            .title,
+            .artists {
+                width: 0;
+                flex-grow: 1;
+            }
+
+            @media (max-width: 700px) {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 2;
+                width: 0;
+
+                .title,
+                .artists {
+                    width: 100%;
+                }
+            }
+        }
+
+        .album {
+            width: 0;
+            flex-grow: 1;
+
+            @media (max-width: 600px) {
+                display: none;
+            }
+        }
+
+        .duration {
+            flex-shrink: 0;
+            width: 4rem;
+
+            @media (max-width: 999px) {
+                display: none;
+            }
+        }
+
+        .listened {
+            flex-shrink: 0;
+            width: 8rem;
+            color: var(--fg-subtle);
+        }
     }
 </style>

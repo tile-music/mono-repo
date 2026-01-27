@@ -1,22 +1,26 @@
 <script lang="ts">
-    import sample_collage from '$lib/assets/images/sample_collage.png'
-    import LinkSpotify from './spotify.svelte'
-    import DeleteUser from '../(app)/delete-account/delete.svelte';
+    import sample_collage from "$lib/assets/images/sample_collage.png";
+    import LinkSpotify from "./Spotify.svelte";
+    import DeleteUser from "../(app)/delete-account/delete.svelte";
 </script>
 
 <div class="content">
     <div class="left">
-        <img src={sample_collage} alt="A sample album art collage.">
+        <img src={sample_collage} alt="A sample album art collage." />
     </div>
     <div class="middle">
-        <h1>one last thing...</h1>
+        <h1>One last thing...</h1>
         <LinkSpotify></LinkSpotify>
-        <DeleteUser><a href="/">cancel & delete account</a></DeleteUser>
+        <DeleteUser><a href="/">Cancel & delete account</a></DeleteUser>
     </div>
     <div class="right">
-        <img src={sample_collage} alt="A second sample album art collage.">
+        <img src={sample_collage} alt="A second sample album art collage." />
     </div>
 </div>
+
+<svelte:head>
+    <title>tile.music | Link Spotify</title>
+</svelte:head>
 
 <style>
     .content {
@@ -57,11 +61,10 @@
         align-items: center;
     }
 
-    .left img, .right img {
+    .left img,
+    .right img {
         height: 150%;
         transform: rotate(8deg);
         opacity: 0.5;
     }
-
-    
 </style>

@@ -1,27 +1,14 @@
-# Music-Visualization-MQP-Code
+# tile.music
 
-## docker usage
+tile.music is a work-in-progress music listening habit visualization platform. It allows users to track their listening history and explore their listening habits through customizable, interactive posters to download, print, and share. It currently supports Spotify, with plans to expand support to Apple Music, Last.fm, and manual tracking.
 
-usage is as follows, under the main repo after running git pull, git submodule update --init run the env.ps1 script
+## Technologies
 
-then under the main repo run:
+tile.music is built on top of [Supabase](https://github.com/supabase/supabase) using [SvelteKit](https://github.com/sveltejs/kit) for the user-facing application, with metadata powered by [MusicBrainz](https://musicbrainz.org/). It also features custom-built libraries, such as [Munite](https://github.com/tile-music/munite) for metadata matching and [Chamfer](https://github.com/notsoli/chamfer) for the customization engine.
 
-* `docker compose build` to build the project
+## Usage
 
-* `docker compose build --no-cache` works like make clean, make
-* `docker compose up -d`   to run the project detached, you can see log output in docker desktop
-* `docker compose up` to run the project with log output enabled
-* `docker compose down` to stop the app
-
-you can also start and stop individual containers for example:
-`docker compose down data-acquisition` (but spell it right)
-
-Then you can rebuild just that one
-`docker compose build data-acquisition`
-
-next restart it
-`docker compose up data-acquisition`
-handily tab completion works because the folder is in the current path and docker is smart enough to just drop the /
+tile.music in its full capacity is not yet available, but a preview of its functionality can be found at [tile.music](https://tile.music).
 
 ## License
 

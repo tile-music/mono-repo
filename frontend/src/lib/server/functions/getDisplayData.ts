@@ -1,8 +1,5 @@
 import type { SongInfo, AlbumInfo } from "../../../../../lib/Song";
-import type {
-    DisplayDataRequest,
-    RankOutput,
-} from "../../../../../lib/Request";
+import type { DisplayDataRequest, RankOutput } from "$shared/Request";
 import type { User } from "@supabase/supabase-js";
 import { createSupabaseProdClient } from "../utils/supabase";
 
