@@ -376,7 +376,8 @@
         display: flex;
         flex-direction: column;
         gap: 30px;
-        overflow: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
         padding-right: 1rem;
     }
 

@@ -207,12 +207,6 @@
         justify-content: center;
     }
 
-    #mailing-list form div {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
     #mailing-list h2 {
         font-size: 1.5rem;
     }
