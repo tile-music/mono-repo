@@ -404,6 +404,10 @@
             color: var(--fg);
         }
 
+        :global(#export svg) {
+            transform: rotate(-90deg);
+        }
+
         #refresh,
         #export {
             border-color: var(--border);
