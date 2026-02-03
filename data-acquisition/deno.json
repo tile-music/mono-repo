@@ -1,11 +1,14 @@
 {
     "nodeModulesDir": "auto",
+    "tasks": {
+        "test": "deno test --allow-env --allow-read --allow-net "
+    },
     "imports": {
         "@std/testing": "jsr:@std/testing@^1.0.12",
         "@zod": "npm:zod",
         "_shared/": "../lib/",
         "@bull": "npm:bullmq",
-        "@spofity":"npm:spotify-api.js",
+        "@spotify":"npm:spotify-api.js",
         "@musicbrainz": "npm:musicbrainz-api",
         "@supabase": "jsr:@supabase/supabase-js@2",
         "@node-fork": "node:child_process",

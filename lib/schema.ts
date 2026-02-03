@@ -7,379 +7,257 @@ export type Json =
   | Json[]
 
 export type Database = {
-  prod: {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  public: {
     Tables: {
       albums: {
         Row: {
-          album_id: string
-          album_name: string
-          album_type: string
-          artists: string[]
-          ean: string | null
-          external_id: string
-          genre: string[] | null
-          image: string | null
-          image_large: string | null
-          image_small: string | null
-          num_dics: number | null
-          num_tracks: number
-          release_day: number | null
-          release_month: number | null
-          release_year: number | null
-          upc: string | null
+          id: string
+          source_album_type: string
+          source_artists: string[]
+          source_data: Json | null
+          source_external_id: string
+          source_image: string
+          source_service: string
+          source_title: string
         }
         Insert: {
-          album_id?: string
-          album_name: string
-          album_type: string
-          artists: string[]
-          ean?: string | null
-          external_id: string
-          genre?: string[] | null
-          image?: string | null
-          image_large?: string | null
-          image_small?: string | null
-          num_dics?: number | null
-          num_tracks: number
-          release_day?: number | null
-          release_month?: number | null
-          release_year?: number | null
-          upc?: string | null
+          id?: string
+          source_album_type: string
+          source_artists: string[]
+          source_data?: Json | null
+          source_external_id: string
+          source_image: string
+          source_service: string
+          source_title: string
         }
         Update: {
-          album_id?: string
-          album_name?: string
-          album_type?: string
-          artists?: string[]
-          ean?: string | null
-          external_id?: string
-          genre?: string[] | null
-          image?: string | null
-          image_large?: string | null
-          image_small?: string | null
-          num_dics?: number | null
-          num_tracks?: number
-          release_day?: number | null
-          release_month?: number | null
-          release_year?: number | null
-          upc?: string | null
+          id?: string
+          source_album_type?: string
+          source_artists?: string[]
+          source_data?: Json | null
+          source_external_id?: string
+          source_image?: string
+          source_service?: string
+          source_title?: string
         }
         Relationships: []
       }
-      mb_recordings: {
+      connected_accounts: {
         Row: {
-          created_at: number
-          first_release_year: number | null
-          isrc: string
-          mbid: string
-          release_mbid: string | null
-          track_artists: string[] | null
-          track_duration_ms: number | null
-          track_name: string | null
-          track_num: number | null
-          updated_at: number
-        }
-        Insert: {
-          created_at: number
-          first_release_year?: number | null
-          isrc: string
-          mbid: string
-          release_mbid?: string | null
-          track_artists?: string[] | null
-          track_duration_ms?: number | null
-          track_name?: string | null
-          track_num?: number | null
-          updated_at: number
-        }
-        Update: {
-          created_at?: number
-          first_release_year?: number | null
-          isrc?: string
-          mbid?: string
-          release_mbid?: string | null
-          track_artists?: string[] | null
-          track_duration_ms?: number | null
-          track_name?: string | null
-          track_num?: number | null
-          updated_at?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "release_mbid_ref"
-            columns: ["release_mbid"]
-            isOneToOne: false
-            referencedRelation: "mb_releases"
-            referencedColumns: ["mbid"]
-          },
-        ]
-      }
-      mb_release_groups: {
-        Row: {
-          album_name: string
-          album_type: string
-          artists: string[]
-          created_at: number
-          genre: string[] | null
-          image: string | null
-          image_large: string | null
-          image_small: string | null
-          mbid: string
-          num_dics: number | null
-          num_tracks: number
-          primary_type: string | null
-          release_day: number | null
-          release_month: number | null
-          release_year: number | null
-          secondary_types: string[] | null
-          updated_at: number
-        }
-        Insert: {
-          album_name: string
-          album_type: string
-          artists: string[]
-          created_at: number
-          genre?: string[] | null
-          image?: string | null
-          image_large?: string | null
-          image_small?: string | null
-          mbid: string
-          num_dics?: number | null
-          num_tracks: number
-          primary_type?: string | null
-          release_day?: number | null
-          release_month?: number | null
-          release_year?: number | null
-          secondary_types?: string[] | null
-          updated_at: number
-        }
-        Update: {
-          album_name?: string
-          album_type?: string
-          artists?: string[]
-          created_at?: number
-          genre?: string[] | null
-          image?: string | null
-          image_large?: string | null
-          image_small?: string | null
-          mbid?: string
-          num_dics?: number | null
-          num_tracks?: number
-          primary_type?: string | null
-          release_day?: number | null
-          release_month?: number | null
-          release_year?: number | null
-          secondary_types?: string[] | null
-          updated_at?: number
-        }
-        Relationships: []
-      }
-      mb_releases: {
-        Row: {
-          album_name: string
-          album_type: string
-          artists: string[]
-          created_at: number
-          ean: string | null
-          genre: string[] | null
-          image: string | null
-          image_large: string | null
-          image_small: string | null
-          mbid: string
-          num_dics: number | null
-          num_tracks: number
-          release_day: number | null
-          release_group_mbid: string | null
-          release_month: number | null
-          release_year: number | null
-          status: string | null
-          upc: string | null
-          updated_at: number
-        }
-        Insert: {
-          album_name: string
-          album_type: string
-          artists: string[]
-          created_at: number
-          ean?: string | null
-          genre?: string[] | null
-          image?: string | null
-          image_large?: string | null
-          image_small?: string | null
-          mbid: string
-          num_dics?: number | null
-          num_tracks: number
-          release_day?: number | null
-          release_group_mbid?: string | null
-          release_month?: number | null
-          release_year?: number | null
-          status?: string | null
-          upc?: string | null
-          updated_at: number
-        }
-        Update: {
-          album_name?: string
-          album_type?: string
-          artists?: string[]
-          created_at?: number
-          ean?: string | null
-          genre?: string[] | null
-          image?: string | null
-          image_large?: string | null
-          image_small?: string | null
-          mbid?: string
-          num_dics?: number | null
-          num_tracks?: number
-          release_day?: number | null
-          release_group_mbid?: string | null
-          release_month?: number | null
-          release_year?: number | null
-          status?: string | null
-          upc?: string | null
-          updated_at?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "release_group_mbid_ref"
-            columns: ["release_group_mbid"]
-            isOneToOne: false
-            referencedRelation: "mb_release_groups"
-            referencedColumns: ["mbid"]
-          },
-        ]
-      }
-      played_tracks: {
-        Row: {
-          album_popularity: number | null
-          album_popularity_updated_at: number | null
-          isrc: string
-          listened_at: number
-          play_id: string
-          selected_mbid: string | null
-          track_id: string
-          track_popularity: number | null
+          access_token: string | null
+          access_token_expires_at: string | null
+          id: string
+          provider: string
+          refresh_token: string
+          scope: string
           user_id: string
         }
         Insert: {
-          album_popularity?: number | null
-          album_popularity_updated_at?: number | null
-          isrc: string
-          listened_at: number
-          play_id?: string
-          selected_mbid?: string | null
-          track_id: string
-          track_popularity?: number | null
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          id?: string
+          provider: string
+          refresh_token: string
+          scope: string
           user_id: string
         }
         Update: {
-          album_popularity?: number | null
-          album_popularity_updated_at?: number | null
-          isrc?: string
-          listened_at?: number
-          play_id?: string
-          selected_mbid?: string | null
-          track_id?: string
-          track_popularity?: number | null
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          id?: string
+          provider?: string
+          refresh_token?: string
+          scope?: string
           user_id?: string
         }
+        Relationships: []
+      }
+      mb_album_releases: {
+        Row: {
+          album_id: string
+          created_at: string
+          id: string
+          is_primary: boolean
+          recording_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          album_id: string
+          created_at: string
+          id?: string
+          is_primary?: boolean
+          recording_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          album_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          recording_id?: string
+          updated_at?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "mbid_ref"
-            columns: ["selected_mbid"]
+            foreignKeyName: "mb_album_releases_album_id_fkey"
+            columns: ["album_id"]
             isOneToOne: false
-            referencedRelation: "mb_recordings"
-            referencedColumns: ["mbid"]
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
           },
+        ]
+      }
+      mb_track_recordings: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean
+          recording_id: string
+          track_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at: string
+          id?: string
+          is_primary?: boolean
+          recording_id: string
+          track_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          recording_id?: string
+          track_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "track_id_ref"
+            foreignKeyName: "mb_track_recordings_track_id_fkey"
             columns: ["track_id"]
             isOneToOne: false
             referencedRelation: "tracks"
-            referencedColumns: ["track_id"]
+            referencedColumns: ["id"]
           },
         ]
+      }
+      plays: {
+        Row: {
+          album_popularity: number | null
+          id: string
+          timestamp: number
+          track_id: string | null
+          track_popularity: number | null
+          user_id: string | null
+        }
+        Insert: {
+          album_popularity?: number | null
+          id?: string
+          timestamp: number
+          track_id?: string | null
+          track_popularity?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          album_popularity?: number | null
+          id?: string
+          timestamp?: number
+          track_id?: string | null
+          track_popularity?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plays_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_id: string | null
+          id: string
+          name: string | null
+          theme: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_id?: string | null
+          id: string
+          name?: string | null
+          theme?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_id?: string | null
+          id?: string
+          name?: string | null
+          theme?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       tracks: {
         Row: {
           album_id: string | null
-          external_id: string | null
-          isrc: string
-          track_artists: string[] | null
-          track_duration_ms: number | null
-          track_id: string
-          track_name: string | null
-          track_num: number | null
+          id: string
+          source_artists: string[]
+          source_external_id: string
+          source_service: string
+          source_title: string
         }
         Insert: {
           album_id?: string | null
-          external_id?: string | null
-          isrc: string
-          track_artists?: string[] | null
-          track_duration_ms?: number | null
-          track_id?: string
-          track_name?: string | null
-          track_num?: number | null
+          id?: string
+          source_artists: string[]
+          source_external_id: string
+          source_service: string
+          source_title: string
         }
         Update: {
           album_id?: string | null
-          external_id?: string | null
-          isrc?: string
-          track_artists?: string[] | null
-          track_duration_ms?: number | null
-          track_id?: string
-          track_name?: string | null
-          track_num?: number | null
+          id?: string
+          source_artists?: string[]
+          source_external_id?: string
+          source_service?: string
+          source_title?: string
         }
         Relationships: [
           {
-            foreignKeyName: "album_id_ref"
+            foreignKeyName: "tracks_album_id_fkey"
             columns: ["album_id"]
             isOneToOne: false
             referencedRelation: "albums"
-            referencedColumns: ["album_id"]
-          },
-        ]
-      }
-      unmatched_played_tracks: {
-        Row: {
-          album_popularity: number | null
-          album_popularity_updated_at: number | null
-          isrc: string
-          listened_at: number
-          play_id: string
-          selected_mbid: string | null
-          track_id: string
-          track_popularity: number | null
-          user_id: string
-        }
-        Insert: {
-          album_popularity?: number | null
-          album_popularity_updated_at?: number | null
-          isrc: string
-          listened_at: number
-          play_id?: string
-          selected_mbid?: string | null
-          track_id: string
-          track_popularity?: number | null
-          user_id: string
-        }
-        Update: {
-          album_popularity?: number | null
-          album_popularity_updated_at?: number | null
-          isrc?: string
-          listened_at?: number
-          play_id?: string
-          selected_mbid?: string | null
-          track_id?: string
-          track_popularity?: number | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "track_id_ref"
-            columns: ["track_id"]
-            isOneToOne: false
-            referencedRelation: "tracks"
-            referencedColumns: ["track_id"]
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -388,7 +266,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      debug_role: {
+        Args: never
+        Returns: {
+          auth_role: string
+          auth_uid: string
+          role_name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
@@ -517,7 +402,10 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  prod: {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
     Enums: {},
   },
 } as const

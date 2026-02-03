@@ -32,31 +32,31 @@ export async function makeDataAcqJobs() {
         .select("*")
         .then((items) => {
             console.log(items);
-            items.data?.forEach(async (element) => {
+            items.data?.forEach(async (e : {}) => {
                 await queue.add(
-                    "spotify" + element,
+                    "spotify:" + e.id,
                     {
                         data: {
-                            userId: element.id,
-                            refreshToken: element.refresh_token,
+                            userId: e.id,
+                            refreshToken: e.refresh_token,
                         },
                     },
                     {
-                        jobId: "spotify" + element.id,
+                        jobId: "spotify" + e.id,
                     },
                 );
                 await queue.add(
-                    "spotify" + element,
+                    "spotify:" + e.id,
                     {
                         data: {
-                            userId: element.id,
-                            refreshToken: element.refresh_token,
+                            userId: e.id,
+                            refreshToken: e.refresh_token,
                         },
                     },
                     {
                         repeat: { pattern: "0/30 * * * *" },
                         immediateley: true,
-                        jobId: "spotify" + element.id,
+                        jobId: "spotify" + e.id,
                     },
                 );
             });

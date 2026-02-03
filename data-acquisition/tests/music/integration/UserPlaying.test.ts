@@ -1,4 +1,3 @@
-import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import {
     SpotifyUserPlaying,
     MockUserPlaying,
@@ -6,8 +5,10 @@ import {
 import { expect } from "jsr:@std/expect";
 import { supabase } from "../supabase.ts";
 import { testData0 } from "./TestData.ts";
-import { json } from "node:stream/consumers";
+
 Deno.test("User Playing Tests ", async (t) => {
+
+
     const testData1 = Array.from({ length: 20 }, (_, i) => ({
         trackName: `Test Track ${i % 10}`,
         trackArtists: [`Test Artist ${i % 5}`],
@@ -15,9 +16,11 @@ Deno.test("User Playing Tests ", async (t) => {
             albumName: `Test Album ${i % 7}`,
             albumArtists: [`Test Album Artist ${i % 3}`],
             albumImage: `Test Image ${i % 4}`,
-            albumReleaseDay: 1,
-            albumReleaseMonth: 2,
-            albumReleaseYear: 2024,
+            releaseDay: 1,
+            releaseMonth: 2,
+            releaseYear: 2024,
+            numTracks: 3
+
         },
         image: `Test Image ${i % 4}`,
         isrc: `USRC176078${30 + i}`,
@@ -27,7 +30,7 @@ Deno.test("User Playing Tests ", async (t) => {
         timestamp: 125666778 + i * 1000,
     }));
 
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.admin.createUser({
         email: "test1@example.com",
         password: "password",
     });
@@ -37,6 +40,7 @@ Deno.test("User Playing Tests ", async (t) => {
     const userId = data.user?.id || "";
 
     await t.step("Mock user playing tests", async (t) => {
+
         await t.step("MockUserPlaying init method", async () => {
             const mockUserPlaying = new MockUserPlaying(
                 supabase,
@@ -54,15 +58,14 @@ Deno.test("User Playing Tests ", async (t) => {
             await mockUserPlaying.init();
             await expect(mockUserPlaying.fire())
                 .resolves.not.toThrow()
-                .then(() =>
-                    supabase
-                        .from("played_tracks")
+                .then(async () => {
+                    const { data } = await supabase
+                        .from("plays")
                         .select()
                         .eq("user_id", userId)
-                        .then(({ data, error }: { data: any; error: any }) => {
-                            console.log(JSON.stringify(data));
-                            expect(data).toHaveLength(4);
-                        }),
+                    console.log(JSON.stringify(data));
+                    expect(data).toHaveLength(4);
+                }
                 );
         });
         await t.step(
@@ -91,7 +94,7 @@ Deno.test("User Playing Tests ", async (t) => {
                     .resolves.not.toThrow()
                     .then(() =>
                         supabase
-                            .from("played_tracks")
+                            .from("plays")
                             .select()
                             .eq("user_id", userId),
                     );
@@ -136,7 +139,7 @@ Deno.test("User Playing Tests ", async (t) => {
                     .resolves.not.toThrow()
                     .then(async () => {
                         const { data, error } = await supabase
-                            .from("played_tracks")
+                            .from("plays")
                             .select()
                             .eq("user_id", userId);
                         if (error) throw error;
@@ -144,14 +147,13 @@ Deno.test("User Playing Tests ", async (t) => {
                         await spotifyUserPlaying.fire();
                         const { data: newData, error: newError } =
                             await supabase
-                                .from("played_tracks")
+                                .from("plays")
                                 .select()
                                 .eq("user_id", userId);
                         if (newError) throw newError;
                         expect(data.length).toBeGreaterThan(0);
-                        expect(newData.length).toBeGreaterThanOrEqual(
-                            data.length,
-                        );
+                        expect(newData.length)
+                            .toBeGreaterThanOrEqual(data.length);
                         expect(newData.length).toBeLessThanOrEqual(data.length);
                     });
             },
@@ -167,18 +169,19 @@ Deno.test("User Playing Tests ", async (t) => {
                 .resolves.not.toThrow()
                 .then(async () => {
                     const { data, error } = await supabase
-                        .from("played_tracks")
+                        .from("plays")
                         .select(
-                            `listened_at,
-                    tracks(spotify_id,
-                    albums(spotify_id))`,
+                            `timestamp,
+                    tracks(source_external_id,
+                    albums(source_external_id))`,
                         )
                         .eq("user_id", userId);
                     if (error) throw error;
                     expect(data).toBeDefined();
                     //console.log(data)
                     for (const entry of data) {
-                        expect(entry.tracks.spotify_id).toBeDefined();
+                        if (entry.tracks)
+                            expect(entry.tracks.source_external_id).toBeDefined();
                     }
                 });
         });

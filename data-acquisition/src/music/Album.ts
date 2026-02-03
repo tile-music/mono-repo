@@ -6,7 +6,7 @@ import { PK_VIOLATION } from "../util/constants.ts";
 import { Fireable } from "./Fireable.ts";
 import { SpotifyPlay } from "./Play.ts";
 
-import { Database } from "../../../lib/schema.ts";
+import { Database } from "_shared/schema.ts";
 
 /**
  * Represents information about a music album.
@@ -54,14 +54,11 @@ export class Album implements Fireable {
     private artists: string[];
     private genre: string[];
     private image: string;
-    private albumId?: string;
-    protected primaryIdent: string;
-    protected supabase: SupabaseClient<
-        Database,
-        "prod",
-        Database["prod"]
-    >;
+    private id?: string;
+    protected externalId: string;
+    protected supabase: SupabaseClient<Database>;
     protected query;
+    protected sourceService = "manual";
 
     protected tracks: Track[] = [];
 
@@ -75,7 +72,7 @@ export class Album implements Fireable {
         releaseYear: number,
         numTracks: number,
         genre: string[],
-        supabase: SupabaseClient<Database, "prod", Database["prod"]>,
+        supabase: SupabaseClient<Database>,
         /* numDiscs: number, */
         albumId?: string,
     ) {
@@ -88,11 +85,11 @@ export class Album implements Fireable {
         this.numTracks = numTracks;
         this.image = image;
         this.genre = genre;
-        this.primaryIdent = `${title},${this.artists.join(",")}`;
+        this.externalId = `${title},${this.artists.join(",")}`;
         this.supabase = supabase;
         //console.log(this);
-        this.query = this.supabase.from("albums").select("album_id");
-        this.albumId = albumId;
+        this.query = this.supabase.from("albums").select("id");
+        this.id = albumId;
         /* this.numDiscs = numDiscs; */
     }
 
@@ -105,22 +102,7 @@ export class Album implements Fireable {
     }
 
     protected queryHelper() {
-        this.query = this.query.eq("album_name", this.title);
-        if (this.releaseYear) {
-            this.query = this.query.eq(
-                "release_year",
-                this.releaseYear ?? null,
-            );
-        }
-        if (this.releaseDay) {
-            this.query = this.query.eq("release_day", this.releaseDay ?? null);
-        }
-        if (this.releaseMonth) {
-            this.query = this.query.eq(
-                "release_month",
-                this.releaseMonth ?? null,
-            );
-        }
+        this.query = this.query.eq("source_external_id", this.externalId);
         return this.query;
     }
 
@@ -137,7 +119,7 @@ export class Album implements Fireable {
      * @todo find some intelligent way to fall back to a worse query, which should never happen in reality
      */
     public async getAlbumDbID(): Promise<string> {
-        if (this.albumId) return this.albumId;
+        if (this.id) return this.id;
         log(6, `${JSON.stringify(this.queryHelper())}`);
         let { data, error } = await this.queryHelper();
 
@@ -146,6 +128,7 @@ export class Album implements Fireable {
             `BEFORE ATTEMT TO INSERT data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`,
         );
         if (data?.length === 0 || !data) {
+            log(6, "inserting");
             ({ data, error } = await this.supabase
                 .from("albums")
                 .insert(this.createDbEntryObject())
@@ -163,12 +146,12 @@ export class Album implements Fireable {
       Album: ${JSON.stringify(this.createDbEntryObject())}
       Data: ${JSON.stringify(data)}`,
             );
-        this.albumId = data[0].album_id;
-        return data[0].album_id;
+        this.id = data[0].id;
+        return data[0].id;
     }
 
     public getAlbumId() {
-        if (this.albumId) return this.albumId;
+        if (this.id) return this.id;
         else throw new Error("album id has not been fetched from database");
     }
 
@@ -182,15 +165,8 @@ export class Album implements Fireable {
     }
 
     public getAlbumIdentifier() {
-        return this.primaryIdent;
+        return this.externalId;
     }
-
-    // protected async mbFire() {
-    //     log(6, "mbfire called");
-    //     const mb = new MusicBrainzAlbum(this, this.supabase);
-    //     await mb.fire();
-    // }
-
     /**
      *
      * @returns an object that can be used to create a new entry in the database
@@ -198,17 +174,13 @@ export class Album implements Fireable {
 
     public createDbEntryObject() {
         return {
-            ...(this.albumId && { album_id: this.albumId }),
-            album_name: this.title,
-            album_type: this.albumType,
-            release_day: this.releaseDay,
-            release_month: this.releaseMonth,
-            release_year: this.releaseYear,
-            num_tracks: this.numTracks,
-            artists: this.artists,
-            genre: this.genre,
-            image_large: this.image,
-            /* num_discs: this.numDiscs */
+            ...(this.id && { id: this.id }),
+            source_title: this.title,
+            source_service: this.sourceService,
+            source_artists: this.artists,
+            source_image: this.image,
+            source_external_id: this.externalId,
+            source_album_type: this.albumType
         };
     }
     public async fire(): Promise<void> {
@@ -219,7 +191,7 @@ export class Album implements Fireable {
                 await t.fire();
             }),
         );
-        log(6, `musicbrainz fire for album ${this.title}`);
+        //log(6, `musicbrainz fire for album ${this.title}`);
         //await this.mbFire();
     }
     public getTitle(): string {
@@ -231,7 +203,6 @@ export class Album implements Fireable {
 }
 
 export class SpotifyAlbum extends Album {
-    private spotifyId: string;
     protected override tracks: SpotifyTrack[] = [];
     constructor(
         albumName: string,
@@ -243,7 +214,7 @@ export class SpotifyAlbum extends Album {
         releaseYear: number,
         numTracks: number,
         genre: string[],
-        supabase: SupabaseClient<any, "prod", any>,
+        supabase: SupabaseClient<Database>,
         spotifyId: string,
         /* numDiscs: number, */
         albumId?: string,
@@ -261,17 +232,12 @@ export class SpotifyAlbum extends Album {
             supabase,
             albumId,
         );
-        this.spotifyId = spotifyId;
-        this.primaryIdent = spotifyId;
+        this.externalId = spotifyId;
+        this.sourceService = "spotify";
     }
-
-    protected override queryHelper() {
-        return this.query.eq("external_id", this.spotifyId);
-    }
-
     static fromTestData(
         data: TestData,
-        supabase: SupabaseClient<any, "prod", any>,
+        supabase: SupabaseClient<Database>,
         userId: string,
     ): SpotifyAlbum {
         const ret = new SpotifyAlbum(
@@ -279,9 +245,9 @@ export class SpotifyAlbum extends Album {
             data.albumInfo.albumType,
             data.albumInfo.albumArtists,
             data.albumInfo.albumImage,
-            data.albumInfo.albumReleaseDay,
-            data.albumInfo.albumReleaseMonth,
-            data.albumInfo.albumReleaseYear,
+            data.albumInfo.releaseDay,
+            data.albumInfo.releaseMonth,
+            data.albumInfo.releaseYear,
             data.albumInfo.numTracks,
             [],
             supabase,
@@ -315,12 +281,12 @@ export class SpotifyAlbum extends Album {
     //     await mb.fire();
     // }
 
-    public override createDbEntryObject() {
-        return {
-            ...super.createDbEntryObject(),
-            external_id: this.spotifyId,
-        };
-    }
+    // public override createDbEntryObject() {
+    //     return {
+    //         ...super.createDbEntryObject(),
+    //         external_id: this.spotifyId,
+    //     };
+    // }
 }
 
 export type TestData = {
@@ -331,9 +297,10 @@ export type TestData = {
         albumName: string;
         albumArtists: string[];
         albumImage: string;
-        d        albumReleaseMonth: number;
-        albumReleaseYear: number;
-        spotifyId: string;
+        releaseDay: number;
+        releaseMonth: number;
+        releaseYear: number;
+        spotifyId?: string;
         numTracks: number;
         /*     numDiscs: number; */
     };

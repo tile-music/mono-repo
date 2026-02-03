@@ -77,8 +77,7 @@ Deno.test('spotify class', async (t) => {
     expect(albumInfo['image']).toBe("placeholder");
     expect(albumInfo['genre']).toStrictEqual(["Rock"]);
 
-    expect(albumInfo['spotifyId']).toBe("spoturi1234567890");
-    expect(albumInfo["albumId"]).toBe(47)
+    expect(albumInfo['externalId']).toBe("spoturi1234567890");
   });
   await t.step('createDbEntryObject should return correct object', async () => {
     const albumInfo = new SpotifyAlbum(
@@ -93,13 +92,13 @@ Deno.test('spotify class', async (t) => {
       ["Pop"],
       supabase,
       "9876543210",
-      213
+      "sdfsdfe"
     );
 
     const dbEntry = albumInfo.createDbEntryObject();
     console.log(dbEntry)
     expect(dbEntry).toStrictEqual({
-      album_id:213,
+      album_id:"sdfsdfe",
       album_name: "New Artist",
       album_type: "Single",
       release_day: 15,
@@ -109,9 +108,9 @@ Deno.test('spotify class', async (t) => {
       artists: ["new artist"],
       genre: ["Pop"],
       image: "new_placeholder",
-      spotify_id: "9876543210",
+      external_id: "9876543210",
     });
   });
-  
+
 
 });

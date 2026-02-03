@@ -10,9 +10,9 @@ export const testData0: TestData[] = [
             albumArtists: ["Deftones"],
             albumImage:
                 "https://i.scdn.co/image/ab67616d0000b2730b1129853982ea17845d4eb6",
-            albumReleaseDay: 27,
-            albumReleaseMonth: 10,
-            albumReleaseYear: 1997,
+            releaseDay: 27,
+            releaseMonth: 10,
+            releaseYear: 1997,
             spotifyId: "7o4UsmV37Sg5It2Eb7vHzu",
             numTracks: 10,
             /* numDiscs: 1, */
@@ -36,8 +36,8 @@ export const testData0: TestData[] = [
             albumImage:
                 "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
             releaseDay: 19,
-            rlbumReleaseMonth: 11,
-            albumReleaseYear: 2010,
+            releaseMonth: 11,
+            releaseYear: 2010,
             spotifyId: "0pGumY11G8OGH05ti6jh23",
             numTracks: 12,
             /* numDiscs: 1, */
@@ -60,9 +60,9 @@ export const testData0: TestData[] = [
             albumArtists: ["charli xcx"],
             albumImage:
                 "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
-            albumReleaseDay: 19,
-            albumReleaseMonth: 11,
-            albumReleaseYear: 2010,
+            releaseDay: 19,
+            releaseMonth: 11,
+            releaseYear: 2010,
             spotifyId: "316O0Xetgx2NJLRgJBw4uq",
             numTracks: 18,
         },
@@ -84,9 +84,9 @@ export const testData0: TestData[] = [
             albumArtists: ["Stromae"],
             albumImage:
                 "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
-            albumReleaseDay: 1,
-            albumReleaseMonth: 1,
-            albumReleaseYear: 2013,
+            releaseDay: 1,
+            releaseMonth: 1,
+            releaseYear: 2013,
             spotifyId: "6uyslsVGFsHKzdGUosFwBM",
             numTracks: 13,
             /* ,
@@ -109,9 +109,9 @@ export const testData0: TestData[] = [
             albumArtists: ["Doechii", "SZA"],
             albumImage:
                 "https://i.scdn.co/image/ab67616d0000b273f831100cdd02b4a705042dfc",
-            albumReleaseDay: 22,
-            albumReleaseMonth: 7,
-            albumReleaseYear: 2022,
+            releaseDay: 22,
+            releaseMonth: 7,
+            releaseYear: 2022,
             spotifyId: "7LYy99hyg4eHQeYkKPuS6R",
             numTracks: 2,
         },
@@ -132,9 +132,9 @@ export const testData0: TestData[] = [
             albumArtists: ["Coco & Clair Clair"],
             albumImage:
                 "https://i.scdn.co/image/ab67616d0000b27347a44ff90da00b83f0cc398",
-            albumReleaseDay: 15,
-            albumReleaseMonth: 11,
-            albumReleaseYear: 2017,
+            releaseDay: 15,
+            releaseMonth: 11,
+            releaseYear: 2017,
             spotifyId: "3SwkEbseZlPzgN5PIJqYV4", // No Spotify ID provided
             numTracks: 1,
         },

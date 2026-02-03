@@ -45,6 +45,8 @@ export class Track implements Fireable {
     protected trackId?: string;
     protected albumId?: string;
     protected supabase;
+    protected externalId = "placeholder";
+    protected sourceService = "manual";
 
     constructor(
         trackName: string,
@@ -52,7 +54,7 @@ export class Track implements Fireable {
         isrc: string,
         durationMs: number,
         play: Play,
-        supabase: SupabaseClient<any, "prod", any>,
+        supabase: SupabaseClient<Database>,
         trackNum: number,
         /* discNum: number, */
         albumId?: string,
@@ -63,7 +65,7 @@ export class Track implements Fireable {
         this.isrc = isrc;
         this.play = play;
         this.supabase = supabase;
-        this.query = supabase.from("tracks").select("track_id");
+        this.query = supabase.from("tracks").select("id");
         this.albumId = albumId;
         this.trackNum = trackNum;
         /* this.discNum = discNum; */
@@ -74,7 +76,7 @@ export class Track implements Fireable {
     }
 
     protected queryHelper() {
-        return this.query.eq("isrc", this.isrc);
+        return this.query.eq("source_external_id", this.externalId);
     }
 
     /**
@@ -91,10 +93,11 @@ export class Track implements Fireable {
      */
     public async getTrackDbID(): Promise<string> {
         if (this.trackId) return this.trackId;
+        log(6, `external id ${this.externalId}`)
         let { data, error } = await this.queryHelper();
         log(
             6,
-            `before insert attempt data: ${JSON.stringify(data)}, error:: ${JSON.stringify(error)}`,
+            `before insert attempt data track: ${JSON.stringify(data)}, error:: ${JSON.stringify(error)}`,
         );
         if (data?.length === 0 || !data) {
             ({ data, error } = await this.supabase
@@ -113,8 +116,8 @@ export class Track implements Fireable {
       Track: ${JSON.stringify(this.createDbEntryObject())}
       Data: ${JSON.stringify(data)}`,
             );
-        this.trackId = data[0].track_id;
-        return data[0].track_id;
+        this.trackId = data[0].id;
+        return data[0].id;
     }
 
     /**
@@ -125,36 +128,40 @@ export class Track implements Fireable {
         if (!this.albumId) throw new Error("albumid is not defined");
         return {
             album_id: this.albumId,
-            isrc: this.isrc,
-            track_name: this.trackName,
-            track_artists: this.trackArtists,
-            track_duration_ms: this.durationMs,
-            track_num: this.trackNum,
+            //isrc: this.isrc,
+            source_title: this.trackName,
+            source_artists: this.trackArtists,
+            //track_duration_ms: this.durationMs,
+            source_service: this.sourceService,
+            source_external_id: this.externalId
+            //track_num: this.trackNum,
             /* disc_num: this.discNum, */
         };
     }
 
-    public matchMusicBrainz(releases: IReleaseMatch[]) {
-        releases.forEach((release) => {
-            log(6, `release in track ${JSON.stringify(release)}`);
-        });
-    }
+    // public matchMusicBrainz(releases: IReleaseMatch[]) {
+    //     releases.forEach((release) => {
+    //         log(6, `release in track ${JSON.stringify(release)}`);
+    //     });
+    // }
 
     public createPlayDbEntryObject() {
         return { ...this.play.createDbEntryObject() };
     }
     public async fire(): Promise<void> {
         const trackId = await this.getTrackDbID();
+        log(6, `track id ${trackId}`)
         if (!this.albumId)
             throw new Error("album id is undefined, this should never happen");
+        log(6, "track fire called")
         this.play.setTrackId(trackId);
-        this.play.setAlbumId(this.albumId);
+
+        //log(6, ` track directly before  play fire ${JSON.stringify(this)}`);
         await this.play.fire();
     }
 }
 
 export class SpotifyTrack extends Track {
-    private spotifyId: string;
     constructor(
         trackName: string,
         trackArtists: string[],
@@ -162,11 +169,7 @@ export class SpotifyTrack extends Track {
         durationMs: number,
         spotifyId: string,
         play: Play,
-        supabase: SupabaseClient<
-            Database,
-            "prod",
-            Database["prod"]
-        >,
+        supabase: SupabaseClient<Database>,
         trackNum: number,
         /*     discNum: number, */
         albumId?: string,
@@ -181,16 +184,7 @@ export class SpotifyTrack extends Track {
             trackNum,
             /*  discNum,  */ albumId,
         );
-        this.spotifyId = spotifyId;
-    }
-    protected override queryHelper() {
-        return this.query.eq("external_id", this.spotifyId);
-    }
-
-    public override createDbEntryObject() {
-        return {
-            ...super.createDbEntryObject(),
-            external_id: this.spotifyId,
-        };
+        this.externalId = spotifyId;
+        this.sourceService = "spotify"
     }
 }

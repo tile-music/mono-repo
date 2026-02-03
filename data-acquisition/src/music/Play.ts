@@ -38,19 +38,11 @@ export class Play implements Fireable {
     private isrc?: string;
     private userId: string;
 
-    protected supabase: SupabaseClient<
-        Database,
-        "prod",
-        Database["prod"]
-    >;
+    protected supabase: SupabaseClient<Database>;
 
     constructor(
         listenedAt: number,
-        supabase: SupabaseClient<
-            Database,
-            "prod",
-            Database["prod"]
-        >,
+        supabase: SupabaseClient<Database>,
         userId: string,
         isrc?: string,
     ) {
@@ -60,34 +52,6 @@ export class Play implements Fireable {
         this.userId = userId;
     }
 
-    private async pickMBID() {
-        if (!this.trackId)
-            throw new Error(
-                `track id not defined on Play:${JSON.stringify(this)}`,
-            );
-        if (!this.albumId)
-            throw new Error(
-                `album id not defined on Play:${JSON.stringify(this)}`,
-            );
-        const mbid = await this.supabase
-            .from("played_tracks")
-            .select("selected_mbid, tracks(album_id)")
-            .eq("track_id", this.trackId)
-            .eq("user_id", this.userId);
-
-        // const mbids = mbid.data?.filter((v) => v.selected_mbid !== null);
-        // if (Array.isArray(mbids) && mbids.length > 1)
-        //     this.selectedMbid = mbids[0].selected_mbid;
-        // else {
-        //     const newMbids = await this.supabase
-        //         .from("album_mbids")
-        //         .select("mbid")
-        //         .eq("album_id", this.albumId);
-        //     log(6, `mbids: ${JSON.stringify(newMbids)}`);
-        //     this.selectedMbid = newMbids.data?.[0]?.mbid ?? null;
-        // }
-        log(6, `selected mbid:${JSON.stringify(mbid)}`);
-    }
 
     public setTrackId(trackId: string) {
         this.trackId = trackId;
@@ -102,23 +66,17 @@ export class Play implements Fireable {
             throw new Error(
                 `track id not defined on Play:${JSON.stringify(this)}`,
             );
-        if (!this.albumId)
-            throw new Error(
-                `album id not defined on Play:${JSON.stringify(this)}`,
-            );
         return {
             track_id: this.trackId,
-            listened_at: this.listenedAt,
-            isrc: this.isrc ?? "",
+            timestamp: this.listenedAt,
             user_id: this.userId,
         };
     }
 
     public async fire(): Promise<void> {
-        //await this.pickMBID();
         const { data: _data, error } = await this.supabase
             //.from(this.selectedMbid ? "played_tracks" : "unmatched_played_tracks")
-            .from("played_tracks")
+            .from("plays")
             .insert(this.createDbEntryObject());
         if (error?.code === PK_VIOLATION) log(6, "Play already inserted");
         else if (error)
@@ -133,11 +91,7 @@ export class SpotifyPlay extends Play {
     constructor(
         listenedAt: number,
         trackPopularity: number,
-        supabase: SupabaseClient<
-            Database,
-            "prod",
-            Database["prod"]
-        >,
+        supabase: SupabaseClient<Database>,
         userId: string,
         isrc?: string,
     ) {

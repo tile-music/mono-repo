@@ -57,7 +57,7 @@ Deno.test('TrackInfo classes', async (t) => {
       expect(spotifyTrackInfo['trackArtists']).toBe(trackArtists);
       expect(spotifyTrackInfo['isrc']).toBe(isrc);
       expect(spotifyTrackInfo['durationMs']).toBe(durationMs);
-      expect(spotifyTrackInfo['spotifyId']).toBe(spotifyId);
+      expect(spotifyTrackInfo['externalId']).toBe(spotifyId);
     });
 
     await t.step('should create a correct database entry object', async () => {
@@ -67,16 +67,14 @@ Deno.test('TrackInfo classes', async (t) => {
       const durationMs = 300000;
       const popularity = 50;
       const spotifyId = '1234567890';
-      const spotifyTrackInfo = new SpotifyTrack(trackName, trackArtists, isrc, durationMs, spotifyId,  new SpotifyPlay(4235236236234531512612,popularity, supabase, "blah"), supabase, 38);
+      const spotifyTrackInfo = new SpotifyTrack(trackName, trackArtists, isrc, durationMs, spotifyId,  new SpotifyPlay(4235236236234531512612,popularity, supabase, "blah"), supabase, 3);
       const dbEntry = spotifyTrackInfo.createDbEntryObject();
 
       expect(dbEntry).toEqual({
-        album_id: 38,
-        isrc: isrc,
-        track_name: trackName,
-        track_artists: trackArtists,
+        source_name: trackName,
+        source_artists: trackArtists,
         track_duration_ms: durationMs,
-        spotify_id: spotifyId,
+        source_external_id: spotifyId,
       });
     });
   })

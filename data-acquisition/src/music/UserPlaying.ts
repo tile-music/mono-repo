@@ -1,7 +1,7 @@
-import { SupabaseClient, Client, Player } from "../../deps.ts";
+import { SupabaseClient, Client, Player } from "@spotify";
 
 import { Track, SpotifyTrack } from "./Track.ts";
-import { Album, SpotifyAlbum } from "./Album.ts";
+import { Album, SpotifyAlbum, TestData } from "./Album.ts";
 import { Play, SpotifyPlay } from "./Play.ts";
 
 import { log } from "../util/log.ts";
@@ -53,12 +53,11 @@ export abstract class UserPlaying implements Fireable {
     supabase!: SupabaseClient<Database>;
     context!: any;
     inited!: boolean;
-    postgres!: any;
     protected albums: Map<string, Album> = new Map();
     dbEntries: any = { p_track_info: [], p_user_id: "" };
 
     constructor(
-        supabase: SupabaseClient<any, "test" | "prod", any>,
+        supabase: SupabaseClient<Database>,
         userId: string,
         context: any,
     ) {
@@ -105,7 +104,7 @@ export class SpotifyUserPlaying extends UserPlaying {
     items!: any;
 
     constructor(
-        supabase: SupabaseClient<any, "test" | "prod", any>,
+        supabase: SupabaseClient<Database>,
         userId: string,
         context: any,
     ) {
@@ -159,7 +158,7 @@ export class SpotifyUserPlaying extends UserPlaying {
                     item.track.album.totalTracks as number,
                     item.track.album.genres,
                     this.supabase,
-                    item.track.album.id,
+                    item.track.album.id
                 ),
             );
             if (!album) {
@@ -193,7 +192,9 @@ export class SpotifyUserPlaying extends UserPlaying {
     }
     public override async fire(): Promise<void> {
         await this.init();
-        this.items = (await this.player.getRecentlyPlayed({ limit: 50 })).items;
+        const things = await this.player.getRecentlyPlayed({ limit: 50 });
+
+        this.items = things.items;
         await super.fire();
     }
     public static parseSpotifyDate(
@@ -257,11 +258,11 @@ export class SpotifyUserPlaying extends UserPlaying {
 }
 
 export class MockUserPlaying extends UserPlaying {
-    mockData: any;
+    mockData: TestData[];
     constructor(
-        supabase: SupabaseClient<any, "prod", any>,
-        userId: any,
-        context: any,
+        supabase: SupabaseClient<Database>,
+        userId: string,
+        context: TestData[],
     ) {
         super(supabase, userId, context);
         this.mockData = context;
@@ -281,8 +282,7 @@ export class MockUserPlaying extends UserPlaying {
                     track.albumInfo.releaseYear,
                     1,
                     ["Test Genre"],
-                    this.supabase,
-                    1,
+                    this.supabase
                 ),
             );
 
@@ -300,7 +300,7 @@ export class MockUserPlaying extends UserPlaying {
                         track.isrc,
                     ),
                     this.supabase,
-                    2,
+                    2
                 ),
             );
         }
