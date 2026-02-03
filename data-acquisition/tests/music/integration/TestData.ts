@@ -35,8 +35,8 @@ export const testData0: TestData[] = [
             albumArtists: ["Kesha"],
             albumImage:
                 "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
-            albumReleaseDay: 19,
-            albumReleaseMonth: 11,
+            releaseDay: 19,
+            rlbumReleaseMonth: 11,
             albumReleaseYear: 2010,
             spotifyId: "0pGumY11G8OGH05ti6jh23",
             numTracks: 12,
