@@ -18,9 +18,7 @@ export const load: LayoutServerLoad = async ({
         const blankProfile = assembleBlankProfile(user.id, user.email);
         const { data: newProfile, error: insertError } = await supabase
             .from("profiles")
-            .upsert(blankProfile, {
-                onConflict: "id",
-            })
+            .upsert(blankProfile)
             .select();
 
         if (insertError || !newProfile || !newProfile[0]) {
