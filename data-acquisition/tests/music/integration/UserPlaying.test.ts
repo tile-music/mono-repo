@@ -2,6 +2,7 @@ import {
     SpotifyUserPlaying,
     MockUserPlaying,
 } from "../../../src/music/UserPlaying.ts";
+import { type TestData } from "../../../src/music/Album.ts";
 import { expect } from "jsr:@std/expect";
 import { supabase } from "../supabase.ts";
 import { testData0 } from "./TestData.ts";
@@ -9,26 +10,33 @@ import { testData0 } from "./TestData.ts";
 Deno.test("User Playing Tests ", async (t) => {
 
 
-    const testData1 = Array.from({ length: 20 }, (_, i) => ({
-        trackName: `Test Track ${i % 10}`,
-        trackArtists: [`Test Artist ${i % 5}`],
-        albumInfo: {
-            albumName: `Test Album ${i % 7}`,
-            albumArtists: [`Test Album Artist ${i % 3}`],
-            albumImage: `Test Image ${i % 4}`,
-            releaseDay: 1,
-            releaseMonth: 2,
-            releaseYear: 2024,
-            numTracks: 3
 
-        },
-        image: `Test Image ${i % 4}`,
-        isrc: `USRC176078${30 + i}`,
-        durationMs: 1000 + i * 100,
-        progressMs: 500 + i * 50,
-        popularity: 100 - (i % 10),
-        timestamp: 125666778 + i * 1000,
+    const testData1: TestData[] = Array.from({ length: 200 }, (_, i) => ({
+      trackName: `Test Track ${i % 10}`,
+      trackArtists: [`Test Artist ${i % 5}`],
+
+      albumInfo: {
+        albumType: "album",
+        albumName: `Test Album ${i % 7}`,
+        albumArtists: [`Test Album Artist ${i % 3}`],
+        albumImage: `Test Image ${i % 4}`,
+        releaseDay: 1,
+        releaseMonth: 2,
+        releaseYear: 2024,
+        externalId: `spotify:album:test-${i}`,
+        numTracks: 3,
+      },
+
+      image: `Test Image ${i % 4}`,
+      isrc: `USRC176078${30 + i}`,
+      durationMs: 1000 + i * 100,
+      popularity: 100 - (i % 10),
+      timestamp: 125666778 + i * 1000,
+
+      externalId: `spotify:track:test-${i}`,
+      trackNum: (i % 10) + 1,
     }));
+
 
     const { data, error } = await supabase.auth.admin.createUser({
         email: "test1@example.com",

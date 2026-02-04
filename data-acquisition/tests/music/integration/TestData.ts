@@ -13,7 +13,7 @@ export const testData0: TestData[] = [
             releaseDay: 27,
             releaseMonth: 10,
             releaseYear: 1997,
-            spotifyId: "7o4UsmV37Sg5It2Eb7vHzu",
+            externalId: "7o4UsmV37Sg5It2Eb7vHzu",
             numTracks: 10,
             /* numDiscs: 1, */
         },
@@ -22,7 +22,7 @@ export const testData0: TestData[] = [
         durationMs: 237733,
         popularity: 63,
         timestamp: 1754322638, // Set to actual playback timestamp if available
-        spotifyId: "7iiULg8Kmbnh1vWbh9rnBA",
+        externalId: "7iiULg8Kmbnh1vWbh9rnBA",
         trackNum: 7,
         /* discNum: 1, */
     },
@@ -38,7 +38,7 @@ export const testData0: TestData[] = [
             releaseDay: 19,
             releaseMonth: 11,
             releaseYear: 2010,
-            spotifyId: "0pGumY11G8OGH05ti6jh23",
+            externalId: "0pGumY11G8OGH05ti6jh23",
             numTracks: 12,
             /* numDiscs: 1, */
         },
@@ -47,7 +47,7 @@ export const testData0: TestData[] = [
         durationMs: 219973,
         popularity: 80,
         timestamp: 1754322618,
-        spotifyId: "3pYDZTJM2tVBUhIRifWVzI",
+        externalId: "3pYDZTJM2tVBUhIRifWVzI",
         trackNum: 4,
         /* diskNum: 1 */
     },
@@ -63,7 +63,7 @@ export const testData0: TestData[] = [
             releaseDay: 19,
             releaseMonth: 11,
             releaseYear: 2010,
-            spotifyId: "316O0Xetgx2NJLRgJBw4uq",
+            externalId: "316O0Xetgx2NJLRgJBw4uq",
             numTracks: 18,
         },
         image: "https://i.scdn.co/image/ab67616d0000b2735be805a76e68debf7675dd28",
@@ -71,7 +71,7 @@ export const testData0: TestData[] = [
         durationMs: 219973,
         popularity: 80,
         timestamp: 1754322618,
-        spotifyId: "5wmv111MUsMc9yLb4gKwa6",
+        externalId: "5wmv111MUsMc9yLb4gKwa6",
         trackNum: 1,
         /* diskNum: 2, */
     },
@@ -87,7 +87,7 @@ export const testData0: TestData[] = [
             releaseDay: 1,
             releaseMonth: 1,
             releaseYear: 2013,
-            spotifyId: "6uyslsVGFsHKzdGUosFwBM",
+            externalId: "6uyslsVGFsHKzdGUosFwBM",
             numTracks: 13,
             /* ,
       numDiscs: 1,*/
@@ -97,7 +97,7 @@ export const testData0: TestData[] = [
         durationMs: 210933,
         popularity: 80,
         timestamp: 1754322618,
-        spotifyId: "1GC1MIaRMW3kfVK9VyD5Ii",
+        externalId: "1GC1MIaRMW3kfVK9VyD5Ii",
         trackNum: 2,
     },
     {
@@ -112,7 +112,7 @@ export const testData0: TestData[] = [
             releaseDay: 22,
             releaseMonth: 7,
             releaseYear: 2022,
-            spotifyId: "7LYy99hyg4eHQeYkKPuS6R",
+            externalId: "7LYy99hyg4eHQeYkKPuS6R",
             numTracks: 2,
         },
         image: "https://i.scdn.co/image/ab67616d0000b273f831100cdd02b4a705042dfc",
@@ -120,7 +120,7 @@ export const testData0: TestData[] = [
         durationMs: 2756000,
         popularity: 50,
         timestamp: 52511521,
-        spotifyId: "67v2UHujFruxWrDmjPYxD6",
+        externalId: "67v2UHujFruxWrDmjPYxD6",
         trackNum: 1,
     },
     {
@@ -135,7 +135,7 @@ export const testData0: TestData[] = [
             releaseDay: 15,
             releaseMonth: 11,
             releaseYear: 2017,
-            spotifyId: "3SwkEbseZlPzgN5PIJqYV4", // No Spotify ID provided
+            externalId: "3SwkEbseZlPzgN5PIJqYV4", // No Spotify ID provided
             numTracks: 1,
         },
         image: "https://i.scdn.co/image/ab67616d0000b27347a44ff90da00b83f0cc398",
@@ -143,7 +143,7 @@ export const testData0: TestData[] = [
         durationMs: 180000, // Example duration
         popularity: 60, // Example popularity
         timestamp: 1754322650, // Example timestamp
-        spotifyId: "3L545updZMVxAsaYV6K8Z9", // No Spotify ID provided
+        externalId: "3L545updZMVxAsaYV6K8Z9", // No Spotify ID provided
         trackNum: 1,
         /*  diskNum: 1, */
     },

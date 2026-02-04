@@ -1,4 +1,5 @@
-import { SupabaseClient, Client, Player } from "@spotify";
+import { Client, Player } from "@spotify";
+import { SupabaseClient } from "@supabase"
 
 import { Track, SpotifyTrack } from "./Track.ts";
 import { Album, SpotifyAlbum, TestData } from "./Album.ts";

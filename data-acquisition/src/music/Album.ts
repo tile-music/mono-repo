@@ -251,7 +251,7 @@ export class SpotifyAlbum extends Album {
             data.albumInfo.numTracks,
             [],
             supabase,
-            data.albumInfo.spotifyId,
+            data.albumInfo.externalId,
             /* data.albumInfo.numDiscs, */
         );
         ret.addTrack(
@@ -260,7 +260,7 @@ export class SpotifyAlbum extends Album {
                 data.trackArtists,
                 data.isrc,
                 data.durationMs,
-                data.spotifyId,
+                data.externalId,
                 new SpotifyPlay(
                     data.timestamp,
                     data.popularity,
@@ -300,7 +300,7 @@ export type TestData = {
         releaseDay: number;
         releaseMonth: number;
         releaseYear: number;
-        spotifyId?: string;
+        externalId: string;
         numTracks: number;
         /*     numDiscs: number; */
     };
@@ -309,6 +309,6 @@ export type TestData = {
     durationMs: number;
     popularity: number;
     timestamp: number;
-    spotifyId: string;
+    externalId: string;
     trackNum: number;
 };

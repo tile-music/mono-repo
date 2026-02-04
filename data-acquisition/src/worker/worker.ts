@@ -1,4 +1,7 @@
-import { Worker, SupabaseClient, process } from "../../deps.ts";
+import { Worker, Job } from "@bull";
+import { SupabaseClient } from "@supabase";
+import { process } from "@node-process";
+
 import { SpotifyUserPlaying } from "../music/UserPlaying.ts";
 import { connection } from "./redis.ts";
 
@@ -26,7 +29,6 @@ export async function spotifyFire(
     const supabaseInd = new SupabaseClient(
         Deno.env.get("SB_URL")!,
         Deno.env.get("SERVICE")!,
-        { db: { schema: supabaseSchema } },
     );
 
     const spotifyUserPlaying = new SpotifyUserPlaying(supabaseInd, userId, {
@@ -59,7 +61,7 @@ const worker = new Worker(
     { connection },
 );
 
-process.on("unhandledRejection", (err) => {
+process.on("unhandledRejection", (err : Error) => {
     console.error(err);
 });
 

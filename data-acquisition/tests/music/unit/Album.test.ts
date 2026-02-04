@@ -62,7 +62,7 @@ Deno.test('spotify class', async (t) => {
       supabase,
 
       "spoturi1234567890",
-      47
+      "cocknuts"
     );
 
 

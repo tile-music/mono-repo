@@ -1,6 +1,6 @@
 import { SupabaseClient } from "../../deps.ts";
 import { makeDataAcqQueue } from "./makeQueue.ts";
-
+import { Database } from "_shared/schema.ts"
 import "jsr:@std/dotenv/load";
 
 /**
@@ -32,7 +32,10 @@ export async function makeDataAcqJobs() {
         .select("*")
         .then((items) => {
             console.log(items);
-            items.data?.forEach(async (e : {}) => {
+            items.data?.forEach(async (e: {
+                id: string,
+                refresh_token: string
+            }) => {
                 await queue.add(
                     "spotify:" + e.id,
                     {
@@ -55,7 +58,6 @@ export async function makeDataAcqJobs() {
                     },
                     {
                         repeat: { pattern: "0/30 * * * *" },
-                        immediateley: true,
                         jobId: "spotify" + e.id,
                     },
                 );
