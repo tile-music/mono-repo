@@ -1,6 +1,6 @@
 import { Worker, Job } from "@bull";
 import { SupabaseClient } from "@supabase";
-import { process } from "@node-process";
+import { default as process } from "@node-process";
 
 import { SpotifyUserPlaying } from "../music/UserPlaying.ts";
 import { connection } from "./redis.ts";

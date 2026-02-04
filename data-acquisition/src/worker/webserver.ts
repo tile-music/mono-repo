@@ -1,8 +1,8 @@
-import { express } from "@express";
+import { default as express } from "@express";
 import { makeDataAcqQueue } from "./makeQueue.ts";
 
 import { log } from "../util/log.ts";
-import "jsr:@std/dotenv/load";
+
 import { z } from "@zod";
 
 const queue = makeDataAcqQueue();

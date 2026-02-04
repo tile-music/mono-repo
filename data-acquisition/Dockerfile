@@ -5,8 +5,6 @@ WORKDIR /app/data-acq
 
 COPY . .
 COPY .env .
-COPY deps.ts .
-COPY import_map.json .
 
 FROM build AS dev
 

@@ -1,6 +1,6 @@
 import { QueueEvents } from "@bull";
 import { fork } from "@node-fork";
-import { process } from "@node-process";
+import { default as process } from "@node-process";
 import { makeDataAcqJobs } from "./worker/serviceAdapter.ts";
 import { connection } from "./worker/redis.ts";
 import {
