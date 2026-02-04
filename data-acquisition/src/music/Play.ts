@@ -52,7 +52,6 @@ export class Play implements Fireable {
         this.userId = userId;
     }
 
-
     public setTrackId(trackId: string) {
         this.trackId = trackId;
     }

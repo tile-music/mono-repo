@@ -1,5 +1,4 @@
-import { Client, Player } from "@spotify";
-import { SupabaseClient } from "@supabase"
+import { SupabaseClient } from "@supabase";
 
 import { Track, SpotifyTrack } from "./Track.ts";
 import { Album, SpotifyAlbum, TestData } from "./Album.ts";
@@ -7,9 +6,15 @@ import { Play, SpotifyPlay } from "./Play.ts";
 
 import { log } from "../util/log.ts";
 
-import type { Database } from "_shared/schema.ts"
+import type { Database } from "_shared/schema.ts";
 
 import { Fireable } from "./Fireable.ts";
+
+import {
+    getRecentlyPlayedTracks,
+    PlayHistoryItemCamel,
+} from "../util/spotify.ts";
+import { REPLCommand } from "node:repl";
 
 export type ReleaseDate = { year: number; month?: number; day?: number };
 
@@ -99,9 +104,7 @@ export abstract class UserPlaying implements Fireable {
 }
 
 export class SpotifyUserPlaying extends UserPlaying {
-    client!: Client;
-    player!: Player;
-    items!: any;
+    items!: PlayHistoryItemCamel[];
 
     constructor(
         supabase: SupabaseClient<Database>,
@@ -110,34 +113,15 @@ export class SpotifyUserPlaying extends UserPlaying {
     ) {
         super(supabase, userId, context);
     }
-    public override async init(): Promise<void> {
-        //console.log(this.context);
-        this.client = await Client.create({
-            refreshToken: true,
-            token: {
-                clientID: Deno.env.get("SP_CID") as string,
-                clientSecret: Deno.env.get("SP_SECRET") as string,
-                refreshToken: this.context.refresh_token,
-            },
-            onRefresh: () => {
-                console.log(
-                    `Token has been refreshed. New token: ${this.client.token}!`,
-                );
-            },
-        });
-        this.player = new Player(this.client);
-    }
+    public override async init(): Promise<void> {}
 
     protected override matchAlbums(): void {
         //await this.getAlbumPopularity();
         for (const [_, item] of this.items.entries()) {
-            const releaseDateRaw = item.track.album.release_date
-                ? item.track.album.release_date
-                : item.track.album.releaseDate;
-            const releaseDatePrecisionRaw = item.track.album
-                .release_date_precision
-                ? item.track.album.release_date_precision
-                : item.track.album.releaseDatePrecision;
+            const releaseDateRaw =
+                item.track.album.releaseDate;
+            const releaseDatePrecisionRaw =
+                item.track.album.releaseDatePrecision;
 
             const releaseDateParsed: ReleaseDate =
                 SpotifyUserPlaying.parseSpotifyDate(
@@ -156,9 +140,9 @@ export class SpotifyUserPlaying extends UserPlaying {
                     releaseDateParsed.month,
                     releaseDateParsed.year,
                     item.track.album.totalTracks as number,
-                    item.track.album.genres,
+                    [],
                     this.supabase,
-                    item.track.album.id
+                    item.track.album.id,
                 ),
             );
             if (!album) {
@@ -172,8 +156,8 @@ export class SpotifyUserPlaying extends UserPlaying {
                     item.track.artists.map(
                         (artist: { name: string }) => artist.name,
                     ),
-                    item.track.externalID.isrc,
-                    item.track.duration,
+                    item.track.externalIds.isrc?? "" ,
+                    item.track.durationMs,
                     item.track.id,
                     new SpotifyPlay(
                         SpotifyUserPlaying.parseISOToDate(
@@ -182,7 +166,7 @@ export class SpotifyUserPlaying extends UserPlaying {
                         item.track.popularity,
                         this.supabase,
                         this.userId,
-                        item.track.externalID.isrc,
+                        item.track.externalIds.isrc,
                     ),
                     this.supabase,
                     item.track.trackNumber,
@@ -191,8 +175,9 @@ export class SpotifyUserPlaying extends UserPlaying {
         }
     }
     public override async fire(): Promise<void> {
-        await this.init();
-        const things = await this.player.getRecentlyPlayed({ limit: 50 });
+        const things = await getRecentlyPlayedTracks(
+            this.context.refresh_token,
+        );
 
         this.items = things.items;
         await super.fire();
@@ -282,7 +267,7 @@ export class MockUserPlaying extends UserPlaying {
                     track.albumInfo.releaseYear,
                     1,
                     ["Test Genre"],
-                    this.supabase
+                    this.supabase,
                 ),
             );
 
@@ -300,7 +285,7 @@ export class MockUserPlaying extends UserPlaying {
                         track.isrc,
                     ),
                     this.supabase,
-                    2
+                    2,
                 ),
             );
         }
@@ -308,7 +293,6 @@ export class MockUserPlaying extends UserPlaying {
 
     public override init(): Promise<void> {
         this.inited = true;
-        console.log("Mock init");
         return Promise.resolve();
     }
 }

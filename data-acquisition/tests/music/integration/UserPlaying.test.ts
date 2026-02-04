@@ -7,10 +7,7 @@ import { expect } from "jsr:@std/expect";
 import { supabase } from "../supabase.ts";
 import { testData0 } from "./TestData.ts";
 
-Deno.test("User Playing Tests ", async (t) => {
-
-
-
+Deno.test("User Playing Tests ", async (t: Deno.TestContext) => {
     const testData1: TestData[] = Array.from({ length: 200 }, (_, i) => ({
       trackName: `Test Track ${i % 10}`,
       trackArtists: [`Test Artist ${i % 5}`],
@@ -26,13 +23,11 @@ Deno.test("User Playing Tests ", async (t) => {
         externalId: `spotify:album:test-${i}`,
         numTracks: 3,
       },
-
       image: `Test Image ${i % 4}`,
       isrc: `USRC176078${30 + i}`,
       durationMs: 1000 + i * 100,
       popularity: 100 - (i % 10),
       timestamp: 125666778 + i * 1000,
-
       externalId: `spotify:track:test-${i}`,
       trackNum: (i % 10) + 1,
     }));
@@ -47,7 +42,7 @@ Deno.test("User Playing Tests ", async (t) => {
 
     const userId = data.user?.id || "";
 
-    await t.step("Mock user playing tests", async (t) => {
+    await t.step("Mock user playing tests", async (t: Deno.TestContext) => {
 
         await t.step("MockUserPlaying init method", async () => {
             const mockUserPlaying = new MockUserPlaying(
@@ -71,7 +66,6 @@ Deno.test("User Playing Tests ", async (t) => {
                         .from("plays")
                         .select()
                         .eq("user_id", userId)
-                    console.log(JSON.stringify(data));
                     expect(data).toHaveLength(4);
                 }
                 );
@@ -96,7 +90,6 @@ Deno.test("User Playing Tests ", async (t) => {
                     userId,
                     testData1,
                 );
-                console.log(testData1);
                 await mockUserPlaying.init();
                 await expect(mockUserPlaying.fire())
                     .resolves.not.toThrow()
@@ -113,7 +106,7 @@ Deno.test("User Playing Tests ", async (t) => {
         const context = { refresh_token: Deno.env.get("SP_REFRESH") };
         await t.step(
             "SpotifyUserPlaying Parse Spotify Date Function",
-            async () => {
+            () => {
                 expect(
                     SpotifyUserPlaying.parseSpotifyDate("1999-12-22", "day"),
                 ).toStrictEqual({ year: 1999, month: 12, day: 22 });
@@ -186,7 +179,6 @@ Deno.test("User Playing Tests ", async (t) => {
                         .eq("user_id", userId);
                     if (error) throw error;
                     expect(data).toBeDefined();
-                    //console.log(data)
                     for (const entry of data) {
                         if (entry.tracks)
                             expect(entry.tracks.source_external_id).toBeDefined();

@@ -20,16 +20,15 @@ async function removeJob(jobId: string) {
     }
 }
 
-
 const addJobSchema = z.object({
-  userId: z.string().min(1, "userId cannot be empty"),
-  refreshToken: z.string().min(1, "refreshToken cannot be empty"),
-  type: z.literal("spotify"),
+    userId: z.string().min(1, "userId cannot be empty"),
+    refreshToken: z.string().min(1, "refreshToken cannot be empty"),
+    type: z.literal("spotify"),
 });
 
 const removeJobSchema = z.object({
-  userId: z.string().min(1, "userId cannot be empty"),
-  type: z.literal("spotify"),
+    userId: z.string().min(1, "userId cannot be empty"),
+    type: z.literal("spotify"),
 });
 
 /**

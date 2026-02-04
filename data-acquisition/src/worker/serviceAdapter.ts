@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase";
 import { makeDataAcqQueue } from "./makeQueue.ts";
-import { Database } from "_shared/schema.ts"
+import { Database } from "_shared/schema.ts";
 import "jsr:@std/dotenv/load";
 
 /**
@@ -25,43 +25,41 @@ export async function makeDataAcqJobs() {
     const supabase = new SupabaseClient(
         Deno.env.get("SB_URL")!,
         Deno.env.get("SERVICE")!,
-        { db: { schema: "public" } },
     );
     await supabase
         .from("spotify_credentials")
         .select("*")
         .then((items) => {
             console.log(items);
-            items.data?.forEach(async (e: {
-                id: string,
-                refresh_token: string
-            }) => {
-                await queue.add(
-                    "spotify:" + e.id,
-                    {
-                        data: {
-                            userId: e.id,
-                            refreshToken: e.refresh_token,
+            items.data?.forEach(
+                async (e: { id: string; refresh_token: string }) => {
+                    await queue.add(
+                        "spotify:" + e.id,
+                        {
+                            data: {
+                                userId: e.id,
+                                refreshToken: e.refresh_token,
+                            },
                         },
-                    },
-                    {
-                        jobId: "spotify" + e.id,
-                    },
-                );
-                await queue.add(
-                    "spotify:" + e.id,
-                    {
-                        data: {
-                            userId: e.id,
-                            refreshToken: e.refresh_token,
+                        {
+                            jobId: "spotify" + e.id,
                         },
-                    },
-                    {
-                        repeat: { pattern: "0/30 * * * *" },
-                        jobId: "spotify" + e.id,
-                    },
-                );
-            });
+                    );
+                    await queue.add(
+                        "spotify:" + e.id,
+                        {
+                            data: {
+                                userId: e.id,
+                                refreshToken: e.refresh_token,
+                            },
+                        },
+                        {
+                            repeat: { pattern: "0/30 * * * *" },
+                            jobId: "spotify" + e.id,
+                        },
+                    );
+                },
+            );
         });
 }
 /** if you'd like to update sooner you could get rid of the second 0 and even the first */

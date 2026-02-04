@@ -8,12 +8,11 @@
         "@zod": "npm:zod",
         "_shared/": "../lib/",
         "@bull": "npm:bullmq",
-        "@spotify":"npm:spotify-api.js",
-        "@musicbrainz": "npm:musicbrainz-api",
         "@supabase": "jsr:@supabase/supabase-js@2",
         "@node-fork": "node:child_process",
         "@node-process": "node:process",
         "@express": "npm:express",
-        "@munite": "jsr:@tile-music/munite"
+        "@munite": "jsr:@tile-music/munite",
+        "@expect": "jsr:@std/expect"
     }
 }

@@ -92,7 +92,7 @@ export class Track implements Fireable {
      */
     public async getTrackDbID(): Promise<string> {
         if (this.trackId) return this.trackId;
-        log(6, `external id ${this.externalId}`)
+        log(6, `external id ${this.externalId}`);
         let { data, error } = await this.queryHelper();
         log(
             6,
@@ -132,7 +132,7 @@ export class Track implements Fireable {
             source_artists: this.trackArtists,
             //track_duration_ms: this.durationMs,
             source_service: this.sourceService,
-            source_external_id: this.externalId
+            source_external_id: this.externalId,
             //track_num: this.trackNum,
             /* disc_num: this.discNum, */
         };
@@ -143,16 +143,12 @@ export class Track implements Fireable {
     //         log(6, `release in track ${JSON.stringify(release)}`);
     //     });
     // }
-
-    public createPlayDbEntryObject() {
-        return { ...this.play.createDbEntryObject() };
-    }
     public async fire(): Promise<void> {
         const trackId = await this.getTrackDbID();
-        log(6, `track id ${trackId}`)
+        log(6, `track id ${trackId}`);
         if (!this.albumId)
             throw new Error("album id is undefined, this should never happen");
-        log(6, "track fire called")
+        log(6, "track fire called");
         this.play.setTrackId(trackId);
 
         //log(6, ` track directly before  play fire ${JSON.stringify(this)}`);
@@ -184,6 +180,6 @@ export class SpotifyTrack extends Track {
             /*  discNum,  */ albumId,
         );
         this.externalId = spotifyId;
-        this.sourceService = "spotify"
+        this.sourceService = "spotify";
     }
 }

@@ -87,10 +87,8 @@ export class Album implements Fireable {
         this.genre = genre;
         this.externalId = `${title},${this.artists.join(",")}`;
         this.supabase = supabase;
-        //console.log(this);
         this.query = this.supabase.from("albums").select("id");
         this.id = albumId;
-        /* this.numDiscs = numDiscs; */
     }
 
     public getAlbumType() {
@@ -180,7 +178,7 @@ export class Album implements Fireable {
             source_artists: this.artists,
             source_image: this.image,
             source_external_id: this.externalId,
-            source_album_type: this.albumType
+            source_album_type: this.albumType,
         };
     }
     public async fire(): Promise<void> {
