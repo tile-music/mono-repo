@@ -32,4 +32,3 @@ EXPOSE 4173
 ENV NODE_ENV=production
 
 CMD [ "node", "--env-file=.env.local","build" ]
-

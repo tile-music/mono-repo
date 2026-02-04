@@ -7,13 +7,18 @@ export const actions: Actions = {
     login: async ({ request, locals: { supabase } }) => {
         const formData = await request.formData();
         const form = validateAccountForm("login", formData);
-        if (!form.valid) {
-            return fail(422, { failures: form.failures });
-        }
+        if (!form.valid) return fail(422, form);
 
-        const { error } = await supabase.auth.signInWithPassword(form.data);
-        if (error) {
-            return fail(422, { invalidCredentials: true });
+        const loginData = {
+            email: form.data.email!,
+            password: form.data.password!,
+        };
+
+        const { error: login_error } =
+            await supabase.auth.signInWithPassword(loginData);
+        if (login_error) {
+            form.failures.general = "Invalid email or password.";
+            return fail(422, form);
         } else {
             redirect(303, "/profile");
         }

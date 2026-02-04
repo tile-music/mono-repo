@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase";
 import { makeDataAcqQueue } from "./makeQueue.ts";
 import { Database } from "_shared/schema.ts";
+import {log} from "../util/log.ts"
 import "jsr:@std/dotenv/load";
 
 /**
@@ -21,45 +22,57 @@ import "jsr:@std/dotenv/load";
  */
 export async function makeDataAcqJobs() {
     const queue = makeDataAcqQueue();
-    console.log("makeJobs");
     const supabase = new SupabaseClient(
         Deno.env.get("SB_URL")!,
         Deno.env.get("SERVICE")!,
+        { db: { schema: "public" } },
     );
-    await supabase
-        .from("spotify_credentials")
-        .select("*")
-        .then((items) => {
-            console.log(items);
-            items.data?.forEach(
-                async (e: { id: string; refresh_token: string }) => {
-                    await queue.add(
-                        "spotify:" + e.id,
-                        {
-                            data: {
-                                userId: e.id,
-                                refreshToken: e.refresh_token,
-                            },
-                        },
-                        {
-                            jobId: "spotify" + e.id,
-                        },
-                    );
-                    await queue.add(
-                        "spotify:" + e.id,
-                        {
-                            data: {
-                                userId: e.id,
-                                refreshToken: e.refresh_token,
-                            },
-                        },
-                        {
-                            repeat: { pattern: "0/30 * * * *" },
-                            jobId: "spotify" + e.id,
-                        },
-                    );
+
+    const {
+        data: connected_spotify_accounts,
+        error: get_connected_spotify_accounts_error,
+    } = await supabase
+        .from("connected_accounts")
+        .select("user_id, refresh_token")
+        .eq("provider", "spotify");
+
+    if (get_connected_spotify_accounts_error) {
+        log(
+            2,
+            "Error when retrieving connected spotify accounts: " +
+                get_connected_spotify_accounts_error.message,
+        );
+    } else {
+        for (const account of connected_spotify_accounts) {
+            // immediate job
+            await queue.add(
+                "spotify" + account,
+                {
+                    data: {
+                        userId: account.user_id,
+                        refreshToken: account.refresh_token,
+                    },
+                },
+                {
+                    jobId: "spotify" + account.user_id,
                 },
             );
-        });
+
+            // job every 30 mins
+            await queue.add(
+                "spotify" + account,
+                {
+                    data: {
+                        userId: account.user_id,
+                        refreshToken: account.refresh_token,
+                    },
+                },
+                {
+                    repeat: { pattern: "0/30 * * * *" },
+                    immediateley: true,
+                    jobId: "spotify" + account.user_id,
+                },
+            );
+        }
+    }
 }
-/** if you'd like to update sooner you could get rid of the second 0 and even the first */

@@ -1,60 +1,73 @@
 include:
-  #- ./mb-docker/docker-compose.yml
-  - ./supabase/docker/docker-compose.yml
+    #- ./mb-docker/docker-compose.yml
+    - ./supabase/docker/docker-compose.yml
 services:
-  lib-node:
-    build:
-      context: .
-      dockerfile: Dockerfile.lib
-      target: lib-build-node
-    image: mdv-lib-node
-  lib-deno:
-    build:
-      context: .
-      dockerfile: Dockerfile.lib
-      target: lib-build-deno
-    image: mdv-lib-deno
-  frontend:
-    build:
-      context: ./frontend/
-      target: dev
-    volumes:
-      - ./lib/:/app/lib
-      - ./frontend/src:/app/frontend/src
-      - ./frontend/static:/app/frontend/static
-      - ./frontend/vite.config.ts:/app/frontend/vite.config.ts
-      - ./frontend/tsconfig.json:/app/frontend/tsconfig.json
-      - ./frontend/svelte.config.js:/app/frontend/svelte.config.js
-      - ./frontend/.env.local:/app/frontend/.env.local
-      - MQP:/data/frontend
-    ports:
-      - "5173:5173"
-      - "24678:24678"
-    networks:
-      - default
-    depends_on:
-      - lib-node
-  redis:
-    image: "redis:alpine"
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
-  data-acquisition:
-    build:
-      context: ./data-acquisition/
-      target: dev
-    volumes:
-      - MQP:/data/data-acquisition
-    ports:
-      - "3001:3001"
-    networks:
-      - default
-    depends_on:
-      - db
-      - analytics
-      - redis
-      - lib-deno
+    lib-node:
+        build:
+            context: .
+            dockerfile: Dockerfile.lib
+            target: lib-build-node
+        image: mdv-lib-node
+    lib-deno:
+        build:
+            context: .
+            dockerfile: Dockerfile.lib
+            target: lib-build-deno
+        image: mdv-lib-deno
+    frontend:
+        build:
+            context: ./frontend/
+            target: dev
+        volumes:
+            - ./lib/:/app/lib
+            - ./frontend/src:/app/frontend/src
+            - ./frontend/static:/app/frontend/static
+            - ./frontend/vite.config.ts:/app/frontend/vite.config.ts
+            - ./frontend/tsconfig.json:/app/frontend/tsconfig.json
+            - ./frontend/svelte.config.js:/app/frontend/svelte.config.js
+            - ./frontend/.env.local:/app/frontend/.env.local
+            - MQP:/data/frontend
+        ports:
+            - "5173:5173"
+            - "24678:24678"
+        networks:
+            - default
+        depends_on:
+            - lib-node
+    redis:
+        image: "redis:alpine"
+        ports:
+            - "6379:6379"
+        volumes:
+            - ./redis.conf:/usr/local/etc/redis/redis.conf
+        command: redis-server /usr/local/etc/redis/redis.conf
+    data-acquisition:
+        build:
+            context: ./data-acquisition/
+            target: dev
+        volumes:
+            - MQP:/data/data-acquisition
+        ports:
+            - "3001:3001"
+        networks:
+            - default
+        depends_on:
+            db:
+                condition: service_healthy
+            analytics:
+                condition: service_started
+            redis:
+                condition: service_started
+            lib-deno:
+                condition: service_started
+    nginx:
+        build:
+            context: ./nginx
+        ports:
+            - "80:80"
+            - "443:443"
+        depends_on:
+            - frontend
+            - kong
 volumes:
-  MQP:
+    MQP:

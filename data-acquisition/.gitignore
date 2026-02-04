@@ -142,6 +142,4 @@ package-lock.json
 
 playground/supabase.ipynb
 
-log**.**
-
-src/util/munite
+log**.txt

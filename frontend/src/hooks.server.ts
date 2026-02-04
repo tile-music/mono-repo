@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { log } from "$lib/log";
@@ -8,6 +8,12 @@ import {
     PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
 import type { Profile } from "$shared/Profile";
+
+type SupabaseCookie = {
+    name: string;
+    value: string;
+    options: CookieOptions;
+};
 
 const supabase: Handle = async ({ event, resolve }) => {
     /**
@@ -20,13 +26,15 @@ const supabase: Handle = async ({ event, resolve }) => {
         PUBLIC_SUPABASE_ANON_KEY,
         {
             cookies: {
-                getAll: () => event.cookies.getAll(),
+                getAll() {
+                    return event.cookies.getAll();
+                },
                 /**
                  * SvelteKit's cookies API requires `path` to be explicitly set in
                  * the cookie options. Setting `path` to `/` replicates previous/
                  * standard behavior.
                  */
-                setAll: (cookiesToSet) => {
+                setAll(cookiesToSet: SupabaseCookie[]) {
                     cookiesToSet.forEach(({ name, value, options }) => {
                         event.cookies.set(name, value, {
                             ...options,
@@ -144,7 +152,11 @@ const profile: Handle = async ({ event, resolve }) => {
 
     // if there's an error fetching the profile, log it and set profile to null
     if (fetchResult.error) {
-        log(3, "Error fetching profile of authenticated user:" + fetchResult.error);
+        log(
+            3,
+            "Error fetching profile of authenticated user:" +
+                JSON.stringify(fetchResult.error, null, 2),
+        );
         event.locals.profile = null;
         return resolve(event);
     }
@@ -156,30 +168,11 @@ const profile: Handle = async ({ event, resolve }) => {
 
 const userTheme: Handle = async ({ event, resolve }) => {
     const { profile } = event.locals;
-    const theme = `theme-${profile?.theme ?? "theme-default-dark"}`;
+    const theme = `theme-${profile?.theme ?? "theme-dark"}`;
 
     return await resolve(event, {
         transformPageChunk: ({ html }) => html.replace("[theme]", theme),
     });
-};
-
-const originalConsoleWarn = console.debug;
-
-console.warn = function (...args) {
-    const shouldLog = args.every((arg) => {
-        if (typeof arg === "string") {
-            /*
-            current supabase auth implementation sucks and spits out an unnecessary warning every
-            time session data is needed on a page, even though nothing we're doing is unsafe.
-            we need to manually suppress that warning, unfortunately.
-            */
-            return !arg.includes("Using the user object");
-        }
-        return true;
-    });
-    if (shouldLog) {
-        originalConsoleWarn.apply(console, args);
-    }
 };
 
 export const handle: Handle = sequence(supabase, authGuard, profile, userTheme);

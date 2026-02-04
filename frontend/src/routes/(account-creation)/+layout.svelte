@@ -1,7 +1,8 @@
 <script lang="ts">
-    import sample_collage from '$lib/assets/images/sample_collage.png'
+    import sample_collage from "$lib/assets/images/sample_collage.png";
+    import type { Snippet } from "svelte";
     interface Props {
-        children?: import('svelte').Snippet;
+        children: Snippet;
     }
 
     let { children }: Props = $props();
@@ -9,10 +10,10 @@
 
 <div class="content">
     <div class="left">
-        <img src={sample_collage} alt="A sample album art collage.">
+        <img src={sample_collage} alt="A sample album art collage." />
     </div>
     <div class="right">
-        {@render children?.()}
+        {@render children()}
     </div>
 </div>
 
@@ -30,7 +31,7 @@
         justify-content: right;
         align-items: center;
     }
-    
+
     .right {
         width: 50%;
         display: flex;
@@ -42,5 +43,15 @@
         height: 150%;
         transform: rotate(8deg);
         opacity: 0.5;
+    }
+
+    @media (max-width: 700px) {
+        .left {
+            display: none;
+        }
+
+        .right {
+            width: 100%;
+        }
     }
 </style>

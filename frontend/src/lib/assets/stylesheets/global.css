@@ -8,6 +8,11 @@
     src: url("../fonts/Archivo-Regular.woff2") format("woff2");
 }
 
+:root {
+    font-family: "Archivo";
+    color: var(--fg);
+}
+
 /* basic elements */
 html,
 body {
@@ -15,7 +20,7 @@ body {
 }
 
 body {
-    background-color: var(--background);
+    background-color: var(--bg);
 }
 
 h1,
@@ -25,50 +30,19 @@ h4,
 h5,
 h6 {
     font-family: "Mattone";
-    color: var(--text);
-}
-
-p,
-div {
-    font-family: "Archivo";
-    color: var(--text);
+    font-weight: normal;
 }
 
 a {
-    font-family: "Archivo";
     color: var(--accent);
 }
 
-h1 {
-    font-size: 30px;
-}
-
-/* input elements */
-input[type="text"],
-input[type="password"] {
-    background-color: var(--background);
-    border: 2px solid var(--medium);
-    border-radius: 5px;
-    font-family: "Archivo", sans-serif;
-    font-size: 15px;
-    padding: 2px 5px;
-    color: var(--text);
-}
-
-input[type="submit"],
-.art-display-button,
-.art-display-menu-button {
-    height: 40px;
-    border-radius: 20px;
+fieldset {
     border: none;
-    cursor: pointer;
-    color: var(--background);
-    background-color: var(--accent);
-    font-family: "Mattone", sans-serif;
-    font-size: 15px;
-    padding: 0 20px;
+    margin: 0;
+    padding: 0;
 }
 
-::placeholder {
-    color: var(--medium);
+button {
+    cursor: pointer;
 }
