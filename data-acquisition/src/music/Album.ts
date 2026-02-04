@@ -1,5 +1,5 @@
 import { SpotifyTrack, Track } from "./Track.ts";
-import { SupabaseClient } from "../../deps.ts";
+import { SupabaseClient } from "@supabase";
 import { log } from "../util/log.ts";
 
 import { PK_VIOLATION } from "../util/constants.ts";

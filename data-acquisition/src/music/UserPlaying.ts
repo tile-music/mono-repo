@@ -9,7 +9,6 @@ import { log } from "../util/log.ts";
 
 import type { Database } from "_shared/schema.ts"
 
-import { MusicBrainzApi } from "../../deps.ts";
 import { Fireable } from "./Fireable.ts";
 
 export type ReleaseDate = { year: number; month?: number; day?: number };

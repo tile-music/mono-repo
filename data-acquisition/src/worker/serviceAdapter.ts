@@ -1,4 +1,4 @@
-import { SupabaseClient } from "../../deps.ts";
+import { SupabaseClient } from "@supabase";
 import { makeDataAcqQueue } from "./makeQueue.ts";
 import { Database } from "_shared/schema.ts"
 import "jsr:@std/dotenv/load";

@@ -1,4 +1,4 @@
-import { express } from "../../deps.ts";
+import { express } from "@express";
 import { makeDataAcqQueue } from "./makeQueue.ts";
 
 import { log } from "../util/log.ts";

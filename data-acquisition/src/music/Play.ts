@@ -1,4 +1,4 @@
-import { SupabaseClient } from "../../deps.ts";
+import { SupabaseClient } from "@supabase";
 import { Fireable } from "./Fireable.ts";
 import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/constants.ts";

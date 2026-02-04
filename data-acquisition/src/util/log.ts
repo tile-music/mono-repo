@@ -1,4 +1,4 @@
-import { log as logBase } from "../../../lib/log.ts";
+import { log as logBase } from "_shared/log.ts";
 
 const logLevel: number = Number(Deno.env.get("LOG_LEVEL")) ?? 6;
 

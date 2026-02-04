@@ -1,13 +1,12 @@
 import { Play } from "./Play.ts";
-import { SupabaseClient } from "../../deps.ts";
+import { SupabaseClient } from "@supabase";
 
 import { Fireable } from "./Fireable.ts";
 import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/constants.ts";
 
-import { type IReleaseMatch } from "../../deps.ts";
 import { release } from "node:os";
-import { Database } from "../../../lib/schema.ts";
+import { Database } from "_shared/schema.ts";
 /**
  * @file TrackInfo.ts
  * @description This file contains the definition of the TrackInfo class, which represents information about a music track.

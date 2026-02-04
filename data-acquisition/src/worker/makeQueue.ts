@@ -1,4 +1,4 @@
-import { Queue } from "../../deps.ts";
+import { Queue } from "@bull";
 
 import { connection } from "./redis.ts";
 /**
