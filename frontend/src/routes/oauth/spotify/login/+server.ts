@@ -1,14 +1,15 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import type { SignInWithOAuthCredentials } from "@supabase/supabase-js/dist/index.cjs";
+import { log } from "$lib/log";
 
 export const GET: RequestHandler = async ({
     locals: { user, supabase },
     url,
 }) => {
     const next = url.searchParams.get("next") ?? "/profile";
-    const linkIdentity = url.searchParams.get("linkIdentity") ?? "false";
-    console.log("link identity", true);
+    const linkIdentityStr = url.searchParams.get("linkIdentity");
+    const linkIdentity = linkIdentityStr == "true";
 
     const scope = "user-read-recently-played user-read-private user-read-email";
     const options = {
@@ -25,6 +26,7 @@ export const GET: RequestHandler = async ({
         const { data, error } = await supabase.auth.linkIdentity(options);
 
         if (!error) {
+            log(5, `Linking Spotify identity to user ${user?.id}`);
             // linkIdentity skips the internal authorization route, so we can send
             // the user directly to the provider's OAuth url.
             return redirect(302, data.url);
@@ -39,7 +41,6 @@ export const GET: RequestHandler = async ({
             // let it generate its own URL and splice it manually.
             const newUrl =
                 "http://localhost/oauth/authorize?" + data.url.split("?")[1];
-            console.log(newUrl);
             return redirect(302, newUrl);
         }
     }

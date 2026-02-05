@@ -1,9 +1,9 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { log } from "$lib/log";
+import { DATA_ACQ_URL } from "$env/static/private";
 
 export const GET: RequestHandler = async ({ locals: { supabase }, url }) => {
-    console.log(url.searchParams);
     const code = url.searchParams.get("code");
     const scope = url.searchParams.get("scope");
     const next = url.searchParams.get("next");
@@ -55,11 +55,30 @@ export const GET: RequestHandler = async ({ locals: { supabase }, url }) => {
     const { error: insert_error } = await supabase
         .from("connected_accounts")
         .upsert(connected_account);
-    console.log("INSERTED :)");
 
     if (insert_error) {
-        log(3, "Error inserting connected account:" + insert_error);
+        log(3, "Error inserting connected account:" + insert_error.message);
         redirect(303, "/login");
+    }
+
+    const add_job_response = await fetch(DATA_ACQ_URL + "/add-job", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            userId: connected_account.user_id,
+            refreshToken: connected_account.refresh_token,
+            type: connected_account.provider,
+        }),
+    });
+
+    if (!add_job_response.ok) {
+        log(
+            2,
+            "Error adding data acquisition job: " +
+                (await add_job_response.text()),
+        );
     }
 
     redirect(303, "/" + next.slice(1));
