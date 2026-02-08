@@ -9,6 +9,7 @@ export default defineConfig({
         watch: {
             usePolling: true,
         },
+        allowedHosts: ["local.tile.music"],
     },
     plugins: [sveltekit()],
 });

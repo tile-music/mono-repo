@@ -18,6 +18,7 @@ declare global {
         // interface PageState {}
         // interface Platform {}
     }
+    declare const MusicKit: any;
 }
 
 export {};

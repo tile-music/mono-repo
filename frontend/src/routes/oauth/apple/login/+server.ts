@@ -12,13 +12,12 @@ export const GET: RequestHandler = async ({
     const linkIdentityStr = url.searchParams.get("linkIdentity");
     const linkIdentity = linkIdentityStr == "true";
 
-    const scope = "user-read-recently-played user-read-private user-read-email";
+    const scope = "name email";
     const options = {
-        provider: "spotify",
+        provider: "apple",
         options: {
             scopes: scope,
-            queryParams: { show_dialog: "true" },
-            redirectTo: `${APP_URL}/oauth/spotify/callback?scope=${scope}&next=${next}`,
+            redirectTo: `${APP_URL}/oauth/apple/callback?scope=${scope}&next=${next}`,
             skipBrowserRedirect: true,
         },
     } satisfies SignInWithOAuthCredentials;
@@ -27,7 +26,7 @@ export const GET: RequestHandler = async ({
         const { data, error } = await supabase.auth.linkIdentity(options);
 
         if (!error) {
-            log(5, `Linking Spotify identity to user ${user?.id}`);
+            log(5, `Linking Apple identity to user ${user?.id}`);
             // linkIdentity skips the internal authorization route, so we can send
             // the user directly to the provider's OAuth url.
             return redirect(302, data.url);
@@ -42,6 +41,7 @@ export const GET: RequestHandler = async ({
             // let it generate its own URL and splice it manually.
             const newUrl =
                 APP_URL + "/oauth/authorize?" + data.url.split("?")[1];
+            console.log("redirecting to " + newUrl);
             return redirect(302, newUrl);
         }
     }
