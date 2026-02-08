@@ -207,22 +207,25 @@ export type Database = {
           avatar_id: string | null
           id: string
           name: string | null
-          theme: string | null
-          updated_at: string | null
+          theme: string
+          updated_at: string
+          username: string
         }
         Insert: {
           avatar_id?: string | null
           id: string
           name?: string | null
-          theme?: string | null
-          updated_at?: string | null
+          theme: string
+          updated_at: string
+          username: string
         }
         Update: {
           avatar_id?: string | null
           id?: string
           name?: string | null
-          theme?: string | null
-          updated_at?: string | null
+          theme?: string
+          updated_at?: string
+          username?: string
         }
         Relationships: []
       }
@@ -266,14 +269,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      debug_role: {
-        Args: never
-        Returns: {
-          auth_role: string
-          auth_uid: string
-          role_name: string
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

@@ -77,13 +77,14 @@ export abstract class UserPlaying implements Fireable {
     protected abstract matchAlbums(): void;
 
     protected addOrGetAlbum(album: Album) {
-        const ident = album.getAlbumIdentifier();
+        const ident = album.getExternalId();
         if (this.albums.has(ident)) return this.albums.get(ident);
         else {
             this.albums.set(ident, album);
             return this.albums.get(ident);
         }
     }
+
 
     public async fire(): Promise<void> {
         try {
@@ -113,65 +114,73 @@ export class SpotifyUserPlaying extends UserPlaying {
     ) {
         super(supabase, userId, context);
     }
-    public override async init(): Promise<void> {}
+    public override async init(): Promise<void> { }
 
     protected override matchAlbums(): void {
         //await this.getAlbumPopularity();
-        for (const [_, item] of this.items.entries()) {
-            const releaseDateRaw =
-                item.track.album.releaseDate;
-            const releaseDatePrecisionRaw =
-                item.track.album.releaseDatePrecision;
 
-            const releaseDateParsed: ReleaseDate =
-                SpotifyUserPlaying.parseSpotifyDate(
-                    releaseDateRaw,
-                    releaseDatePrecisionRaw,
-                );
-            const album = this.addOrGetAlbum(
-                new SpotifyAlbum(
-                    item.track.album.name,
-                    item.track.album.albumType,
-                    item.track.album.artists.map(
-                        (artist: { name: string }) => artist.name,
+        for (const [_, item] of this.items.entries()) {
+            try {
+                const releaseDateRaw =
+                    item.track.album.releaseDate;
+                const releaseDatePrecisionRaw =
+                    item.track.album.releaseDatePrecision;
+
+                const releaseDateParsed: ReleaseDate =
+                    SpotifyUserPlaying.parseSpotifyDate(
+                        releaseDateRaw,
+                        releaseDatePrecisionRaw,
+                    );
+                const album = this.addOrGetAlbum(
+                    new SpotifyAlbum(
+                        item.track.album.name,
+                        item.track.album.albumType,
+                        item.track.album.artists.map(
+                            (artist: { name: string }) => artist.name,
+                        ),
+                        item.track.album.images[0].url,
+                        releaseDateParsed.day,
+                        releaseDateParsed.month,
+                        releaseDateParsed.year,
+                        item.track.album.totalTracks as number,
+                        [],
+                        this.supabase,
+                        item.track.album.id,
                     ),
-                    item.track.album.images[0].url,
-                    releaseDateParsed.day,
-                    releaseDateParsed.month,
-                    releaseDateParsed.year,
-                    item.track.album.totalTracks as number,
-                    [],
-                    this.supabase,
-                    item.track.album.id,
-                ),
-            );
-            if (!album) {
-                log(0, `album is undefined ${{ ...item }}`);
+                );
+                if (!album) {
+                    log(0, `album is undefined ${{ ...item }}`);
+                    continue;
+                }
+
+                album.addTrack(
+                    new SpotifyTrack(
+                        item.track.name,
+                        item.track.artists.map(
+                            (artist: { name: string }) => artist.name,
+                        ),
+                        item.track.externalIds.isrc ?? "",
+                        item.track.durationMs,
+                        item.track.id,
+                        new SpotifyPlay(
+                            SpotifyUserPlaying.parseISOToDate(
+                                item.playedAt,
+                            ).valueOf(),
+                            item.track.popularity,
+                            this.supabase,
+                            this.userId,
+                            item.track.externalIds.isrc,
+                        ),
+                        this.supabase,
+                        item.track.trackNumber,
+                    ),
+                );
+            } catch (error) {
+                log(1, `
+                    error: ${JSON.stringify(error, null, 2)}\n
+                    error putting ${JSON.stringify(item, null, 2)}`);
                 continue;
             }
-
-            album.addTrack(
-                new SpotifyTrack(
-                    item.track.name,
-                    item.track.artists.map(
-                        (artist: { name: string }) => artist.name,
-                    ),
-                    item.track.externalIds.isrc?? "" ,
-                    item.track.durationMs,
-                    item.track.id,
-                    new SpotifyPlay(
-                        SpotifyUserPlaying.parseISOToDate(
-                            item.playedAt,
-                        ).valueOf(),
-                        item.track.popularity,
-                        this.supabase,
-                        this.userId,
-                        item.track.externalIds.isrc,
-                    ),
-                    this.supabase,
-                    item.track.trackNumber,
-                ),
-            );
         }
     }
     public override async fire(): Promise<void> {

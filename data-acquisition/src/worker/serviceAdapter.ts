@@ -69,7 +69,7 @@ export async function makeDataAcqJobs() {
                 },
                 {
                     repeat: { pattern: "0/30 * * * *" },
-                    immediateley: true,
+                    //immediateley: true,
                     jobId: "spotify" + account.user_id,
                 },
             );

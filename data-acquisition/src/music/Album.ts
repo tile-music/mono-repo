@@ -8,6 +8,8 @@ import { SpotifyPlay } from "./Play.ts";
 
 import { Database } from "_shared/schema.ts";
 
+import { matchSpotifyAlbum } from "@munite";
+
 /**
  * Represents information about a music album.
  *
@@ -162,7 +164,7 @@ export class Album implements Fireable {
         return track;
     }
 
-    public getAlbumIdentifier() {
+    public getExternalId() {
         return this.externalId;
     }
     /**
@@ -197,6 +199,16 @@ export class Album implements Fireable {
     }
     public getArtists(): string[] {
         return this.artists;
+    }
+
+    protected async matchMusicBrainz(): Promise<void> {
+        try {
+            const musicbrainzData = await matchSpotifyAlbum(this.getExternalId());
+            log(6, `musicbrainz data:\n${JSON.stringify(matchSpotifyAlbum, null, 2)}`)
+        } catch (e) {
+            log(2, `error encountered while matching album\n
+                    Album: ${`)
+        }
     }
 }
 
