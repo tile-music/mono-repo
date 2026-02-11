@@ -230,8 +230,8 @@ export async function getRecentlyPlayedTracks(
     const constrainedLimit = Math.min(Math.max(1, limit), 50);
 
     // Get Spotify credentials from environment variables
-    const clientId = Deno.env.get("SP_CID");
-    const clientSecret = Deno.env.get("SP_SECRET");
+    const clientId = Deno.env.get("SPOTIFY_CID");
+    const clientSecret = Deno.env.get("SPOTIFY_SECRET");
 
     if (!clientId || !clientSecret) {
         throw new Error(

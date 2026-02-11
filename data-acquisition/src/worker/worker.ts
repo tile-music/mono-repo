@@ -7,8 +7,6 @@ import {
     SpotifyUserPlaying,
 } from "../music/UserPlaying.ts";
 import { connection } from "./redis.ts";
-
-import "@std/dotenv/load";
 import { log } from "../util/log.ts";
 
 /**
@@ -28,7 +26,7 @@ type SupabaseSchema = "test" | "prod";
 export async function spotifyFire(userId: string, refreshToken: string) {
     const supabaseInd = new SupabaseClient(
         Deno.env.get("SB_URL")!,
-        Deno.env.get("SERVICE")!,
+        Deno.env.get("SB_SERVICE_KEY")!,
     );
 
     const spotifyUserPlaying = new SpotifyUserPlaying(supabaseInd, userId, {
@@ -42,7 +40,7 @@ export async function spotifyFire(userId: string, refreshToken: string) {
 export async function appleMusicFire(userId: string, accessToken: string) {
     const supabaseInd = new SupabaseClient(
         Deno.env.get("SB_URL")!,
-        Deno.env.get("SERVICE")!,
+        Deno.env.get("SB_SERVICE_KEY")!,
     );
 
     const appleMusicUserPlaying = new AppleMusicUserPlaying(

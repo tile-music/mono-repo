@@ -130,11 +130,11 @@ app.get("/health", (req: any, res: any) => {
 
 // Start the server on a specified port
 let PORT = 3000;
-if (Deno.env.get("PORT") === undefined)
+if (Deno.env.get("DATA_ACQ_PORT") === undefined)
     console.log("PORT is not set, using default port 3000");
-else if (isNaN(parseInt(Deno.env.get("PORT")!)))
+else if (isNaN(parseInt(Deno.env.get("DATA_ACQ_PORT")!)))
     console.log("PORT is not a number, using default port 3000");
-else PORT = parseInt(Deno.env.get("PORT")!);
+else PORT = parseInt(Deno.env.get("DATA_ACQ_PORT")!);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

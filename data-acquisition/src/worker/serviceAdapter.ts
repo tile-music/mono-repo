@@ -2,7 +2,6 @@ import { SupabaseClient } from "@supabase";
 import { makeDataAcqQueue } from "./makeQueue.ts";
 // import { Database } from "_shared/schema.ts";
 import { log } from "../util/log.ts";
-import "@std/dotenv/load";
 
 /** */
 /**
@@ -23,7 +22,7 @@ export async function makeDataAcqJobs(): Promise<void> {
     const queue = makeDataAcqQueue();
     const supabase = new SupabaseClient(
         Deno.env.get("SB_URL")!,
-        Deno.env.get("SERVICE")!,
+        Deno.env.get("SB_SERVICE_KEY")!,
         { db: { schema: "public" } },
     );
 

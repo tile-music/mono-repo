@@ -52,6 +52,19 @@ services:
             - ./redis.conf:/usr/local/etc/redis/redis.conf
         command: redis-server /usr/local/etc/redis/redis.conf
     data-acquisition:
+        environment:
+            APPLE_MEDIA_KEY_ID: ${APPLE_MEDIA_KEY_ID}
+            APPLE_MEDIA_KEY_PATH: ${APPLE_MEDIA_KEY_PATH}
+            APPLE_TEAM_ID: ${APPLE_TEAM_ID}
+            APP_URL: ${APP_URL}
+            DATA_ACQ_LOG_LEVEL: ${DATA_ACQ_LOG_LEVEL}
+            SPOTIFY_CID: ${SPOTIFY_CID}
+            SPOTIFY_SECRET: ${SPOTIFY_SECRET}
+            SPOTIFY_REFRESH: ${SPOTIFY_REFRESH}
+            SB_URL: ${SB_URL}
+            SB_SERVICE_KEY: ${SB_SERVICE_KEY}
+            SB_URL_TEST: ${SB_URL_TEST}
+            DATA_ACQ_PORT: ${DATA_ACQ_PORT}
         build:
             context: ./data-acquisition/
             target: dev

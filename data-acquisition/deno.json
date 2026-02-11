@@ -4,7 +4,6 @@
         "test": "deno test --allow-env --allow-read --allow-net "
     },
     "imports": {
-        "@std/dotenv": "jsr:@std/dotenv@^0.225.6",
         "@std/testing": "jsr:@std/testing@^1.0.12",
         "@zod": "npm:zod",
         "_shared/": "../lib/",

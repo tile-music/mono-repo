@@ -1,6 +1,6 @@
 import { log as logBase } from "_shared/log.ts";
 
-const logLevel: number = Number(Deno.env.get("LOG_LEVEL")) ?? 6;
+const logLevel: number = Number(Deno.env.get("DATA_ACQ_LOG_LEVEL")) ?? 6;
 
 const serviceName = "data acquisition";
 
