@@ -36,6 +36,7 @@ services:
             - ./frontend/tsconfig.json:/app/frontend/tsconfig.json
             - ./frontend/svelte.config.js:/app/frontend/svelte.config.js
             - ./frontend/.env.local:/app/frontend/.env.local
+            - ./secrets/keys:/app/secrets/keys:ro
             - MQP:/data/frontend
         ports:
             - "5173:5173"
@@ -69,6 +70,7 @@ services:
             context: ./data-acquisition/
             target: dev
         volumes:
+            - ./secrets/keys:/app/secrets/keys:ro
             - MQP:/data/data-acquisition
         ports:
             - "3001:3001"
@@ -86,6 +88,8 @@ services:
     nginx:
         build:
             context: ./nginx
+        volumes:
+            - ./secrets/certs:/app/secrets/certs:ro
         ports:
             - "80:80"
             - "443:443"
