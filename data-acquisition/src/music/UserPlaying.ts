@@ -15,6 +15,10 @@ import {
     PlayHistoryItemCamel,
 } from "../util/spotify.ts";
 import { REPLCommand } from "node:repl";
+import {
+    AppleMusicRecentlyPlayedResponse,
+    getRecentlyPlayedTracksApple,
+} from "../util/apple-music.ts";
 
 export type ReleaseDate = { year: number; month?: number; day?: number };
 
@@ -85,7 +89,6 @@ export abstract class UserPlaying implements Fireable {
         }
     }
 
-
     public async fire(): Promise<void> {
         try {
             this.matchAlbums();
@@ -114,15 +117,14 @@ export class SpotifyUserPlaying extends UserPlaying {
     ) {
         super(supabase, userId, context);
     }
-    public override async init(): Promise<void> { }
+    public override async init(): Promise<void> {}
 
     protected override matchAlbums(): void {
         //await this.getAlbumPopularity();
 
         for (const [_, item] of this.items.entries()) {
             try {
-                const releaseDateRaw =
-                    item.track.album.releaseDate;
+                const releaseDateRaw = item.track.album.releaseDate;
                 const releaseDatePrecisionRaw =
                     item.track.album.releaseDatePrecision;
 
@@ -176,9 +178,12 @@ export class SpotifyUserPlaying extends UserPlaying {
                     ),
                 );
             } catch (error) {
-                log(1, `
+                log(
+                    1,
+                    `
                     error: ${JSON.stringify(error, null, 2)}\n
-                    error putting ${JSON.stringify(item, null, 2)}`);
+                    error putting ${JSON.stringify(item, null, 2)}`,
+                );
                 continue;
             }
         }
@@ -248,6 +253,32 @@ export class SpotifyUserPlaying extends UserPlaying {
                 parsedMilliseconds,
             ),
         );
+    }
+}
+
+export class AppleMusicUserPlaying extends UserPlaying {
+    recently_played!: AppleMusicRecentlyPlayedResponse;
+
+    constructor(
+        supabase: SupabaseClient<Database>,
+        userId: string,
+        context: { access_token: string },
+    ) {
+        super(supabase, userId, context);
+    }
+
+    public override async init() {}
+
+    protected override matchAlbums() {}
+
+    public override async fire(): Promise<void> {
+        this.recently_played = await getRecentlyPlayedTracksApple(
+            this.context.access_token,
+        );
+
+        console.log(this.recently_played);
+
+        await super.fire();
     }
 }
 

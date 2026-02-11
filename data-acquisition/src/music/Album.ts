@@ -203,11 +203,16 @@ export class Album implements Fireable {
 
     protected async matchMusicBrainz(): Promise<void> {
         try {
-            const musicbrainzData = await matchSpotifyAlbum(this.getExternalId());
-            log(6, `musicbrainz data:\n${JSON.stringify(matchSpotifyAlbum, null, 2)}`)
+            const musicbrainzData = await matchSpotifyAlbum(
+                this.getExternalId(),
+            );
+            log(
+                6,
+                `musicbrainz data:\n${JSON.stringify(matchSpotifyAlbum, null, 2)}`,
+            );
         } catch (e) {
-            log(2, `error encountered while matching album\n
-                    Album: ${`)
+            // log(2, `error encountered while matching album\n
+            //         Album: ${}`)
         }
     }
 }

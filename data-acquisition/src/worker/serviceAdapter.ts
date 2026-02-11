@@ -1,11 +1,10 @@
 import { SupabaseClient } from "@supabase";
 import { makeDataAcqQueue } from "./makeQueue.ts";
-import { Database } from "_shared/schema.ts";
-import {log} from "../util/log.ts"
-import "jsr:@std/dotenv/load";
+// import { Database } from "_shared/schema.ts";
+import { log } from "../util/log.ts";
+import "@std/dotenv/load";
 
-/**
- */
+/** */
 /**
  * Asynchronously creates and schedules jobs for Spotify credentials.
  *
@@ -16,11 +15,11 @@ import "jsr:@std/dotenv/load";
  *
  * @async
  * @function makeJobs
- * @returns {Promise<void>} A promise that resolves when the jobs have been added to the queue.
+ * @returns A promise that resolves when the jobs have been added to the queue.
  * @todo: add a perameter instead of creating a new queue
  * @todo: deduplicate
  */
-export async function makeDataAcqJobs() {
+export async function makeDataAcqJobs(): Promise<void> {
     const queue = makeDataAcqQueue();
     const supabase = new SupabaseClient(
         Deno.env.get("SB_URL")!,
@@ -38,8 +37,8 @@ export async function makeDataAcqJobs() {
 
     if (get_connected_spotify_accounts_error) {
         log(
-            2,
-            "Error when retrieving connected spotify accounts: " +
+            1,
+            "Error when retrieving connected Spotify accounts: " +
                 get_connected_spotify_accounts_error.message,
         );
     } else {
@@ -49,6 +48,7 @@ export async function makeDataAcqJobs() {
                 "spotify" + account,
                 {
                     data: {
+                        provider: "spotify",
                         userId: account.user_id,
                         refreshToken: account.refresh_token,
                     },
@@ -63,14 +63,63 @@ export async function makeDataAcqJobs() {
                 "spotify" + account,
                 {
                     data: {
+                        provider: "spotify",
                         userId: account.user_id,
                         refreshToken: account.refresh_token,
                     },
                 },
                 {
                     repeat: { pattern: "0/30 * * * *" },
-                    //immediateley: true,
                     jobId: "spotify" + account.user_id,
+                },
+            );
+        }
+    }
+
+    const {
+        data: connected_apple_music_accounts,
+        error: get_connected_apple_music_accounts_error,
+    } = await supabase
+        .from("connected_accounts")
+        .select("user_id, access_token")
+        .eq("provider", "apple");
+
+    if (get_connected_apple_music_accounts_error) {
+        log(
+            1,
+            "Error when retrieving connected Apple Music accounts: " +
+                get_connected_apple_music_accounts_error.message,
+        );
+    } else {
+        for (const account of connected_apple_music_accounts) {
+            // immediate job
+            await queue.add(
+                "apple" + account,
+                {
+                    data: {
+                        provider: "apple",
+                        userId: account.user_id,
+                        accessToken: account.access_token,
+                    },
+                },
+                {
+                    jobId: "apple" + account.user_id,
+                },
+            );
+
+            // job every 15 mins
+            await queue.add(
+                "apple" + account,
+                {
+                    data: {
+                        provider: "apple",
+                        userId: account.user_id,
+                        accessToken: account.access_token,
+                    },
+                },
+                {
+                    repeat: { pattern: "0/15 * * * *" },
+                    jobId: "apple" + account.user_id,
                 },
             );
         }

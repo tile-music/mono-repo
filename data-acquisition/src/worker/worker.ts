@@ -2,10 +2,14 @@ import { Worker, Job } from "@bull";
 import { SupabaseClient } from "@supabase";
 import { default as process } from "@node-process";
 
-import { SpotifyUserPlaying } from "../music/UserPlaying.ts";
+import {
+    AppleMusicUserPlaying,
+    SpotifyUserPlaying,
+} from "../music/UserPlaying.ts";
 import { connection } from "./redis.ts";
 
-import "jsr:@std/dotenv/load";
+import "@std/dotenv/load";
+import { log } from "../util/log.ts";
 
 /**
  * Fetches and processes the currently playing track for a Spotify user.
@@ -21,11 +25,7 @@ import "jsr:@std/dotenv/load";
 
 type SupabaseSchema = "test" | "prod";
 
-export async function spotifyFire(
-    userId: string,
-    refreshToken: string,
-    supabaseSchema: SupabaseSchema,
-) {
+export async function spotifyFire(userId: string, refreshToken: string) {
     const supabaseInd = new SupabaseClient(
         Deno.env.get("SB_URL")!,
         Deno.env.get("SERVICE")!,
@@ -39,29 +39,44 @@ export async function spotifyFire(
     await spotifyUserPlaying.fire();
 }
 
+export async function appleMusicFire(userId: string, accessToken: string) {
+    const supabaseInd = new SupabaseClient(
+        Deno.env.get("SB_URL")!,
+        Deno.env.get("SERVICE")!,
+    );
+
+    const appleMusicUserPlaying = new AppleMusicUserPlaying(
+        supabaseInd,
+        userId,
+        { access_token: accessToken },
+    );
+
+    await appleMusicUserPlaying.init();
+    await appleMusicUserPlaying.fire();
+}
+
 const worker = new Worker(
     "my-cron-jobs",
     async (job: Job) => {
-        const { userId, refreshToken } = job.data.data;
-
-        const SB_SCHEMA = Deno.env.get("SB_SCHEMA");
-        if ( SB_SCHEMA !== "prod")
-            throw new Error(
-                "Invalid Supabase schema. Must be 'test' or 'prod'.",
-            );
-
-        await spotifyFire(userId, refreshToken, SB_SCHEMA);
+        const provider: string = job.data.data.provider;
+        const userId: string = job.data.data.userId;
 
         console.log(
             `Processing job ${job.id} at ${new Date()} for user ${userId}`,
         );
 
-        // Proceed with further actions using spotifyUserPlaying
+        if (provider === "spotify") {
+            await spotifyFire(userId, job.data.data.refreshToken);
+        } else if (provider === "apple") {
+            await appleMusicFire(userId, job.data.data.accessToken);
+        } else {
+            log(2, `Unknown provider ${provider} for job ${job.id}`);
+        }
     },
     { connection },
 );
 
-process.on("unhandledRejection", (err : Error) => {
+process.on("unhandledRejection", (err: Error) => {
     console.error(err);
 });
 

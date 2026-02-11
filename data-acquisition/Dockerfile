@@ -6,6 +6,9 @@ WORKDIR /app/data-acq
 COPY . .
 COPY .env .
 
+# Resolve deps during build
+RUN deno cache ./src/app.ts
+
 FROM build AS dev
 
 CMD ["deno", "run", "--allow-all", "./src/app.ts"]

@@ -22,16 +22,3 @@ export function makeDataAcqQueue() {
         },
     });
 }
-
-export function makeSpotifyAlbumPopularityQueue() {
-    return new Queue("spotifyAlbumPopularity", {
-        connection,
-        defaultJobOptions: {
-            attempts: 3,
-            backoff: {
-                type: "exponential",
-                delay: 1000,
-            },
-        },
-    });
-}

@@ -16,7 +16,7 @@
                 "!vtsls",
                 "!eslint",
             ],
-            "formatter": "language_server",
+            "formatter": "prettier",
         },
         "TypeScript": {
             "language_servers": [
@@ -25,7 +25,7 @@
                 "!vtsls",
                 "!eslint",
             ],
-            "formatter": "language_server",
+            "formatter": "prettier",
         },
         "TSX": {
             "language_servers": [
@@ -34,7 +34,7 @@
                 "!vtsls",
                 "!eslint",
             ],
-            "formatter": "language_server",
+            "formatter": "prettier",
         },
     },
 }

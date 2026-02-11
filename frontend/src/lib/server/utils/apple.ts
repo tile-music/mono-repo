@@ -39,9 +39,7 @@ export async function getAppleMusicDeveloperToken() {
 
     const exp = now + MAX_TOKEN_AGE;
 
-    const token = await new SignJWT({
-        origin: [APP_URL],
-    })
+    const token = await new SignJWT()
         .setProtectedHeader({
             alg: "ES256",
             kid: APPLE_MEDIA_KEY_ID,
