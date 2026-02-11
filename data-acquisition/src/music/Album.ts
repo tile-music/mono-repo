@@ -1,4 +1,4 @@
-import { SpotifyTrack, Track } from "./Track.ts";
+import { AppleMusicTrack, SpotifyTrack, Track } from "./Track.ts";
 import { SupabaseClient } from "@supabase";
 import { log } from "../util/log.ts";
 
@@ -9,6 +9,7 @@ import { SpotifyPlay } from "./Play.ts";
 import { Database } from "_shared/schema.ts";
 
 import { matchSpotifyAlbum } from "@munite";
+import { AppleMusicSong, getAlbumByIdApple } from "../util/apple-music.ts";
 
 /**
  * Represents information about a music album.
@@ -46,17 +47,17 @@ import { matchSpotifyAlbum } from "@munite";
  * @returns {Object} An object containing the album information formatted for database entry.
  */
 export class Album implements Fireable {
-    private title: string;
-    private albumType: string;
-    private numTracks: number;
+    protected title: string;
+    protected albumType: string;
+    protected numTracks: number;
     /* private numDiscs: number; */
-    private releaseDay: number | null;
-    private releaseMonth: number | null;
-    private releaseYear: number;
-    private artists: string[];
-    private genre: string[];
-    private image: string;
-    private id?: string;
+    protected releaseDay: number | null;
+    protected releaseMonth: number | null;
+    protected releaseYear: number;
+    protected artists: string[];
+    protected genre: string[];
+    protected image: string;
+    protected id?: string;
     protected externalId: string;
     protected supabase: SupabaseClient<Database>;
     protected query;
@@ -131,7 +132,7 @@ export class Album implements Fireable {
             log(6, "inserting");
             ({ data, error } = await this.supabase
                 .from("albums")
-                .insert(this.createDbEntryObject())
+                .insert(await this.createDbEntryObject())
                 .select());
         }
         log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`);
@@ -143,8 +144,8 @@ export class Album implements Fireable {
             log(
                 3,
                 `multiple matching entries for base album class,
-      Album: ${JSON.stringify(this.createDbEntryObject())}
-      Data: ${JSON.stringify(data)}`,
+                    Album: ${JSON.stringify(await this.createDbEntryObject())}
+                    Data: ${JSON.stringify(data)}`,
             );
         this.id = data[0].id;
         return data[0].id;
@@ -172,7 +173,7 @@ export class Album implements Fireable {
      * @returns an object that can be used to create a new entry in the database
      */
 
-    public createDbEntryObject() {
+    public async createDbEntryObject() {
         return {
             ...(this.id && { id: this.id }),
             source_title: this.title,
@@ -302,6 +303,65 @@ export class SpotifyAlbum extends Album {
     //         external_id: this.spotifyId,
     //     };
     // }
+}
+
+export class AppleMusicAlbum extends Album {
+    protected override tracks: AppleMusicTrack[] = [];
+    constructor(
+        song: AppleMusicSong,
+        supabase: SupabaseClient<Database>,
+        albumId?: string,
+    ) {
+        const attr = song.attributes;
+        super(
+            attr.albumName ?? "",
+            "album",
+            ["placeholder artist"],
+            attr.artwork?.url ?? "",
+            -1,
+            -1,
+            -1,
+            -1,
+            ["placeholder genre"],
+            supabase,
+            albumId,
+        );
+
+        const externalIdRegex = /album\/(?:[^/]+\/)?(\d+)(?=\?|$)/;
+        const regexResult = externalIdRegex.exec(attr.url ?? "");
+        if (regexResult !== null) this.externalId = regexResult[1];
+        else {
+            log(
+                3,
+                "Apple Music song URL does not match expected format to retrieve album ID:" +
+                    attr.url,
+            );
+        }
+
+        this.sourceService = "apple";
+    }
+
+    public override async createDbEntryObject() {
+        const response = await getAlbumByIdApple("us", this.externalId);
+        if (response.data.length === 0) return super.createDbEntryObject();
+
+        const info = response.data[0];
+        const attr = info.attributes;
+
+        let albumType = "album";
+        if (attr.isCompilation) albumType = "compilation";
+        if (attr.isSingle) albumType = "single";
+
+        return {
+            id: this.id,
+            source_title: attr.name,
+            source_service: this.sourceService,
+            source_artists: [attr.artistName ?? "Unknown Artist"],
+            source_image: this.image,
+            source_external_id: this.externalId,
+            source_album_type: albumType,
+        };
+    }
 }
 
 export type TestData = {

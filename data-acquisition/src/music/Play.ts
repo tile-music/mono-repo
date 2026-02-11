@@ -104,3 +104,23 @@ export class SpotifyPlay extends Play {
         };
     }
 }
+
+export class AppleMusicPlay extends Play {
+    private new_listen: boolean;
+
+    constructor(
+        new_listen: boolean,
+        listenedAt: number,
+        supabase: SupabaseClient<Database>,
+        userId: string,
+        isrc?: string,
+    ) {
+        super(listenedAt, supabase, userId, isrc);
+        this.new_listen = new_listen;
+    }
+
+    public override async fire() {
+        if (!this.new_listen) return;
+        await super.fire();
+    }
+}

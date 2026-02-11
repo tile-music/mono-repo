@@ -24,6 +24,8 @@ const MAX_TOKEN_AGE = 60 * 60 * 24; // 1 day (in seconds)
 let cachedToken: string | null = null;
 let cachedExp = 0;
 
+// Song Types
+
 type Artwork = {
     width: number;
     height: number;
@@ -63,7 +65,7 @@ type SongAttributes = {
     artistName?: string;
 };
 
-type Song = {
+export type AppleMusicSong = {
     id: string;
     type: "songs";
     href: string;
@@ -71,7 +73,7 @@ type Song = {
 };
 
 export type AppleMusicRecentlyPlayedResponse = {
-    data: Song[];
+    data: AppleMusicSong[];
     href?: string;
     next?: string;
     meta?: Record<string, unknown>;
@@ -121,6 +123,104 @@ export async function getRecentlyPlayedTracksApple(
 
     const json = await response.json();
     return json as AppleMusicRecentlyPlayedResponse;
+}
+
+// Album Types
+
+type EditorialNotes = {
+    short?: string;
+    standard?: string;
+};
+
+type ResourceId = {
+    id: string;
+    type: string;
+    href?: string;
+};
+
+type Relationship<T> = {
+    href?: string;
+    next?: string;
+    data?: T[];
+};
+
+type AlbumAttributes = {
+    artistName?: string;
+    name: string;
+    url?: string;
+    genreNames?: string[];
+    releaseDate?: string;
+    trackCount?: number;
+    isCompilation?: boolean;
+    isSingle?: boolean;
+    isMasteredForItunes?: boolean;
+    upc?: string;
+    copyright?: string;
+    recordLabel?: string;
+    editorialNotes?: EditorialNotes;
+    artwork?: Artwork;
+};
+
+export type AppleMusicAlbum = {
+    id: string;
+    type: "albums";
+    href: string;
+    attributes: AlbumAttributes;
+    relationships?: {
+        artists?: Relationship<ResourceId>;
+        tracks?: Relationship<AppleMusicSong>;
+    };
+};
+
+export type AppleMusicAlbumResponse = {
+    data: AppleMusicAlbum[];
+    href?: string;
+    next?: string;
+    meta?: Record<string, unknown>;
+};
+
+/**
+ * Fetches a specific album from the Apple Music Catalog by album ID.
+ *
+ * @param storefront A valid Apple Music storefront code (e.g., "us", "gb", "jp")
+ * @param albumId The album ID (e.g., "329455551")
+ * @returns The catalog album response containing the requested album
+ *
+ * Notes:
+ * - This call requires ONLY the Developer Token.
+ * - You can include `include=tracks` to also fetch the track relationship.
+ */
+export async function getAlbumByIdApple(
+    storefront: string,
+    albumId: string,
+    options?: { includeTracks?: boolean },
+): Promise<AppleMusicAlbumResponse> {
+    const developer_token = await getAppleMusicDeveloperToken();
+    if (!developer_token) {
+        throw new Error("Apple Music Developer Token must be set");
+    }
+
+    const includeParam = options?.includeTracks ? "?include=tracks" : "";
+
+    const url = `https://api.music.apple.com/v1/catalog/${encodeURIComponent(
+        storefront,
+    )}/albums/${encodeURIComponent(albumId)}${includeParam}`;
+
+    const response = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${developer_token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+            `Failed to fetch Apple Music album ${albumId}: ${response.status} ${errorText}`,
+        );
+    }
+
+    const json = await response.json();
+    return json as AppleMusicAlbumResponse;
 }
 
 /**

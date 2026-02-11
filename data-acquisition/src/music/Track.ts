@@ -7,6 +7,9 @@ import { PK_VIOLATION } from "../util/constants.ts";
 
 import { release } from "node:os";
 import { Database } from "_shared/schema.ts";
+
+import { AppleMusicSong } from "../util/apple-music.ts";
+
 /**
  * @file TrackInfo.ts
  * @description This file contains the definition of the TrackInfo class, which represents information about a music track.
@@ -181,5 +184,26 @@ export class SpotifyTrack extends Track {
         );
         this.externalId = spotifyId;
         this.sourceService = "spotify";
+    }
+}
+
+export class AppleMusicTrack extends Track {
+    constructor(
+        song: AppleMusicSong,
+        play: Play,
+        supabase: SupabaseClient<Database>,
+    ) {
+        const attr = song.attributes;
+        super(
+            attr.name,
+            [attr.artistName ?? ""],
+            attr.isrc ?? "",
+            attr.durationInMillis ?? -1,
+            play,
+            supabase,
+            attr.trackNumber ?? -1,
+        );
+        this.externalId = song.id;
+        this.sourceService = "apple";
     }
 }

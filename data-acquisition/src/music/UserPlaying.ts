@@ -1,8 +1,8 @@
 import { SupabaseClient } from "@supabase";
 
-import { Track, SpotifyTrack } from "./Track.ts";
-import { Album, SpotifyAlbum, TestData } from "./Album.ts";
-import { Play, SpotifyPlay } from "./Play.ts";
+import { Track, SpotifyTrack, AppleMusicTrack } from "./Track.ts";
+import { Album, AppleMusicAlbum, SpotifyAlbum, TestData } from "./Album.ts";
+import { AppleMusicPlay, Play, SpotifyPlay } from "./Play.ts";
 
 import { log } from "../util/log.ts";
 
@@ -258,6 +258,7 @@ export class SpotifyUserPlaying extends UserPlaying {
 
 export class AppleMusicUserPlaying extends UserPlaying {
     recently_played!: AppleMusicRecentlyPlayedResponse;
+    last_played_id!: string | null;
 
     constructor(
         supabase: SupabaseClient<Database>,
@@ -269,14 +270,75 @@ export class AppleMusicUserPlaying extends UserPlaying {
 
     public override async init() {}
 
-    protected override matchAlbums() {}
+    protected override matchAlbums(): void {
+        let now = new Date().valueOf();
+        let new_listen = true;
+
+        for (const song of this.recently_played.data) {
+            try {
+                if (song.id === this.last_played_id) new_listen = false;
+
+                const album = this.addOrGetAlbum(
+                    new AppleMusicAlbum(song, this.supabase),
+                );
+                if (!album) {
+                    log(0, `album is undefined ${{ ...song }}`);
+                    continue;
+                }
+
+                // Sequentially move played time back by the song length
+                now -= song.attributes.durationInMillis!;
+
+                album.addTrack(
+                    new AppleMusicTrack(
+                        song,
+                        new AppleMusicPlay(
+                            new_listen,
+                            now,
+                            this.supabase,
+                            this.userId,
+                            song.attributes.isrc,
+                        ),
+                        this.supabase,
+                    ),
+                );
+            } catch (error) {
+                log(
+                    1,
+                    `
+                    error: ${JSON.stringify(error, null, 2)}\n
+                    error putting ${JSON.stringify(song, null, 2)}`,
+                );
+                continue;
+            }
+        }
+    }
 
     public override async fire(): Promise<void> {
         this.recently_played = await getRecentlyPlayedTracksApple(
             this.context.access_token,
         );
 
-        console.log(this.recently_played);
+        const { data, error } = await this.supabase
+            .from("plays")
+            .select("tracks( source_external_id )")
+            .order("timestamp", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) {
+            log(
+                1,
+                `Error grabbing last played track for user ${this.userId}: ${error.message} `,
+            );
+        } else {
+            this.last_played_id = data?.tracks?.source_external_id ?? null;
+        }
+
+        log(
+            6,
+            `Last played id for user ${this.userId}: ${this.last_played_id}`,
+        );
 
         await super.fire();
     }

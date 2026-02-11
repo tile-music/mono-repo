@@ -4,7 +4,6 @@ FROM mdv-lib-deno AS build
 WORKDIR /app/data-acq
 
 COPY . .
-COPY .env .
 
 # Resolve deps during build
 RUN deno cache ./src/app.ts
