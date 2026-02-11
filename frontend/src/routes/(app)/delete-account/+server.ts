@@ -3,10 +3,7 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "@sveltejs/kit";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-import {
-    PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_SERVICE_KEY,
-} from "$env/static/public";
+import { env } from "$env/dynamic/private";
 
 const headers = { "Content-Type": "application/json" };
 
@@ -35,8 +32,8 @@ export const POST: RequestHandler = async ({
     if (session !== null) {
         // create a supabase client
         const supabaseProd = new SupabaseClient(
-            PUBLIC_SUPABASE_URL as string,
-            PUBLIC_SUPABASE_SERVICE_KEY as string,
+            env.SB_URL! as string,
+            env.SB_SERVICE_KEY! as string,
             { db: { schema: "prod" } },
         );
 

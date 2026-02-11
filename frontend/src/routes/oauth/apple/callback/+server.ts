@@ -1,7 +1,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { log } from "$lib/log";
-import { DATA_ACQ_URL } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 
 export const GET: RequestHandler = async ({ locals: { supabase }, url }) => {
     const code = url.searchParams.get("code");

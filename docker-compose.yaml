@@ -15,6 +15,16 @@ services:
             target: lib-build-deno
         image: mdv-lib-deno
     frontend:
+        environment:
+            SB_URL: ${SB_URL}
+            SB_ANON_KEY: ${SB_ANON_KEY}
+            SB_SERVICE_KEY: ${SB_SERVICE_KEY}
+            APP_URL: ${APP_URL}
+            DATA_ACQ_URL: ${DATA_ACQ_URL}
+            FRONTEND_LOG_LEVEL: ${FRONTEND_LOG_LEVEL}
+            APPLE_MEDIA_KEY_PATH: ${APPLE_MEDIA_KEY_PATH}
+            APPLE_MEDIA_KEY_ID: ${APPLE_MEDIA_KEY_ID}
+            APPLE_TEAM_ID: ${APPLE_TEAM_ID}
         build:
             context: ./frontend/
             target: dev

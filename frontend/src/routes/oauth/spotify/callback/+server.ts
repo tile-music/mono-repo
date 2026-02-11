@@ -1,7 +1,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { log } from "$lib/log";
-import { DATA_ACQ_URL } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 
 export const GET: RequestHandler = async ({ locals: { supabase }, url }) => {
     const code = url.searchParams.get("code");
@@ -61,7 +61,7 @@ export const GET: RequestHandler = async ({ locals: { supabase }, url }) => {
         redirect(303, "/login");
     }
 
-    const add_job_response = await fetch(DATA_ACQ_URL + "/add-job", {
+    const add_job_response = await fetch(env.DATA_ACQ_URL! + "/add-job", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

@@ -2,7 +2,7 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import type { SignInWithOAuthCredentials } from "@supabase/supabase-js/dist/index.cjs";
 import { log } from "$lib/log";
-import { APP_URL } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 
 export const GET: RequestHandler = async ({
     locals: { user, supabase },
@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({
         provider: "apple",
         options: {
             scopes: scope,
-            redirectTo: `${APP_URL}/oauth/apple/callback?scope=${scope}&next=${next}`,
+            redirectTo: `${env.APP_URL!}/oauth/apple/callback?scope=${scope}&next=${next}`,
             skipBrowserRedirect: true,
         },
     } satisfies SignInWithOAuthCredentials;
@@ -40,7 +40,7 @@ export const GET: RequestHandler = async ({
             // but we still want to take advantage of the more secure PKCE flow, so we have to
             // let it generate its own URL and splice it manually.
             const newUrl =
-                APP_URL + "/oauth/authorize?" + data.url.split("?")[1];
+                env.APP_URL! + "/oauth/authorize?" + data.url.split("?")[1];
             console.log("redirecting to " + newUrl);
             return redirect(302, newUrl);
         }
