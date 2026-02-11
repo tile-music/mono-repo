@@ -25,4 +25,5 @@ data-acquisition/src/music/Album.ts
 .dbeaver/*
 
 # Secrets / .env files
-secrets/
+secrets/*
+!secrets/.env.example
