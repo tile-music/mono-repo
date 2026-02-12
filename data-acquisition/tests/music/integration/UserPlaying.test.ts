@@ -3,7 +3,7 @@ import {
     MockUserPlaying,
 } from "../../../src/music/UserPlaying.ts";
 import { type TestData } from "../../../src/music/Album.ts";
-import { expect } from "jsr:@std/expect";
+import { expect } from "@expect";
 import { supabase } from "../supabase.ts";
 import { testData0 } from "./TestData.ts";
 

@@ -1,5 +1,5 @@
 import { Album, SpotifyAlbum } from "../../../src/music/Album.ts";
-import { expect } from "jsr:@std/expect";
+import { expect } from "@expect";
 import { supabase } from "../supabase.ts";
 
 /* @ibixler add worst case tests as well */
@@ -28,17 +28,20 @@ Deno.test("base classes", async (t) => {
         expect(album["genre"]).toStrictEqual(["Rock"]);
     });
 
-    await t.step("createDbEntryObject should return correct object", () => {
-        const dbEntry = album.createDbEntryObject();
-        expect(dbEntry).toStrictEqual({
-            source_title: "Lenny Skinny",
-            source_album_type: "Album",
-            source_artists: ["lenny skinny"],
-            source_image: "placeholder",
-            source_external_id: "Lenny Skinny,lenny skinny",
-            source_service: "manual",
-        });
-    });
+    await t.step(
+        "createDbEntryObject should return correct object",
+        async () => {
+            const dbEntry = await album.createDbEntryObject();
+            expect(dbEntry).toStrictEqual({
+                source_title: "Lenny Skinny",
+                source_album_type: "Album",
+                source_artists: ["lenny skinny"],
+                source_image: "placeholder",
+                source_external_id: "Lenny Skinny,lenny skinny",
+                source_service: "manual",
+            });
+        },
+    );
 });
 Deno.test("spotify class", async (t) => {
     await t.step("constructor should initialize properties correctly", () => {
@@ -88,8 +91,8 @@ Deno.test("spotify class", async (t) => {
                 "sdfsdfe",
             );
 
-            const dbEntry = albumInfo.createDbEntryObject();
-            console.log(dbEntry);
+            const dbEntry = await albumInfo.createDbEntryObject();
+
             expect(dbEntry).toStrictEqual({
                 id: "sdfsdfe",
                 source_title: "New Artist",
