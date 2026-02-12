@@ -4,7 +4,7 @@ import { sequence } from "@sveltejs/kit/hooks";
 import { log } from "$lib/log";
 
 import { env } from "$env/dynamic/private";
-import type { Profile } from "$shared/Profile";
+import type { Profile } from "$lib/types";
 
 type SupabaseCookie = {
     name: string;

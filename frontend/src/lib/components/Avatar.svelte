@@ -1,9 +1,10 @@
 <script lang="ts">
     import type { Database } from "$shared/schema";
     import sampleAvatar from "$lib/assets/images/sample_avatar.jpg";
+    import type { Profile } from "$lib/types";
 
     interface Props {
-        profile: Database["public"]["Tables"]["profiles"]["Row"];
+        profile: Profile;
         size: number | string;
     }
 
