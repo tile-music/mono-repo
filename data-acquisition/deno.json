@@ -1,7 +1,7 @@
 {
     "nodeModulesDir": "auto",
     "tasks": {
-        "test": "deno test --allow-env --allow-read --allow-net "
+        "test": "deno test --allow-env --allow-read --allow-net --env-file=.env"
     },
     "imports": {
         "@std/testing": "jsr:@std/testing@^1.0.12",
@@ -12,7 +12,7 @@
         "@node-fork": "node:child_process",
         "@node-process": "node:process",
         "@express": "npm:express",
-        "@munite": "jsr:@tile-music/munite",
+        "@munite": "../../munite/src/mod.ts",
         "@expect": "jsr:@std/expect",
         "@jose": "npm:jose@^6.1.3"
     }

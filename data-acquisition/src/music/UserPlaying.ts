@@ -12,9 +12,8 @@ import { Fireable } from "./Fireable.ts";
 
 import {
     getRecentlyPlayedTracks,
-    PlayHistoryItemCamel,
+    PlayHistoryItem,
 } from "../util/spotify.ts";
-import { REPLCommand } from "node:repl";
 import {
     AppleMusicRecentlyPlayedResponse,
     getRecentlyPlayedTracksApple,
@@ -108,7 +107,7 @@ export abstract class UserPlaying implements Fireable {
 }
 
 export class SpotifyUserPlaying extends UserPlaying {
-    items!: PlayHistoryItemCamel[];
+    items!: PlayHistoryItem[];
 
     constructor(
         supabase: SupabaseClient<Database>,
@@ -124,32 +123,34 @@ export class SpotifyUserPlaying extends UserPlaying {
 
         for (const [_, item] of this.items.entries()) {
             try {
-                const releaseDateRaw = item.track.album.releaseDate;
-                const releaseDatePrecisionRaw =
-                    item.track.album.releaseDatePrecision;
+                const release_date_raw = item.track.album.release_date;
+                const release_date_precision_raw =
+                    item.track.album.release_date_precision;
 
-                const releaseDateParsed: ReleaseDate =
+                const release_date_parsed: ReleaseDate =
                     SpotifyUserPlaying.parseSpotifyDate(
-                        releaseDateRaw,
-                        releaseDatePrecisionRaw,
+                        release_date_raw,
+                        release_date_precision_raw,
                     );
+
                 const album = this.addOrGetAlbum(
                     new SpotifyAlbum(
                         item.track.album.name,
-                        item.track.album.albumType,
+                        item.track.album.album_type,
                         item.track.album.artists.map(
                             (artist: { name: string }) => artist.name,
                         ),
                         item.track.album.images[0].url,
-                        releaseDateParsed.day,
-                        releaseDateParsed.month,
-                        releaseDateParsed.year,
-                        item.track.album.totalTracks as number,
+                        release_date_parsed.day,
+                        release_date_parsed.month,
+                        release_date_parsed.year,
+                        item.track.album.total_tracks as number,
                         [],
                         this.supabase,
                         item.track.album.id,
                     ),
                 );
+
                 if (!album) {
                     log(0, `album is undefined ${{ ...item }}`);
                     continue;
@@ -161,20 +162,20 @@ export class SpotifyUserPlaying extends UserPlaying {
                         item.track.artists.map(
                             (artist: { name: string }) => artist.name,
                         ),
-                        item.track.externalIds.isrc ?? "",
-                        item.track.durationMs,
+                        item.track.external_ids?.isrc ?? "",
+                        item.track.duration_ms,
                         item.track.id,
                         new SpotifyPlay(
                             SpotifyUserPlaying.parseISOToDate(
-                                item.playedAt,
+                                item.played_at,
                             ).valueOf(),
                             item.track.popularity,
                             this.supabase,
                             this.userId,
-                            item.track.externalIds.isrc,
+                            item.track.external_ids?.isrc,
                         ),
                         this.supabase,
-                        item.track.trackNumber,
+                        item.track.track_number,
                     ),
                 );
             } catch (error) {

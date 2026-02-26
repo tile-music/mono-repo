@@ -73,7 +73,7 @@ export type Database = {
           access_token_expires_at: string | null
           id: string
           provider: string
-          refresh_token: string
+          refresh_token: string | null
           scope: string
           user_id: string
         }
@@ -82,7 +82,7 @@ export type Database = {
           access_token_expires_at?: string | null
           id?: string
           provider: string
-          refresh_token: string
+          refresh_token?: string | null
           scope: string
           user_id: string
         }
@@ -91,7 +91,7 @@ export type Database = {
           access_token_expires_at?: string | null
           id?: string
           provider?: string
-          refresh_token?: string
+          refresh_token?: string | null
           scope?: string
           user_id?: string
         }

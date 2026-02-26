@@ -4,7 +4,7 @@ import { getRecentlyPlayedTracks } from "../../../src/util/spotify.ts";
 Deno.test(
     "getRecentlyPlayedTracks - should fetch recently played tracks with proper structure",
     async () => {
-        const refreshToken = Deno.env.get("SPOTIFY_REFRESH");
+        const refreshToken = Deno.env.get("SP_REFRESH");
 
         if (!refreshToken) {
             throw new Error(
@@ -27,7 +27,7 @@ Deno.test(
 Deno.test(
     "getRecentlyPlayedTracks - should convert snake_case to camelCase",
     async () => {
-        const refreshToken = Deno.env.get("SPOTIFY_REFRESH");
+        const refreshToken = Deno.env.get("SP_REFRESH");
 
         if (!refreshToken) {
             throw new Error(
@@ -37,47 +37,42 @@ Deno.test(
 
         const result = await getRecentlyPlayedTracks(refreshToken);
 
-        // Verify camelCase conversion at top level
         expect(result.items).toBeDefined();
 
         if (result.items.length > 0) {
             const firstItem = result.items[0];
 
-            // Check that camelCase keys exist
-            expect(firstItem.playedAt).toBeDefined();
-            expect((firstItem as any).played_at).toBeUndefined(); // snake_case should not exist
+            expect(firstItem.played_at).toBeDefined();
+            expect((firstItem as any).playedAt).toBeUndefined();
 
-            // Check track properties
-            expect(firstItem.track.durationMs).toBeDefined();
-            expect((firstItem.track as any).duration_ms).toBeUndefined();
-            expect(firstItem.track.isLocal).toBeDefined();
-            expect((firstItem.track as any).is_local).toBeUndefined();
-            expect(firstItem.track.trackNumber).toBeDefined();
-            expect((firstItem.track as any).track_number).toBeUndefined();
+            expect(firstItem.track.duration_ms).toBeDefined();
+            expect((firstItem.track as any).durationMs).toBeUndefined();
+            expect(firstItem.track.is_local).toBeDefined();
+            expect((firstItem.track as any).isLocal).toBeUndefined();
+            expect(firstItem.track.track_number).toBeDefined();
+            expect((firstItem.track as any).trackNumber).toBeUndefined();
 
-            // Check nested album properties
-            expect(firstItem.track.album.albumType).toBeDefined();
-            expect((firstItem.track.album as any).album_type).toBeUndefined();
-            expect(firstItem.track.album.totalTracks).toBeDefined();
-            expect((firstItem.track.album as any).total_tracks).toBeUndefined();
-            expect(firstItem.track.album.externalUrls).toBeDefined();
+            expect(firstItem.track.album.album_type).toBeDefined();
+            expect((firstItem.track.album as any).albumType).toBeUndefined();
+            expect(firstItem.track.album.total_tracks).toBeDefined();
+            expect((firstItem.track.album as any).totalTracks).toBeUndefined();
+            expect(firstItem.track.album.external_urls).toBeDefined();
             expect(
-                (firstItem.track.album as any).external_urls,
+                (firstItem.track.album as any).externalUrls,
             ).toBeUndefined();
-            expect(firstItem.track.album.releaseDate).toBeDefined();
-            expect((firstItem.track.album as any).release_date).toBeUndefined();
+            expect(firstItem.track.album.release_date).toBeDefined();
+            expect((firstItem.track.album as any).releaseDate).toBeUndefined();
 
-            // Check artists
-            expect(firstItem.track.artists[0].externalUrls).toBeDefined();
+            expect(firstItem.track.artists[0].external_urls).toBeDefined();
             expect(
-                (firstItem.track.artists[0] as any).external_urls,
+                (firstItem.track.artists[0] as any).externalUrls,
             ).toBeUndefined();
         }
     },
 );
 
 Deno.test("getRecentlyPlayedTracks - should respect custom limit", async () => {
-    const refreshToken = Deno.env.get("SPOTIFY_REFRESH");
+    const refreshToken = Deno.env.get("SP_REFRESH");
 
     if (!refreshToken) {
         throw new Error(
@@ -93,7 +88,7 @@ Deno.test("getRecentlyPlayedTracks - should respect custom limit", async () => {
 });
 
 Deno.test("getRecentlyPlayedTracks - should cap limit at 50", async () => {
-    const refreshToken = Deno.env.get("SPOTIFY_REFRESH");
+    const refreshToken = Deno.env.get("SP_REFRESH");
 
     if (!refreshToken) {
         throw new Error(
@@ -103,7 +98,6 @@ Deno.test("getRecentlyPlayedTracks - should cap limit at 50", async () => {
 
     const result = await getRecentlyPlayedTracks(refreshToken, 100);
 
-    // Spotify API max is 50
     expect(result.limit).toBe(50);
     expect(result.items.length).toBeLessThanOrEqual(50);
 });
@@ -111,7 +105,7 @@ Deno.test("getRecentlyPlayedTracks - should cap limit at 50", async () => {
 Deno.test(
     "getRecentlyPlayedTracks - should have valid track data structure",
     async () => {
-        const refreshToken = Deno.env.get("SPOTIFY_REFRESH");
+        const refreshToken = Deno.env.get("SP_REFRESH");
 
         if (!refreshToken) {
             throw new Error(
@@ -124,20 +118,18 @@ Deno.test(
         if (result.items.length > 0) {
             const track = result.items[0].track;
 
-            // Verify required track fields
             expect(track.id).toBeDefined();
             expect(typeof track.id).toBe("string");
             expect(track.name).toBeDefined();
             expect(typeof track.name).toBe("string");
             expect(track.uri).toBeDefined();
             expect(track.uri).toMatch(/^spotify:track:/);
-            expect(typeof track.durationMs).toBe("number");
-            expect(track.durationMs).toBeGreaterThan(0);
+            expect(typeof track.duration_ms).toBe("number");
+            expect(track.duration_ms).toBeGreaterThan(0);
             expect(typeof track.explicit).toBe("boolean");
             expect(typeof track.popularity).toBe("number");
             expect(track.type).toBe("track");
 
-            // Verify album
             expect(track.album).toBeDefined();
             expect(track.album.id).toBeDefined();
             expect(track.album.name).toBeDefined();
@@ -145,22 +137,20 @@ Deno.test(
             expect(track.album.images.length).toBeGreaterThan(0);
             expect(track.album.images[0].url).toMatch(/^https?:\/\//);
 
-            // Verify artists
             expect(track.artists).toBeInstanceOf(Array);
             expect(track.artists.length).toBeGreaterThan(0);
             expect(track.artists[0].id).toBeDefined();
             expect(track.artists[0].name).toBeDefined();
             expect(track.artists[0].type).toBe("artist");
 
-            // Verify played_at timestamp
-            expect(result.items[0].playedAt).toBeDefined();
-            expect(typeof result.items[0].playedAt).toBe("string");
+            expect(result.items[0].played_at).toBeDefined();
+            expect(typeof result.items[0].played_at).toBe("string");
         }
     },
 );
 
 Deno.test("getRecentlyPlayedTracks - should handle minimal limit", async () => {
-    const refreshToken = Deno.env.get("SPOTIFY_REFRESH");
+    const refreshToken = Deno.env.get("SP_REFRESH");
 
     if (!refreshToken) {
         throw new Error(

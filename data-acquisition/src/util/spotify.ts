@@ -74,7 +74,7 @@ interface Context {
     uri: string;
 }
 
-interface PlayHistoryItem {
+export interface PlayHistoryItem {
     track: Track;
     played_at: string;
     context: Context | null;
@@ -94,152 +94,33 @@ export interface RecentlyPlayedTracksResponse {
     items: PlayHistoryItem[];
 }
 
-// Camel case types (transformed output)
-interface ExternalUrlsCamel {
-    spotify: string;
-}
-
-interface ImageCamel {
-    url: string;
-    height: number;
-    width: number;
-}
-
-interface RestrictionsCamel {
-    reason: string;
-}
-
-interface ArtistCamel {
-    externalUrls: ExternalUrlsCamel;
+interface Paging<T> {
     href: string;
-    id: string;
-    name: string;
-    type: "artist";
-    uri: string;
-}
-
-interface AlbumCamel {
-    albumType: "album" | "single" | "compilation";
-    totalTracks: number;
-    availableMarkets: string[];
-    externalUrls: ExternalUrlsCamel;
-    href: string;
-    id: string;
-    images: ImageCamel[];
-    name: string;
-    releaseDate: string;
-    releaseDatePrecision: "year" | "month" | "day";
-    restrictions?: RestrictionsCamel;
-    type: "album";
-    uri: string;
-    artists: ArtistCamel[];
-}
-
-interface ExternalIdsCamel {
-    isrc?: string;
-    ean?: string;
-    upc?: string;
-}
-
-interface TrackCamel {
-    album: AlbumCamel;
-    artists: ArtistCamel[];
-    availableMarkets: string[];
-    discNumber: number;
-    durationMs: number;
-    explicit: boolean;
-    externalIds: ExternalIdsCamel;
-    externalUrls: ExternalUrlsCamel;
-    href: string;
-    id: string;
-    isPlayable?: boolean;
-    linkedFrom?: Record<string, unknown>;
-    restrictions?: RestrictionsCamel;
-    name: string;
-    popularity: number;
-    previewUrl: string | null;
-    trackNumber: number;
-    type: "track";
-    uri: string;
-    isLocal: boolean;
-}
-
-interface ContextCamel {
-    type: string;
-    href: string;
-    externalUrls: ExternalUrlsCamel;
-    uri: string;
-}
-
-export interface PlayHistoryItemCamel {
-    track: TrackCamel;
-    playedAt: string;
-    context: ContextCamel | null;
-}
-
-interface CursorsCamel {
-    after: string;
-    before: string;
-}
-
-export interface RecentlyPlayedTracksResponseCamel {
-    href: string;
+    items: T[];
     limit: number;
     next: string | null;
-    cursors: CursorsCamel;
+    offset: number;
+    previous: string | null;
     total: number;
-    items: PlayHistoryItemCamel[];
 }
 
-/**
- * Converts snake_case keys to camelCase recursively
- */
-function toCamelCase<T = any>(obj: any): T {
-    if (obj === null || obj === undefined) {
-        return obj;
-    }
-
-    if (Array.isArray(obj)) {
-        return obj.map((item) => toCamelCase(item)) as T;
-    }
-
-    if (typeof obj === "object" && obj.constructor === Object) {
-        return Object.keys(obj).reduce((acc: any, key: string) => {
-            const camelKey = key.replace(/_([a-z])/g, (_, letter) =>
-                letter.toUpperCase(),
-            );
-            acc[camelKey] = toCamelCase(obj[key]);
-            return acc;
-        }, {} as any) as T;
-    }
-
-    return obj as T;
+export interface SpotifyAlbumWithTracks extends Album {
+    tracks: Paging<Track>;
 }
 
-/**
- * Fetches recently played tracks from Spotify
- * @param refreshToken - Spotify refresh token
- * @param limit - Number of tracks to fetch (max 50, default 50)
- * @returns Recently played tracks data in camelCase
- */
-export async function getRecentlyPlayedTracks(
-    refreshToken: string,
-    limit: number = 50,
-): Promise<RecentlyPlayedTracksResponseCamel> {
-    // Validate and constrain limit
-    const constrainedLimit = Math.min(Math.max(1, limit), 50);
+let appAccessToken: string | null = null;
+let appTokenExpiresAt = 0;
 
-    // Get Spotify credentials from environment variables
+async function getAccessToken(refreshToken: string): Promise<string> {
     const clientId = Deno.env.get("SPOTIFY_CID");
     const clientSecret = Deno.env.get("SPOTIFY_SECRET");
 
     if (!clientId || !clientSecret) {
         throw new Error(
-            "SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET must be set in environment variables",
+            "SPOTIFY_CID and SPOTIFY_SECRET must be set in environment variables",
         );
     }
 
-    // Step 1: Exchange refresh token for access token
     const tokenResponse = await fetch(
         "https://accounts.spotify.com/api/token",
         {
@@ -261,10 +142,19 @@ export async function getRecentlyPlayedTracks(
     }
 
     const tokenData = await tokenResponse.json();
-    const accessToken = tokenData.access_token;
+    return tokenData.access_token;
+}
 
-    // Step 2: Fetch recently played tracks
-    const recentlyPlayedResponse = await fetch(
+
+export async function getRecentlyPlayedTracks(
+    refreshToken: string,
+    limit: number = 50,
+): Promise<RecentlyPlayedTracksResponse> {
+
+    const constrainedLimit = Math.min(Math.max(1, limit), 50);
+    const accessToken = await getAccessToken(refreshToken);
+
+    const response = await fetch(
         `https://api.spotify.com/v1/me/player/recently-played?limit=${constrainedLimit}`,
         {
             headers: {
@@ -273,13 +163,131 @@ export async function getRecentlyPlayedTracks(
         },
     );
 
-    if (!recentlyPlayedResponse.ok) {
-        const error = await recentlyPlayedResponse.text();
+    if (!response.ok) {
+        const error = await response.text();
         throw new Error(`Failed to fetch recently played tracks: ${error}`);
     }
 
-    const recentlyPlayedData = await recentlyPlayedResponse.json();
+    return await response.json();
+}
 
-    // Convert snake_case to camelCase
-    return toCamelCase<RecentlyPlayedTracksResponseCamel>(recentlyPlayedData);
+
+async function getAppAccessToken(): Promise<string> {
+    const now = Date.now();
+
+    if (appAccessToken && now < appTokenExpiresAt) {
+        return appAccessToken;
+    }
+
+    const clientId = Deno.env.get("SPOTIFY_CID");
+    const clientSecret = Deno.env.get("SPOTIFY_SECRET");
+
+    if (!clientId || !clientSecret) {
+        throw new Error(
+            "SPOTIFY_CID and SPOTIFY_SECRET must be set in environment variables",
+        );
+    }
+
+    const response = await fetch(
+        "https://accounts.spotify.com/api/token",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+            },
+            body: new URLSearchParams({
+                grant_type: "client_credentials",
+            }),
+        },
+    );
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to get app access token: ${error}`);
+    }
+
+    const data = await response.json();
+
+    appAccessToken = data.access_token;
+    // subtract 30s for safety margin
+    appTokenExpiresAt = Date.now() + (data.expires_in - 30) * 1000;
+
+    return appAccessToken!;
+}
+
+// ===============================
+// Fetch Album (Resolves Pagination)
+// ===============================
+
+export async function getSpotifyAlbumById(
+    albumId: string,
+): Promise<SpotifyAlbumWithTracks> {
+
+    async function fetchWithAuth(url: string): Promise<Response> {
+        let token = await getAppAccessToken();
+
+        let response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        // If token expired unexpectedly, refresh once
+        if (response.status === 401) {
+            appAccessToken = null;
+            token = await getAppAccessToken();
+
+            response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+        }
+
+        return response;
+    }
+
+    // Initial album fetch
+    const albumResponse = await fetchWithAuth(
+        `https://api.spotify.com/v1/albums/${albumId}`,
+    );
+
+    if (!albumResponse.ok) {
+        const error = await albumResponse.text();
+        throw new Error(`Failed to fetch album: ${error}`);
+    }
+
+    const albumData: SpotifyAlbumWithTracks = await albumResponse.json();
+
+    // Resolve paginated track pages
+    let allTracks = [...albumData.tracks.items];
+    let nextUrl = albumData.tracks.next;
+
+    while (nextUrl) {
+        const pageResponse = await fetchWithAuth(nextUrl);
+
+        if (!pageResponse.ok) {
+            const error = await pageResponse.text();
+            throw new Error(`Failed to fetch album track page: ${error}`);
+        }
+
+        const pageData: Paging<Track> = await pageResponse.json();
+
+        allTracks = allTracks.concat(pageData.items);
+        nextUrl = pageData.next;
+    }
+
+    return {
+        ...albumData,
+        tracks: {
+            ...albumData.tracks,
+            items: allTracks,
+            next: null,
+            previous: null,
+            offset: 0,
+            limit: allTracks.length,
+            total: allTracks.length,
+        },
+    };
 }

@@ -8,8 +8,17 @@ import { SpotifyPlay } from "./Play.ts";
 
 import { Database } from "_shared/schema.ts";
 
-import { matchSpotifyAlbum } from "@munite";
-import { AppleMusicSong, getAlbumByIdApple } from "../util/apple-music.ts";
+import { matchAlbum } from "@munite";
+import {
+    AppleMusicAlbumResponse,
+    AppleMusicSong,
+    getAlbumByIdApple,
+} from "../util/apple-music.ts";
+
+import {
+    SpotifyAlbumWithTracks,
+    getSpotifyAlbumById,
+} from "../util/spotify.ts";
 
 /**
  * Represents information about a music album.
@@ -47,6 +56,7 @@ import { AppleMusicSong, getAlbumByIdApple } from "../util/apple-music.ts";
  * @returns {Object} An object containing the album information formatted for database entry.
  */
 export class Album implements Fireable {
+    protected albumLookupData?: Object;
     protected title: string;
     protected albumType: string;
     protected numTracks: number;
@@ -90,7 +100,7 @@ export class Album implements Fireable {
         this.genre = genre;
         this.externalId = `${title},${this.artists.join(",")}`;
         this.supabase = supabase;
-        this.query = this.supabase.from("albums").select("id");
+        this.query = this.supabase.from("albums").select("id, source_data");
         this.id = albumId;
     }
 
@@ -115,6 +125,8 @@ export class Album implements Fireable {
      * it attempts to insert a new album record. If the operation fails or returns no data,
      * an error is thrown. If multiple matching entries are found, a warning is logged.
      *
+     * this method also has the side effect of fetching the album lookup data from the database
+     *
      * @returns {Promise<number>} The album's database ID.
      * @throws {Error} If the album cannot be inserted or retrieved from the database.
      * @todo find some intelligent way to fall back to a worse query, which should never happen in reality
@@ -123,13 +135,13 @@ export class Album implements Fireable {
         if (this.id) return this.id;
         log(6, `${JSON.stringify(this.queryHelper())}`);
         let { data, error } = await this.queryHelper();
-
         log(
             6,
             `BEFORE ATTEMT TO INSERT data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`,
         );
         if (data?.length === 0 || !data) {
             log(6, "inserting");
+            await this.fetchSourceData();
             ({ data, error } = await this.supabase
                 .from("albums")
                 .insert(await this.createDbEntryObject())
@@ -138,7 +150,8 @@ export class Album implements Fireable {
         log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`);
         if ((error && error?.code !== PK_VIOLATION) || data === null)
             throw Error(
-                `could not insert Album ${JSON.stringify(this.createDbEntryObject())} error: ${JSON.stringify(error)}`,
+                `could not insert Album ${JSON.stringify(this.createDbEntryObject())}
+                error: ${JSON.stringify(error)}`,
             );
         if (data.length > 1)
             log(
@@ -147,6 +160,7 @@ export class Album implements Fireable {
                     Album: ${JSON.stringify(await this.createDbEntryObject())}
                     Data: ${JSON.stringify(data)}`,
             );
+        this.albumLookupData = data[0].source_data ?? undefined;
         this.id = data[0].id;
         return data[0].id;
     }
@@ -182,8 +196,10 @@ export class Album implements Fireable {
             source_image: this.image,
             source_external_id: this.externalId,
             source_album_type: this.albumType,
+            source_data: JSON.stringify(this.albumLookupData),
         };
     }
+    protected async fetchSourceData(): Promise<void> {}
     public async fire(): Promise<void> {
         const albumId = await this.getAlbumDbID();
         await Promise.all(
@@ -201,25 +217,11 @@ export class Album implements Fireable {
     public getArtists(): string[] {
         return this.artists;
     }
-
-    protected async matchMusicBrainz(): Promise<void> {
-        try {
-            const musicbrainzData = await matchSpotifyAlbum(
-                this.getExternalId(),
-            );
-            log(
-                6,
-                `musicbrainz data:\n${JSON.stringify(matchSpotifyAlbum, null, 2)}`,
-            );
-        } catch (e) {
-            // log(2, `error encountered while matching album\n
-            //         Album: ${}`)
-        }
-    }
 }
 
 export class SpotifyAlbum extends Album {
     protected override tracks: SpotifyTrack[] = [];
+    declare albumLookupData?: SpotifyAlbumWithTracks;
     constructor(
         albumName: string,
         albumType: string,
@@ -292,6 +294,10 @@ export class SpotifyAlbum extends Album {
         return ret;
     }
 
+    protected override async fetchSourceData() {
+        this.albumLookupData = await getSpotifyAlbumById(this.externalId);
+    }
+
     // protected override async mbFire() {
     //     const mb = new SpotifyMusicBrainzAlbum(this, this.supabase);
     //     await mb.fire();
@@ -307,6 +313,7 @@ export class SpotifyAlbum extends Album {
 
 export class AppleMusicAlbum extends Album {
     protected override tracks: AppleMusicTrack[] = [];
+    declare albumLookupData?: AppleMusicAlbumResponse;
     constructor(
         song: AppleMusicSong,
         supabase: SupabaseClient<Database>,
@@ -340,26 +347,38 @@ export class AppleMusicAlbum extends Album {
 
         this.sourceService = "apple";
     }
+    public override async fetchSourceData(): Promise<void> {
+        //we should plan on not hard coding region
+        if (!this.albumLookupData) {
+            const response = await getAlbumByIdApple("us", this.externalId);
+            if (response.data.length !== 0) {
+                this.albumLookupData = response;
+                const data = this.albumLookupData.data[0].attributes;
+
+                this.albumType = "album";
+                if (data.isCompilation) this.albumType = "compilation";
+                if (data.isSingle) this.albumType = "single";
+            }
+        }
+    }
 
     public override async createDbEntryObject() {
-        const response = await getAlbumByIdApple("us", this.externalId);
-        if (response.data.length === 0) return super.createDbEntryObject();
-
-        const info = response.data[0];
-        const attr = info.attributes;
-
-        let albumType = "album";
-        if (attr.isCompilation) albumType = "compilation";
-        if (attr.isSingle) albumType = "single";
-
+        if (!this.albumLookupData)
+            throw new Error(
+                "missing album lookup data THIS SHOULD NEVER HAPPEN",
+            );
         return {
             id: this.id,
-            source_title: attr.name,
+            source_title: this.albumLookupData.data[0].attributes.name,
             source_service: this.sourceService,
-            source_artists: [attr.artistName ?? "Unknown Artist"],
+            source_artists: [
+                this.albumLookupData.data[0].attributes.artistName ??
+                    "Unknown Artist",
+            ],
             source_image: this.image,
             source_external_id: this.externalId,
-            source_album_type: albumType,
+            source_album_type: this.albumType,
+            source_data: JSON.stringify(this.albumLookupData),
         };
     }
 }
