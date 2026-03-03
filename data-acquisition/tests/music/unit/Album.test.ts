@@ -39,6 +39,7 @@ Deno.test("base classes", async (t) => {
                 source_image: "placeholder",
                 source_external_id: "Lenny Skinny,lenny skinny",
                 source_service: "manual",
+                source_data: undefined,
             });
         },
     );
@@ -101,6 +102,7 @@ Deno.test("spotify class", async (t) => {
                 source_artists: ["new artist"],
                 source_image: "new_placeholder",
                 source_external_id: "9876543210",
+                source_data: undefined,
             });
         },
     );

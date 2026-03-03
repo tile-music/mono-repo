@@ -320,6 +320,8 @@ export class AppleMusicUserPlaying extends UserPlaying {
             this.context.access_token,
         );
 
+        log(6, `recently played tracks: ${JSON.stringify(this.recently_played, null, 2)}`)
+
         const { data, error } = await this.supabase
             .from("plays")
             .select("tracks( source_external_id )")

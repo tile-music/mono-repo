@@ -103,15 +103,15 @@ export type Database = {
           created_at: string
           id: string
           is_primary: boolean
-          recording_id: string
+          release_group_id: string
           updated_at: string | null
         }
         Insert: {
           album_id: string
           created_at: string
-          id?: string
+          id: string
           is_primary?: boolean
-          recording_id: string
+          release_group_id: string
           updated_at?: string | null
         }
         Update: {
@@ -119,7 +119,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_primary?: boolean
-          recording_id?: string
+          release_group_id?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -137,15 +137,15 @@ export type Database = {
           created_at: string
           id: string
           is_primary: boolean
-          recording_id: string
+          release_id: string
           track_id: string
           updated_at: string | null
         }
         Insert: {
           created_at: string
-          id?: string
+          id: string
           is_primary?: boolean
-          recording_id: string
+          release_id: string
           track_id: string
           updated_at?: string | null
         }
@@ -153,11 +153,18 @@ export type Database = {
           created_at?: string
           id?: string
           is_primary?: boolean
-          recording_id?: string
+          release_id?: string
           track_id?: string
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "mb_track_recordings_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "mb_album_releases"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mb_track_recordings_track_id_fkey"
             columns: ["track_id"]

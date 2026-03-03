@@ -66,6 +66,9 @@ services:
             SB_SERVICE_KEY: ${SB_SERVICE_KEY}
             SB_URL_TEST: ${SB_URL_TEST}
             DATA_ACQ_PORT: ${DATA_ACQ_PORT}
+            MUSICBRAINZ_API_URL: ${MUSICBRAINZ_API_URL}
+            MAX_MUSICBRAINZ_REQUESTS_PER_SECOND: ${MAX_MUSICBRAINZ_REQUESTS_PER_SECOND}
+            QUERY_RELEASE: ${QUERY_RELEASE}
         build:
             context: ./data-acquisition/
             target: dev

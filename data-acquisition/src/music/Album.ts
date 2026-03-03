@@ -8,7 +8,7 @@ import { SpotifyPlay } from "./Play.ts";
 
 import { Database } from "_shared/schema.ts";
 
-import { matchAlbum } from "@munite";
+import { matchAlbum, getConfig, init } from "@munite";
 import {
     AppleMusicAlbumResponse,
     AppleMusicSong,
@@ -19,6 +19,14 @@ import {
     SpotifyAlbumWithTracks,
     getSpotifyAlbumById,
 } from "../util/spotify.ts";
+
+await init({
+    musicbrainz_api_url: Deno.env.get("MUSICBRAINZ_API_URL") ?? "",
+    max_musicbrainz_requests_per_second: parseInt(
+        Deno.env.get("MAX_MUSICBRAINZ_REQUESTS_PER_SECOND") ?? "1",
+    ),
+    query_release: Deno.env.get("QUERY_RELEASE") ?? "true",
+});
 
 /**
  * Represents information about a music album.
@@ -56,7 +64,7 @@ import {
  * @returns {Object} An object containing the album information formatted for database entry.
  */
 export class Album implements Fireable {
-    protected albumLookupData?: Object;
+    protected albumLookupData?: any;
     protected title: string;
     protected albumType: string;
     protected numTracks: number;
@@ -71,7 +79,7 @@ export class Album implements Fireable {
     protected externalId: string;
     protected supabase: SupabaseClient<Database>;
     protected query;
-    protected sourceService = "manual";
+    protected sourceService: "manual" | "apple-music" | "spotify" = "manual";
 
     protected tracks: Track[] = [];
 
@@ -116,6 +124,8 @@ export class Album implements Fireable {
         this.query = this.query.eq("source_external_id", this.externalId);
         return this.query;
     }
+
+
 
     /**
      * Retrieves the database ID for the current album instance.
@@ -182,6 +192,39 @@ export class Album implements Fireable {
     public getExternalId() {
         return this.externalId;
     }
+    protected async performMuniteLookup(): Promise<void> {
+        log(6, `munite config ${JSON.stringify(getConfig(), null, 2)}`);
+
+        if (this.sourceService === "manual") {
+            log(6, "munite skipped (manual source)");
+            return;
+        }
+
+        try {
+            log(
+                6,
+                `album lookup data in munite req\n
+                album lookup data plain: ${this.albumLookupData} ${typeof this.albumLookupData}\n`
+            );
+
+            const parsedLookupData = JSON.parse(this.albumLookupData);
+
+            const lookupResult = await matchAlbum(
+                this.sourceService,
+                parsedLookupData,
+            );
+
+            log(6, "invoked munite");
+            log(6, `munite result:\n${JSON.stringify(lookupResult, null, 2)}`);
+        } catch (error) {
+            log(
+                1,
+                `munite error: ${
+                    error instanceof Error ? error.stack : error
+                }`,
+            );
+        }
+    }
     /**
      *
      * @returns an object that can be used to create a new entry in the database
@@ -196,7 +239,7 @@ export class Album implements Fireable {
             source_image: this.image,
             source_external_id: this.externalId,
             source_album_type: this.albumType,
-            source_data: JSON.stringify(this.albumLookupData),
+            source_data: this.albumLookupData,
         };
     }
     protected async fetchSourceData(): Promise<void> {}
@@ -208,6 +251,8 @@ export class Album implements Fireable {
                 await t.fire();
             }),
         );
+        log(6, "perfomring munite lookup");
+        await this.performMuniteLookup();
         //log(6, `musicbrainz fire for album ${this.title}`);
         //await this.mbFire();
     }
@@ -345,7 +390,7 @@ export class AppleMusicAlbum extends Album {
             );
         }
 
-        this.sourceService = "apple";
+        this.sourceService = "apple-music";
     }
     public override async fetchSourceData(): Promise<void> {
         //we should plan on not hard coding region
@@ -378,7 +423,7 @@ export class AppleMusicAlbum extends Album {
             source_image: this.image,
             source_external_id: this.externalId,
             source_album_type: this.albumType,
-            source_data: JSON.stringify(this.albumLookupData),
+            source_data: this.albumLookupData,
         };
     }
 }
