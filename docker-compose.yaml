@@ -1,5 +1,5 @@
 include:
-    #- ./mb-docker/docker-compose.yml
+    #- ./musicbrainz-docker/docker-compose.yml
     - ./supabase/docker/docker-compose.yml
 services:
     lib-node:

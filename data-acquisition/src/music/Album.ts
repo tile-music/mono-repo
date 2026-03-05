@@ -8,7 +8,7 @@ import { SpotifyPlay } from "./Play.ts";
 
 import { Database } from "_shared/schema.ts";
 
-import { matchAlbum, getConfig, init } from "@munite";
+import { AlbumRelease } from "./AlbumReleases.ts";
 import {
     AppleMusicAlbumResponse,
     AppleMusicSong,
@@ -19,14 +19,6 @@ import {
     SpotifyAlbumWithTracks,
     getSpotifyAlbumById,
 } from "../util/spotify.ts";
-
-await init({
-    musicbrainz_api_url: Deno.env.get("MUSICBRAINZ_API_URL") ?? "",
-    max_musicbrainz_requests_per_second: parseInt(
-        Deno.env.get("MAX_MUSICBRAINZ_REQUESTS_PER_SECOND") ?? "1",
-    ),
-    query_release: Deno.env.get("QUERY_RELEASE") ?? "true",
-});
 
 /**
  * Represents information about a music album.
@@ -125,8 +117,6 @@ export class Album implements Fireable {
         return this.query;
     }
 
-
-
     /**
      * Retrieves the database ID for the current album instance.
      *
@@ -192,39 +182,7 @@ export class Album implements Fireable {
     public getExternalId() {
         return this.externalId;
     }
-    protected async performMuniteLookup(): Promise<void> {
-        log(6, `munite config ${JSON.stringify(getConfig(), null, 2)}`);
 
-        if (this.sourceService === "manual") {
-            log(6, "munite skipped (manual source)");
-            return;
-        }
-
-        try {
-            log(
-                6,
-                `album lookup data in munite req\n
-                album lookup data plain: ${this.albumLookupData} ${typeof this.albumLookupData}\n`
-            );
-
-            const parsedLookupData = JSON.parse(this.albumLookupData);
-
-            const lookupResult = await matchAlbum(
-                this.sourceService,
-                parsedLookupData,
-            );
-
-            log(6, "invoked munite");
-            log(6, `munite result:\n${JSON.stringify(lookupResult, null, 2)}`);
-        } catch (error) {
-            log(
-                1,
-                `munite error: ${
-                    error instanceof Error ? error.stack : error
-                }`,
-            );
-        }
-    }
     /**
      *
      * @returns an object that can be used to create a new entry in the database
@@ -252,9 +210,16 @@ export class Album implements Fireable {
             }),
         );
         log(6, "perfomring munite lookup");
-        await this.performMuniteLookup();
+        const albumRelease = new AlbumRelease(
+            albumId,
+            this.albumLookupData,
+            this.tracks,
+            this.supabase,
+            this.sourceService,
+        );
+        await albumRelease.fire();
         //log(6, `musicbrainz fire for album ${this.title}`);
-        //await this.mbFire();
+
     }
     public getTitle(): string {
         return this.title;

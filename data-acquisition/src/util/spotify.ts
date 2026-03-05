@@ -237,7 +237,7 @@ export async function getSpotifyAlbumById(
         if (response.status === 401) {
             appAccessToken = null;
             token = await getAppAccessToken();
-
+            //await response.
             response = await fetch(url, {
                 headers: {
                     Authorization: `Bearer ${token}`,
