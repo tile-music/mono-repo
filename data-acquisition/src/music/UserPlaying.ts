@@ -64,6 +64,11 @@ export abstract class UserPlaying implements Fireable {
     protected albums: Map<string, Album> = new Map();
     dbEntries: any = { p_track_info: [], p_user_id: "" };
 
+    /**
+     * @param supabase Database client.
+     * @param userId Internal user ID.
+     * @param context Provider-specific auth/context payload.
+     */
     constructor(
         supabase: SupabaseClient<Database>,
         userId: string,
@@ -79,6 +84,9 @@ export abstract class UserPlaying implements Fireable {
 
     protected abstract matchAlbums(): void;
 
+    /**
+     * Reuses an existing album entity or stores a new one by external ID.
+     */
     protected addOrGetAlbum(album: Album) {
         const ident = album.getExternalId();
         if (this.albums.has(ident)) return this.albums.get(ident);
@@ -88,6 +96,9 @@ export abstract class UserPlaying implements Fireable {
         }
     }
 
+    /**
+     * Matches albums/tracks and persists each album pipeline.
+     */
     public async fire(): Promise<void> {
         try {
             this.matchAlbums();
@@ -106,9 +117,17 @@ export abstract class UserPlaying implements Fireable {
   } */
 }
 
+/**
+ * Playback ingestion workflow for Spotify.
+ */
 export class SpotifyUserPlaying extends UserPlaying {
     items!: PlayHistoryItem[];
 
+    /**
+     * @param supabase Database client.
+     * @param userId Internal user ID.
+     * @param context Spotify token context.
+     */
     constructor(
         supabase: SupabaseClient<Database>,
         userId: string,
@@ -116,8 +135,15 @@ export class SpotifyUserPlaying extends UserPlaying {
     ) {
         super(supabase, userId, context);
     }
+
+    /**
+     * No-op init kept for interface parity.
+     */
     public override async init(): Promise<void> {}
 
+    /**
+     * Converts recently played Spotify items to album and track entities.
+     */
     protected override matchAlbums(): void {
         //await this.getAlbumPopularity();
 
@@ -189,6 +215,10 @@ export class SpotifyUserPlaying extends UserPlaying {
             }
         }
     }
+
+    /**
+     * Fetches Spotify recently played tracks and persists normalized entities.
+     */
     public override async fire(): Promise<void> {
         const things = await getRecentlyPlayedTracks(
             this.context.refresh_token,
@@ -197,6 +227,10 @@ export class SpotifyUserPlaying extends UserPlaying {
         this.items = things.items;
         await super.fire();
     }
+
+    /**
+     * Parses Spotify release date strings based on precision.
+     */
     public static parseSpotifyDate(
         date: string,
         datePrecision: "year" | "month" | "day",
@@ -218,6 +252,10 @@ export class SpotifyUserPlaying extends UserPlaying {
                 };
         }
     }
+
+    /**
+     * Parses an ISO 8601 UTC timestamp into a `Date`.
+     */
     public static parseISOToDate(isoString: string): Date {
         //console.log(isoString);
         const match = isoString.match(
@@ -257,10 +295,18 @@ export class SpotifyUserPlaying extends UserPlaying {
     }
 }
 
+/**
+ * Playback ingestion workflow for Apple Music.
+ */
 export class AppleMusicUserPlaying extends UserPlaying {
     recently_played!: AppleMusicRecentlyPlayedResponse;
     last_played_id!: string | null;
 
+    /**
+     * @param supabase Database client.
+     * @param userId Internal user ID.
+     * @param context Apple Music token context.
+     */
     constructor(
         supabase: SupabaseClient<Database>,
         userId: string,
@@ -269,8 +315,14 @@ export class AppleMusicUserPlaying extends UserPlaying {
         super(supabase, userId, context);
     }
 
+    /**
+     * No-op init kept for interface parity.
+     */
     public override async init() {}
 
+    /**
+     * Converts recently played Apple tracks to album and track entities.
+     */
     protected override matchAlbums(): void {
         let now = new Date().valueOf();
         let new_listen = true;
@@ -315,6 +367,9 @@ export class AppleMusicUserPlaying extends UserPlaying {
         }
     }
 
+    /**
+     * Fetches Apple Music history, determines new listens, and persists entities.
+     */
     public override async fire(): Promise<void> {
         this.recently_played = await getRecentlyPlayedTracksApple(
             this.context.access_token,
@@ -347,8 +402,17 @@ export class AppleMusicUserPlaying extends UserPlaying {
     }
 }
 
+/**
+ * Test-only ingestion workflow backed by mock data.
+ */
 export class MockUserPlaying extends UserPlaying {
     mockData: TestData[];
+
+    /**
+     * @param supabase Database client.
+     * @param userId Internal user ID.
+     * @param context Mock tracks to ingest.
+     */
     constructor(
         supabase: SupabaseClient<Database>,
         userId: string,
@@ -358,6 +422,9 @@ export class MockUserPlaying extends UserPlaying {
         this.mockData = context;
     }
 
+    /**
+     * Converts mock fixtures into album and track entities.
+     */
     protected override matchAlbums(): void {
         // make sure this works like a traditional for loop not async for each because that will result in a major race condition
         for (const track of this.mockData) {
@@ -396,6 +463,9 @@ export class MockUserPlaying extends UserPlaying {
         }
     }
 
+    /**
+     * Marks mock ingestion as initialized.
+     */
     public override init(): Promise<void> {
         this.inited = true;
         return Promise.resolve();

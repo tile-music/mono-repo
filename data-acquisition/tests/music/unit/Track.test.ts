@@ -27,7 +27,7 @@ Deno.test("TrackInfo classes", async (t) => {
                 );
 
                 expect(trackInfo).toBeInstanceOf(Track);
-                expect(trackInfo["trackName"]).toBe(trackName);
+                expect(trackInfo["title"]).toBe(trackName);
                 expect(trackInfo["trackArtists"]).toBe(trackArtists);
                 expect(trackInfo["isrc"]).toBe(isrc);
                 expect(trackInfo["durationMs"]).toBe(durationMs);
@@ -86,7 +86,7 @@ Deno.test("TrackInfo classes", async (t) => {
                 );
 
                 expect(spotifyTrackInfo).toBeInstanceOf(SpotifyTrack);
-                expect(spotifyTrackInfo["trackName"]).toBe(trackName);
+                expect(spotifyTrackInfo["title"]).toBe(trackName);
                 expect(spotifyTrackInfo["trackArtists"]).toBe(trackArtists);
                 expect(spotifyTrackInfo["isrc"]).toBe(isrc);
                 expect(spotifyTrackInfo["durationMs"]).toBe(durationMs);

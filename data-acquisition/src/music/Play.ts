@@ -40,6 +40,12 @@ export class Play implements Fireable {
 
     protected supabase: SupabaseClient<Database>;
 
+    /**
+     * @param listenedAt Unix timestamp (ms) for when playback occurred.
+     * @param supabase Database client.
+     * @param userId User identifier for the play row.
+     * @param isrc Optional track ISRC.
+     */
     constructor(
         listenedAt: number,
         supabase: SupabaseClient<Database>,
@@ -52,14 +58,23 @@ export class Play implements Fireable {
         this.userId = userId;
     }
 
+    /**
+     * Sets the track ID to associate with this play.
+     */
     public setTrackId(trackId: string) {
         this.trackId = trackId;
     }
 
+    /**
+     * Sets the album ID associated with this play.
+     */
     public setAlbumId(albumId: string) {
         this.albumId = albumId;
     }
 
+    /**
+     * Builds the insert payload for the `plays` table.
+     */
     public createDbEntryObject() {
         if (!this.trackId)
             throw new Error(
@@ -72,6 +87,9 @@ export class Play implements Fireable {
         };
     }
 
+    /**
+     * Inserts this play into the database.
+     */
     public async fire(): Promise<void> {
         const { data: _data, error } = await this.supabase
             //.from(this.selectedMbid ? "played_tracks" : "unmatched_played_tracks")
@@ -85,8 +103,18 @@ export class Play implements Fireable {
     }
 }
 
+/**
+ * Spotify-specific play variant with popularity metadata.
+ */
 export class SpotifyPlay extends Play {
     private trackPopularity: number;
+    /**
+     * @param listenedAt Unix timestamp (ms) for when playback occurred.
+     * @param trackPopularity Spotify popularity score.
+     * @param supabase Database client.
+     * @param userId User identifier for the play row.
+     * @param isrc Optional track ISRC.
+     */
     constructor(
         listenedAt: number,
         trackPopularity: number,
@@ -97,6 +125,10 @@ export class SpotifyPlay extends Play {
         super(listenedAt, supabase, userId, isrc);
         this.trackPopularity = trackPopularity;
     }
+
+    /**
+     * Builds a play payload including Spotify popularity.
+     */
     public override createDbEntryObject() {
         return {
             ...super.createDbEntryObject(),
@@ -105,9 +137,19 @@ export class SpotifyPlay extends Play {
     }
 }
 
+/**
+ * Apple Music play variant that only writes new listens.
+ */
 export class AppleMusicPlay extends Play {
     private new_listen: boolean;
 
+    /**
+     * @param new_listen Whether this entry should be persisted.
+     * @param listenedAt Unix timestamp (ms) for when playback occurred.
+     * @param supabase Database client.
+     * @param userId User identifier for the play row.
+     * @param isrc Optional track ISRC.
+     */
     constructor(
         new_listen: boolean,
         listenedAt: number,
@@ -119,6 +161,9 @@ export class AppleMusicPlay extends Play {
         this.new_listen = new_listen;
     }
 
+    /**
+     * Persists only if the listen is new.
+     */
     public override async fire() {
         if (!this.new_listen) return;
         await super.fire();

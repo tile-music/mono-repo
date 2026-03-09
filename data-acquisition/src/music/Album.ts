@@ -8,7 +8,7 @@ import { SpotifyPlay } from "./Play.ts";
 
 import { Database } from "_shared/schema.ts";
 
-import { AlbumRelease } from "./AlbumReleases.ts";
+import { AlbumRelease } from "./AlbumRelease.ts";
 import {
     AppleMusicAlbumResponse,
     AppleMusicSong,
@@ -75,6 +75,19 @@ export class Album implements Fireable {
 
     protected tracks: Track[] = [];
 
+    /**
+     * @param title Source album title.
+     * @param albumType Source album type.
+     * @param artists Source artists.
+     * @param image Album artwork URL.
+     * @param releaseDay Release day if available.
+     * @param releaseMonth Release month if available.
+     * @param releaseYear Release year.
+     * @param numTracks Number of tracks.
+     * @param genre Source genres.
+     * @param supabase Database client.
+     * @param albumId Optional internal album ID.
+     */
     constructor(
         title: string,
         albumType: string,
@@ -104,14 +117,23 @@ export class Album implements Fireable {
         this.id = albumId;
     }
 
+    /**
+     * Returns the normalized album type.
+     */
     public getAlbumType() {
         return this.albumType.toLowerCase();
     }
 
+    /**
+     * Returns the source track count.
+     */
     public getNumTracks() {
         return this.numTracks;
     }
 
+    /**
+     * Adds source external ID filtering to the base album query.
+     */
     protected queryHelper() {
         this.query = this.query.eq("source_external_id", this.externalId);
         return this.query;
@@ -165,20 +187,32 @@ export class Album implements Fireable {
         return data[0].id;
     }
 
+    /**
+     * Returns the internal album ID after persistence.
+     */
     public getAlbumId() {
         if (this.id) return this.id;
         else throw new Error("album id has not been fetched from database");
     }
 
+    /**
+     * Returns associated track entities.
+     */
     public getTracks() {
         return this.tracks;
     }
 
+    /**
+     * Appends a track to this album.
+     */
     public addTrack(track: Track) {
         this.tracks.push(track);
         return track;
     }
 
+    /**
+     * Returns the provider-specific album external ID.
+     */
     public getExternalId() {
         return this.externalId;
     }
@@ -200,7 +234,15 @@ export class Album implements Fireable {
             source_data: this.albumLookupData,
         };
     }
+
+    /**
+     * Fetches and stores provider metadata used for matching and persistence.
+     */
     protected async fetchSourceData(): Promise<void> {}
+
+    /**
+     * Persists the album, then all tracks, then MusicBrainz mapping.
+     */
     public async fire(): Promise<void> {
         const albumId = await this.getAlbumDbID();
         await Promise.all(
@@ -221,17 +263,43 @@ export class Album implements Fireable {
         //log(6, `musicbrainz fire for album ${this.title}`);
 
     }
+
+    /**
+     * Returns the album title.
+     */
     public getTitle(): string {
         return this.title;
     }
+
+    /**
+     * Returns album artist names.
+     */
     public getArtists(): string[] {
         return this.artists;
     }
 }
 
+/**
+ * Spotify-backed album entity.
+ */
 export class SpotifyAlbum extends Album {
     protected override tracks: SpotifyTrack[] = [];
     declare albumLookupData?: SpotifyAlbumWithTracks;
+
+    /**
+     * @param albumName Source album title.
+     * @param albumType Source album type.
+     * @param artists Source artists.
+     * @param image Album artwork URL.
+     * @param releaseDay Release day if available.
+     * @param releaseMonth Release month if available.
+     * @param releaseYear Release year.
+     * @param numTracks Number of tracks.
+     * @param genre Source genres.
+     * @param supabase Database client.
+     * @param spotifyId Spotify album ID.
+     * @param albumId Optional internal album ID.
+     */
     constructor(
         albumName: string,
         albumType: string,
@@ -263,6 +331,10 @@ export class SpotifyAlbum extends Album {
         this.externalId = spotifyId;
         this.sourceService = "spotify";
     }
+
+    /**
+     * Builds a Spotify album from local test fixture data.
+     */
     static fromTestData(
         data: TestData,
         supabase: SupabaseClient<Database>,
@@ -304,6 +376,9 @@ export class SpotifyAlbum extends Album {
         return ret;
     }
 
+    /**
+     * Fetches Spotify album lookup data by external ID.
+     */
     protected override async fetchSourceData() {
         this.albumLookupData = await getSpotifyAlbumById(this.externalId);
     }
@@ -321,9 +396,18 @@ export class SpotifyAlbum extends Album {
     // }
 }
 
+/**
+ * Apple Music-backed album entity.
+ */
 export class AppleMusicAlbum extends Album {
     protected override tracks: AppleMusicTrack[] = [];
     declare albumLookupData?: AppleMusicAlbumResponse;
+
+    /**
+     * @param song Apple Music song payload used to derive album metadata.
+     * @param supabase Database client.
+     * @param albumId Optional internal album ID.
+     */
     constructor(
         song: AppleMusicSong,
         supabase: SupabaseClient<Database>,
@@ -357,6 +441,10 @@ export class AppleMusicAlbum extends Album {
 
         this.sourceService = "apple-music";
     }
+
+    /**
+     * Fetches Apple Music album lookup data by external ID.
+     */
     public override async fetchSourceData(): Promise<void> {
         //we should plan on not hard coding region
         if (!this.albumLookupData) {
@@ -372,6 +460,9 @@ export class AppleMusicAlbum extends Album {
         }
     }
 
+    /**
+     * Builds the album insert payload from Apple lookup metadata.
+     */
     public override async createDbEntryObject() {
         if (!this.albumLookupData)
             throw new Error(
@@ -388,11 +479,14 @@ export class AppleMusicAlbum extends Album {
             source_image: this.image,
             source_external_id: this.externalId,
             source_album_type: this.albumType,
-            source_data: this.albumLookupData,
+            source_data: this.albumLookupData.data[0],
         };
     }
 }
 
+/**
+ * Fixture shape used by mock ingestion.
+ */
 export type TestData = {
     trackName: string;
     trackArtists: string[];

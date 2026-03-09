@@ -7,6 +7,8 @@ import { timeStamp } from "node:console";
 import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/constants.ts";
 import { success } from "@zod";
+import { Release } from "./Release.ts";
+import { TrackRecording } from "./TrackRecording.ts";
 await init({
     musicbrainz_api_url: Deno.env.get("MUSICBRAINZ_API_URL") ?? "",
     max_musicbrainz_requests_per_second: parseInt(
@@ -14,34 +16,42 @@ await init({
     ),
     query_release: Deno.env.get("QUERY_RELEASE") ?? "true",
 });
+
+/**
+ * Maps an internal album to a MusicBrainz release.
+ */
 export class AlbumRelease implements Fireable {
-    albumId: string;
+
     id?: string;
-    albumLookupData: any;
     muniteResult?: FilterResponse;
-    tracks: Track[];
-    supabase: SupabaseClient<Database>;
     query;
     isPrimary: boolean = true;
-    sourceService: "spotify" | "apple-music" | "manual";
 
+    /**
+     * @param albumId Internal album ID.
+     * @param albumLookupData Service payload used for Munite matching.
+     * @param tracks Tracks associated with the album.
+     * @param supabase Database client.
+     * @param sourceService Upstream source provider.
+     */
     constructor(
-        albumId: string,
-        albumLookupData: any,
-        tracks: Track[],
-        supabase: SupabaseClient<Database>,
-        sourceService: "spotify" | "apple-music" | "manual",
+        private albumId: string,
+        private albumLookupData: any,
+        private tracks: Track[],
+        private supabase: SupabaseClient<Database>,
+        private sourceService: "spotify" | "apple-music" | "manual",
     ) {
-        this.albumId = albumId;
-        this.albumLookupData = albumLookupData;
-        this.tracks = tracks;
-        this.supabase = supabase;
+
         this.query = this.supabase
             .from("mb_album_releases")
             .select("*")
             .eq("album_id", this.albumId);
-        this.sourceService = sourceService;
+
     }
+
+    /**
+     * Calls Munite to resolve the best MusicBrainz release match.
+     */
     protected async callMunite() {
         log(6, `munite config ${JSON.stringify(getConfig(), null, 2)}`);
 
@@ -82,6 +92,10 @@ export class AlbumRelease implements Fireable {
             );
         }
     }
+
+    /**
+     * Returns the album release row ID, inserting related rows when missing.
+     */
     protected async getARDbID() {
         if (this.id) return this.id;
         log(6, `${JSON.stringify(this.query)}`);
@@ -89,17 +103,22 @@ export class AlbumRelease implements Fireable {
         let dbEntry;
         log(
             6,
-            `BEFORE ATTEMT TO INSERT data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`,
+            `BEFORE ATTEMT TO INSERT data in album release: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`,
         );
         if (data?.length === 0 || !data) {
             log(6, "fetching and inserting");
             await this.callMunite();
             dbEntry = this.createDbEntryObject();
             if(this.muniteResult?.status === "success" && dbEntry) {
+                const release = new Release(this.muniteResult.release.id, this.supabase);
+                log(6, "created release class calling fire")
+                await release.fire();
                 ({ data, error } = await this.supabase
                     .from("mb_album_releases")
                     .insert(dbEntry)
                     .select());
+                const trackRecording = new TrackRecording(this.tracks, this.muniteResult, this.supabase);
+                await trackRecording.fire()
             }
         }
         log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`);
@@ -119,11 +138,19 @@ export class AlbumRelease implements Fireable {
         this.id = data[0].id;
         return data[0].id;
     }
+
+    /**
+     * Persists the album-to-release mapping when applicable.
+     */
     public async fire(): Promise<void> {
         if(this.sourceService === "manual") return;
         await this.getARDbID();
     }
-    protected createDbEntryObject(): Database["public"]["Tables"]["mb_album_releases"]["Insert"] | void {
+
+    /**
+     * Builds the insert payload for `mb_album_releases`.
+     */
+    protected createDbEntryObject() : Database["public"]["Tables"]["mb_album_releases"]["Insert"] | void {
         const date = new Date();
         if (this.muniteResult?.status !== "success" || !this.muniteResult)
             return

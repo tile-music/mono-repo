@@ -36,7 +36,7 @@ import { AppleMusicSong } from "../util/apple-music.ts";
  * @todo Change how `indb` is set because this might create a state mismatch.
  */
 export class Track implements Fireable {
-    readonly trackName: string;
+    readonly title: string;
     readonly trackArtists: string[];
     readonly isrc: string;
     readonly durationMs: number;
@@ -50,6 +50,16 @@ export class Track implements Fireable {
     protected externalId = "placeholder";
     protected sourceService = "manual";
 
+    /**
+     * @param trackName Source title for the track.
+     * @param trackArtists Source artists for the track.
+     * @param isrc Track ISRC.
+     * @param durationMs Track duration in milliseconds.
+     * @param play Play entity associated with this track.
+     * @param supabase Database client.
+     * @param trackNum Track number within the source album.
+     * @param albumId Optional parent album ID.
+     */
     constructor(
         trackName: string,
         trackArtists: string[],
@@ -61,7 +71,7 @@ export class Track implements Fireable {
         /* discNum: number, */
         albumId?: string,
     ) {
-        this.trackName = trackName;
+        this.title = trackName;
         this.trackArtists = trackArtists;
         this.durationMs = durationMs;
         this.isrc = isrc;
@@ -73,10 +83,23 @@ export class Track implements Fireable {
         /* this.discNum = discNum; */
     }
 
+    /**
+     * Sets the album ID for this track.
+     */
     public setAlbumId(albumId: string) {
         this.albumId = albumId;
     }
 
+    /**
+     * Returns the source track title.
+     */
+    public getTitle(){
+        return this.title;
+    }
+
+    /**
+     * Adds source external ID filtering to the base track query.
+     */
     protected queryHelper() {
         return this.query.eq("source_external_id", this.externalId);
     }
@@ -131,7 +154,7 @@ export class Track implements Fireable {
         return {
             album_id: this.albumId,
             //isrc: this.isrc,
-            source_title: this.trackName,
+            source_title: this.title,
             source_artists: this.trackArtists,
             //track_duration_ms: this.durationMs,
             source_service: this.sourceService,
@@ -146,6 +169,10 @@ export class Track implements Fireable {
     //         log(6, `release in track ${JSON.stringify(release)}`);
     //     });
     // }
+
+    /**
+     * Persists the track and then persists the related play.
+     */
     public async fire(): Promise<void> {
         const trackId = await this.getTrackDbID();
         log(6, `track id ${trackId}`);
@@ -159,7 +186,21 @@ export class Track implements Fireable {
     }
 }
 
+/**
+ * Spotify-backed track entity.
+ */
 export class SpotifyTrack extends Track {
+    /**
+     * @param trackName Source title for the track.
+     * @param trackArtists Source artists for the track.
+     * @param isrc Track ISRC.
+     * @param durationMs Track duration in milliseconds.
+     * @param spotifyId Spotify track ID.
+     * @param play Play entity associated with this track.
+     * @param supabase Database client.
+     * @param trackNum Track number within the source album.
+     * @param albumId Optional parent album ID.
+     */
     constructor(
         trackName: string,
         trackArtists: string[],
@@ -187,7 +228,15 @@ export class SpotifyTrack extends Track {
     }
 }
 
+/**
+ * Apple Music-backed track entity.
+ */
 export class AppleMusicTrack extends Track {
+    /**
+     * @param song Apple Music song payload.
+     * @param play Play entity associated with this track.
+     * @param supabase Database client.
+     */
     constructor(
         song: AppleMusicSong,
         play: Play,
