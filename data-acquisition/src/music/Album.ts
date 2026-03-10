@@ -178,7 +178,7 @@ export class Album implements Fireable {
         if (data.length > 1)
             log(
                 3,
-                `multiple matching entries for base album class,
+                `multiple matching entries for album class,
                     Album: ${JSON.stringify(await this.createDbEntryObject())}
                     Data: ${JSON.stringify(data)}`,
             );
@@ -260,7 +260,7 @@ export class Album implements Fireable {
             this.sourceService,
         );
         await albumRelease.fire();
-        //log(6, `musicbrainz fire for album ${this.title}`);
+        log(6, `musicbrainz fire for album ${this.title}`);
 
     }
 
@@ -389,7 +389,7 @@ export class SpotifyAlbum extends Album {
  */
 export class AppleMusicAlbum extends Album {
     protected override tracks: AppleMusicTrack[] = [];
-    declare albumLookupData?: AppleMusicAlbumResponse;
+    declare albumLookupData?: AppleMusicAlbumResponse["data"][0];
 
     /**
      * @param song Apple Music song payload used to derive album metadata.
@@ -438,8 +438,8 @@ export class AppleMusicAlbum extends Album {
         if (!this.albumLookupData) {
             const response = await getAlbumByIdApple("us", this.externalId);
             if (response.data.length !== 0) {
-                this.albumLookupData = response;
-                const data = this.albumLookupData.data[0].attributes;
+                this.albumLookupData = response.data[0];
+                const data = this.albumLookupData.attributes;
 
                 this.albumType = "album";
                 if (data.isCompilation) this.albumType = "compilation";
@@ -458,16 +458,16 @@ export class AppleMusicAlbum extends Album {
             );
         return {
             id: this.id,
-            source_title: this.albumLookupData.data[0].attributes.name,
+            source_title: this.albumLookupData.attributes.name,
             source_service: this.sourceService,
             source_artists: [
-                this.albumLookupData.data[0].attributes.artistName ??
+                this.albumLookupData.attributes.artistName ??
                     "Unknown Artist",
             ],
             source_image: this.image,
             source_external_id: this.externalId,
             source_album_type: this.albumType,
-            source_data: this.albumLookupData.data[0],
+            source_data: this.albumLookupData,
         };
     }
 }

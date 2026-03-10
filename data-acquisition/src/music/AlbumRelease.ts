@@ -3,10 +3,8 @@ import { matchAlbum, getConfig, init, type FilterResponse } from "@munite";
 import { Track } from "./Track.ts";
 import { SupabaseClient } from "@supabase";
 import type { Database } from "_shared/schema.ts";
-import { timeStamp } from "node:console";
 import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/constants.ts";
-import { success } from "@zod";
 import { Release } from "./Release.ts";
 import { TrackRecording } from "./TrackRecording.ts";
 await init({
@@ -15,6 +13,7 @@ await init({
         Deno.env.get("MAX_MUSICBRAINZ_REQUESTS_PER_SECOND") ?? "1",
     ),
     query_release: Deno.env.get("QUERY_RELEASE") ?? "true",
+    log_level: "debug"
 });
 
 /**
