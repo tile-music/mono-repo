@@ -382,18 +382,6 @@ export class SpotifyAlbum extends Album {
     protected override async fetchSourceData() {
         this.albumLookupData = await getSpotifyAlbumById(this.externalId);
     }
-
-    // protected override async mbFire() {
-    //     const mb = new SpotifyMusicBrainzAlbum(this, this.supabase);
-    //     await mb.fire();
-    // }
-
-    // public override createDbEntryObject() {
-    //     return {
-    //         ...super.createDbEntryObject(),
-    //         external_id: this.spotifyId,
-    //     };
-    // }
 }
 
 /**
