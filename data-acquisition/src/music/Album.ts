@@ -57,6 +57,7 @@ import {
  */
 export class Album implements Fireable {
     protected albumLookupData?: any;
+    protected albumLookupDataHasErrors = false;
     protected title: string;
     protected albumType: string;
     protected numTracks: number;

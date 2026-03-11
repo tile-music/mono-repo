@@ -13,14 +13,13 @@ await init({
         Deno.env.get("MAX_MUSICBRAINZ_REQUESTS_PER_SECOND") ?? "1",
     ),
     query_release: Deno.env.get("QUERY_RELEASE") ?? "true",
-    log_level: "debug"
+    log_level: "debug",
 });
 
 /**
  * Maps an internal album to a MusicBrainz release.
  */
 export class AlbumRelease implements Fireable {
-
     id?: string;
     muniteResult?: FilterResponse;
     query;
@@ -40,12 +39,10 @@ export class AlbumRelease implements Fireable {
         private supabase: SupabaseClient<Database>,
         private sourceService: "spotify" | "apple-music" | "manual",
     ) {
-
         this.query = this.supabase
             .from("mb_album_releases")
             .select("*")
             .eq("album_id", this.albumId);
-
     }
 
     /**
@@ -63,7 +60,7 @@ export class AlbumRelease implements Fireable {
             log(
                 6,
                 `album lookup data in munite req\n
-                album lookup data plain: ${this.albumLookupData} ${typeof this.albumLookupData}\n`,
+                album lookup data plain: ${JSON.stringify(this.albumLookupData, null, 2)} ${typeof this.albumLookupData}\n`,
             );
 
             const parsedLookupData = () => {
@@ -81,9 +78,16 @@ export class AlbumRelease implements Fireable {
                 this.sourceService,
                 parsedLookupData(),
             );
-            if(this.muniteResult.status === "error" ) log(3, `munite lookup failed \n ${JSON.stringify(this, null, 2)}`)
+            if (this.muniteResult.status === "error")
+                log(
+                    3,
+                    `munite lookup failed \n ${JSON.stringify(this, null, 2)}`,
+                );
             log(6, "invoked munite");
-            log(6, `munite result:\n${JSON.stringify(this.muniteResult, null, 2)}`);
+            log(
+                6,
+                `munite result:\n${JSON.stringify(this.muniteResult, null, 2)}`,
+            );
         } catch (error) {
             log(
                 1,
@@ -108,16 +112,23 @@ export class AlbumRelease implements Fireable {
             log(6, "fetching and inserting");
             await this.callMunite();
             dbEntry = this.createDbEntryObject();
-            if(this.muniteResult?.status === "success" && dbEntry) {
-                const release = new Release(this.muniteResult.release.id, this.supabase);
-                log(6, "created release class calling fire")
+            if (this.muniteResult?.status === "success" && dbEntry) {
+                const release = new Release(
+                    this.muniteResult.release.id,
+                    this.supabase,
+                );
+                log(6, "created release class calling fire");
                 await release.fire();
                 ({ data, error } = await this.supabase
                     .from("mb_album_releases")
                     .insert(dbEntry)
                     .select());
-                const trackRecording = new TrackRecording(this.tracks, this.muniteResult, this.supabase);
-                await trackRecording.fire()
+                const trackRecording = new TrackRecording(
+                    this.tracks,
+                    this.muniteResult,
+                    this.supabase,
+                );
+                await trackRecording.fire();
             }
         }
         log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`);
@@ -142,17 +153,20 @@ export class AlbumRelease implements Fireable {
      * Persists the album-to-release mapping when applicable.
      */
     public async fire(): Promise<void> {
-        if(this.sourceService === "manual") return;
+        if (this.sourceService === "manual") return;
         await this.getARDbID();
     }
 
     /**
      * Builds the insert payload for `mb_album_releases`.
      */
-    protected createDbEntryObject() : Database["public"]["Tables"]["mb_album_releases"]["Insert"] | void {
+    protected createDbEntryObject():
+        | Database["public"]["Tables"]["mb_album_releases"]["Insert"]
+        | void {
         const date = new Date();
+        log(6, "creating mb db entry")
         if (this.muniteResult?.status !== "success" || !this.muniteResult)
-            return
+            return;
         return {
             id: this.muniteResult.release.id,
             album_id: this.albumId,
