@@ -177,7 +177,10 @@ export type AppleMusicAlbumResponse = {
     href?: string;
     next?: string;
     meta?: Record<string, unknown>;
-};
+} |
+{
+    errors: unknown;
+}
 
 /**
  * Fetches a specific album from the Apple Music Catalog by album ID.
@@ -212,6 +215,8 @@ export async function getAlbumByIdApple(
         },
     });
 
+
+
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
@@ -220,6 +225,9 @@ export async function getAlbumByIdApple(
     }
 
     const json = await response.json();
+    if("error" in json) {
+        log(0, "apple music response status ok but error exists in response");
+    }
     return json as AppleMusicAlbumResponse;
 }
 

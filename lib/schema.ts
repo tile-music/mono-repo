@@ -97,6 +97,32 @@ export type Database = {
         }
         Relationships: []
       }
+      mb_album_art: {
+        Row: {
+          image_type: string
+          image_url: string
+          release_id: string
+        }
+        Insert: {
+          image_type: string
+          image_url: string
+          release_id: string
+        }
+        Update: {
+          image_type?: string
+          image_url?: string
+          release_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mb_album_art_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "mb_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mb_album_releases: {
         Row: {
           album_id: string

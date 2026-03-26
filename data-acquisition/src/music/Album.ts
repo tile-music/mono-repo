@@ -385,12 +385,15 @@ export class SpotifyAlbum extends Album {
     }
 }
 
+type AppleMusicAlbumSuccess = Extract<AppleMusicAlbumResponse, { data: unknown }>;
+
+
 /**
  * Apple Music-backed album entity.
  */
 export class AppleMusicAlbum extends Album {
     protected override tracks: AppleMusicTrack[] = [];
-    declare albumLookupData?: AppleMusicAlbumResponse["data"][0];
+    declare albumLookupData?: AppleMusicAlbumSuccess["data"][0];
 
     /**
      * @param song Apple Music song payload used to derive album metadata.
@@ -438,7 +441,13 @@ export class AppleMusicAlbum extends Album {
         //we should plan on not hard coding region
         if (!this.albumLookupData) {
             const response = await getAlbumByIdApple("us", this.externalId);
-            if (response.data.length !== 0) {
+            // Check if response is an error type
+            if ("errors" in response) {
+                // Handle error case - log and continue
+                log(2, `Apple Music API error for album ${this.externalId}: #{JSON.stringify(response.errors)}`);
+                return;
+            }
+            if (response.data && response.data.length !== 0) {
                 this.albumLookupData = response.data[0];
                 const data = this.albumLookupData.attributes;
 
@@ -446,7 +455,9 @@ export class AppleMusicAlbum extends Album {
                 if (data.isCompilation) this.albumType = "compilation";
                 if (data.isSingle) this.albumType = "single";
             }
+
         }
+
     }
 
     /**

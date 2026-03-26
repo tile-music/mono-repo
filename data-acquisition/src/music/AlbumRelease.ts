@@ -1,5 +1,11 @@
 import { Fireable } from "./Fireable.ts";
-import { matchAlbum, getConfig, init, type FilterResponse } from "@munite";
+import {
+    matchAlbum,
+    getConfig,
+    init,
+    type FilterResponse,
+    setLogLevel,
+} from "@munite";
 import { Track } from "./Track.ts";
 import { SupabaseClient } from "@supabase";
 import type { Database } from "_shared/schema.ts";
@@ -7,6 +13,7 @@ import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/constants.ts";
 import { Release } from "./Release.ts";
 import { TrackRecording } from "./TrackRecording.ts";
+import { CoverArt } from "./CoverArt.ts";
 await init({
     musicbrainz_api_url: Deno.env.get("MUSICBRAINZ_API_URL") ?? "",
     max_musicbrainz_requests_per_second: parseInt(
@@ -63,31 +70,36 @@ export class AlbumRelease implements Fireable {
                 album lookup data plain: ${JSON.stringify(this.albumLookupData, null, 2)} ${typeof this.albumLookupData}\n`,
             );
 
-            const parsedLookupData = () => {
-                if (typeof this.albumLookupData === "string") {
-                    log(
-                        6,
-                        `album lookup data is string \n${this.sourceService}`,
-                    );
-                    return JSON.parse(this.albumLookupData);
-                }
-                return this.albumLookupData;
-            };
+            // const parsedLookupData = () => {
+            //     if (typeof this.albumLookupData === "string") {
+            //         log(
+            //             6,
+            //             `album lookup data is string \n${this.sourceService}`,
+            //         );
+            //         return JSON.parse(this.albumLookupData);
+            //     }
+            //     return this.albumLookupData;
+            // };
+            //
+            if (!("errors" in this.albumLookupData)) {
+                setLogLevel("debug");
+                log(6, `source service ${this.sourceService}`);
 
-            this.muniteResult = await matchAlbum(
-                this.sourceService,
-                parsedLookupData(),
-            );
-            if (this.muniteResult.status === "error")
-                log(
-                    3,
-                    `munite lookup failed \n ${JSON.stringify(this, null, 2)}`,
+                this.muniteResult = await matchAlbum(
+                    this.sourceService,
+                    this.albumLookupData,
                 );
-            log(6, "invoked munite");
-            log(
-                6,
-                `munite result:\n${JSON.stringify(this.muniteResult, null, 2)}`,
-            );
+                if (this.muniteResult.status === "error")
+                    log(
+                        3,
+                        `munite lookup failed \n ${JSON.stringify(this, null, 2)}`,
+                    );
+                log(6, "invoked munite");
+                log(
+                    6,
+                    `munite result:\n${JSON.stringify(this.muniteResult, null, 2)}`,
+                );
+            }
         } catch (error) {
             log(
                 1,
@@ -113,6 +125,7 @@ export class AlbumRelease implements Fireable {
             await this.callMunite();
             dbEntry = this.createDbEntryObject();
             if (this.muniteResult?.status === "success" && dbEntry) {
+                log(6, `cover art!!!: ${JSON.stringify(this.muniteResult.release.cover_art, null, 2)}`)
                 const release = new Release(
                     this.muniteResult.release.id,
                     this.supabase,
@@ -129,6 +142,8 @@ export class AlbumRelease implements Fireable {
                     this.supabase,
                 );
                 await trackRecording.fire();
+                const _coverArt = new CoverArt(dbEntry.id, this.supabase, this.muniteResult.release.cover_art)
+                await _coverArt.fire()
             }
         }
         log(6, `data: ${JSON.stringify(data)} error: ${JSON.stringify(error)}`);
@@ -164,9 +179,11 @@ export class AlbumRelease implements Fireable {
         | Database["public"]["Tables"]["mb_album_releases"]["Insert"]
         | void {
         const date = new Date();
-        log(6, "creating mb db entry")
-        if (this.muniteResult?.status !== "success" || !this.muniteResult)
+        log(6, "creating mb db entry");
+        if (this.muniteResult?.status !== "success" || !this.muniteResult) {
+            log(4, `mb lookup failed ${JSON.stringify(this, null, 2)})}`);
             return;
+        }
         return {
             id: this.muniteResult.release.id,
             album_id: this.albumId,

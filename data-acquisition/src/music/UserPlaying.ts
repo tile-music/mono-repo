@@ -100,6 +100,15 @@ export abstract class UserPlaying implements Fireable {
      * Matches albums/tracks and persists each album pipeline.
      */
     public async fire(): Promise<void> {
+        // await Promise.all(
+        //     Array.from(this.albums.values()).map(async (album) => {
+        //         try {
+        //             await album.fire();
+        //         } catch (e) {
+        //             log(0, `Error processing album ${JSON.stringify(album, null, 2)}: ${e instanceof Error ? e.stack : e}`);
+        //         }
+        //     }),
+        // );
         try {
             this.matchAlbums();
             await Promise.all(
@@ -375,7 +384,7 @@ export class AppleMusicUserPlaying extends UserPlaying {
             this.context.access_token,
         );
 
-        log(6, `recently played tracks: ${JSON.stringify(this.recently_played, null, 2)}`)
+        log(6, `recently played tracks: {JSON.stringify(this.recently_played)}`)
 
         const { data, error } = await this.supabase
             .from("plays")
