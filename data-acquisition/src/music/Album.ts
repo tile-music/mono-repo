@@ -436,9 +436,9 @@ export class AppleMusicAlbum extends Album {
 
     /**
      * Fetches Apple Music album lookup data by external ID.
+     * @todo stop hard coding region
      */
     public override async fetchSourceData(): Promise<void> {
-        //we should plan on not hard coding region
         if (!this.albumLookupData) {
             const response = await getAlbumByIdApple("us", this.externalId);
             // Check if response is an error type

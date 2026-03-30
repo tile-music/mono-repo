@@ -124,7 +124,7 @@ app.post("/remove-job", async (req: any, res: any) => {
     }
 });
 
-app.get("/health", (req: any, res: any) => {
+app.get("/health", (res: any) => {
     res.status(200).json({ message: "Server is healthy" });
 });
 

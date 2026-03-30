@@ -4,82 +4,10 @@ import { Fireable } from "./Fireable.ts";
 import { Database } from "../../../lib/schema.ts";
 import { log } from "../util/log.ts";
 import { SupabaseClient } from "@supabase";
+import {findBestRecordingMatch} from "../util/levenshtein.ts"
 type Entry = Database["public"]["Tables"]["mb_track_recordings"]["Insert"];
 
-/**
- * all these functions were shatted and chatted
- */
 
-/**
- * Normalizes titles before fuzzy matching.
- */
-function normalizeTitle(title: string): string {
-    return title
-        .toLowerCase()
-        .replace(/\(.*?\)/g, "") // remove parentheses
-        .replace(/\[.*?\]/g, "") // remove brackets
-        .replace(/feat\.?.*/g, "")
-        .replace(/-.*$/g, "") // remove suffixes like "- remastered"
-        .replace(/[^\w\s]/g, "")
-        .trim();
-}
-
-/**
- * Computes Levenshtein edit distance between two strings.
- */
-function levenshtein(a: string, b: string): number {
-    const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
-
-    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-
-    for (let i = 1; i <= b.length; i++) {
-        for (let j = 1; j <= a.length; j++) {
-            matrix[i][j] =
-                b[i - 1] === a[j - 1]
-                    ? matrix[i - 1][j - 1]
-                    : Math.min(
-                          matrix[i - 1][j - 1] + 1,
-                          matrix[i][j - 1] + 1,
-                          matrix[i - 1][j] + 1,
-                      );
-        }
-    }
-
-    return matrix[b.length][a.length];
-}
-
-/**
- * Returns a normalized similarity score between 0 and 1.
- */
-function similarity(a: string, b: string): number {
-    const dist = levenshtein(a, b);
-    return 1 - dist / Math.max(a.length, b.length);
-}
-
-/**
- * Finds the best recording title match above the configured threshold.
- */
-function findBestRecordingMatch(
-    trackTitle: string,
-    recordings: { id: string; title: string }[],
-) {
-    const normalizedTrack = normalizeTitle(trackTitle);
-
-    let best = null;
-    let bestScore = 0;
-
-    for (const rec of recordings) {
-        const normalizedRec = normalizeTitle(rec.title);
-        const score = similarity(normalizedTrack, normalizedRec);
-
-        if (score > bestScore) {
-            bestScore = score;
-            best = rec;
-        }
-    }
-
-    return bestScore > 0.7 ? best : null; // threshold
-}
 
 /**
  * Persists track-to-recording mappings for matched releases.
@@ -120,6 +48,14 @@ export class TrackRecording implements Fireable {
                             this.muniteResult.release.id,
                         ),
                     );
+                } else {
+                    log(
+                        6,
+                        `failed to find a suitable recording
+                        Recordings: ${JSON.stringify(this.muniteResult.release.tracks, null, 2)}
+                        Track: ${JSON.stringify(this.tracks, null, 2)}
+                        `,
+                    );
                 }
             }
             if (tracksMatched < this.tracks.length)
@@ -132,9 +68,12 @@ export class TrackRecording implements Fireable {
                 .from("mb_track_recordings")
                 .upsert(this.entries, { ignoreDuplicates: true })
                 .select();
-            log(6, `mb track recordings\n
+            log(
+                6,
+                `mb track recordings\n
                 data: ${JSON.stringify(data, null, 2)}\n
-                error: ${JSON.stringify(error, null,2)}`)
+                error: ${JSON.stringify(error, null, 2)}`,
+            );
         }
     }
 

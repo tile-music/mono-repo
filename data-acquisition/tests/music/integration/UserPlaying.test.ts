@@ -222,6 +222,6 @@ Deno.test("apple:integration:user-playing", async (t) => {
       appleMusicFactory,
     );
   } finally {
-    await supabase.auth.admin.deleteUser(userId);
+    //await supabase.auth.admin.deleteUser(userId);
   }
 });

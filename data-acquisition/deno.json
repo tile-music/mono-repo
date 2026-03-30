@@ -14,6 +14,7 @@
         "@express": "npm:express",
         "@munite": "../../munite/src/mod.ts",
         "@expect": "jsr:@std/expect",
+        "@assert": "jsr:@std/assert",
         "@jose": "npm:jose@^6.1.3"
     }
 }
