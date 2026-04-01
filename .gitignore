@@ -27,3 +27,4 @@ data-acquisition/src/music/Album.ts
 # Secrets / .env files
 secrets/*
 !secrets/.env.example
+data-acquisition/nohup.out

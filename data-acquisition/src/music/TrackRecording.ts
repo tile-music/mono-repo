@@ -4,10 +4,8 @@ import { Fireable } from "./Fireable.ts";
 import { Database } from "../../../lib/schema.ts";
 import { log } from "../util/log.ts";
 import { SupabaseClient } from "@supabase";
-import {findBestRecordingMatch} from "../util/levenshtein.ts"
+import { findBestRecordingMatch } from "../util/levenshtein.ts";
 type Entry = Database["public"]["Tables"]["mb_track_recordings"]["Insert"];
-
-
 
 /**
  * Persists track-to-recording mappings for matched releases.
@@ -94,8 +92,3 @@ export class TrackRecording implements Fireable {
         };
     }
 }
-
-// public async getRecordings(): Promise<Recording[]> {
-//     const recordings = await this.track.getRecordings();
-//     return recordings;
-// }

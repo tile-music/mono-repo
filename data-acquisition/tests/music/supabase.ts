@@ -9,7 +9,7 @@ function getRequiredEnv(name: string): string {
 
 export const supabase = createClient<Database>(
     getRequiredEnv("SB_URL_TEST"),
-    getRequiredEnv("SERVICE"),
+    getRequiredEnv("SB_SERVICE_KEY"),
     {
         auth: {
             autoRefreshToken: false,

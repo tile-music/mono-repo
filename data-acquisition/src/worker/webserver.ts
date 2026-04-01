@@ -2,7 +2,7 @@ import { default as express } from "@express";
 import { makeDataAcqQueue } from "./makeQueue.ts";
 
 import { log } from "../util/log.ts";
-
+import { supabase } from "../../tests/music/supabase.ts";
 import { z } from "@zod";
 
 const queue = makeDataAcqQueue();
@@ -126,6 +126,106 @@ app.post("/remove-job", async (req: any, res: any) => {
 
 app.get("/health", (res: any) => {
     res.status(200).json({ message: "Server is healthy" });
+});
+
+async function createTestUser(prefix: string) {
+    const email = `${prefix}-${crypto.randomUUID()}@example.com`;
+
+    const { data, error } = await supabase.auth.admin.createUser({
+        email,
+        password: "password",
+    });
+
+    if (error) throw error;
+    if (!data.user?.id) throw new Error("Failed to create test user");
+
+    return data.user.id;
+}
+
+async function getUserPlayCount(userId: string) {
+    const { data, error } = await supabase
+        .from("plays")
+        .select("track_id")
+        .eq("user_id", userId);
+
+    if (error) throw error;
+    return data.length ?? 0;
+}
+
+function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+/**file change */
+
+app.get("/healthz", async (_req: any, res: any) => {
+    let userId: string | null = null;
+
+    try {
+        const refreshToken = Deno.env.get("SP_REFRESH");
+
+        // 1. Create test user
+        userId = await createTestUser("healthz");
+
+        // 2. Enqueue job (same path as production)
+        await queue.add(
+            userId,
+            {
+                data: {
+                    provider: "spotify",
+                    userId: userId,
+                    refreshToken: refreshToken,
+                },
+            },
+            {
+                jobId: "spotify:healthz-" + userId,
+            },
+        );
+
+        // 3. Wait for worker to process
+        // (tune this depending on your queue latency)
+        let attempts = 0;
+        let playCount = 0;
+
+        while (attempts < 10) {
+            await sleep(2000); // 2s backoff
+            playCount = await getUserPlayCount(userId);
+
+            if (playCount > 0) break;
+            attempts++;
+        }
+
+        if (playCount === 0) {
+            throw new Error("No plays inserted - pipeline failed");
+        }
+
+        // 4. Cleanup queue jobs
+        await removeJob(userId);
+        await removeJob("healthz-" + userId);
+
+        // 5. Delete user
+        await supabase.auth.admin.deleteUser(userId);
+
+        return res.status(200).json({
+            status: "ok",
+            playsInserted: playCount,
+        });
+    } catch (err) {
+        // Cleanup on failure too
+        if (userId) {
+            try {
+                await removeJob(userId);
+                await removeJob("healthz-" + userId);
+                await supabase.auth.admin.deleteUser(userId);
+            } catch (_) {
+                // swallow cleanup errors
+            }
+        }
+
+        return res.status(500).json({
+            status: "error",
+            error: err instanceof Error ? err.message : String(err),
+        });
+    }
 });
 
 // Start the server on a specified port

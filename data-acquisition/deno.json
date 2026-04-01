@@ -1,7 +1,8 @@
 {
     "nodeModulesDir": "auto",
     "tasks": {
-        "test": "deno test --allow-env --allow-read --allow-net --env-file=.env"
+        "test": "deno test --allow-env --allow-read --allow-net --env-file=.env",
+        "start": "deno run --allow-env --allow-read --allow-ffi --allow-net --allow-run --env-file=.env src/app.ts"
     },
     "imports": {
         "@std/testing": "jsr:@std/testing@^1.0.12",
