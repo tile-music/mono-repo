@@ -10,7 +10,7 @@ import { connection } from "./redis.ts";
  *
  * @returns {Queue} A new Queue instance configured with the specified options.
  */
-export function makeDataAcqQueue() {
+export function makeQueue() {
     return new Queue("my-cron-jobs", {
         connection,
         defaultJobOptions: {

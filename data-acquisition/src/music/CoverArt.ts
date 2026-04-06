@@ -1,4 +1,4 @@
-import { Fireable } from "./Fireable.ts";
+//import { Fireable } from "./Fireable.ts";
 import { SupabaseClient } from "@supabase";
 import type { FilterResponse } from "@munite";
 import { Database } from "_shared/schema.ts";
@@ -169,13 +169,52 @@ export class CoverArt {
         }
     }
 
+    private async findExistingCloudflareImage(
+        type: "front" | "back",
+    ): Promise<{ id: string; variants: string[] } | null> {
+        // Cloudflare Images doesn't support metadata search, so we use a
+        // deterministic image ID derived from releaseId + type to check existence.
+        const imageId = `${this.releaseId}-${type}`;
+
+        const res = await fetch(
+            `https://api.cloudflare.com/client/v4/accounts/${Deno.env.get("CF_ACCT")}/images/v1/${imageId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${Deno.env.get("CF_IMAGES_TOKEN")}`,
+                },
+            },
+        );
+
+        if (res.status === 404) return null;
+
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Cloudflare image lookup failed: ${text}`);
+        }
+
+        const json: CloudflareImageResponse = await res.json();
+
+        if (!json.success) return null;
+
+        log(1, `Cloudflare image already exists for ${this.releaseId}/${type}, skipping upload`);
+
+        return {
+            id: json.result.id,
+            variants: json.result.variants,
+        };
+    }
+
     private async uploadToCloudflare(
         url: string,
         type: "front" | "back",
     ): Promise<{ id: string; variants: string[] }> {
+        const existing = await this.findExistingCloudflareImage(type);
+        if (existing) return existing;
+
         const form = new FormData();
 
         form.append("url", url);
+        form.append("id", `${this.releaseId}-${type}`); // deterministic ID enables future lookups
         form.append(
             "metadata",
             JSON.stringify({

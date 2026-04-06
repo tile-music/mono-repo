@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase";
-import { makeDataAcqQueue } from "./makeQueue.ts";
+import { makeQueue } from "./makeQueue.ts";
 // import { Database } from "_shared/schema.ts";
 import { log } from "../util/log.ts";
 
@@ -19,7 +19,7 @@ import { log } from "../util/log.ts";
  * @todo: deduplicate
  */
 export async function makeDataAcqJobs(): Promise<void> {
-    const queue = makeDataAcqQueue();
+    const queue = makeQueue();
     const supabase = new SupabaseClient(
         Deno.env.get("SB_URL")!,
         Deno.env.get("SB_SERVICE_KEY")!,

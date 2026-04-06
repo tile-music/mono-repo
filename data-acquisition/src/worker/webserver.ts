@@ -1,11 +1,14 @@
 import { default as express } from "@express";
-import { makeDataAcqQueue } from "./makeQueue.ts";
+import { makeQueue } from "./makeQueue.ts";
 
 import { log } from "../util/log.ts";
 import { supabase } from "../../tests/music/supabase.ts";
 import { z } from "@zod";
+import { queryMusicBrainzReleases } from "../../../../munite/src/api/musicbrainz.ts";
+import { QueueEvents } from "@bull";
 
-const queue = makeDataAcqQueue();
+const queue = makeQueue();
+const queueEvents = new QueueEvents("my-cron-jobs");
 // Create an instance of Express
 const app = express();
 app.use(express.json());
@@ -40,91 +43,97 @@ const removeJobSchema = z.object({
  * @param req.body.refreshToken - The refresh token for the user session.
  * @param req.body.type - The type of request or user action.
  */
-app.post("/add-job", async (req: any, res: any) => {
-    const { userId, refreshToken, type } = req.body;
-    console.log(req.body);
-    console.log("userId", userId);
-    if (!userId || !refreshToken || !type) {
-        return res
-            .status(400)
-            .json({ error: "Missing userId, refreshToken, or cronExpression" });
-    }
-
-    try {
-        if (type === "spotify") {
-            //while (!(await queue.remove("single-shot" + userId)))
-            await queue.add(
-                userId,
-                {
-                    data: {
-                        userId,
-                        refreshToken,
-                    },
-                },
-                {
-                    jobId: "single-shot" + userId,
-                },
-            );
-            //while(!(await queue.remove(userId)))
-            await queue.add(
-                userId,
-                {
-                    data: {
-                        userId,
-                        refreshToken,
-                    },
-                },
-                {
-                    repeat: { pattern: "0/30 * * * *" },
-                    jobId: userId,
-                },
-            );
-            log(6, "job added");
-            res.status(200).json({ message: "Job added successfully" });
-        } else {
-            return res.status(400).json({ error: "Invalid type" });
+app.post(
+    "/add-job",
+    async (req: express.ExpressRequest, res: express.ExpressResponse) => {
+        const { userId, refreshToken, type } = req.body;
+        console.log(req.body);
+        console.log("userId", userId);
+        if (!userId || !refreshToken || !type) {
+            return res.status(400).json({
+                error: "Missing userId, refreshToken, or cronExpression",
+            });
         }
-        // Add job to queue with specified cron expression
-    } catch (err) {
-        res.status(500).json({ error: "Failed to add job: " + err });
-    }
-});
 
-app.post("/remove-job", async (req: any, res: any) => {
-    console.log("remove job");
-    const { userId, type } = req.body;
-    console.log(req.body);
-    console.log("userId", userId);
-    if (!userId || !type) {
-        return res
-            .status(400)
-            .json({ error: "Missing userId, refreshToken, or cronExpression" });
-    }
-
-    try {
-        if (type === "spotify") {
-            await removeJob(userId);
-            await removeJob("single-shot" + userId);
-
-            console.log("removed job");
-            res.status(200).json({ message: "Job removed successfully" });
-        } else {
-            return res.status(400).json({ error: "Invalid type" });
-        }
-    } catch (err) {
-        if (err instanceof Error) {
-            switch (err.message) {
-                case "Failed to remove job from queue something is blocking it or one of its dependencies":
-                    return res.status(500).json({
-                        error: "you may be hitting the button too many times in a row, chill out then try agian",
-                    });
+        try {
+            if (type === "spotify") {
+                //while (!(await queue.remove("single-shot" + userId)))
+                await queue.add(
+                    userId,
+                    {
+                        data: {
+                            userId,
+                            refreshToken,
+                        },
+                    },
+                    {
+                        jobId: "single-shot" + userId,
+                    },
+                );
+                //while(!(await queue.remove(userId)))
+                await queue.add(
+                    userId,
+                    {
+                        data: {
+                            userId,
+                            refreshToken,
+                        },
+                    },
+                    {
+                        repeat: { pattern: "0/30 * * * *" },
+                        jobId: userId,
+                    },
+                );
+                log(6, "job added");
+                res.status(200).json({ message: "Job added successfully" });
+            } else {
+                return res.status(400).json({ error: "Invalid type" });
             }
+            // Add job to queue with specified cron expression
+        } catch (err) {
+            res.status(500).json({ error: "Failed to add job: " + err });
         }
-        res.status(500).json({ error: "Failed to add job" });
-    }
-});
+    },
+);
 
-app.get("/health", (res: any) => {
+app.post(
+    "/remove-job",
+    async (req: express.ExpressRequest, res: express.ExpressResponse) => {
+        console.log("remove job");
+        const { userId, type } = req.body;
+        console.log(req.body);
+        console.log("userId", userId);
+        if (!userId || !type) {
+            return res.status(400).json({
+                error: "Missing userId, refreshToken, or cronExpression",
+            });
+        }
+
+        try {
+            if (type === "spotify") {
+                await removeJob(userId);
+                await removeJob("single-shot" + userId);
+
+                console.log("removed job");
+                res.status(200).json({ message: "Job removed successfully" });
+            } else {
+                return res.status(400).json({ error: "Invalid type" });
+            }
+        } catch (err) {
+            if (err instanceof Error) {
+                switch (err.message) {
+                    case "Failed to remove job from queue something is blocking it or one of its dependencies":
+                        return res.status(500).json({
+                            error: "you may be hitting the button too many times in a row, chill out then try agian",
+                        });
+                }
+            }
+            res.status(500).json({ error: "Failed to add job" });
+        }
+    },
+);
+
+app.get("/health", (_req: express.Request, res: express.Response) => {
     res.status(200).json({ message: "Server is healthy" });
 });
 
@@ -152,12 +161,7 @@ async function getUserPlayCount(userId: string) {
     return data.length ?? 0;
 }
 
-function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-/**file change */
-
-app.get("/healthz", async (_req: any, res: any) => {
+app.get("/healthz", async (_req: express.Request, res: express.Response) => {
     let userId: string | null = null;
 
     try {
@@ -167,7 +171,7 @@ app.get("/healthz", async (_req: any, res: any) => {
         userId = await createTestUser("healthz");
 
         // 2. Enqueue job (same path as production)
-        await queue.add(
+        const job = await queue.add(
             userId,
             {
                 data: {
@@ -177,22 +181,15 @@ app.get("/healthz", async (_req: any, res: any) => {
                 },
             },
             {
-                jobId: "spotify:healthz-" + userId,
+                jobId: "healthz-" + userId,
             },
         );
 
         // 3. Wait for worker to process
         // (tune this depending on your queue latency)
-        let attempts = 0;
         let playCount = 0;
-
-        while (attempts < 10) {
-            await sleep(2000); // 2s backoff
-            playCount = await getUserPlayCount(userId);
-
-            if (playCount > 0) break;
-            attempts++;
-        }
+        await job.waitUntilFinished(queueEvents, 40000);
+        playCount = await getUserPlayCount(userId);
 
         if (playCount === 0) {
             throw new Error("No plays inserted - pipeline failed");
@@ -213,7 +210,7 @@ app.get("/healthz", async (_req: any, res: any) => {
         // Cleanup on failure too
         if (userId) {
             try {
-                await removeJob(userId);
+                //await removeJob(userId);
                 await removeJob("healthz-" + userId);
                 await supabase.auth.admin.deleteUser(userId);
             } catch (_) {

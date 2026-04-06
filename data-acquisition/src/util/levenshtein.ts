@@ -1,53 +1,111 @@
 import { log } from "./log.ts";
 
 /**
- * all these functions were shatted and chatted
- */
-
-/**
  * Normalizes titles before fuzzy matching.
  */
 function normalizeTitle(title: string): string {
     return title
         .toLowerCase()
-        .replace(/\(.*?\)/g, "") // remove parentheses
-        .replace(/\[.*?\]/g, "") // remove brackets
+        .replace(/[()]/g, "") // keep content, remove parentheses chars only
+        .replace(/\[|\]/g, "") // remove brackets chars only
         .replace(/feat\.?.*/g, "")
         .replace(/-.*$/g, "") // remove suffixes like "- remastered"
         .replace(/[^\w\s]/g, "")
+        .replace(/\s+/g, " ")
         .trim();
 }
 
 /**
- * Computes Levenshtein edit distance between two strings.
+ * Splits a normalized title into tokens.
  */
-function levenshtein(a: string, b: string): number {
-    const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
-
-    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-
-    for (let i = 1; i <= b.length; i++) {
-        for (let j = 1; j <= a.length; j++) {
-            matrix[i][j] =
-                b[i - 1] === a[j - 1]
-                    ? matrix[i - 1][j - 1]
-                    : Math.min(
-                          matrix[i - 1][j - 1] + 1,
-                          matrix[i][j - 1] + 1,
-                          matrix[i - 1][j] + 1,
-                      );
-        }
-    }
-
-    return matrix[b.length][a.length];
+function tokenize(title: string): string[] {
+    return title.split(" ").filter(Boolean);
 }
 
 /**
- * Returns a normalized similarity score between 0 and 1.
+ * Computes Jaccard similarity between two token arrays.
+ * = intersection / union
  */
-function similarity(a: string, b: string): number {
+function jaccardSimilarity(aTokens: string[], bTokens: string[]): number {
+    const aSet = new Set(aTokens);
+    const bSet = new Set(bTokens);
+
+    let intersection = 0;
+    for (const token of aSet) {
+        if (bSet.has(token)) {
+            intersection++;
+        }
+    }
+
+    const union = new Set([...aSet, ...bSet]).size;
+
+    return union === 0 ? 0 : intersection / union;
+}
+
+/**
+ * Computes Levenshtein edit distance between two strings.
+ * (kept as a secondary signal for typos)
+ */
+export function levenshtein(a: string, b: string): number {
+    const an = a ? a.length : 0;
+    const bn = b ? b.length : 0;
+    if (an === 0) return bn;
+    if (bn === 0) return an;
+
+    const matrix = new Array<number[]>(bn + 1);
+    for (let i = 0; i <= bn; ++i) {
+        const row = (matrix[i] = new Array<number>(an + 1));
+        row[0] = i;
+    }
+
+    const firstRow = matrix[0];
+    for (let j = 1; j <= an; ++j) {
+        firstRow[j] = j;
+    }
+
+    for (let i = 1; i <= bn; ++i) {
+        for (let j = 1; j <= an; ++j) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] =
+                    Math.min(
+                        matrix[i - 1][j - 1], // substitution
+                        matrix[i][j - 1],     // insertion
+                        matrix[i - 1][j],     // deletion
+                    ) + 1;
+            }
+        }
+    }
+
+    return matrix[bn][an];
+}
+
+/**
+ * Returns normalized Levenshtein similarity (0–1).
+ */
+function levenshteinSimilarity(a: string, b: string): number {
     const dist = levenshtein(a, b);
     return 1 - dist / Math.max(a.length, b.length);
+}
+
+/**
+ * Token-based similarity (primary signal).
+ * Combines Jaccard (order-independent) with optional Levenshtein fallback.
+ */
+export function tokenSimilarity(a: string, b: string): number {
+    const aTokens = tokenize(a);
+    const bTokens = tokenize(b);
+
+    const jaccard = jaccardSimilarity(aTokens, bTokens);
+
+    // Optional: order-insensitive Levenshtein boost
+    const sortedA = aTokens.slice().sort().join(" ");
+    const sortedB = bTokens.slice().sort().join(" ");
+    const lev = levenshteinSimilarity(sortedA, sortedB);
+
+    // Weighted blend (tune as needed)
+    return 0.8 * jaccard + 0.2 * lev;
 }
 
 /**
@@ -64,7 +122,8 @@ export function findBestRecordingMatch(
 
     for (const rec of recordings) {
         const normalizedRec = normalizeTitle(rec.title);
-        const score = similarity(normalizedTrack, normalizedRec);
+
+        const score = tokenSimilarity(normalizedTrack, normalizedRec);
 
         if (score > bestScore) {
             bestScore = score;
@@ -72,8 +131,10 @@ export function findBestRecordingMatch(
         }
     }
 
-    log(6, `best recording ${best} Track title ${trackTitle}`)
+    log(
+        6,
+        `best recording ${JSON.stringify(best)} score=${bestScore} track="${trackTitle}"`,
+    );
 
-
-    return bestScore > 0.7 ? best : null; // threshold
+    return bestScore > 0.65 ? best : null; // slightly lower threshold works better with tokens
 }

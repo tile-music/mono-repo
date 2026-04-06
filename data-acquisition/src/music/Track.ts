@@ -5,7 +5,6 @@ import { Fireable } from "./Fireable.ts";
 import { log } from "../util/log.ts";
 import { PK_VIOLATION } from "../util/constants.ts";
 
-import { release } from "node:os";
 import { Database } from "_shared/schema.ts";
 
 import { AppleMusicSong } from "../util/apple-music.ts";

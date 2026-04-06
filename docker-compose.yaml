@@ -69,6 +69,16 @@ services:
             MUSICBRAINZ_API_URL: ${MUSICBRAINZ_API_URL}
             MAX_MUSICBRAINZ_REQUESTS_PER_SECOND: ${MAX_MUSICBRAINZ_REQUESTS_PER_SECOND}
             QUERY_RELEASE: ${QUERY_RELEASE}
+            PORT: ${DATA_ACQ_PORT}
+        healthcheck:
+            test: [
+                "CMD-SHELL",
+                "deno run --allow-net -e \"fetch('$DATA_ACQ_URL/healthz').then(r => { if(r.status !== 200) throw new Error(r.status) }).catch(e => { console.error(e); Deno.exit(1) })\""
+            ]
+            interval: 1h
+            timeout: 30s
+            retries: 3
+            start_period: 30s
         build:
             context: ./data-acquisition/
             target: dev

@@ -4,11 +4,11 @@ import { default as process } from "@node-process";
 import { makeDataAcqJobs } from "./worker/serviceAdapter.ts";
 import { connection } from "./worker/redis.ts";
 import {
-    makeDataAcqQueue,
+    makeQueue,
 } from "./worker/makeQueue.ts";
 
 // Create a Queue instance
-const queue = makeDataAcqQueue();
+const queue = makeQueue();
 async function reset() {
     await queue.obliterate({ force: true });
 }
