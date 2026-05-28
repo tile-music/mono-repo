@@ -1,5 +1,5 @@
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
-import type { Profile } from "$shared/Profile";
+import type { Profile } from "$lib/types";
 
 declare global {
     namespace App {
@@ -18,6 +18,7 @@ declare global {
         // interface PageState {}
         // interface Platform {}
     }
+    declare const MusicKit: any;
 }
 
 export {};

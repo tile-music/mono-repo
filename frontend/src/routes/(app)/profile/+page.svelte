@@ -13,18 +13,7 @@
     }
 
     let { data }: Props = $props();
-    let { profile, email } = $derived(data);
-
-    let formattedWebsite = $derived.by(() => {
-        // add http or https to website url
-        if (
-            !profile.website.startsWith("http://") &&
-            !profile.website.startsWith("https://")
-        ) {
-            return "https://" + profile.website;
-        }
-        return profile.website;
-    });
+    let { profile } = $derived(data);
 </script>
 
 <main>
@@ -32,11 +21,8 @@
         <section id="preview">
             <Avatar {profile} size={128} />
             <div>
-                <h3>{profile.full_name}</h3>
+                <h3>{profile.name}</h3>
                 <span>{profile.username}</span>
-                {#if profile.website}
-                    <a href={formattedWebsite}>{profile.website}</a>
-                {/if}
             </div>
         </section>
         <fieldset role="radiogroup">

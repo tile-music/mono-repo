@@ -4,11 +4,11 @@ import { fail, error } from "@sveltejs/kit";
 import { assembleBlankProfile } from "./profile";
 import { log } from "$lib/log";
 import { resetListeningData } from "$lib/server/functions";
+import type { Profile } from "$lib/types";
 
 type UpdateProfileFields = {
     username: string;
-    full_name: string;
-    website: string;
+    name: string;
 };
 
 type UpdateThemeFields = {
@@ -49,8 +49,7 @@ export const actions: Actions = {
                 fields: {},
                 failures: {
                     username: "",
-                    full_name: "",
-                    website: "",
+                    name: "",
                     general: "",
                 },
             },
@@ -72,11 +71,8 @@ export const actions: Actions = {
         const formData = await request.formData();
         form.fields = {
             username: formData.get("username")?.toString(),
-            full_name: formData.get("full_name")?.toString() ?? "",
-            website: formData.get("website")?.toString() ?? "",
+            name: formData.get("name")?.toString() ?? "",
         };
-
-        console.log(form.fields);
 
         if (form.fields.username === undefined) {
             form.failures.username = "Username is required";
@@ -89,8 +85,7 @@ export const actions: Actions = {
         // make sure update is necessary
         if (
             profile.username == form.fields.username &&
-            profile.full_name == form.fields.full_name &&
-            profile.website == form.fields.website
+            profile.name == form.fields.name
         ) {
             // update is unnecessary
             log(5, `Not updating ${user.id}: update is unnecessary`);
@@ -187,7 +182,7 @@ export const actions: Actions = {
         return response;
     },
 
-    reset_profile: async ({ locals: { supabase, user } }) => {
+    reset_profile: async ({ locals: { supabase, user, profile } }) => {
         const response = {
             reset_profile: {
                 success: false,
@@ -205,8 +200,16 @@ export const actions: Actions = {
             return fail(401, response);
         }
 
-        // replace profile with blank profile, retaining user id and email
-        const blankProfile = assembleBlankProfile(user.id, user.email);
+        // replace profile with blank profile
+        const blankProfile: Profile = {
+            avatar_id: null,
+            username: user.email ?? profile!.username,
+            id: user.id,
+            name: null,
+            theme: "dark",
+            updated_at: new Date().toISOString(),
+        };
+
         const { error } = await supabase
             .from("profiles")
             .update(blankProfile)

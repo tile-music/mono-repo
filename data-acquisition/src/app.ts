@@ -1,44 +1,50 @@
-import { QueueEvents, fork, process } from "../deps.ts"
-
-import { makeDataAcqJobs } from './worker/serviceAdapter.ts';
-import { connection } from './worker/redis.ts';
-import { makeDataAcqQueue, makeSpotifyAlbumPopularityQueue } from './worker/makeQueue.ts';
+import { QueueEvents } from "@bull";
+import { fork } from "@node-fork";
+import { default as process } from "@node-process";
+import { makeDataAcqJobs } from "./worker/serviceAdapter.ts";
+import { connection } from "./worker/redis.ts";
+import {
+    makeQueue,
+} from "./worker/makeQueue.ts";
 
 // Create a Queue instance
-const queue = makeDataAcqQueue();
-const queue2 = makeSpotifyAlbumPopularityQueue();
+const queue = makeQueue();
 async function reset() {
-  await queue.obliterate({ force: true });
-  await queue2.obliterate({ force: true });
+    await queue.obliterate({ force: true });
 }
 reset();
 
+type FailedReason = {
+    jobId: string;
+    failedReason: string;
+};
 // Create a QueueScheduler to manage job scheduling
-const queueEvents = new QueueEvents('my-cron-jobs', { connection });
-queueEvents.on('failed', ({ jobId, failedReason }) => {
-  console.error(`Job ${jobId} failed with error ${failedReason}`);
+const queueEvents: QueueEvents = new QueueEvents("my-cron-jobs", {
+    connection,
+});
+queueEvents.on("failed", ({ jobId: jobId, failedReason }: FailedReason) => {
+    console.error(`Job ${jobId} failed with error ${failedReason}`);
 });
 
-const queueEvents2 = new QueueEvents('spotifyAlbumPopularity', { connection})
+const queueEvents2 = new QueueEvents("spotifyAlbumPopularity", { connection });
 
-queueEvents2.on('failed', ({ jobId, failedReason }) => {
-  console.error(`Job ${jobId} failed with error ${failedReason}`);
+queueEvents2.on("failed", ({ jobId, failedReason }: FailedReason) => {
+    console.error(`Job ${jobId} failed with error ${failedReason}`);
 });
 // Graceful shutdown handling
-process.on('SIGINT', async () => {
-  await queue.close();
-  await queue2.close();
-  console.log('Worker and queue closed');
-  process.exit(0);
+process.on("SIGINT", async () => {
+    await queue.close();
+    console.log("Worker and queue closed");
+    process.exit(0);
 });
 console.log("Starting Webserver");
 fork(import.meta.dirname + "/worker/webserver.ts");
 
 console.log("Starting Spotify Worker");
-for (let i = 0; i < Math.floor(navigator.hardwareConcurrency / 2) ; i++ ){
-  fork(import.meta.dirname + "/worker/worker.ts" );
+for (let i = 0; i < Math.floor(navigator.hardwareConcurrency / 2); i++) {
+    fork(import.meta.dirname + "/worker/worker.ts");
 }
-async function main(){
-  await makeDataAcqJobs();
+async function main() {
+    await makeDataAcqJobs();
 }
 main();

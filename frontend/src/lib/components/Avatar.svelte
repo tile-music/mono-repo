@@ -1,6 +1,7 @@
 <script lang="ts">
-    import type { Profile } from "$shared/Profile";
+    import type { Database } from "$shared/schema";
     import sampleAvatar from "$lib/assets/images/sample_avatar.jpg";
+    import type { Profile } from "$lib/types";
 
     interface Props {
         profile: Profile;
@@ -10,7 +11,8 @@
     const { profile, size }: Props = $props();
     const sizeString = $derived(typeof size === "number" ? size + "px" : size);
 
-    function initials(name: string) {
+    function initials(name: string | null) {
+        if (!name) return "t.m";
         const words = name.split(" ").filter((part) => part.length > 0);
         const initialsArray = words.map((part) => part.charAt(0).toUpperCase());
         return initialsArray.join("");
@@ -18,9 +20,11 @@
 </script>
 
 <div class="icon" style:--size={sizeString}>
-    {#if profile.username !== "" || profile.full_name !== ""}
+    {#if profile.username !== "" || profile.name !== ""}
         {@const text = initials(
-            profile.full_name !== "" ? profile.full_name : profile.username,
+            profile.name !== "" || profile.name === null
+                ? profile.name
+                : profile.username,
         )}
         <span style:--length={text.length}>{text}</span>
     {:else}

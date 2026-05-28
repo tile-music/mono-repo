@@ -142,4 +142,6 @@ package-lock.json
 
 playground/supabase.ipynb
 
-log**.**
+log**.txt
+
+secrets/

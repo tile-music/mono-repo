@@ -1,7 +1,19 @@
-import { SupabaseClient } from "../../deps.ts";
-import { Database } from "../../../lib/schema.ts";
-export const supabase: SupabaseClient<any, "test", any> = new SupabaseClient(
-    Deno.env.get("SB_URL_TEST") as string,
-    Deno.env.get("SERVICE") as string,
-    { db: { schema: "prod" } },
+import { createClient } from "@supabase";
+import { Database } from "_shared/schema.ts";
+
+function getRequiredEnv(name: string): string {
+    const value = Deno.env.get(name);
+    if (value) return value;
+    throw new Error(`${name} environment variable is required for testing`);
+}
+
+export const supabase = createClient<Database>(
+    getRequiredEnv("SB_URL_TEST"),
+    getRequiredEnv("SB_SERVICE_KEY"),
+    {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+        },
+    },
 );

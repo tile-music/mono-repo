@@ -1,10 +1,9 @@
-import { SupabaseClient } from "../../deps.ts";
-import { makeDataAcqQueue  } from "./makeQueue.ts";
+import { SupabaseClient } from "@supabase";
+import { makeQueue } from "./makeQueue.ts";
+// import { Database } from "_shared/schema.ts";
+import { log } from "../util/log.ts";
 
-import "jsr:@std/dotenv/load";
-
-/**
- */
+/** */
 /**
  * Asynchronously creates and schedules jobs for Spotify credentials.
  *
@@ -15,51 +14,113 @@ import "jsr:@std/dotenv/load";
  *
  * @async
  * @function makeJobs
- * @returns {Promise<void>} A promise that resolves when the jobs have been added to the queue.
+ * @returns A promise that resolves when the jobs have been added to the queue.
  * @todo: add a perameter instead of creating a new queue
- * @todo: deduplicate 
-*/
-export async function makeDataAcqJobs() {
-  const queue = makeDataAcqQueue();
-  console.log("makeJobs");
-  const supabase = new SupabaseClient(
-    Deno.env.get("SB_URL")!,
-    Deno.env.get("SERVICE")!,
-    { db: { schema: "public" } }
-  );
-  await supabase
-    .from("spotify_credentials")
-    .select("*")
-    .then((items) => {
-      console.log(items);
-      items.data?.forEach(async (element) => {
-        await queue.add(
-          "spotify" + element,
-          {
-            data: {
-              userId: element.id,
-              refreshToken: element.refresh_token,
-            },
-          },
-          {
-            jobId: "spotify" + element.id,
-          }
+ * @todo: deduplicate
+ */
+export async function makeDataAcqJobs(): Promise<void> {
+    const queue = makeQueue();
+    const supabase = new SupabaseClient(
+        Deno.env.get("SB_URL")!,
+        Deno.env.get("SB_SERVICE_KEY")!,
+        { db: { schema: "public" } },
+    );
+
+    const {
+        data: connected_spotify_accounts,
+        error: get_connected_spotify_accounts_error,
+    } = await supabase
+        .from("connected_accounts")
+        .select("user_id, refresh_token")
+        .eq("provider", "spotify");
+
+    if (get_connected_spotify_accounts_error) {
+        log(
+            1,
+            "Error when retrieving connected Spotify accounts: " +
+                get_connected_spotify_accounts_error.message,
         );
-        await queue.add(
-          "spotify" + element,
-          {
-            data: {
-              userId: element.id,
-              refreshToken: element.refresh_token,
-            },
-          },
-          {
-            repeat: { pattern: "0/30 * * * *" },
-            immediateley: true,
-            jobId: "spotify" + element.id,
-          }
+    } else {
+        for (const account of connected_spotify_accounts) {
+            // immediate job
+            await queue.add(
+                "spotify" + account,
+                {
+                    data: {
+                        provider: "spotify",
+                        userId: account.user_id,
+                        refreshToken: account.refresh_token,
+                    },
+                },
+                {
+                    jobId: "spotify" + account.user_id,
+                },
+            );
+
+            // job every 30 mins
+            await queue.add(
+                "spotify" + account,
+                {
+                    data: {
+                        provider: "spotify",
+                        userId: account.user_id,
+                        refreshToken: account.refresh_token,
+                    },
+                },
+                {
+                    repeat: { pattern: "0/30 * * * *" },
+                    jobId: "spotify" + account.user_id,
+                },
+            );
+        }
+    }
+
+    const {
+        data: connected_apple_music_accounts,
+        error: get_connected_apple_music_accounts_error,
+    } = await supabase
+        .from("connected_accounts")
+        .select("user_id, access_token")
+        .eq("provider", "apple");
+
+    if (get_connected_apple_music_accounts_error) {
+        log(
+            1,
+            "Error when retrieving connected Apple Music accounts: " +
+                get_connected_apple_music_accounts_error.message,
         );
-      });
-    })
+    } else {
+        for (const account of connected_apple_music_accounts) {
+            // immediate job
+            await queue.add(
+                "apple" + account,
+                {
+                    data: {
+                        provider: "apple",
+                        userId: account.user_id,
+                        accessToken: account.access_token,
+                    },
+                },
+                {
+                    jobId: "apple" + account.user_id,
+                },
+            );
+
+            // job every 15 mins
+            await queue.add(
+                "apple" + account,
+                {
+                    data: {
+                        provider: "apple",
+                        userId: account.user_id,
+                        accessToken: account.access_token,
+                    },
+                },
+                {
+                    repeat: { pattern: "0/15 * * * *" },
+                    jobId: "apple" + account.user_id,
+                },
+            );
+        }
+    }
 }
-/** if you'd like to update sooner you could get rid of the second 0 and even the first */

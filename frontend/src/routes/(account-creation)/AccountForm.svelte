@@ -3,6 +3,8 @@
     import type { ActionData as LoginActionData } from "./login/$types";
     import type { ActionData as RegisterActionData } from "./register/$types";
     import { PasswordInput, ValidatedInput, Field, Button } from "$lib/ui";
+    import LoginSpotify from "$lib/components/LoginSpotify.svelte";
+    import LoginApple from "$lib/components/LoginApple.svelte";
 
     interface Props {
         type: "login" | "register";
@@ -16,6 +18,9 @@
 
 <main>
     <h1>{type === "login" ? "Welcome back!" : "Welcome!"}</h1>
+    <LoginSpotify next="/studio" />
+    <LoginApple next="/oauth/apple/link" />
+    <p>or</p>
     <form
         method="POST"
         action="?/{type}"

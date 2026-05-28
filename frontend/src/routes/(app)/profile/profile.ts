@@ -1,3 +1,4 @@
+import {log} from "$lib/log"
 /**
  * Creates a blank profile.
  *
@@ -10,6 +11,7 @@
  */
 export function assembleBlankProfile(id: string, email?: string) {
     let username = "";
+    log(5, `email ${email}, id ${id}`)
     if (email) {
         const domain = email.split("@")[0];
         if (domain.length >= 3) username = domain;
@@ -19,10 +21,9 @@ export function assembleBlankProfile(id: string, email?: string) {
     return {
         id: id,
         updated_at: new Date(),
-        username,
-        full_name: "",
-        website: "",
-        avatar_url: "",
+        username: username,
+        name: "",
+        avatar_id: "",
         theme: "dark",
     };
 }

@@ -19,14 +19,14 @@
 <Tab name="Basic Information" id="tab-basic-information">
     <form method="POST" action="?/update_profile" use:enhance>
         <Field>
-            <label for="full_name">Full Name</label>
+            <label for="name">Name</label>
             <ValidatedInput
-                id="full_name"
-                name="full_name"
+                id="name"
+                name="name"
                 type="text"
-                value={profile.full_name}
+                value={profile.name}
                 maxlength={64}
-                customError={updateProfileForm?.failures.full_name}
+                customError={updateProfileForm?.failures.name}
                 autocomplete="off"
             />
         </Field>
@@ -40,18 +40,6 @@
                 maxlength={32}
                 customError={updateProfileForm?.failures.username}
                 required
-                autocomplete="off"
-            />
-        </Field>
-        <Field>
-            <label for="website">Website / Social Media</label>
-            <ValidatedInput
-                id="website"
-                name="website"
-                type="text"
-                value={profile.website}
-                customError={updateProfileForm?.failures.website}
-                maxlength={128}
                 autocomplete="off"
             />
         </Field>

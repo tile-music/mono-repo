@@ -1,7 +1,7 @@
 <script lang="ts">
     import Tab from "./Tab.svelte";
     import { page } from "$app/state";
-    import type { Profile } from "$shared/Profile";
+    import type { Profile } from "$lib/types";
     import { Button } from "$lib/ui";
     import type { FormResponse } from "../+page.server";
     import { enhance } from "$app/forms";

@@ -1,8 +1,13 @@
-import { Worker, SupabaseClient, process } from '../../deps.ts';
-import { SpotifyUserPlaying } from '../music/UserPlaying.ts';
-import { connection } from './redis.ts';
+import { Worker, Job } from "@bull";
+import { SupabaseClient } from "@supabase";
+import { default as process } from "@node-process";
 
-import "jsr:@std/dotenv/load";
+import {
+    AppleMusicUserPlaying,
+    SpotifyUserPlaying,
+} from "../music/UserPlaying.ts";
+import { connection } from "./redis.ts";
+import { log } from "../util/log.ts";
 
 /**
  * Fetches and processes the currently playing track for a Spotify user.
@@ -18,51 +23,64 @@ import "jsr:@std/dotenv/load";
 
 type SupabaseSchema = "test" | "prod";
 
-export async function spotifyFire(userId: string, refreshToken: string, supabaseSchema: SupabaseSchema) {
-  const supabaseInd = new SupabaseClient(
-    Deno.env.get("SB_URL")!,
-    Deno.env.get("SERVICE")!,
-    { db: { schema: supabaseSchema} }
-  );
+export async function spotifyFire(userId: string, refreshToken: string) {
+    const supabaseInd = new SupabaseClient(
+        Deno.env.get("SB_URL")!,
+        Deno.env.get("SB_SERVICE_KEY")!,
+    );
 
-  const spotifyUserPlaying = new SpotifyUserPlaying(
-    supabaseInd,
-    userId,
-    { refresh_token: refreshToken }
-  );
+    const spotifyUserPlaying = new SpotifyUserPlaying(supabaseInd, userId, {
+        refresh_token: refreshToken,
+    });
 
-  await spotifyUserPlaying.init();
-  await spotifyUserPlaying.fire();
+    await spotifyUserPlaying.init();
+    await spotifyUserPlaying.fire();
+}
+
+export async function appleMusicFire(userId: string, accessToken: string) {
+    const supabaseInd = new SupabaseClient(
+        Deno.env.get("SB_URL")!,
+        Deno.env.get("SB_SERVICE_KEY")!,
+    );
+
+    const appleMusicUserPlaying = new AppleMusicUserPlaying(
+        supabaseInd,
+        userId,
+        { access_token: accessToken },
+    );
+
+    await appleMusicUserPlaying.init();
+    await appleMusicUserPlaying.fire();
 }
 
 const worker = new Worker(
-  'my-cron-jobs',
-  async (job) => {
-    const { userId, refreshToken } = job.data.data;
-    
-    const SB_SCHEMA = Deno.env.get("SB_SCHEMA");
-    if (SB_SCHEMA !== "test" && SB_SCHEMA !== "prod")
-      throw new Error("Invalid Supabase schema. Must be 'test' or 'prod'.");
+    "my-cron-jobs",
+    async (job: Job) => {
+        const provider: string = job.data.data.provider;
+        const userId: string = job.data.data.userId;
 
-    await spotifyFire(userId, refreshToken, SB_SCHEMA); 
+        console.log(
+            `Processing job ${job.id} at ${new Date()} for user ${userId}`,
+        );
 
-    console.log(
-      `Processing job ${job.id} at ${new Date()} for user ${userId}`
-    );
-
-    // Proceed with further actions using spotifyUserPlaying
-  },
-  { connection }
+        if (provider === "spotify") {
+            await spotifyFire(userId, job.data.data.refreshToken);
+        } else if (provider === "apple") {
+            await appleMusicFire(userId, job.data.data.accessToken);
+        } else {
+            log(2, `Unknown provider ${provider} for job ${job.id}`);
+        }
+    },
+    { connection },
 );
 
-process.on('unhandledRejection', (err) => {
-  console.error(err);
-})
-
-// Graceful shutdown handling
-process.on('SIGINT', async () => {
-  await worker.close();
-  console.log('Worker and queue closed');
-  process.exit(0);
+process.on("unhandledRejection", (err: Error) => {
+    console.error(err);
 });
 
+// Graceful shutdown handling
+process.on("SIGINT", async () => {
+    await worker.close();
+    console.log("Worker and queue closed");
+    process.exit(0);
+});

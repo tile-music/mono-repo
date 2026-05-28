@@ -4,11 +4,9 @@ FROM mdv-lib-deno AS build
 WORKDIR /app/data-acq
 
 COPY . .
-COPY .env .
-COPY deps.ts .
 
-# Cache dependencies
-RUN deno cache deps.ts
+# Resolve deps during build
+RUN deno cache ./src/app.ts
 
 FROM build AS dev
 

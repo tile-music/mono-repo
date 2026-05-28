@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from "./$types";
 import { redirect, error } from "@sveltejs/kit";
-import type { Profile } from "$shared/Profile";
+import type { Profile } from "$lib/types";
 import { log } from "$lib/log";
 import { assembleBlankProfile } from "./profile/profile";
 
@@ -18,9 +18,7 @@ export const load: LayoutServerLoad = async ({
         const blankProfile = assembleBlankProfile(user.id, user.email);
         const { data: newProfile, error: insertError } = await supabase
             .from("profiles")
-            .upsert(blankProfile, {
-                onConflict: "id",
-            })
+            .upsert(blankProfile)
             .select();
 
         if (insertError || !newProfile || !newProfile[0]) {
@@ -38,9 +36,8 @@ export const load: LayoutServerLoad = async ({
             id: newProfile[0].id,
             updated_at: newProfile[0].updated_at,
             username: newProfile[0].username,
-            full_name: newProfile[0].full_name,
-            avatar_url: newProfile[0].avatar_url,
-            website: newProfile[0].website,
+            name: newProfile[0].full_name,
+            avatar_id: newProfile[0].avatar_url,
             theme: newProfile[0].theme,
         };
 

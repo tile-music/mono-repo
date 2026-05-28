@@ -1,5 +1,7 @@
 .DS_Store
 .env
+.env.*
+!.env.example
 .log
 env.sh
 env.ps1
@@ -21,3 +23,8 @@ prodkeys.txt
 data-acquisition/src/music/Album.ts
 .project
 .dbeaver/*
+
+# Secrets / .env files
+secrets/*
+!secrets/.env.example
+data-acquisition/nohup.out

@@ -15,6 +15,7 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.test
+!.env.model
 .env.*/
 # Vite
 vite.config.js.timestamp-*
@@ -24,4 +25,4 @@ vite.config.ts.timestamp-*
 /blob-report/
 /playwright/.cache/
 
-/cert
+/secrets

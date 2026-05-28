@@ -42,9 +42,8 @@
             <section id="details">
                 <Avatar {profile} size={50} />
                 <div>
-                    <p><strong>{profile.full_name}</strong></p>
+                    <p><strong>{profile.name}</strong></p>
                     <p>{profile.username}</p>
-                    <p>{profile.website}</p>
                 </div>
             </section>
             <ul>
